@@ -1147,7 +1147,7 @@ bool IMGobject::invoke(b16 cmdcode, void *para1, void *para2, void *para3){
 				_s.uncompressData(_s1, _pi.get_comp());
 				matrix *_pmat = (matrix *)para2;
 				_pmat->allocate(_pi.get_picSize().get_H(), _pi.get_picSize().get_W()); 
-				_pmat->push(_s1);
+				_pmat->push(_s1, _pi.get_format());
 				return true;
 			}
 			break;

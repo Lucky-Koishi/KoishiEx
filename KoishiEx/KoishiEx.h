@@ -191,9 +191,9 @@ namespace Koishi{
 		void reallocate(b32 _row, b32 _column);
 		void release();
 		void fill(color _clr);
-		void push(color _clr);					//游标处颜色赋值并加1
-		b64 push(const stream &_s);				//以流填充
-		b64 make(stream &_s);					//制作成流
+		void push(color _clr);							//游标处颜色赋值并加1
+		b64 push(const stream &_s, colorFormat cf = ARGB8888);		//以流填充
+		b64 make(stream &_s);							//制作成ARGB8888流
 	public:
 		//取值/行列
 		pcolor operator[] (b32 _i) const;		//重写双下标函数

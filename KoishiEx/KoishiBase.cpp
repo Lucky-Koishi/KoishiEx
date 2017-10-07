@@ -385,13 +385,31 @@ void matrix::push(color _clr){
 		pt++;
 }
 
-b64 matrix::push(const stream &_s){
+b64 matrix::push(const stream &_s, colorFormat cf){
 	b32 len = _s.getLen();
 	b32 i = 0;
-	while(i+3<len){
-		//一个字节一个字节读的话是B/G/R/A
-		push(color(_s[i+3], _s[i+2], _s[i+1], _s[i+0]));
-		i+=4;
+	switch(cf){
+		case ARGB4444:
+		while(i+1<len){
+			//一个字节一个字节读的话是B/G/R/A
+			push(color(_s[i+1]<<8 | _s[i+0], ARGB4444));
+			i+=2;
+		}
+		break;
+		case ARGB1555:
+		while(i+1<len){
+			//一个字节一个字节读的话是B/G/R/A
+			push(color(_s[i+1]<<8 | _s[i+0], ARGB1555));
+			i+=2;
+		}
+		break;
+		default:
+		while(i+3<len){
+			//一个字节一个字节读的话是B/G/R/A
+			push(color(_s[i+3], _s[i+2], _s[i+1], _s[i+0]));
+			i+=4;
+		}
+		break;
 	}
 	return i;
 }
