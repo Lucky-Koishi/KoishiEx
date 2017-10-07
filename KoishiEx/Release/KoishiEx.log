@@ -1,0 +1,23 @@
+﻿生成启动时间为 2017/9/28 星期四 下午 4:38:31。
+     1>项目“K:\KoishiEx\KoishiEx\KoishiEx.vcxproj”在节点 2 上(build 个目标)。
+     1>InitializeBuildStatus:
+         正在创建“Release\KoishiEx.unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+       ClCompile:
+         所有输出均为最新。
+         D:\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Release\KoishiEx.pch" /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt KoishiFactory.cpp
+         KoishiFactory.cpp
+       Lib:
+         D:\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"K:\KoishiEx\Release\KoishiEx.lib" /NOLOGO /LTCG Release\KoishiBase.obj
+         Release\KoishiData.obj
+         Release\KoishiFactory.obj
+         Release\sha256.obj
+         Release\stdafx.obj
+         KoishiEx.vcxproj -> K:\KoishiEx\Release\KoishiEx.lib
+       FinalizeBuildStatus:
+         正在删除文件“Release\KoishiEx.unsuccessfulbuild”。
+         正在对“Release\KoishiEx.lastbuildstate”执行 Touch 任务。
+     1>已完成生成项目“K:\KoishiEx\KoishiEx\KoishiEx.vcxproj”(build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:00.73
