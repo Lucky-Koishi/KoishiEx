@@ -14,7 +14,7 @@
 
 #define KOISHI_EX_VER		(double)1.1
 
-#define MAX_UNCOMPRESSED_DATA_LENGTH	0x100000
+#define MAX_UNCOMPRESSED_DATA_LENGTH	0x1000000
 
 #define unclared
 #define declare_basefun(_member,_type) protected:_type _member;public:inline _type get_##_member() const{return _member;}inline _type*getPtr_##_member(){return &_member;}inline void set_##_member(_type val){_member=val;}
@@ -48,8 +48,9 @@ namespace Koishi{
 	extern str IMGext;
 	extern str IMGnameMask;
 	enum IMGversion{V1 = 1, V2 = 2, V4 = 4, V5 = 5, V6 = 6, OGG = -1, VUDEF = 0};
-	enum compressType{COMP_NONE = 5, COMP_ZLIB = 6, COMP_UDEF = 0};
-	enum colorFormat{ARGB8888 = 0x10, ARGB4444 = 0x0F, ARGB1555 = 0x0E, LINK = 0x11, COLOR_UDEF = 0, V4_FMT};
+	enum compressType{COMP_NONE = 5, COMP_ZLIB = 6, COMP_ZLIB2 = 7, COMP_UDEF = 0};
+	enum DDSPixelFormatID{DXT1 = 0x12, DXT3=0x13, DXT5=0x14, DPF_UDF = 0};
+	enum colorFormat{ARGB8888 = 0x10, ARGB4444 = 0x0F, ARGB1555 = 0x0E, LINK = 0x11, DDS_DXT1 = 0x12, DDS_DXT3 = 0x13, DDS_DXT5 = 0x14, COLOR_UDEF = 0, V4_FMT, RGB565};
 	enum colorMethod{LAY, DARKEN, MULTIPLY, COLORBURN, LINEARBURN, LIGHTEN, SCREEN, COLORDODGE, LINEARDODGE, OVERLAY, HARDLIGHT, SOFTLIGHT, VIVIDLIGHT, LINEARLIGHT, PINLIGHT, HARDMIX, DIFFER, EXCLUSION};
 	enum command{CREATE, LOAD, MAKE, RELEASE, PUSH, INSERT, REMOVE, REPLACE, RENAME, SETPARA, EXTRACT, PREPROCESS, CONVERT};
 	enum picChangablePara{LINKTO, BASEX, BASEY, FRAMEW, FRAMEH};
@@ -255,9 +256,11 @@ namespace Koishi{
 	//////结构体//////////////////////
 	class IMGindex;			//IMG的索引项
 	class PICinfo;			//PIC数据
+	class DDSinfo;			//DDS数据
 	typedef std::vector<IMGindex> IMGcontent;
 	typedef std::vector<IMGobject> IMGlist;
 	typedef std::vector<PICinfo> PIClist;
+	typedef std::vector<DDSinfo> DDSlist;
 	///////////////////////////////////
 	class IMGindex{
 		//IMG索引数据
@@ -268,7 +271,6 @@ namespace Koishi{
 		IMGindex();
 	};
 	class PICinfo{
-	public:
 		//图像信息
 		declare_basefun(format, colorFormat);
 		declare_basefun(comp, compressType);
@@ -277,17 +279,33 @@ namespace Koishi{
 		declare_basefun(picSize, size);
 		declare_basefun(frmSize, size);
 		declare_basefun(linkTo, i32);
+		//V5多出来的
+		declare_basefun(DDSIDused, b32);
+		declare_basefun(DDSpointLT, point);
+		declare_basefun(DDSpointRB, point);
 	public:
 		PICinfo();
 	};
-	///////////////////////////////////
+	class DDSinfo{
+		declare_basefun(fourCCID, DDSPixelFormatID);
+		declare_basefun(DDSID, b32);
+		declare_basefun(lengthOfCompressed, b32);
+		declare_basefun(lengthOfDDS, b32);
+		declare_basefun(width, b32);
+		declare_basefun(height, b32);
+		declare_basefun(reserved, b32);
+	public:
+		DDSinfo();
+	};
 	class NPKobject{
 	public:
 		NPKobject();
+		NPKobject(const stream &_s);
+		NPKobject(const str &fileName);
 		bool load(const stream &_s);
-		bool make(const stream &_s);
-		bool loadFile(str fileName);
-		bool saveFile(str fileName);
+		bool make(stream &_s);
+		bool loadFile(const str &fileName);
+		bool saveFile(const str &fileName);
 		bool create();
 		bool release();
 	public:
@@ -300,6 +318,7 @@ namespace Koishi{
 		pstream getData(b8 part);
 		b64 getSize() const;
 		bool IMGextract(b32 pos, IMGobject &obj);
+		bool extractIMGFile(i32 pos, str fileName);
 	public:
 		b32 count;
 		IMGcontent content;
@@ -313,6 +332,8 @@ namespace Koishi{
 	class IMGobject{
 	public:
 		IMGobject();
+		IMGobject(const stream &_s);
+		IMGobject(const str &fileName);
 		~IMGobject();
 		bool loadFile(str fileName);			//从文件中读取
 		bool saveFile(str fileName);			//保存文
@@ -337,6 +358,10 @@ namespace Koishi{
 		bool PICData(b32 pos, stream &data);
 		bool PICInfoOffset(b32 pos, b64 &off);		//计算目标字节流在数据块3内的存储位置
 		bool PICDataOffset(b32 pos, b64 &off);		//计算目标字节流在数据块4内的存储位置
+		bool DDSInfo(b32 pos, DDSinfo &obj);
+		bool DDSData(b32 pos, stream &data);
+		bool DDSInfoOffset(b32 pos, b64 &off);		//计算目标字节流在数据块2内的存储位置
+		bool DDSDataOffset(b32 pos, b64 &off);		//计算目标字节流在数据块4内的存储位置
 		i32 linkFind(b32 pos, b32 depth = 5);		//查找索引帧最终指向（depth为深度）
 	public:
 		//通用属性
@@ -347,6 +372,9 @@ namespace Koishi{
 	public:
 		//V4,V6使用的调色板
 		palette paletteData;
+		//V5相关
+		b32 totalLength_usedByV5;
+		DDSlist DDScontent;
 	protected:
 		//Data分为四个区域：文件头、IMG功能区、图像信息区、图像数据区
 		stream data1, data2, data3, data4;

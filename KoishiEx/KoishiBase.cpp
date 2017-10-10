@@ -52,9 +52,9 @@ void color::set(b32 colorDt, colorFormat clrFmt){
 		//////////////////////////////////////
 	case ARGB4444:
 		set_A(((colorDt & 0xf000) >> 12) * 0x11);
-		set_R(((colorDt & 0x0f00) >> 8) * 0x11);
-		set_G(((colorDt & 0x00f0) >> 4) * 0x11);
-		set_B(((colorDt & 0x000f) >> 0) * 0x11);
+		set_R((colorDt & 0x0f00) >> 8 << 4);
+		set_G((colorDt & 0x00f0) >> 4 << 4);
+		set_B((colorDt & 0x000f) >> 0 << 4);
 		break;
 		//////////////////////////////////////
 		///////////////ARGB1555///////////////
@@ -63,9 +63,9 @@ void color::set(b32 colorDt, colorFormat clrFmt){
 		//////////////////////////////////////
 	case ARGB1555:
 		set_A(((colorDt & 0x8000) >> 15) * 0xff);
-		set_R(((colorDt & 0x7c00) >> 10) * 0x08);
-		set_G(((colorDt & 0x03e0) >> 5) * 0x08);
-		set_B(((colorDt & 0x001f) >> 0) * 0x08);
+		set_R((colorDt & 0x7c00) >> 10 << 3);
+		set_G((colorDt & 0x03e0) >> 5 << 3);
+		set_B((colorDt & 0x001f) >> 0 << 3);
 		break;
 		////////////
 		///V4×¨ÓÃ///
@@ -76,6 +76,17 @@ void color::set(b32 colorDt, colorFormat clrFmt){
 		set_R((colorDt & 0x000000ff) >> 0);
 		set_G((colorDt & 0x0000ff00) >> 8);
 		set_B((colorDt & 0x00ff0000) >> 16);
+		break;
+	case RGB565:
+		//////////////////////////////////////
+		///////////////ARGB1555///////////////
+		//1 1 1 1 1 1 1 1 //1 1 1 1 1 1 1 1 //
+		//|   R   | |     G     | |   B   | //
+		//////////////////////////////////////
+		set_A(0xff);
+		set_R((colorDt & 0xf800) >> 11 << 3);
+		set_G((colorDt & 0x07e0) >> 5 << 2);
+		set_B((colorDt & 0x001f) >> 0 << 3);
 		break;
 	default:
 		set(colorDt);

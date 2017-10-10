@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "KoishiEx.h"
+#include "DDS.h"
 #include <assert.h>
 
 using namespace Koishi;
@@ -15,9 +16,25 @@ PICinfo::PICinfo(){
 	comp = COMP_UDEF;
 	linkTo = -1;
 	dataSize = 0;
+	DDSIDused = 0;
 };
+DDSinfo::DDSinfo(){
+	DDSID = 0;
+	fourCCID = DPF_UDF;
+	height = 0;
+	lengthOfCompressed = 0;
+	lengthOfDDS = 0;
+	reserved = 1;
+	width = 0;
+}
 NPKobject::NPKobject(){
 	count = 0;
+}
+NPKobject::NPKobject(const stream &_s){
+	load(_s);
+}
+NPKobject::NPKobject(const str &fileName){
+	loadFile(fileName);
 }
 IMGobject::IMGobject(){
 	//普通属性
@@ -27,6 +44,12 @@ IMGobject::IMGobject(){
 	indexSize = 0;
 	version = VUDEF;
 }
+IMGobject::IMGobject(const stream &_s){
+	load(_s);
+}
+IMGobject::IMGobject(const str &fileName){
+	loadFile(fileName);
+}
 //////////////////////////////////////////////////////////////////////////////////////
 //Main Factory
 //////////////////////////////////////////////////////////////////////////////////////
@@ -34,7 +57,7 @@ IMGobject::IMGobject(){
 bool NPKobject::load(const stream &_s){
 	return invoke(LOAD, (void*)&_s);
 }
-bool NPKobject::make(const stream &_s){
+bool NPKobject::make(stream &_s){
 	return invoke(MAKE, (void*)&_s);
 }
 bool NPKobject::create(){
@@ -43,7 +66,7 @@ bool NPKobject::create(){
 bool NPKobject::release(){
 	return invoke(RELEASE);
 }
-bool NPKobject::loadFile(str fileName){
+bool NPKobject::loadFile(const str &fileName){
 	stream _data;
 	bool ret1 = _data.loadFile(fileName);
 	bool ret2 = false;
@@ -53,7 +76,7 @@ bool NPKobject::loadFile(str fileName){
 	_data.release();
 	return ret1 && ret2;
 }
-bool NPKobject::saveFile(str fileName){
+bool NPKobject::saveFile(const str &fileName){
 	stream _data;
 	bool ret1 = make(_data);
 	bool ret2 = false;
@@ -96,7 +119,7 @@ b64 NPKobject::getSize() const{
 	return data1.getLen()+data2.getLen()+data3.getLen()+data4.getLen();
 }
 bool NPKobject::IMGextract(b32 pos, IMGobject &obj){
-	if(pos>=count){
+	if(pos<0 || pos>=count){
 		return false;
 	}
 	stream temps;
@@ -104,6 +127,15 @@ bool NPKobject::IMGextract(b32 pos, IMGobject &obj){
 	getData(3)->ptMoveTo(content[pos].get_imgoffset()-getData(0)->getLen() - getData(1)->getLen() - getData(2) -> getLen());
 	getData(3)->readStream(temps, (b64)(content[pos].get_imgsize()));
 	return obj.load(temps);
+}
+bool NPKobject::extractIMGFile(i32 pos, str fileName){
+	if(pos<0 || pos>=count){
+		return false;
+	}
+	stream temps;
+	getData(3)->ptMoveTo(content[pos].get_imgoffset()-getData(0)->getLen() - getData(1)->getLen() - getData(2) -> getLen());
+	getData(3)->readStream(temps, (b64)(content[pos].get_imgsize()));
+	return temps.makeFile(fileName);
 }
 bool NPKobject::invoke(b16 command, void *para1, void *para2, void *para3){
 	switch(command){
@@ -600,6 +632,8 @@ bool IMGobject::PICData(b32 pos, stream& data){
 		return false;
 	b64 offset = 0;
 	b64 size = (b64)content[pos].get_dataSize();
+	if(size == 0)
+		return false;
 	if(!PICDataOffset(pos, offset))
 		return false;
 	data4.ptMoveTo(offset);
@@ -613,8 +647,11 @@ bool IMGobject::PICInfoOffset(b32 pos, b64 &off){
 	for(i32 i=0;i<pos;i++){
 		if(content[i].get_format() == LINK){
 			off += 8;
-		}else{
+		}else if(content[i].get_format() < LINK){
 			off += 36;
+		}else{
+			//V5的某些特例
+			off += 64;
 		}
 	}
 	return true;
@@ -623,10 +660,55 @@ bool IMGobject::PICDataOffset(b32 pos, b64 &off){
 	if(pos>=count)
 		return false;
 	off = 0;
-	for(i32 i=0;i<pos;i++){
-		if(content[i].get_format() != LINK){
+	i32 i;
+	if(version == V5){
+		for(i=0;i<DDScontent.size();i++){
+			off += DDScontent[i].get_lengthOfCompressed();
+		}
+	}
+	for(i=0;i<pos;i++){
+		if(content[i].get_format() < LINK){
 			off += content[i].get_dataSize();
 		}
+	}
+	return true;
+}
+bool IMGobject::DDSInfo(b32 pos, DDSinfo& obj){
+	if(version != V5)
+		return false;
+	if(pos>=count)
+		return false;
+	obj = DDScontent[pos];
+	return true;
+}
+bool IMGobject::DDSData(b32 pos, stream& data){
+	if(version != V5)
+		return false;
+	if(pos>=count)
+		return false;
+	b64 offset = 0;
+	b64 size = (b64)DDScontent[pos].get_lengthOfCompressed();
+	if(!DDSDataOffset(pos, offset))
+		return false;
+	data4.ptMoveTo(offset);
+	data4.readStream(data, size);
+	return true;
+}
+bool IMGobject::DDSInfoOffset(b32 pos, b64 &off){
+	if(version != V5)
+		return false;
+	if(pos>=count)
+		return false;
+	return 3+pos*7;
+}
+bool IMGobject::DDSDataOffset(b32 pos, b64 &off){
+	if(version != V5)
+		return false;
+	if(pos>=count)
+		return false;
+	off = 0;
+	for(i32 i=0;i<pos;i++){
+		off += DDScontent[i].get_lengthOfCompressed();
 	}
 	return true;
 }
@@ -1831,6 +1913,213 @@ bool IMGobject::invoke(b16 cmdcode, void *para1, void *para2, void *para3){
 		}//switch(cmd)
 		break;
 	case V5:
+		switch(cmd){
+		case LOAD:
+			////////////////////////////////////////////////
+			//读取数据
+			//para1:(stream*)数据流
+			//para2:无意义
+			//para3:无意义
+			////////////////////////////////////////////////
+			{
+				stream _data(*(stream*)para1);			//源数据
+				b32 _dword;								//暂存无符号整型
+				i32 _int,_int1,_int2,i,j;				//暂存有符号整型
+				i32 _byteCount,_byteCount2;				//暂存有符号整型2
+				PICinfo _po;							//暂存图片信息
+				DDSinfo _di;							//暂存DDS信息
+				i32 _ddsCount;							//DDS数目
+				i32 _clrCount;
+				lcolor _colorList;
+				paletteData.clear();
+				_data.ptMoveTo(32);
+				/////////////////////////////////////////////////////////
+				//V5专用
+				_data.read(_dword);
+				_ddsCount = _dword;						//V5专用：DDS图片个数
+				_data.read(_dword);
+				totalLength_usedByV5 = _dword;			//数值上等于IMG的总长度
+				_data.read(_dword);
+				_clrCount = _dword;						//颜色表数据
+				_colorList.clear();
+				for(i=0;i<_clrCount;i++){
+					_data.read(_dword);
+					_colorList.push_back(color(_dword, V4_FMT));
+				}
+				paletteData.push(_colorList);
+				/////////////////////////////////////////////////////////
+				//第一组不明意义的表
+				DDScontent.clear();
+				for(i=0;i<_ddsCount;i++){		//不知道是与V5DATA.COUNT有关还是INDEX数目有关，先尝试
+					_data.read(_dword);
+					_di.set_reserved(_dword);
+					_data.read(_dword);
+					_di.set_fourCCID((DDSPixelFormatID)_dword);
+					_data.read(_dword);
+					_di.set_DDSID(_dword);
+					_data.read(_dword);
+					_di.set_lengthOfCompressed(_dword);
+					_data.read(_dword);
+					_di.set_lengthOfDDS(_dword);
+					_data.read(_dword);
+					_di.set_width(_dword);
+					_data.read(_dword);
+					_di.set_height(_dword);
+					DDScontent.push_back(_di);
+				}
+				_byteCount = _data.ptPos()-32;		//功能区字节数
+				_data.ptMoveTo(32);
+				getData(1)->reallocate(_byteCount+1000);
+				_data.readStream(*(getData(1)),_byteCount);
+				/////////////////////////////////////////////////////
+				//此处才是INDEX开始，但是INDEX与V2V4V6格式不是很相同
+				//必须使用第一字节进行区分，
+				//第一字节小于LINK的话，与V2V4V6的图片帧INDEX相同，都是36字节
+				//第一字节等于LINK还是2字节
+				//第一字节大于LINK则是V5特有的INDEX格式，为64字节
+				//V5特有的INDEX格式比V2V4V6少了个图片数据长度（4字节）、
+				//多了个参数（据说与DDS有关）以及两个坐标点（总计20字节）、
+				//还有12个空字节，所以是36-4+20+12=64字节
+				_data.ptMoveTo(32+_byteCount);
+				content.clear();
+				for(i=0;i<count;i++){
+					_data.read(_dword);
+					_po.set_format((colorFormat)_dword);
+					if(_dword == LINK){
+						_data.read(_int);
+						_po.set_linkTo(_int);
+
+						_po.set_comp((compressType)0);
+						_po.set_picSize(size(0,0));
+						_po.set_dataSize(0);
+						_po.set_basePt(point(0,0));
+						_po.set_frmSize(size(0,0));
+						
+						_po.set_DDSIDused(0);
+						_po.set_DDSpointLT(point(0,0));
+						_po.set_DDSpointRB(point(0,0));
+					}else if(_dword<LINK){
+						_po.set_linkTo(-1);
+
+						_data.read(_dword);
+						_po.set_comp((compressType)_dword);
+						_data.read(_int1);
+						_data.read(_int2);
+						_po.set_picSize(size(_int1, _int2));
+						_data.read(_dword);
+						_po.set_dataSize(_dword);
+						_data.read(_int1);
+						_data.read(_int2);
+						_po.set_basePt(point(_int1, _int2));
+						_data.read(_int1);
+						_data.read(_int2);
+						_po.set_frmSize(size(_int1, _int2));
+
+						_po.set_DDSIDused(0);
+						_po.set_DDSpointLT(point(0,0));
+						_po.set_DDSpointRB(point(0,0));
+					}else{
+						_po.set_linkTo(-1);
+
+						_data.read(_dword);
+						_po.set_comp((compressType)_dword);
+						_data.read(_int1);
+						_data.read(_int2);
+						_po.set_picSize(size(_int1, _int2));
+						_data.read(_dword);
+						_po.set_dataSize(_dword);
+						_data.read(_int1);
+						_data.read(_int2);
+						_po.set_basePt(point(_int1, _int2));
+						_data.read(_int1);
+						_data.read(_int2);
+						_po.set_frmSize(size(_int1, _int2));
+						_data.read(_dword);
+						_data.read(_dword);
+						_po.set_DDSIDused(_dword);
+						_data.read(_int1);
+						_data.read(_int2);
+						_po.set_DDSpointLT(point(_int1,_int2));
+						_data.read(_int1);
+						_data.read(_int2);
+						_po.set_DDSpointRB(point(_int1,_int2));
+						_data.read(_dword);
+					}
+					content.push_back(_po);
+				}
+				_byteCount2 = _data.ptPos()-32-_byteCount;		//功能区字节数
+				_data.ptMoveTo(32+_byteCount);
+				getData(2)->reallocate(_byteCount2+1000);
+				_data.readStream(*(getData(2)), _byteCount2);
+				//////////////////////////////////////////////////////
+				//数据区
+				getData(3)->reallocate(_data.getLen());
+				_data.readStream(*(getData(3)), _data.getLen());
+				return true;
+			}//load
+			break;
+		case EXTRACT:
+			////////////////////////////////////////////////
+			//提取数据
+			//para1: i32 位置，-1则为结尾处
+			//para2: matrix & 像素矩阵
+			//para3: 无意义
+			////////////////////////////////////////////////
+			{
+				i32 _pos = *(i32*)para1;
+				matrix *_pmat = (matrix *)para2;
+				b32 _count = count;
+				i32 i;
+				if(_pos<0){
+					_pos += _count;
+				}
+				if(_pos<0){
+					return false;
+				}
+				if(_pos>_count - 1){
+					return false;
+				}
+				PICinfo _pi;
+				DDSinfo _di;
+				stream _s, _s1;
+				matrix _mat;
+				PICInfo(_pos, _pi);
+				if(_pi.get_format() == LINK){
+					_pos = linkFind(_pos);
+				}
+				PICInfo(_pos, _pi);
+				if(_pi.get_format() > LINK){
+					DDSInfo(_pi.get_DDSIDused(), _di);
+					DDSData(_pi.get_DDSIDused(), _s);
+					_s.uncompressData(_s1, COMP_ZLIB);
+					KoishiDDS::DDS _d(_s1);
+					_d.uncompress(_mat);
+					b32 _it = _pi.get_DDSpointLT().get_Y();
+					b32 _ib = _pi.get_DDSpointRB().get_Y()-1;
+					b32 _il = _pi.get_DDSpointLT().get_X();
+					b32 _ir = _pi.get_DDSpointRB().get_X()-1;
+					_mat.getSubMatrix(*_pmat, _it, _ib, _il, _ir);
+				}else{
+					PICData(_pos, _s);
+					_s.uncompressData(_s1, _pi.get_comp());
+					_pmat->allocate(_pi.get_picSize().get_H(), _pi.get_picSize().get_W()); 
+					_pmat->push(_s1, _pi.get_format());
+				}
+				return true;
+			}//extract
+			break;
+		default:
+			////////////////////////////////////////////////
+			//预留
+			//para1: 无意义
+			//para2: 无意义
+			//para3: 无意义
+			////////////////////////////////////////////////
+			{
+				return false;
+			}//default
+			break;
+		}
 		break;
 	case V1:
 		break;

@@ -10,6 +10,7 @@
 #include "../../KoishiEx/Koishidata.cpp"
 #include "../../KoishiEx/Koishifactory.cpp"
 #include "../../KoishiEx/sha256.cpp"
+#include "../../KoishiEx/dds.cpp"
 #include "renamedialog.h"
 
 #ifdef _DEBUG
@@ -194,6 +195,15 @@ CString FmtToCStr(colorFormat cf, IMGversion iv = V2){
 		break;
 	case LINK:
 		s = L"指向帧号";
+		break;
+	case DDS_DXT1:
+		s = L"DDS_DXT1";
+		break;
+	case DDS_DXT3:
+		s = L"DDS_DXT3";
+		break;
+	case DDS_DXT5:
+		s = L"DDS_DXT5";
 		break;
 	default:
 		s = L"暂未定义";
@@ -485,7 +495,7 @@ void CDemoExDlg::OnBnClickedCancel12()
 	if(dlg.DoModal() == IDOK){
 		fileName = dlg.GetPathName();
 		matrix _mat;
-		if(io.version == V2 || io.version == V4){
+		if(io.version == V2 || io.version == V4 || io.version == V5){
 			for(i=0;i<io.count;i++){
 				io.PICextract(i, _mat);
 				tempName = fileName.Left(fileName.GetLength()-4) + L"-ID"+NumToCStr(i)+L".png";
@@ -626,7 +636,7 @@ void CDemoExDlg::OnBnClickedCancel11()
 		fileName = dlg.GetPathName();
 		CStrToStr(fileName, fn);
 		matrix _mat;
-		if(io.version == V2 || io.version == V4){
+		if(io.version == V2 || io.version == V4 || io.version == V5){
 			io.PICextract(row, _mat);
 			if(_mat.makePNG(fn)){
 				MessageBox(_T("提取完毕喵！"));
