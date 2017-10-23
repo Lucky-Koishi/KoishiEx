@@ -48,11 +48,22 @@ namespace Koishi{
 	extern str IMGext;
 	extern str IMGnameMask;
 	enum IMGversion{V1 = 1, V2 = 2, V4 = 4, V5 = 5, V6 = 6, OGG = -1, VUDEF = 0};
+	enum command{
+		//结构相关
+		CREATE, LOAD, MAKE, RELEASE, CONVERT,
+		//图片相关
+		GETINFO, GETINFOGETDATA, PUSH, INSERT, REMOVE, REPLACE, EXTRACT, PREPROCESS, EMPTY,
+		//DDS相关
+		DDSGETINFO, DDSGETDATA, DDSPUSH, DDSINSERT, DDSREMOVE, DDSREPLACE, DDSEXTRACT, DDSPREPROCESS, 
+		//颜色相关
+		CLRPUSH, CLRINSERT, 
+		//参数相关
+		RENAME, SETPARA
+	};
 	enum compressType{COMP_NONE = 5, COMP_ZLIB = 6, COMP_ZLIB2 = 7, COMP_UDEF = 0};
 	enum DDSPixelFormatID{DXT1 = 0x12, DXT3=0x13, DXT5=0x14, DPF_UDF = 0};
 	enum colorFormat{ARGB8888 = 0x10, ARGB4444 = 0x0F, ARGB1555 = 0x0E, LINK = 0x11, DDS_DXT1 = 0x12, DDS_DXT3 = 0x13, DDS_DXT5 = 0x14, COLOR_UDEF = 0, V4_FMT, RGB565};
 	enum colorMethod{LAY, DARKEN, MULTIPLY, COLORBURN, LINEARBURN, LIGHTEN, SCREEN, COLORDODGE, LINEARDODGE, OVERLAY, HARDLIGHT, SOFTLIGHT, VIVIDLIGHT, LINEARLIGHT, PINLIGHT, HARDMIX, DIFFER, EXCLUSION};
-	enum command{CREATE, LOAD, MAKE, RELEASE, PUSH, INSERT, REMOVE, REPLACE, RENAME, SETPARA, EXTRACT, PREPROCESS, CONVERT};
 	enum picChangablePara{LINKTO, BASEX, BASEY, FRAMEW, FRAMEH};
 	enum channelFlag{FA = 0x01, FR = 0x02, FG = 0x04, FB = 0x08};
 	enum layerMethod{UPPER, LOWER};
@@ -175,26 +186,27 @@ namespace Koishi{
 		i32 area() const;
 	};
 	//////////////////////////////////
-	static size operator - (const point& pt1, const point& pt2);
-	static point operator + (const point& pt1, const size& sz);
-	static point operator - (const point& pt1, const size& sz);
+	//static size operator - (const point& pt1, const point& pt2);
+	//static point operator + (const point& pt1, const size& sz);
+	//static point operator - (const point& pt1, const size& sz);
 	/////////////////////////////////////
 	class matrix{
 	public:
 		matrix();
 		matrix(b32 _row, b32 _column);
+		matrix(const size &_sz);
 		matrix(const matrix &_mat);
 		~matrix();
 		matrix& operator = (const matrix &_mat);
 	public:
 		//内存分配
 		void allocate(b32 _row, b32 _column);
-		void reallocate(b32 _row, b32 _column);
+		void allocate(const size &_sz);
 		void release();
 		void fill(color _clr);
 		void push(color _clr);							//游标处颜色赋值并加1
 		b64 push(const stream &_s, colorFormat cf = ARGB8888);		//以流填充
-		b64 make(stream &_s);							//制作成ARGB8888流
+		b64 make(stream &_s) const;							//制作成ARGB8888流
 	public:
 		//取值/行列
 		pcolor operator[] (b32 _i) const;		//重写双下标函数
@@ -202,8 +214,10 @@ namespace Koishi{
 		b32 getColumnCount() const;
 		b32 getElemCount() const;
 		//取子阵
-		void getSubMatrix(matrix &dest, b32 &_rst, b32 &_red, b32 &_cst, b32 &_ced) const;
+		void getSubMatrix(matrix &dest, b32 rowStart, b32 rowEnd, b32 columnStart, b32 columnEnd) const;
 		void getChannelMatrix(matrix &dest, b8 _chn = FA) const;
+		//扩充矩阵
+		void expandMatrix(matrix &dest, b32 toTop, b32 toBottom, b32 toLeft, b32 toRight) const;
 		//元素统计
 		void setElem(b32 _row, b32 _column, const color &_clr);
 		void setElem(b32 _id, const color &_clr);
@@ -279,7 +293,7 @@ namespace Koishi{
 		declare_basefun(picSize, size);
 		declare_basefun(frmSize, size);
 		declare_basefun(linkTo, i32);
-		//V5多出来的
+		//V5独有
 		declare_basefun(DDSIDused, b32);
 		declare_basefun(DDSpointLT, point);
 		declare_basefun(DDSpointRB, point);
@@ -332,53 +346,65 @@ namespace Koishi{
 	class IMGobject{
 	public:
 		IMGobject();
-		IMGobject(const stream &_s);
+		IMGobject(stream &s);
 		IMGobject(const str &fileName);
 		~IMGobject();
-		bool loadFile(str fileName);			//从文件中读取
-		bool saveFile(str fileName);			//保存文
-	public:
-		bool create(IMGversion ver = V2);
-		bool load(const stream &_s);
-		bool make(stream& _s);
-		bool release();
-		bool PICparaModify(i32 pos, i32 term, i32 val);
-		bool PICpush(const PICinfo &obj, const stream &_s);
-		bool PICinsert(i32 pos, const PICinfo &obj, const stream &_s);
+		bool LoadFile(str fileName);			//从文件中读取
+		bool SaveFile(str fileName);			//保存文件
+		bool Load(stream &s);
+		bool Make(stream &s);
+		bool Create(IMGversion ver);
+		bool Release();
+		bool GetPICInfo(i32 pos, PICinfo &info);		//
+		bool GetPICInfoOffset(i32 pos, b64 &off);
+		bool GetPICData(i32 pos, stream &s);
+		bool GetPICDataOffset(i32 pos, b64 &off);
+		bool GetDDSInfo(i32 pos, DDSinfo &info);
+		bool GetDDSInfoOffset(i32 pos, b64 &off);
+		bool GetDDSData(i32 pos, stream &s);
+		bool GetDDSDataOffset(i32 pos, b64 &off);
+		bool SetPICInfoPara(i32 pos, i32 term, void *pval);
+		bool PICpush(const PICinfo &info, const stream &s);
+		bool PICinsert(i32 pos, const PICinfo &info, const stream &s);
 		bool PICremove(i32 pos);
-		bool PICreplace(i32 pos, const PICinfo &obj, const stream &_s);
+		bool PICreplace(i32 pos, const PICinfo &info, const stream &s);
 		bool PICextract(i32 pos, matrix &mat, i32 paletteID = 0);
-		bool PICpreprocess(const matrix &mat, stream &s, PICinfo &obj);
-		bool colorExtract(lcolor &list);
-		bool convertTo(IMGversion newVer, IMGobject &imgObj, i32 paletteID = 0);
+		bool PICpreprocess(const matrix &mat, stream &s, PICinfo &info);
+		bool PICempty(stream &s, PICinfo &info);
+		bool DDSpush(const DDSinfo &info, const stream &s);
+		bool DDSinsert(i32 pos, const DDSinfo &info, const stream &s);
+		bool DDSremove(i32 pos);
+		bool DDSreplace(i32 pos, const DDSinfo &info, const stream &s);
+		bool DDSextract(i32 pos, matrix &mat);
+		bool DDSpreprocess(const matrix &mat, stream &s, DDSinfo &info);
+		bool CLRpush(const color &clr, i32 paletteID = 0);
+		bool CLRinsert(i32 pos, const color &clr, i32 paletteID = 0);
+		bool CLRremove(i32 pos, i32 paletteID = 0);
+		bool CLRreplace(i32 pos, const color &clr, i32 paletteID = 0);
+		bool CLRnewPalette();
+		bool ConvertTo(IMGobject &newIO, IMGversion newVersion, i32 palettedID = 0);
 	public:
-		pstream getData(b8 _part);
-		b64 getSize() const;
-		bool PICInfo(b32 pos, PICinfo &obj);
-		bool PICData(b32 pos, stream &data);
-		bool PICInfoOffset(b32 pos, b64 &off);		//计算目标字节流在数据块3内的存储位置
-		bool PICDataOffset(b32 pos, b64 &off);		//计算目标字节流在数据块4内的存储位置
-		bool DDSInfo(b32 pos, DDSinfo &obj);
-		bool DDSData(b32 pos, stream &data);
-		bool DDSInfoOffset(b32 pos, b64 &off);		//计算目标字节流在数据块2内的存储位置
-		bool DDSDataOffset(b32 pos, b64 &off);		//计算目标字节流在数据块4内的存储位置
 		i32 linkFind(b32 pos, b32 depth = 5);		//查找索引帧最终指向（depth为深度）
-	public:
-		//通用属性
-		IMGversion version;
-		b32 count, indexSize;
-		IMGindex *derived;
-		PIClist content;
-	public:
-		//V4,V6使用的调色板
-		palette paletteData;
-		//V5相关
-		b32 totalLength_usedByV5;
-		DDSlist DDScontent;
+		b64 getSize() const;
 	protected:
-		//Data分为四个区域：文件头、IMG功能区、图像信息区、图像数据区
-		stream data1, data2, data3, data4;
-		bool invoke(b16 command, void *para1 = NULL, void *para2 = NULL, void *para3 = NULL);
+		stream *getData(b8 _part);
+		stream data1;		//文件头（V2,V4,V6为一组,V5为一组）
+		stream data2;		//调色板数据
+		stream data3;		//DDS信息，V5之外无效
+		stream data4;		//图像信息
+		stream data5;		//DDS图像数据，V5之外无效
+		stream data6;		//图像数据
+	public:
+		IMGindex *derived;
+
+		IMGversion version;
+		b32 indexCount, indexSize;
+		b32 V5_DDSCount;
+		b32 V5_totalLength;
+
+		palette paletteData;
+		DDSlist DDScontent;
+		PIClist PICcontent;
 	};
 }
 

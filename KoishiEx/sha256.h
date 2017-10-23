@@ -2,10 +2,14 @@
 
 #include <string>
 
+namespace KoishiSHA256{
 typedef unsigned __int8  uint8_t;
 typedef unsigned __int32 uint32_t;
 typedef unsigned __int64 uint64_t;
-
+ inline uint32_t rotate(uint32_t a, uint32_t c);
+  inline uint32_t swap(uint32_t x);
+  inline uint32_t f1(uint32_t e, uint32_t f, uint32_t g);
+   inline uint32_t f2(uint32_t a, uint32_t b, uint32_t c);
 class SHA256 //: public Hash
 {
 public:
@@ -49,3 +53,4 @@ private:
   /// hash, stored as integers
   uint32_t m_hash[HashValues];
 };
+}

@@ -2,6 +2,8 @@
 #include "sha256.h"
 
 /// same as reset()
+using namespace KoishiSHA256;
+
 SHA256::SHA256()
 {
   reset();
@@ -24,33 +26,32 @@ void SHA256::reset()
   m_hash[7] = 0x5be0cd19;
 }
 
-namespace
-{
-  inline uint32_t rotate(uint32_t a, uint32_t c)
+
+  inline uint32_t KoishiSHA256::rotate(uint32_t a, uint32_t c)
   {
     return (a >> c) | (a << (32 - c));
   }
 
-  inline uint32_t swap(uint32_t x)
+  inline uint32_t KoishiSHA256::swap(uint32_t x)
   {
 	return _byteswap_ulong(x);
   }
 
   // mix functions for processBlock()
-  inline uint32_t f1(uint32_t e, uint32_t f, uint32_t g)
+  inline uint32_t KoishiSHA256::f1(uint32_t e, uint32_t f, uint32_t g)
   {
     uint32_t term1 = rotate(e, 6) ^ rotate(e, 11) ^ rotate(e, 25);
     uint32_t term2 = (e & f) ^ (~e & g); //(g ^ (e & (f ^ g)))
     return term1 + term2;
   }
 
-  inline uint32_t f2(uint32_t a, uint32_t b, uint32_t c)
+  inline uint32_t KoishiSHA256::f2(uint32_t a, uint32_t b, uint32_t c)
   {
     uint32_t term1 = rotate(a, 2) ^ rotate(a, 13) ^ rotate(a, 22);
     uint32_t term2 = ((a | b) & c) | (a & b); //(a & (b ^ c)) ^ (b & c);
     return term1 + term2;
   }
-}
+
 
 
 /// process 64 bytes

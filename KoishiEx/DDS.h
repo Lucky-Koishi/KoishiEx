@@ -84,7 +84,9 @@ namespace KoishiDDS{
 		bool make(stream &s);
 		bool makeFile(const str &DDSfileName);
 		bool uncompress(matrix &mat);
-	private:
+		bool compress(const matrix &mat);
+		DDSHeader *getHeader();
+	public:
 		b16 RGB8888TO565(Koishi::color c8888);
 		Koishi::color RGB565TO8888(b16 c565);
 		void DXT1_uncompress(const stream &udata, lcolor &clist);
@@ -93,5 +95,8 @@ namespace KoishiDDS{
 		void DXT3_uncompress(matrix &mat);
 		void DXT5_uncompress(const stream &udata, lcolor &clist);
 		void DXT5_uncompress(matrix &mat);
+		void DXT5_uncompress2(matrix &mat);
+		void DXT5_compress(const lcolor &clist, stream &dest);
+		void DXT5_compress(const matrix &mat);
 	};
 }

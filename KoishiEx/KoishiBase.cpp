@@ -316,15 +316,15 @@ void size::set(i32 w, i32 h){
 i32 size::area() const{
 	return get_W()*get_H();
 }
-size Koishi::operator - (const point& pt1, const point& pt2){
-	return size(pt2.get_X() - pt1.get_X(), pt2.get_Y() - pt1.get_Y());
-}
-point Koishi::operator + (const point& pt1, const size& sz){
-	return point(pt1.get_X() + sz.get_W(), pt1.get_Y() + sz.get_H());
-}
-point Koishi::operator - (const point& pt1, const size& sz){
-	return point(pt1.get_X() - sz.get_W(), pt1.get_Y() - sz.get_H());
-}
+//size Koishi::operator - (const point& pt1, const point& pt2){
+//	return size(pt2.get_X() - pt1.get_X(), pt2.get_Y() - pt1.get_Y());
+//}
+//point Koishi::operator + (const point& pt1, const size& sz){
+//	return point(pt1.get_X() + sz.get_W(), pt1.get_Y() + sz.get_H());
+//}
+//point Koishi::operator - (const point& pt1, const size& sz){
+//	return point(pt1.get_X() - sz.get_W(), pt1.get_Y() - sz.get_H());
+//}
 /////////////////////////////////////////////////////////////////
 //matrix
 matrix::matrix(){
@@ -337,16 +337,23 @@ matrix::matrix(b32 _row, b32 _column){
 	column = _column;
 	row = _row;
 	pt = 0;
-	data = new color[column*row];
+	data = new color[column*row+1000];
+	fill(0);
+}
+matrix::matrix(const size &_sz){
+	column = _sz.get_W();
+	row = _sz.get_H();
+	pt = 0;
+	data = new color[column*row+1000];
 	fill(0);
 }
 matrix::matrix(const matrix &_mat){
 	column = _mat.column;
 	row = _mat.row;
 	pt = 0;
-	data = new color[column*row];
+	data = new color[column*row+1000];
 	if(data)
-		memcpy(data, _mat.data, 4*column*row);
+		memcpy(data, _mat.data, 4*column*row+1000);
 }
 matrix::~matrix(){
 	release();
@@ -358,10 +365,10 @@ matrix& matrix::operator = (const matrix &_mat){
 		delete[] data;
 	column = _mat.column;
 	row = _mat.row;
-	data = new color[column*row];
+	data = new color[column*row+1000];
 	pt = 0;
 	if(data)
-		memcpy(data, _mat.data, 4*column*row);
+		memcpy(data, _mat.data, 4*column*row+1000);
 	return *this;
 }
 
@@ -369,12 +376,20 @@ void matrix::allocate(b32 _row, b32 _column){
 	if(!data){
 		row  = _row;
 		column = _column;
-		data = new color[row*column];
+		data = new color[row*column+1000];
 		pt = 0;
 		fill(0);
 	}
 }
-
+void matrix::allocate(const size &_sz){
+	if(!data){
+		row  = _sz.get_H();
+		column = _sz.get_W();
+		data = new color[row*column+1000];
+		pt = 0;
+		fill(0);
+	}
+}
 void matrix::release(){
 	if(data){
 		delete[] data;
@@ -425,7 +440,7 @@ b64 matrix::push(const stream &_s, colorFormat cf){
 	return i;
 }
 
-b64 matrix::make(stream &_s){
+b64 matrix::make(stream &_s) const{
 	_s.allocate(4*column*row);
 	for(b32 i = 0; i< column*row; i++){
 		_s.push(data[i].get_B());
@@ -450,27 +465,36 @@ b32 matrix::getElemCount() const{
 	return row*column;
 }	
 //取子阵
-void matrix::getSubMatrix(matrix &dest, b32 &_rst, b32 &_red, b32 &_cst, b32 &_ced) const{
-	if(_red>row)
-		_red = row;
-	if(_rst>_red)
-		_rst = _red;
-	if(_ced>column)
-		_ced = column;
-	if(_cst>_ced)
-		_cst = _ced;
-	dest.allocate(_red-_rst+1, _ced-_cst+1);
+void matrix::getSubMatrix(matrix &dest, b32 rowStart, b32 rowEnd, b32 columnStart, b32 columnEnd) const{
+	if(rowEnd>row)
+		rowEnd = row;
+	if(rowStart>rowEnd)
+		rowStart = rowEnd;
+	if(columnEnd>column)
+		columnEnd = column;
+	if(columnStart>columnEnd)
+		columnStart = columnEnd;
+	dest.allocate(rowEnd-rowStart, columnEnd-columnStart);
 	b32 i,j;
-	for(i=0;i<_red-_rst+1;i++){
-		for(j=0;j<_ced-_cst+1;j++){
-			dest.push(data[_cst+j+(_rst+i)*column]);
+	for(i=0;i<rowEnd-rowStart;i++){
+		for(j=0;j<columnEnd-columnStart;j++){
+			dest.push(data[columnStart+j+(rowStart+i)*column]);
 		}
 	}
 }
 void matrix::getChannelMatrix(matrix &dest, b8 _chn) const{
-	dest.allocate(getRowCount(), getColumnCount());
+	dest.allocate(row, column);
 	for(b32 i = 0;i<getElemCount();i++){
 		dest.push(data[i].getChannel(_chn));
+	}
+}
+void matrix::expandMatrix(matrix &dest, b32 toTop, b32 toBottom, b32 toLeft, b32 toRight) const{
+	dest.allocate(row+toTop+toBottom, column+toLeft+toRight);
+	b32 i,j;
+	for(i=0;i<row;i++){
+		for(j=0;j<column;j++){
+			dest.setElem(i+toTop, j+toLeft, getElem(i,j));
+		}
 	}
 }
 //元素统计
@@ -690,9 +714,9 @@ bool matrix::loadPNG(str fileName){
 		for( y=0; y<h; ++y ) {  
 			for( x=0; x<w*4; ) {  
 				/* 以下是RGBA数据，需要自己补充代码，保存RGBA数据 */  
-				data[temp].set_B(row_pointers[y][x++]); // red  
+				data[temp].set_R(row_pointers[y][x++]); // red  
 				data[temp].set_G(row_pointers[y][x++]); // green  
-				data[temp].set_R(row_pointers[y][x++]); // blue
+				data[temp].set_B(row_pointers[y][x++]); // blue
 				data[temp].set_A(row_pointers[y][x++]);   
 				temp ++;
 			}  

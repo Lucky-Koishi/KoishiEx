@@ -163,8 +163,8 @@ b64 stream::ptMove(i64 dist){
 	i64 goa = now + dist;
 	if(goa<0){
 		pt = 0;
-	}else if((b64)goa>len-1){
-		pt = len - 1;
+	}else if((b64)goa>len){
+		pt = len;
 	}else{
 		pt = (b64)goa;
 	}
@@ -173,8 +173,8 @@ b64 stream::ptMove(i64 dist){
 b64 stream::ptMoveTo(i64 pos){
 	if(pos<0)
 		pos = 0;
-	if(pos>len-1)
-		pos = len-1;
+	if(pos>len)
+		pos = len;
 	pt = (b64)pos;
 	return pt;
 }
@@ -363,7 +363,7 @@ void stream::nameMask(){
 void stream::getSHA256(stream &dest){
 	pb8 buf = new b8[32];
 	b64 len = getLen();
-	SHA256 sha;
+	KoishiSHA256::SHA256 sha;
 	sha.reset();
 	sha.add(data, len);
 	sha.getHash(buf);
@@ -380,7 +380,7 @@ void stream::getSHA256(stream &dest, const stream &added){
 	s.pushStream(added, added.getLen());
 	pb8 buf = new b8[32];
 	b64 len = s.getLen()/17*17;
-	SHA256 sha;
+	KoishiSHA256::SHA256 sha;
 	sha.reset();
 	sha.add(s.data, len);
 	sha.getHash(buf);
@@ -419,6 +419,14 @@ i8 stream::compressData(stream &dest, compressType type){
 i8 stream::uncompressData(stream &dest, compressType type, b64 tryLength){
 	switch(type){
 	case COMP_ZLIB:
+		{
+			 dest.allocate(tryLength);
+			 i8 i = (i8)uncompress(dest.data, (b32*)&tryLength, data, getLen());
+			 dest.len = tryLength;
+			 return i;
+		}
+		break;
+	case COMP_ZLIB2:
 		{
 			 dest.allocate(tryLength);
 			 i8 i = (i8)uncompress(dest.data, (b32*)&tryLength, data, getLen());
