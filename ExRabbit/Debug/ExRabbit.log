@@ -1,0 +1,43 @@
+﻿生成启动时间为 2017/10/23 星期一 下午 5:07:37。
+     1>项目“E:\KoishiEx\ExRabbit\ExRabbit.vcxproj”在节点 2 上(build 个目标)。
+     1>InitializeBuildStatus:
+         正在创建“Debug\ExRabbit.unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+       ClCompile:
+         所有输出均为最新。
+         D:\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Debug\ExRabbit.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ExRabbitDlg.cpp
+         ExRabbitDlg.cpp
+       ResourceCompile:
+         所有输出均为最新。
+       ManifestResourceCompile:
+         所有输出均为最新。
+       Link:
+         D:\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\KoishiEx\Debug\ExRabbit.exe" /INCREMENTAL /NOLOGO /NODEFAULTLIB:libcmt.lib /MANIFEST /ManifestFile:"Debug\ExRabbit.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"E:\KoishiEx\Debug\ExRabbit.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\KoishiEx\Debug\ExRabbit.lib" /MACHINE:X86 Debug\ExRabbit.res
+         Debug\ExRabbit.exe.embed.manifest.res
+         Debug\DialogNew.obj
+         Debug\DlgInsert.obj
+         Debug\DlgInsert2.obj
+         Debug\DlgRename.obj
+         Debug\DlgSetpara.obj
+         Debug\DlgTrasform.obj
+         Debug\ExRabbit.obj
+         Debug\ExRabbitDlg.obj
+         Debug\Func.obj
+         Debug\stdafx.obj
+         libpng15.lib(pngget.obj) : 找到 MSIL .netmodule 或使用 /GL 编译的模块；正在使用 /LTCG 重新启动链接；将 /LTCG 添加到链接命令行以改进链接器性能
+     1>LINK : warning LNK4075: 忽略“/INCREMENTAL”(由于“/LTCG”规范)
+         正在生成代码
+         已完成代码的生成
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"Debug\ExRabbit.exe.embed.manifest" /manifest Debug\ExRabbit.exe.intermediate.manifest "D:\Microsoft Visual Studio 10.0\VC\Include\Manifest\dpiaware.manifest"
+         所有输出均为最新。
+       LinkEmbedManifest:
+         所有输出均为最新。
+         ExRabbit.vcxproj -> E:\KoishiEx\Debug\ExRabbit.exe
+       FinalizeBuildStatus:
+         正在删除文件“Debug\ExRabbit.unsuccessfulbuild”。
+         正在对“Debug\ExRabbit.lastbuildstate”执行 Touch 任务。
+     1>已完成生成项目“E:\KoishiEx\ExRabbit\ExRabbit.vcxproj”(build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:05.22

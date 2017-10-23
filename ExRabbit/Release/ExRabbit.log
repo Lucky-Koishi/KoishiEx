@@ -1,0 +1,47 @@
+﻿生成启动时间为 2017/10/23 星期一 下午 4:19:46。
+     1>项目“E:\KoishiEx\ExRabbit\ExRabbit.vcxproj”在节点 2 上(rebuild 个目标)。
+     1>_PrepareForClean:
+         正在删除文件“Release\ExRabbit.lastbuildstate”。
+       InitializeBuildStatus:
+         正在创建“Release\ExRabbit.unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+       ClCompile:
+         D:\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yc"StdAfx.h" /Fp"Release\ExRabbit.pch" /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
+         stdafx.cpp
+         D:\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Release\ExRabbit.pch" /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt DialogNew.cpp DlgInsert.cpp DlgInsert2.cpp DlgRename.cpp DlgSetpara.cpp DlgTrasform.cpp ExRabbit.cpp ExRabbitDlg.cpp Func.cpp
+         DialogNew.cpp
+         DlgInsert.cpp
+         DlgInsert2.cpp
+         DlgRename.cpp
+         DlgSetpara.cpp
+         DlgTrasform.cpp
+         ExRabbit.cpp
+         ExRabbitDlg.cpp
+         Func.cpp
+     1>e:\koishiex\exrabbit\../KoishiEx/Koishifactory.cpp(1511): warning C4101: “i”: 未引用的局部变量
+       ResourceCompile:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /D NDEBUG /D _UNICODE /D UNICODE /l"0x0804" /IRelease\ /nologo /fo"Release\ExRabbit.res" ExRabbit.rc 
+       Link:
+         D:\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\KoishiEx\Release\ExRabbit.exe" /INCREMENTAL:NO /NOLOGO /MANIFEST /ManifestFile:"Release\ExRabbit.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"E:\KoishiEx\Release\ExRabbit.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\KoishiEx\Release\ExRabbit.lib" /MACHINE:X86 Release\ExRabbit.res
+         Release\DialogNew.obj
+         Release\DlgInsert.obj
+         Release\DlgInsert2.obj
+         Release\DlgRename.obj
+         Release\DlgSetpara.obj
+         Release\DlgTrasform.obj
+         Release\ExRabbit.obj
+         Release\ExRabbitDlg.obj
+         Release\Func.obj
+         Release\stdafx.obj
+         正在生成代码
+         已完成代码的生成
+         ExRabbit.vcxproj -> E:\KoishiEx\Release\ExRabbit.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"E:\KoishiEx\Release\ExRabbit.exe;#1" /manifest Release\ExRabbit.exe.intermediate.manifest "D:\Microsoft Visual Studio 10.0\VC\Include\Manifest\dpiaware.manifest"
+       FinalizeBuildStatus:
+         正在删除文件“Release\ExRabbit.unsuccessfulbuild”。
+         正在对“Release\ExRabbit.lastbuildstate”执行 Touch 任务。
+     1>已完成生成项目“E:\KoishiEx\ExRabbit\ExRabbit.vcxproj”(rebuild 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:15.06
