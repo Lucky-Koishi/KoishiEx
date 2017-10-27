@@ -633,7 +633,7 @@ bool IMGobject::Load(stream &s){
 	}
 	ptEnd = s.ptPos();
 	s.ptMoveTo(ptStart);
-	getData(2)->allocate(100 + ptEnd - ptStart);
+	getData(2)->allocate(1000 + ptEnd - ptStart);
 	s.readStream(*getData(2), ptEnd - ptStart);
 	s.ptMoveTo(ptStart = ptEnd);
 	//////////////////////////////////////
@@ -854,7 +854,7 @@ bool IMGobject::GetPICData(i32 pos, stream &s){
 		return false;
 	data6.ptMoveTo(offset);
 	data6.readStream(s, size);
-	return false;
+	return true;
 }
 bool IMGobject::GetPICDataOffset(i32 pos, b64 &off){
 	if(pos<0)
@@ -1268,9 +1268,14 @@ bool IMGobject::PICextract(i32 pos, matrix &mat, i32 paletteID){
 		case V6:
 			mat.allocate(pi.get_picSize());
 			for(i=0;i<sPic.getLen();i++){
-				if(sPic[i]>=paletteData[paletteID].size())
+				if(sPic[i]>=paletteData[paletteID].size()){
 					sPic[i] = 0;
-				mat.push(paletteData[paletteID][sPic[i]]);
+				}
+				if(paletteData[paletteID].size()>0){
+					mat.push(paletteData[paletteID][sPic[i]]);
+				}else{
+					mat.push(color(0));
+				}
 			}
 			break;
 		}
@@ -1454,7 +1459,7 @@ bool IMGobject::DDSremove(i32 pos){
 	b64 off1,off2;
 	GetDDSInfo(pos, di);
 	GetDDSInfoOffset(pos, off1);
-	GetDDSInfoOffset(pos, off2);
+	GetDDSDataOffset(pos, off2);
 	DDScontent.erase(DDScontent.begin()+pos);
 	getData(3)->deleteStream(off1, 28);
 	getData(5)->deleteStream(off2, di.get_lengthOfCompressed());
@@ -1478,7 +1483,7 @@ bool IMGobject::DDSreplace(i32 pos, const DDSinfo &info, const stream &s){
 	b64 off1,off2;
 	GetDDSInfo(pos, di);
 	GetDDSInfoOffset(pos, off1);
-	GetDDSInfoOffset(pos, off2);
+	GetDDSDataOffset(pos, off2);
 	DDScontent[pos] = info;
 	getData(3)->deleteStream(off1, 28);
 	getData(5)->deleteStream(off2, di.get_lengthOfCompressed());
@@ -1508,7 +1513,6 @@ bool IMGobject::DDSextract(i32 pos, matrix &mat){
 		return false;
 	if(pos>V5_DDSCount - 1)
 		return false;
-	i32 i;
 	DDSinfo di;
 	stream sMid, sPic;
 	GetDDSInfo(pos, di);
@@ -1556,6 +1560,14 @@ bool IMGobject::CLRinsert(i32 pos, const color &clr, i32 paletteID){
 		return false;
 	if(version != V6)
 		paletteID = 0;
+	if(pos<0)
+		pos += paletteData[paletteID].size()+1;
+	if(pos<0)
+		return false;
+	if(pos>paletteData[paletteID].size())
+		return false;
+	if(pos==paletteData[paletteID].size())
+		return CLRpush(clr, paletteID);
 	paletteData[paletteID].insert(paletteData[paletteID].begin()+pos, clr);
 	getData(2)->release();
 	if(version != V6)
@@ -1571,6 +1583,12 @@ bool IMGobject::CLRremove(i32 pos, i32 paletteID){
 		return false;
 	if(version != V6)
 		paletteID = 0;
+	if(pos<0)
+		pos += paletteData[paletteID].size();
+	if(pos<0)
+		return false;
+	if(pos>paletteData[paletteID].size() - 1)
+		return false;
 	paletteData[paletteID].erase(paletteData[paletteID].begin()+pos);
 	getData(2)->release();
 	if(version != V6)
@@ -1601,6 +1619,7 @@ bool IMGobject::CLRnewPalette(){
 	lcolor clrList;
 	clrList.clear();
 	paletteData.push(clrList);
+	getData(2)->release();
 	paletteData.bigMake(*getData(2));
 	return true;
 }

@@ -29,7 +29,7 @@ namespace Koishi{
 	typedef unsigned short			b16,		*pb16;
 	typedef unsigned long			b32,		*pb32;
 	typedef unsigned long long		b64,		*pb64;
-	typedef char					i8,			*pi8;
+	typedef signed char				i8,			*pi8;
 	typedef short					i16,		*pi16;
 	typedef long					i32,		*pi32;
 	typedef long long				i64,		*pi64;
@@ -144,6 +144,11 @@ namespace Koishi{
 		b64 len,maxLen,pt;
 	};
 	/////////////////////////////////////
+	typedef struct{
+		i32 H;
+		fl2 S;
+		fl2 V;
+	}colorHSV;
 	class color{
 		declare_basefun(A,b8);
 		declare_basefun(R,b8);
@@ -162,6 +167,22 @@ namespace Koishi{
 		b8 mixMethod(b8 a,b8 b, colorMethod _method);
 		void mixWith(const color &_clr2, colorMethod _method = LAY);
 		color mix(const color &_clr1, const color &_clr2, colorMethod _method = LAY);
+	public:
+		//HSV²Ù×÷
+		void getHSV(colorHSV &hsv) const;
+		void useHSV(const colorHSV &hsv);
+		void moveHto(i32 newH);
+		void moveSto(fl2 newS);
+		void moveVto(fl2 newV);
+		void moveH(i32 delta);
+		void moveS(fl2 delta);
+		void moveV(fl2 delta);
+		void moveRto(b8 newR);
+		void moveGto(b8 newG);
+		void moveBto(b8 newB);
+		void moveR(i8 delta);
+		void moveG(i8 delta);
+		void moveB(i8 delta);
 	};
 	////////////////////////////////////
 	class point{

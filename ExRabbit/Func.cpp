@@ -35,6 +35,8 @@ CString shorten(CString str1, char split){
 }
 CString to_(CString str1){
 	str1.Replace(L"/", L"_");
+	str1.Replace(L":", L"");
+	str1.Replace(L"\\", L"_");
 	return str1;
 }
 str to_(str str1){

@@ -23,6 +23,30 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="进度.txt" />
+    <None Include="res\LOGO.png">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\LOGO.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon1.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon2.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon3.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon4.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\Folder_Blue_Rabbit_16px_511716_easyicon.net.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\Folder_White_Rabbit_16px_511717_easyicon.net.ico">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExRabbit.h">
@@ -61,6 +85,15 @@
     <ClInclude Include="DlgSetpara.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="DlgInsert3.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgInsert4.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgHSV.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExRabbit.cpp">
@@ -91,6 +124,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="DlgSetpara.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgInsert3.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgInsert4.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgHSV.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -71,7 +71,9 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DDS.h" />
     <ClInclude Include="KoishiEx.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="sha256.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -79,6 +81,7 @@
     <ClInclude Include="zlib.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DDS.cpp" />
     <ClCompile Include="KoishiBase.cpp" />
     <ClCompile Include="KoishiData.cpp" />
     <ClCompile Include="KoishiFactory.cpp" />
@@ -87,6 +90,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="KoishiEx.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

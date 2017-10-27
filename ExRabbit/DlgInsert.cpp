@@ -149,6 +149,7 @@ void CDlgInsert::OnBnClickedButton1()
 	if(dlg.DoModal() == IDOK){
 		fileName = dlg.GetPathName();
 		m_ed1.SetWindowText(fileName);
+		m_ed3.SetWindowText(shorten(fileName, '\\'));
 	}
 }
 

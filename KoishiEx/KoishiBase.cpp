@@ -278,7 +278,173 @@ color color::mix(const color &_clr1, const color &_clr2, colorMethod _method){
 	_clr3.mixWith(_clr2, _method);
 	return _clr3;
 }
-	
+
+void color::getHSV(colorHSV &hsv) const{
+	fl2 r = (fl2)R/255;
+	fl2 g = (fl2)G/255;
+	fl2 b = (fl2)B/255;
+	fl2 maxclr, minclr;
+	if(r>=g && r>=b)
+		maxclr = r;
+	if(b>=g && b>=r)
+		maxclr = b;
+	if(g>=b && g>=r)
+		maxclr = g;
+	if(r>=g && b>=g)
+		minclr = g;
+	if(b>=r && g>=r)
+		minclr = r;
+	if(g>=b && r>=b)
+		minclr = b;
+	hsv.V = maxclr;
+	if(hsv.V==0){
+		hsv.S = 0;
+	}else{
+		hsv.S = (maxclr-minclr)/maxclr;
+	}
+	if(hsv.S == 0){
+		hsv.H = 0;
+	}else{
+		if(maxclr == r)
+			hsv.H = 60*(g-b)/(maxclr-minclr);
+		if(maxclr == g)
+			hsv.H = 120+60*(b-r)/(maxclr-minclr);
+		if(maxclr == b)
+			hsv.H = 240+60*(r-g)/(maxclr-minclr);
+		if(hsv.H<0)
+			hsv.H += 360;
+	}
+}
+void color::useHSV(const colorHSV &hsv){
+	i32 h = hsv.H/60;
+	fl2 f = (fl2)hsv.H/60 - h;
+	fl2 v = hsv.V;
+	fl2 p = hsv.V*(1-hsv.S);
+	fl2 q = hsv.V*(1-f*hsv.S);
+	fl2 t = hsv.V*(1-(1-f)*hsv.S);
+	switch(h){
+	case 0:
+		R = v*255;
+		G = t*255;
+		B = p*255;
+		break;
+	case 1:
+		R = q*255;
+		G = v*255;
+		B = p*255;
+		break;
+	case 2:
+		R = p*255;
+		G = v*255;
+		B = t*255;
+		break;
+	case 3:
+		R = p*255;
+		G = q*255;
+		B = v*255;
+		break;
+	case 4:
+		R = t*255;
+		G = p*255;
+		B = v*255;
+		break;
+	case 5:
+		R = v*255;
+		G = p*255;
+		B = q*255;
+		break;
+	}
+}
+void color::moveHto(i32 newH){
+	colorHSV hsv;
+	getHSV(hsv);
+	hsv.H = newH;
+	hsv.H %= 360;
+	useHSV(hsv);
+}
+void color::moveSto(fl2 newS){
+	colorHSV hsv;
+	getHSV(hsv);
+	hsv.S = newS;
+	if(hsv.S >= 1)
+		hsv.S = 1;
+	if(hsv.S <= 0)
+		hsv.S = 0;
+	useHSV(hsv);
+}
+void color::moveVto(fl2 newV){
+	colorHSV hsv;
+	getHSV(hsv);
+	hsv.V = newV;
+	if(hsv.V >= 1)
+		hsv.V = 1;
+	if(hsv.V <= 0)
+		hsv.V = 0;
+	useHSV(hsv);
+}
+void color::moveH(i32 delta){
+	colorHSV hsv;
+	getHSV(hsv);
+	hsv.H += delta;
+	hsv.H %= 360;
+	useHSV(hsv);
+}
+void color::moveS(fl2 delta){
+	colorHSV hsv;
+	getHSV(hsv);
+	hsv.S += delta;
+	if(hsv.S >= 1)
+		hsv.S = 1;
+	if(hsv.S <= 0)
+		hsv.S = 0;
+	useHSV(hsv);
+}
+void color::moveV(fl2 delta){
+	colorHSV hsv;
+	getHSV(hsv);
+	hsv.V += delta;
+	if(hsv.V >= 1)
+		hsv.V = 1;
+	if(hsv.V <= 0)
+		hsv.V = 0;
+	useHSV(hsv);
+}
+void color::moveRto(b8 newR){
+	R = newR;
+}
+void color::moveGto(b8 newG){
+	G = newG;
+}
+void color::moveBto(b8 newB){
+	B = newB;
+}
+void color::moveR(i8 delta){
+	if(R + delta>255){
+		R = 255;
+	}else if(R + delta<0){
+		R = 0;
+	}else{
+		R += delta;
+	}
+}
+void color::moveG(i8 delta){
+	if(G + delta>255){
+		G = 255;
+	}else if(G + delta<0){
+		G = 0;
+	}else{
+		G += delta;
+	}
+}
+void color::moveB(i8 delta){
+	if(B + delta>255){
+		B = 255;
+	}else if(B + delta<0){
+		B = 0;
+	}else{
+		B += delta;
+	}
+}
 ///////////////////////////////////////////////////////////////
 //point & size
 point::point(){
@@ -869,7 +1035,7 @@ bool palette::tinyMake(stream &s, i32 paletteID){
 bool palette::bigMake(stream &s){
 	i32 i,j;
 	lcolor colorList;
-	s.allocate(sizeof(color)*(10+getCount()+getTotalColorCount()));
+	s.allocate(sizeof(color)*(1000+getCount()+getTotalColorCount()));
 	s.push((i32)getCount());
 	for(j=0;j<getCount();j++){
 		colorList = table[j];

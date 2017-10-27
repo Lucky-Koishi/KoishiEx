@@ -37,6 +37,12 @@
     <ClInclude Include="zlib.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="DDS.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -54,5 +60,13 @@
     <ClCompile Include="sha256.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="DDS.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="KoishiEx.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

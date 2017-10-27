@@ -1,4 +1,4 @@
-﻿生成启动时间为 2017/10/23 星期一 下午 4:19:46。
+﻿生成启动时间为 2017/10/27 星期五 下午 4:05:55。
      1>项目“E:\KoishiEx\ExRabbit\ExRabbit.vcxproj”在节点 2 上(rebuild 个目标)。
      1>_PrepareForClean:
          正在删除文件“Release\ExRabbit.lastbuildstate”。
@@ -7,24 +7,31 @@
        ClCompile:
          D:\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yc"StdAfx.h" /Fp"Release\ExRabbit.pch" /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
          stdafx.cpp
-         D:\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Release\ExRabbit.pch" /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt DialogNew.cpp DlgInsert.cpp DlgInsert2.cpp DlgRename.cpp DlgSetpara.cpp DlgTrasform.cpp ExRabbit.cpp ExRabbitDlg.cpp Func.cpp
+         D:\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Release\ExRabbit.pch" /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt DialogNew.cpp DlgHSV.cpp DlgInsert.cpp DlgInsert2.cpp DlgInsert3.cpp DlgInsert4.cpp DlgRename.cpp DlgSetpara.cpp DlgTrasform.cpp ExRabbit.cpp ExRabbitDlg.cpp Func.cpp
          DialogNew.cpp
+         DlgHSV.cpp
          DlgInsert.cpp
          DlgInsert2.cpp
+         DlgInsert3.cpp
+         DlgInsert4.cpp
          DlgRename.cpp
          DlgSetpara.cpp
          DlgTrasform.cpp
          ExRabbit.cpp
          ExRabbitDlg.cpp
+     1>ExRabbitDlg.cpp(237): warning C4800: “volatile int”: 将值强制为布尔值“true”或“false”(性能警告)
+     1>ExRabbitDlg.cpp(2475): warning C4101: “j”: 未引用的局部变量
          Func.cpp
-     1>e:\koishiex\exrabbit\../KoishiEx/Koishifactory.cpp(1511): warning C4101: “i”: 未引用的局部变量
        ResourceCompile:
          C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /D NDEBUG /D _UNICODE /D UNICODE /l"0x0804" /IRelease\ /nologo /fo"Release\ExRabbit.res" ExRabbit.rc 
        Link:
          D:\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\KoishiEx\Release\ExRabbit.exe" /INCREMENTAL:NO /NOLOGO /MANIFEST /ManifestFile:"Release\ExRabbit.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"E:\KoishiEx\Release\ExRabbit.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\KoishiEx\Release\ExRabbit.lib" /MACHINE:X86 Release\ExRabbit.res
          Release\DialogNew.obj
+         Release\DlgHSV.obj
          Release\DlgInsert.obj
          Release\DlgInsert2.obj
+         Release\DlgInsert3.obj
+         Release\DlgInsert4.obj
          Release\DlgRename.obj
          Release\DlgSetpara.obj
          Release\DlgTrasform.obj
@@ -44,4 +51,4 @@
 
 生成成功。
 
-已用时间 00:00:15.06
+已用时间 00:00:11.30

@@ -227,7 +227,7 @@ void CDlgInsert2::OnBnClickedOk()
 				MessageBox(L"添加该索引项后，ID为"+cstr+L"的索引项是指向型索引项喵！\r\n不能再由其他指向型索引项去指向它喵！",L"提示喵");
 				return;
 			}
-			if(i==pos || i > pos && dlg->io.PICcontent[i-1].get_format() == LINK){
+			if(pos == -1 || i==pos || i > pos && dlg->io.PICcontent[i-1].get_format() == LINK){
 				MessageBox(L"添加该索引项后，ID为"+cstr+L"的索引项是指向型索引项喵！\r\n不能再由其他指向型索引项去指向它喵！",L"提示喵");
 				return;
 			}
@@ -323,10 +323,10 @@ void CDlgInsert2::OnBnClickedOk()
 		m_ed9.GetWindowText(cstr1);
 		m_ed10.GetWindowText(cstr2);
 		x1 = _ttoi(cstr1);
-		x2 = _ttoi(cstr2);
+		y1 = _ttoi(cstr2);
 		m_ed11.GetWindowText(cstr1);
 		m_ed12.GetWindowText(cstr2);
-		y1 = _ttoi(cstr1);
+		x2 = _ttoi(cstr1);
 		y2 = _ttoi(cstr2);
 		if(x1>=x2 || y1>=y2){
 			MessageBox(L"右下角的坐标两点必须都大于左上角的坐标喵！",L"提示喵");

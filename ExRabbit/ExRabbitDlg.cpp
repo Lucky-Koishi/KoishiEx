@@ -12,6 +12,11 @@
 #endif
 
 // CExRabbitDlg 对话框
+#ifdef DEBUG
+#define UGLY 0
+#else
+#define UGLY 1
+#endif
 
 
 CExRabbitDlg::CExRabbitDlg(CWnd* pParent /*=NULL*/)
@@ -38,6 +43,14 @@ void CExRabbitDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN_X, m_spX);
 	DDX_Control(pDX, IDC_SPIN_Y, m_spY);
 	DDX_Control(pDX, IDC_LIST_DDS, m_lDDS);
+	DDX_Control(pDX, IDC_LOGO, m_logo);
+	DDX_Control(pDX, IDC_EDIT_INFO2, m_edInfo2);
+	DDX_Control(pDX, IDC_EDIT_INFO3, m_edInfo3);
+	DDX_Control(pDX, IDC_EDIT_INFO4, m_edInfo4);
+	DDX_Control(pDX, IDC_EDIT_INFO5, m_edInfo5);
+	DDX_Control(pDX, IDC_EDIT_INFO6, m_edInfo6);
+	DDX_Control(pDX, IDC_EDIT_INFO7, m_edInfo7);
+	DDX_Control(pDX, IDC_EDIT_INFO8, m_edInfo8);
 }
 
 BEGIN_MESSAGE_MAP(CExRabbitDlg, CDialogEx)
@@ -78,10 +91,7 @@ BEGIN_MESSAGE_MAP(CExRabbitDlg, CDialogEx)
 	ON_COMMAND(ID_PICMENU_REMOVE, &CExRabbitDlg::OnPicMenuRemove)
 	ON_COMMAND(ID_PICMENU_REPLACE, &CExRabbitDlg::OnPicMenuReplace)
 	ON_COMMAND(ID_PICMENU_SETPARA, &CExRabbitDlg::OnPicMenuSetPara)
-	ON_COMMAND(ID_PICMENU_LINKTO, &CExRabbitDlg::OnPicMenuLinkTo)
 	ON_COMMAND(ID_PICMENU_HIDE, &CExRabbitDlg::OnPicMenuHide)
-	ON_COMMAND(ID_PICMENU2_EXTRACTALLPNG, &CExRabbitDlg::OnPicMenu2ExtractAllPng)
-	ON_COMMAND(ID_PICMENU2_EXTRACTALLINDEX, &CExRabbitDlg::OnPicMenu2ExtractAllIndex)
 	ON_COMMAND(ID_PICMENU2_INSERT, &CExRabbitDlg::OnPicMenu2Insert)
 	ON_COMMAND(ID_DDSMENU_EXTRACTPNG, &CExRabbitDlg::OnDdsMenuExtractPng)
 	ON_COMMAND(ID_DDSMENU_EXTRACTALLPNG, &CExRabbitDlg::OnDdsMenuExtractAllPng)
@@ -90,8 +100,6 @@ BEGIN_MESSAGE_MAP(CExRabbitDlg, CDialogEx)
 	ON_COMMAND(ID_DDSMENU_INSERT, &CExRabbitDlg::OnDdsMenuInsert)
 	ON_COMMAND(ID_DDSMENU_REMOVE, &CExRabbitDlg::OnDdsMenuRemove)
 	ON_COMMAND(ID_DDSMENU_REPLACE, &CExRabbitDlg::OnDdsMenuReplace)
-	ON_COMMAND(ID_DDSMENU2_EXTRACTALLPNG, &CExRabbitDlg::OnDdsMenu2ExtractAllPng)
-	ON_COMMAND(ID_DDSMENU2_EXTRACTALLDDS, &CExRabbitDlg::OnDdsMenu2ExtractAllDds)
 	ON_COMMAND(ID_DDSMENU2_INSERT, &CExRabbitDlg::OnDdsMenu2Insert)
 	ON_COMMAND(ID_CLRMENU_INSERT, &CExRabbitDlg::OnClrMenuInsert)
 	ON_COMMAND(ID_CLRMENU_REMOVE, &CExRabbitDlg::OnClrmenuRemove)
@@ -99,19 +107,32 @@ BEGIN_MESSAGE_MAP(CExRabbitDlg, CDialogEx)
 	ON_COMMAND(ID_CLRMENU_EXTRACTPALETTE, &CExRabbitDlg::OnClrMenuExtractPalette)
 	ON_COMMAND(ID_CLRMENU_EXTRACTALLPALETTE, &CExRabbitDlg::OnClrMenuExtractAllPalette)
 	ON_COMMAND(ID_CLRMENU2_INSERT, &CExRabbitDlg::OnClrMenu2Insert)
-	ON_COMMAND(ID_CLRMENU2_EXTRACTPALETTE, &CExRabbitDlg::OnClrMenu2ExtractPalette)
-	ON_COMMAND(ID_CLRMENU2_EXTRACTALLPALETTE, &CExRabbitDlg::OnClrMenu2ExtractAllPalette)
 	ON_COMMAND(ID_DISPLAYMENU_SWITCH_ABS, &CExRabbitDlg::OnDisplayMenuSwitchAbs)
 	ON_COMMAND(ID_DISPLAYMENU_AUTOFIND, &CExRabbitDlg::OnDisplayMenuAutoFind)
 	ON_COMMAND(ID_DISPLAYMENU_SWITCHINDEX, &CExRabbitDlg::OnDisplayMenuSwitchIndex)
 	ON_COMMAND(ID_DISPLAYMENU_SWITCHDDS, &CExRabbitDlg::OnDisplayMenuSwitchDds)
-	ON_COMMAND(ID_DISPLAYMENU_COLORTAB, &CExRabbitDlg::OnDisplayMenuColorTab)
-	ON_COMMAND(ID_DISPLAYMENU_PICBOUND, &CExRabbitDlg::OnDisplayMenuPicBound)
-	ON_COMMAND(ID_DISPLAYMENU_FRMBOUND, &CExRabbitDlg::OnDisplayMenuFrmBound)
-	ON_COMMAND(ID_DISPLAYMENU_BASEAXIS, &CExRabbitDlg::OnDisplayMenuBaseAxis)
-	ON_COMMAND(ID_DISPLAYMENU_GRID, &CExRabbitDlg::OnDisplayMenuGrid)
 	ON_WM_RBUTTONUP()
 	ON_BN_CLICKED(IDC_BUTTON_MENU2, &CExRabbitDlg::OnBnClickedButtonMenu2)
+	ON_COMMAND(ID_CLRMENU_LOADPALETTE, &CExRabbitDlg::OnClrmenuLoadpalette)
+	ON_COMMAND(ID_CLRMENU_NEWPALETTE, &CExRabbitDlg::OnClrmenuNewpalette)
+	ON_COMMAND(ID_CLRMENU2_LOADPALETTE, &CExRabbitDlg::OnClrmenu2Loadpalette)
+	ON_COMMAND(ID_CLRMENU2_NEWPALETTE, &CExRabbitDlg::OnClrmenu2Newpalette)
+	ON_COMMAND(ID_MENUHSV, &CExRabbitDlg::OnMenuhsv)
+	ON_WM_MOUSEMOVE()
+	ON_COMMAND(ID_IMGMENU_SELECTALL, &CExRabbitDlg::OnImgmenuSelectall)
+	ON_COMMAND(ID_IMGMENU_SELECTOTHER, &CExRabbitDlg::OnImgmenuSelectother)
+	ON_COMMAND(ID_IMGMENU_REMOVEALLSELECTED, &CExRabbitDlg::OnImgmenuRemoveallselected)
+	ON_COMMAND(ID_IMGMENU_HIDEALLSELECTED, &CExRabbitDlg::OnImgmenuHideallselected)
+	ON_COMMAND(ID_IMGMENU_EXTRACTALLSELECTED, &CExRabbitDlg::OnImgmenuExtractallselected)
+	ON_NOTIFY(LVN_KEYDOWN, IDC_LIST_IMG, &CExRabbitDlg::OnLvnKeydownListImg)
+	ON_NOTIFY(LVN_KEYDOWN, IDC_LIST_PIC, &CExRabbitDlg::OnLvnKeydownListPic)
+	ON_NOTIFY(LVN_KEYDOWN, IDC_LIST_CLR, &CExRabbitDlg::OnLvnKeydownListClr)
+	ON_NOTIFY(LVN_KEYDOWN, IDC_LIST_DDS, &CExRabbitDlg::OnLvnKeydownListDds)
+	ON_COMMAND(ID_IMG_MENU_ADDTOMIXED, &CExRabbitDlg::OnImgMenuAddtomixed)
+	ON_COMMAND(ID_DISPLAYMENU2_SHOWALL, &CExRabbitDlg::OnDisplaymenu2Showall)
+	ON_COMMAND(ID_DISPLAYMENU2_AUTOFIND, &CExRabbitDlg::OnDisplaymenu2Autofind)
+	ON_COMMAND(ID_DISPLAYMENU2_SWITCH_ABS, &CExRabbitDlg::OnDisplaymenu2SwitchAbs)
+	ON_WM_DROPFILES()
 END_MESSAGE_MAP()
 /////////
 
@@ -141,11 +162,7 @@ BOOL CExRabbitDlg::OnInitDialog()
 	dispModeAbs = false;
 	dispModeIndex = false;
 	dispModeDds = false;
-	dispSwColorTab = false;
-	dispSwPicBound = false;
-	dispSwFrmBound = false;
-	dispSwAxis = false;
-	dispSwGrid = false;
+	dispModeShowAll = false;
 	fileNPKname = L"";
 	fileIMGname = L"";
 	drawing = 0;
@@ -153,7 +170,12 @@ BOOL CExRabbitDlg::OnInitDialog()
 	drawDDS = 0;
 	extracting = 0;	//提取中
 	converting = 0;	//转换中
+	lazyTime = 0;
+	AfxBeginThread(lazyThread, (PVOID)this);
 	crtIMGid = -1;
+	crtPICid = -1;
+	crtCLRDDSid = -1;
+	saveAlert = false;
 
 	dlgInsert.Create(IDD_INSERT_DIALOG, this);
 	dlgInsert.ShowWindow(SW_HIDE);
@@ -167,6 +189,16 @@ BOOL CExRabbitDlg::OnInitDialog()
 	dlgInsert2.ShowWindow(SW_HIDE);
 	dlgSetpara.Create(IDD_SERPARA_DIALOG, this);
 	dlgSetpara.ShowWindow(SW_HIDE);
+	dlgInsert3.Create(IDD_INSERT3_DIALOG, this);
+	dlgInsert3.ShowWindow(SW_HIDE);
+	dlgInsert4.Create(IDD_INSERT4_DIALOG, this);
+	dlgInsert4.ShowWindow(SW_HIDE);
+	dlgHSV.Create(IDD_HSV_DIALOG, this);
+	dlgHSV.ShowWindow(SW_HIDE);
+#if UGLY
+	m_logoPic.LoadBitmap(IDB_BITMAP1);
+	m_logo.SetBitmap(m_logoPic);
+#endif
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -195,8 +227,16 @@ void CExRabbitDlg::OnPaint()
 	}
 	else
 	{
+#if UGLY
+		CPaintDC dc(this);
+		CRect   rect;        
+		GetClientRect(rect);    
+		dc.FillSolidRect(rect,0XCCCCFF); 
+#endif
 		CDialogEx::OnPaint();
+		draw(drawDDS);
 	}
+
 }
 
 //当用户拖动最小化窗口时系统调用此函数取得光标
@@ -282,6 +322,11 @@ BOOL CExRabbitDlg::updatePIClist(){
 		cstr += SzToCStr(io.PICcontent[i].get_frmSize());
 		m_lPicture.EasyInsertItem(cstr);
 	}
+	if(io.indexCount > 0){
+		m_lPicture.SetItemState(0, LVIS_FOCUSED | LVIS_SELECTED,LVIS_FOCUSED | LVIS_SELECTED);   
+		m_lPicture.SetSelectionMark(0);
+		draw();
+	}
 	return 0;
 }
 
@@ -324,6 +369,19 @@ BOOL CExRabbitDlg::updateNPKInfo(){
 	m_edNPK.SetWindowText(cstr);
 	return 0;
 }
+BOOL CExRabbitDlg::updateInfo(){
+	m_edInfo2.SetWindowText(saveAlert?L"IMG未保存":L"IMG已保存");
+	m_edInfo3.SetWindowText(crtIMGid<0?L"IMG:未选":L"IMG:"+NumToCStr(crtIMGid));
+	m_edInfo4.SetWindowText(crtPICid<0?L"PIC:未选":L"PIC:"+NumToCStr(crtPICid));
+	if(io.version == V4 || io.version == V6){
+		m_edInfo5.SetWindowText(crtCLRDDSid<0?L"CLR:未选":L"CLR:"+NumToCStr(crtCLRDDSid));
+	}else if(io.version == V5){
+		m_edInfo5.SetWindowText(crtCLRDDSid<0?L"DDS:未选":L"DDS:"+NumToCStr(crtCLRDDSid));
+	}else{
+		m_edInfo5.SetWindowText(L"CLR:无效");
+	}
+	return 0;
+}
 BOOL CExRabbitDlg::updateIMGInfo(){
 	CString cstr;
 	cstr = shorten(fileIMGname,'\\');
@@ -362,6 +420,9 @@ void CExRabbitDlg::OnBnClickedButtonMenu()
 	CMenu menu, *pPopup;  
     menu.LoadMenu(IDR_MENU);  
     pPopup = menu.GetSubMenu(0);  
+	if(!fileOpen){
+		pPopup->EnableMenuItem(ID_MAINMENU_SAVE, MF_GRAYED|MF_DISABLED);
+	}
     CPoint myPoint;  
     ClientToScreen(&myPoint);  
     GetCursorPos(&myPoint); //鼠标位置  
@@ -373,7 +434,8 @@ void CExRabbitDlg::OnBnClickedButtonMenu2()
 	int row;
 	if((row = crtIMGid) >= 0){
 		no.IMGreplace(row, io);
-		MessageBox(L"已保存完毕喵！");
+		MessageBox(L"IMG已保存完毕喵！",L"提示喵！");
+		saveAlert = false;
 		updateIMGlist();
 		updatePIClist();
 		updateCLRlist();
@@ -381,6 +443,7 @@ void CExRabbitDlg::OnBnClickedButtonMenu2()
 		updateNPKInfo();
 		updateIMGInfo();
 		updatePICInfo();
+		updateInfo();
 		m_lIMG.SetSelectionMark(row);
 	}
 }
@@ -394,6 +457,20 @@ void CExRabbitDlg::OnNMClickListImg(NMHDR *pNMHDR, LRESULT *pResult)
 	// TODO: 在此添加控件通知处理程序代码
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	int row = pNMListView->iItem;
+	if(saveAlert){
+		switch(MessageBox(L"这个IMG已经被你改动了喵，要保存喵？",L"提示喵",MB_YESNO)){
+		case IDYES:
+			OnBnClickedButtonMenu2();
+			m_lIMG.SetSelectionMark(row);
+			break;
+		case IDNO:
+			m_lIMG.SetSelectionMark(row);
+			saveAlert = false;
+			updateInfo();
+			break;
+		}
+	}
+	crtIMGid = row;
 	if(row>=0){
 		io.Release();
 		no.IMGextract(row, io);
@@ -404,8 +481,8 @@ void CExRabbitDlg::OnNMClickListImg(NMHDR *pNMHDR, LRESULT *pResult)
 		updateDDSlist();
 		updateIMGInfo();
 		updatePICInfo();
-		crtIMGid = row;
 	}
+	updateInfo();
 	*pResult = 0;
 }
 
@@ -419,7 +496,13 @@ void CExRabbitDlg::OnNMRClickListImg(NMHDR *pNMHDR, LRESULT *pResult)
 	int row = pNMListView->iItem;
 	CMenu menu, *pPopup;  
 	menu.LoadMenu(IDR_MENU);  
-	pPopup = menu.GetSubMenu(row>=0?1:2);  
+	pPopup = menu.GetSubMenu(row>=0?1:2);
+	if(row < 0 && !fileOpen){
+		pPopup->EnableMenuItem(ID_IMGMENU2_INSERT, MF_GRAYED|MF_DISABLED);
+	}
+	if(!mixMode){
+		pPopup->EnableMenuItem(ID_IMG_MENU_ADDTOMIXED, MF_GRAYED|MF_DISABLED);
+	}
 	CPoint myPoint;  
 	ClientToScreen(&myPoint);  
 	GetCursorPos(&myPoint); //鼠标位置  
@@ -432,6 +515,10 @@ void CExRabbitDlg::OnNMClickListClr(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
+	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+	int row = pNMListView->iItem;
+	crtCLRDDSid = row;
+	updateInfo();
 	draw();
 	*pResult = 0;
 }
@@ -446,11 +533,23 @@ void CExRabbitDlg::OnNMRClickListClr(NMHDR *pNMHDR, LRESULT *pResult)
 	int row = pNMListView->iItem;
 	CMenu menu, *pPopup;  
 	menu.LoadMenu(IDR_MENU);  
-	pPopup = menu.GetSubMenu(row>=0?7:8);    
+	pPopup = menu.GetSubMenu(row>=0?7:8);
+	if(row < 0 && !fileOpen){
+		pPopup->EnableMenuItem(ID_CLRMENU2_INSERT, MF_GRAYED|MF_DISABLED);
+		pPopup->EnableMenuItem(ID_CLRMENU2_LOADPALETTE, MF_GRAYED|MF_DISABLED);
+		pPopup->EnableMenuItem(ID_CLRMENU2_NEWPALETTE, MF_GRAYED|MF_DISABLED);
+	}
+	if(row>=0 && io.version == V4){
+		pPopup->EnableMenuItem(ID_CLRMENU_EXTRACTALLPALETTE, MF_DISABLED|MF_GRAYED);
+		pPopup->EnableMenuItem(ID_CLRMENU_NEWPALETTE, MF_DISABLED|MF_GRAYED);
+	}
+	if(row<0 && io.version == V4){
+		pPopup->EnableMenuItem(ID_CLRMENU2_NEWPALETTE, MF_DISABLED|MF_GRAYED);
+	}
 	CPoint myPoint;  
 	ClientToScreen(&myPoint);  
 	GetCursorPos(&myPoint); //鼠标位置  
-	pPopup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, myPoint.x, myPoint.y, this);  
+	pPopup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, myPoint.x, myPoint.y, this);
 	*pResult = 0;
 }
 
@@ -459,6 +558,10 @@ void CExRabbitDlg::OnNMClickListDds(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
+	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+	int row = pNMListView->iItem;
+	crtCLRDDSid = row;
+	updateInfo();
 	draw(true);
 	*pResult = 0;
 }
@@ -474,6 +577,9 @@ void CExRabbitDlg::OnNMRClickListDds(NMHDR *pNMHDR, LRESULT *pResult)
 	CMenu menu, *pPopup;  
 	menu.LoadMenu(IDR_MENU);  
 	pPopup = menu.GetSubMenu(row>=0?5:6);  
+	if(row < 0 && !fileOpen){
+		pPopup->EnableMenuItem(ID_DDSMENU2_INSERT, MF_GRAYED|MF_DISABLED);
+	}
 	CPoint myPoint;  
 	ClientToScreen(&myPoint);  
 	GetCursorPos(&myPoint); //鼠标位置  
@@ -486,6 +592,10 @@ void CExRabbitDlg::OnNMClickListPic(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
+	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+	int row = pNMListView->iItem;
+	crtPICid = row;
+	updateInfo();
 	draw();
 	*pResult = 0;
 }
@@ -501,7 +611,10 @@ void CExRabbitDlg::OnNMRClickListPic(NMHDR *pNMHDR, LRESULT *pResult)
 	CMenu menu, *pPopup;  
 	menu.LoadMenu(IDR_MENU);  
 	pPopup = menu.GetSubMenu(row>=0?3:4);  
-	//v4v6不能提取索引表
+	//非v4v6不能提取索引表
+	if(row < 0 && !fileOpen){
+		pPopup->EnableMenuItem(ID_PICMENU2_INSERT, MF_GRAYED|MF_DISABLED);
+	}
 	if(row>=0 && !(io.version == V4 || io.version == V6)){
 		pPopup->EnableMenuItem(ID_PICMENU_EXTRACTALLINDEX, MF_DISABLED|MF_GRAYED);
 		pPopup->EnableMenuItem(ID_PICMENU_EXTRACTINDEX, MF_DISABLED|MF_GRAYED);
@@ -517,6 +630,47 @@ void CExRabbitDlg::OnNMRClickListPic(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
+void CExRabbitDlg::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	int x = point.x-164;
+	int y = point.y-226;
+	COLORREF clrr;
+	CString str1;
+	if(point.x>164 && point.y>226){
+		m_edInfo6.SetWindowText(L"x:"+NumToCStr(x-basePoint.get_X())+L" y:"+NumToCStr(y-basePoint.get_Y()));
+		clrr = GetPixel(this->GetDC()->m_hDC, point.x, point.y);
+		str1.Format(L"0x%02X%02X%02X",GetRValue(clrr),GetGValue(clrr),GetBValue(clrr));
+		m_edInfo7.SetWindowText(str1);
+
+		CImage img;
+		int i,j;
+		img.Create(60, 20, 32);
+		UCHAR* pst = (UCHAR*)img.GetBits();
+		int pit = img.GetPitch();
+
+		for(i=0;i<60;i++){
+			for(j=0;j<20;j++){
+				if(i==0||j==0){
+					*(pst + pit*j + 4*i + 0) = 0xCC;
+					*(pst + pit*j + 4*i + 1) = 0xCC;
+					*(pst + pit*j + 4*i + 2) = 0xCC;
+				}else if(i==59||j==19){
+					*(pst + pit*j + 4*i + 0) = 0x33;
+					*(pst + pit*j + 4*i + 1) = 0x33;
+					*(pst + pit*j + 4*i + 2) = 0x33;
+				}else{
+				*(pst + pit*j + 4*i + 0) = GetBValue(clrr);
+				*(pst + pit*j + 4*i + 1) = GetGValue(clrr);
+				*(pst + pit*j + 4*i + 2) = GetRValue(clrr);
+				}
+			}
+		}
+		img.Draw(this->GetDC()->m_hDC,647,537);
+		img.Destroy();
+	}
+	CDialogEx::OnMouseMove(nFlags, point);
+}
 
 void CExRabbitDlg::OnRButtonUp(UINT nFlags, CPoint point)
 {
@@ -524,15 +678,12 @@ void CExRabbitDlg::OnRButtonUp(UINT nFlags, CPoint point)
 	if(point.x>164 && point.y>226){
 		CMenu menu, *pPopup;  
 		menu.LoadMenu(IDR_MENU);  
-		pPopup = menu.GetSubMenu(9);
+		pPopup = menu.GetSubMenu(mixMode?10:9);
 		menu.CheckMenuItem(ID_DISPLAYMENU_SWITCH_ABS, dispModeAbs?MF_CHECKED:MF_UNCHECKED);
 		menu.CheckMenuItem(ID_DISPLAYMENU_SWITCHINDEX, dispModeIndex?MF_CHECKED:MF_UNCHECKED);
 		menu.CheckMenuItem(ID_DISPLAYMENU_SWITCHDDS, dispModeDds?MF_CHECKED:MF_UNCHECKED);
-		menu.CheckMenuItem(ID_DISPLAYMENU_COLORTAB, dispSwColorTab?MF_CHECKED:MF_UNCHECKED);
-		menu.CheckMenuItem(ID_DISPLAYMENU_PICBOUND, dispSwPicBound?MF_CHECKED:MF_UNCHECKED);
-		menu.CheckMenuItem(ID_DISPLAYMENU_FRMBOUND, dispSwFrmBound?MF_CHECKED:MF_UNCHECKED);
-		menu.CheckMenuItem(ID_DISPLAYMENU_BASEAXIS, dispSwAxis?MF_CHECKED:MF_UNCHECKED);
-		menu.CheckMenuItem(ID_DISPLAYMENU_GRID, dispSwGrid?MF_CHECKED:MF_UNCHECKED);
+		menu.CheckMenuItem(ID_DISPLAYMENU2_SWITCH_ABS, dispModeAbs?MF_CHECKED:MF_UNCHECKED);
+		menu.CheckMenuItem(ID_DISPLAYMENU2_SHOWALL, dispModeShowAll?MF_CHECKED:MF_UNCHECKED);
 		CPoint myPoint;  
 		ClientToScreen(&myPoint);  
 		GetCursorPos(&myPoint); //鼠标位置  
@@ -567,6 +718,7 @@ void CExRabbitDlg::OnDeltaposSpinY(NMHDR *pNMHDR, LRESULT *pResult)
 void CExRabbitDlg::OnCbnSelchangeComboPro()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	updateCLRlist();
 	draw();
 }
 
@@ -578,37 +730,94 @@ void CExRabbitDlg::transform(IMGversion vers){
 	to_ver = vers;
 	AfxBeginThread(transformThread, (LPVOID)this);
 }
+UINT lazyThread(PVOID para){
+	CExRabbitDlg* dlg = (CExRabbitDlg*)para;
+	while(dlg->m_hWnd){
+		Sleep(10);
+		if(dlg->lazyTime>0){
+			dlg->lazyTime--;
+		}
+	}
+	return 0;
+}
 UINT drawThread(PVOID para){
 	CExRabbitDlg* dlg = (CExRabbitDlg*)para;
 	int row = dlg->m_lPicture.GetSelectionMark();
 	int clrRow = dlg->m_lColor.GetSelectionMark();
 	int ddsRow = dlg->m_lDDS.GetSelectionMark();
 	int cbpro = dlg->m_cbPro.GetCurSel();
-	bool chaxis = dlg->dispModeAbs;
 	if(dlg->drawing)
 		return 0;
-	dlg->m_edInfo.SetWindowText(L"绘制中……");
 	dlg->drawing = 1;
 	IMGobject *io = &(dlg->io);
-	int i,j,tx,ty;
+	int i,j,k,tx,ty;
 	CImage img;
-
 	matrix mat, canvas;
 	color clr;
+	//绘制基础画布
 	canvas.allocate(300,600);
 	canvas.fill(color(0xff,0x33,0x33,0x33));
-
-	if(dlg->drawDDS){
+	if(dlg->dispModeShowAll){
+		//全部贴图绘制
+		if(row == -1){
+			dlg->drawing = 0;
+			return 0;
+		}
+		NPKobject *no = &(dlg->no);
+		IMGobject ioTemp;
+		PICinfo pi;
+		matrix totalMat(1000,1000);
+		matrix mat,mat2;
+		for(k=0;k<no->count;k++){
+			if(!no->IMGextract(k, ioTemp)){
+				ioTemp.Release();
+				continue;
+			}
+			ioTemp.GetPICInfo(row, pi);
+			if(pi.get_format() == LINK)
+				row = ioTemp.linkFind(row);
+			ioTemp.GetPICInfo(row, pi);
+			if(ioTemp.version == V5)
+				cbpro = 0;
+			if(ioTemp.version == V4)
+				cbpro = 0;
+			ioTemp.PICextract(row, mat, (i32)cbpro);
+			mat2.allocate(
+				mat.getColumnCount()+pi.get_basePt().get_X()+100,
+				mat.getRowCount()+pi.get_basePt().get_Y()+100
+			);
+			mat2.putFore(mat);
+			mat2.elemMoveHonz(pi.get_basePt().get_X());
+			mat2.elemMoveVert(pi.get_basePt().get_Y());
+			totalMat.putFore(mat2);
+			mat.release();
+			mat2.release();
+			ioTemp.Release();
+			dlg->m_pgInfo.SetPos((k+1)*1000/no->count);
+		}
+		for(i=0;i<300;i++){
+			for(j=0;j<600;j++){
+				tx = i-dlg->basePoint.get_Y();	//真实坐标
+				ty = j-dlg->basePoint.get_X();	//真是坐标
+				if(tx<totalMat.getRowCount() && ty<totalMat.getColumnCount()){
+					clr = totalMat.getElem(tx,ty);
+					clr.mixWith(canvas.getElem(i,j),LAY);
+					canvas.setElem(i, j, clr);
+				}
+			}
+		}
+	}else if(dlg->drawDDS){
+		//DDS贴图绘制
 		if(ddsRow == -1){
 			dlg->drawing = 0;
-			dlg->m_edInfo.SetWindowText(L"绘制终止。");
 			return 0;
 		}
 		DDSinfo di;
 		stream s,s1;
 		io->GetDDSInfo(ddsRow, di);
 		io->DDSextract(ddsRow, mat);
-		if(chaxis){
+		if(dlg->dispModeAbs){
+			//实时坐标
 			for(i=0;i<300;i++){
 				for(j=0;j<600;j++){
 					tx = i-dlg->basePoint.get_Y();	//真实坐标
@@ -621,6 +830,7 @@ UINT drawThread(PVOID para){
 				}
 			}
 		}else{
+			//相对坐标
 			for(i=0;i<300;i++){
 				for(j=0;j<600;j++){
 					if(i<mat.getRowCount() && j<mat.getColumnCount()){
@@ -631,10 +841,57 @@ UINT drawThread(PVOID para){
 				}
 			}
 		}
-	}else{
+	}else if(dlg->dispModeDds && io->version == V5){
+		//普通贴图绘制·V5dds模式
 		if(row == -1){
 			dlg->drawing = 0;
-			dlg->m_edInfo.SetWindowText(L"绘制终止。");
+			return 0;
+		}
+		PICinfo po;
+		DDSinfo di;
+		stream s,s1;
+		io->GetPICInfo(row, po);
+		io->GetDDSInfo(po.get_DDSIDused(), di);
+		io->DDSextract(po.get_DDSIDused(), mat);
+		if(dlg->dispModeAbs){
+			//真实坐标模式
+			for(i=0;i<300;i++){
+				for(j=0;j<600;j++){
+					tx = i-dlg->basePoint.get_Y();	//真实坐标
+					ty = j-dlg->basePoint.get_X();	//真实坐标
+					if(tx<mat.getRowCount() && ty<mat.getColumnCount()){
+						clr = mat.getElem(tx,ty);
+						if(ty<po.get_DDSpointLT().get_X() || tx<po.get_DDSpointLT().get_Y() || ty>=po.get_DDSpointRB().get_X() || tx>=po.get_DDSpointRB().get_Y()){
+							clr.set_A(clr.get_A()/4);
+							clr.mixWith(canvas.getElem(i,j),LAY);
+						}else{
+							clr.mixWith(canvas.getElem(i,j),LAY);
+						}
+						canvas.setElem(i, j, clr);
+					}
+				}
+			}
+		}else{
+			//相对坐标模式
+			for(i=0;i<300;i++){
+				for(j=0;j<600;j++){
+					if(i<mat.getRowCount() && j<mat.getColumnCount()){
+						clr = mat.getElem(i,j);
+						if(j<po.get_DDSpointLT().get_X() || i<po.get_DDSpointLT().get_Y() || j>=po.get_DDSpointRB().get_X() || i>=po.get_DDSpointRB().get_Y()){
+							clr.set_A(clr.get_A()/4);
+							clr.mixWith(canvas.getElem(i,j),LAY);
+						}else{
+							clr.mixWith(canvas.getElem(i,j),LAY);
+						}
+						canvas.setElem(i, j, clr);
+					}
+				}
+			}
+		}
+	}else{
+		//绘制普通贴图
+		if(row == -1){
+			dlg->drawing = 0;
 			return 0;
 		}
 		PICinfo po;
@@ -644,8 +901,22 @@ UINT drawThread(PVOID para){
 		io->GetPICInfo(row, po);
 		if(io->version == V5)
 			cbpro = 0;
+		if(io->version == V4)
+			cbpro = 0;
 		io->PICextract(row, mat, (i32)cbpro);
-		if(chaxis){
+		if(dlg->dispModeIndex && (io->version == V4 || io->version == V6)){
+			//V4\V6·索引贴图模式
+			b8 temp = 0xff;
+			for(k=0;k<io->paletteData[cbpro].size();k++){
+				mat.elemReplace(
+					io->paletteData[cbpro][k], 
+					dlg->m_lColor.GetItemState(k, LVIS_SELECTED)== LVIS_SELECTED?color(0,0,0xff):color(temp,temp,temp)
+				);
+				temp -= 155/io->paletteData[cbpro].size();
+			}
+		}
+		if(dlg->dispModeAbs){
+			//真实坐标
 			for(i=0;i<300;i++){
 				for(j=0;j<600;j++){
 					tx = i-po.get_basePt().get_Y()-dlg->basePoint.get_Y();	//真实坐标
@@ -658,6 +929,7 @@ UINT drawThread(PVOID para){
 				}
 			}
 		}else{
+			//相对坐标
 			for(i=0;i<300;i++){
 				for(j=0;j<600;j++){
 					if(i<mat.getRowCount() && j<mat.getColumnCount()){
@@ -668,6 +940,7 @@ UINT drawThread(PVOID para){
 				}
 			}
 		}
+		//绘制颜色表
 		int clrBlockSize = 10;
 		int clct,cp;
 		int m,n;
@@ -688,14 +961,13 @@ UINT drawThread(PVOID para){
 				canvas.setElem(ty,tx+m,color(0xff,0xff,0xff,0xff));
 				canvas.setElem(ty+clrBlockSize-1,tx+m,color(0xff,0xff,0xff,0xff));
 				canvas.setElem(ty+m,tx+clrBlockSize-1,color(0xff,0xff,0xff,0xff));
-				//canvas.setElem(tx+m,	600-clrBlockSize*clct+clrBlockSize*clrRow, color(0xff,0xff,0xff,0xff));
-				//canvas.setElem(299-clrBlockSize+m,	600-clrBlockSize*clct+clrBlockSize*(clrRow+1)-1, color(0xff,0xff,0xff,0xff));
 			}
 		}
+		//绘制多个颜色板
 		if(io->version == V6){
 			cp = io->paletteData.getCount();
 			for(i=0;i<cp;i++){
-				clct = io->paletteData[cbpro].size();
+				clct = io->paletteData[i].size();
 				for(j=0;j<clct;j++){
 					for(m = 0;m<clrBlockSize;m++){
 						for(n=0;n<clrBlockSize;n++){
@@ -730,7 +1002,6 @@ UINT drawThread(PVOID para){
 	img.Destroy();
 	mat.release();
 	dlg->drawing = 0;
-	dlg->m_edInfo.SetWindowText(L"绘制完毕。");
 	canvas.release();
 	return 0;
 }
@@ -752,6 +1023,7 @@ UINT transformThread(PVOID para){
 		if(io.paletteData.getCount() <= 0){
 			dlg->MessageBox(L"转换失败，没有调色板数据！",L"提示");
 			dlg->m_edInfo.SetWindowText(L"转换终止。");
+			dlg->converting = 0;
 			return 0;
 		}
 		fn = dlg->no.content[row].get_imgname();
@@ -769,16 +1041,17 @@ UINT transformThread(PVOID para){
 		}else{
 			dlg->MessageBox(L"转换失败，颜色表溢出！",L"提示");
 			dlg->m_edInfo.SetWindowText(L"转换终止。");
+			dlg->converting = 0;
 			return 0;
 		}
 	}
+	dlg->io.Release();
+	dlg->no.IMGextract(row, dlg->io);
 	dlg->MessageBox(L"转换完毕！",L"提示喵");
 	dlg->switchIMGver(dlg->to_ver);
 	dlg->updatePIClist();
-	dlg->updateIMGInfo();
 	dlg->updateDDSlist();
 	dlg->updateNPKInfo();
-	dlg->updateIMGlist();
 	dlg->updateCLRlist();
 	dlg->m_edInfo.SetWindowText(L"转换完毕。");
 	dlg->converting = 0;
@@ -840,6 +1113,33 @@ UINT extractDDSPNGThread(PVOID para){
 	dlg->extracting = 0;
 	return 0;
 }
+UINT extractDDSThread(PVOID para){
+	CExRabbitDlg* dlg = (CExRabbitDlg*)para;
+	if(dlg->extracting){
+		dlg->MessageBox(L"上一个提取操作进行中。",L"提示喵");
+		return 0;
+	}
+	dlg->extracting = 1;
+	dlg->m_edInfo.SetWindowText(L"提取中……");
+	for(int i = 0;i<dlg->io.V5_DDSCount;i++){
+		str fn;
+		CString filePath;
+		CString fileName;
+		stream s,s1;
+		dlg->m_pgInfo.SetPos((i+1)*1000/dlg->io.V5_DDSCount);
+		fileName = getOutPutDir(dlg->fileIMGname)+L"DDS贴图"+NumToCStr(i)+L".dds";
+		CStrToStr(fileName, fn);
+		dlg->io.GetDDSData(i, s);
+		s.uncompressData(s1, COMP_ZLIB2);
+		s1.makeFile(fn);
+		s.release();
+		s.release();
+	}
+	dlg->MessageBox(L"已保存到文件夹"+getOutPutDir(dlg->fileIMGname)+L"里了。",L"提示喵");
+	dlg->m_edInfo.SetWindowText(L"提取完毕。");
+	dlg->extracting = 0;
+	return 0;
+}
 UINT extractPIDThread(PVOID para){
 	CExRabbitDlg* dlg = (CExRabbitDlg*)para;
 	if(dlg->extracting){
@@ -883,6 +1183,8 @@ void CExRabbitDlg::OnMainMenuNew()
 {
 	// TODO: 在此添加命令处理程序代码
 	dlgNew.OnBnClickedCheck1();
+	
+	//dlgNew.SetWindowPos(this, 200, 200, 0, 0 , SWP_NOSIZE);
 	dlgNew.ShowWindow(SW_SHOW);
 }
 
@@ -910,6 +1212,24 @@ void CExRabbitDlg::OnMainMenuOpen()
 			}
 			fileNPKname = fileName;
 			fileOpen = true;
+			mixMode = false;
+			updateIMGlist();
+			if(no.count>0){
+				m_lIMG.SetSelectionMark(0);
+				crtIMGid = 0;
+			}
+		}
+		if(fmt == L"L" || fmt == L"l"){
+			no.release();
+			if(no.loadFile(fn)){
+				MessageBox(L"读取完毕！");
+			}else{
+				MessageBox(L"读取失败！");
+				return;
+			}
+			fileNPKname = fileName;
+			fileOpen = true;
+			mixMode = true;
 			updateIMGlist();
 			if(no.count>0){
 				m_lIMG.SetSelectionMark(0);
@@ -929,6 +1249,7 @@ void CExRabbitDlg::OnMainMenuOpen()
 			fileIMGname = fileName;
 			fileNPKname = L"临时NPK";
 			fileOpen = true;
+			mixMode = false;
 			fileName = shorten(fileName, '\\');
 			CStrToStr(fileName, fn);
 			no.IMGpush(io, fn);
@@ -953,6 +1274,10 @@ void CExRabbitDlg::OnMainMenuSave()
 	// TODO: 保存NPK
 	CString defExt = _T("NPK文件(*.NPK)|*.NPK");
 	CString extFilter = _T("NPK文件(*.NPK)|*.NPK||");
+	if(mixMode){
+		defExt = _T("拼合方案(*.MPL)|*.MPL");
+		extFilter = _T("拼合方案(*.MPL)|*.MPL||");
+	}
 	CFileDialog dlg(false, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	str fn;
 	CString fileName;
@@ -971,7 +1296,7 @@ void CExRabbitDlg::OnMainMenuSave()
 void CExRabbitDlg::OnMainMenuAbout()
 {
 	// TODO: 在此添加命令处理程序代码
-	MessageBox(L"Ex兔子版  --by乘着歌声的翅膀(EXNPK & COLG)");
+	MessageBox(L"Ex兔子版\r\n           --by乘着歌声的翅膀");
 }
 
 
@@ -1016,6 +1341,7 @@ void CExRabbitDlg::OnImgMenuInsert()
 		dlgInsert.m_ch1.EnableWindow(true);
 		dlgInsert.m_ch2.EnableWindow(true);
 	}
+	dlgInsert.m_ed3.SetWindowText(L"newIMG.img");
 	dlgInsert.ShowWindow(SW_SHOW);
 }
 
@@ -1033,6 +1359,7 @@ void CExRabbitDlg::OnImgMenuRemove()
 		MessageBox(L"删除失败！");
 	}
 	updateIMGlist();
+	m_lIMG.SetItemState(row-1, LVIS_FOCUSED | LVIS_SELECTED,LVIS_FOCUSED | LVIS_SELECTED);   
 	m_lIMG.SetSelectionMark(row-1);
 }
 
@@ -1184,6 +1511,99 @@ void CExRabbitDlg::OnImgMenuConvert()
 	dlgTrasform.ShowWindow(SW_SHOW);
 }
 
+void CExRabbitDlg::OnImgmenuSelectall()
+{
+	// TODO: 在此添加命令处理程序代码
+	for(int i=0;i<m_lIMG.GetItemCount();i++)   
+		 m_lIMG.SetItemState(i, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
+}
+
+
+void CExRabbitDlg::OnImgmenuSelectother()
+{
+	// TODO: 在此添加命令处理程序代码
+	for(int i=0;i<m_lIMG.GetItemCount();i++){
+		if(LVIS_SELECTED ==  m_lIMG.GetItemState(i, LVIS_SELECTED)){
+			 m_lIMG.SetItemState(i, 0, LVIS_SELECTED|LVIS_FOCUSED);
+		}else{
+			 m_lIMG.SetItemState(i, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
+		}
+	}
+}
+
+
+void CExRabbitDlg::OnImgmenuRemoveallselected()
+{
+	// TODO: 在此添加命令处理程序代码
+	POSITION pos = m_lIMG.GetFirstSelectedItemPosition();
+	std::vector<int> listID;
+	listID.clear();
+	if(pos != NULL){
+		while(pos){
+			int nItem = m_lIMG.GetNextSelectedItem(pos);
+			listID.push_back(nItem);
+		}
+	}
+	for(int i=listID.size()-1;i>=0;i--){
+		no.IMGremove(listID[i]);
+	}
+	MessageBox(L"全部删除完毕！",L"提示喵");
+	updateIMGlist();
+	m_lIMG.SetSelectionMark(-1);
+}
+
+
+void CExRabbitDlg::OnImgmenuHideallselected()
+{
+	// TODO: 在此添加命令处理程序代码
+	POSITION pos = m_lIMG.GetFirstSelectedItemPosition();
+	std::vector<int> listID;
+	listID.clear();
+	if(pos != NULL){
+		while(pos){
+			int nItem = m_lIMG.GetNextSelectedItem(pos);
+			listID.push_back(nItem);
+		}
+	}
+	for(int i=listID.size()-1;i>=0;i--){
+		IMGobject _io;
+		PICinfo _pi;
+		stream _s;
+		no.IMGextract(listID[i], _io);
+		for(int j = 0;j<_io.indexCount;j++){
+			_io.GetPICInfo(j,_pi);
+			_io.PICempty(_s, _pi);
+			_io.PICreplace(j, _pi, _s);
+			_s.release();
+		}
+		no.IMGreplace(listID[i], _io);
+	}
+	MessageBox(L"全部隐藏完毕！",L"提示喵");
+	updatePIClist();
+}
+
+
+void CExRabbitDlg::OnImgmenuExtractallselected()
+{
+	// TODO: 在此添加命令处理程序代码
+	POSITION pos = m_lIMG.GetFirstSelectedItemPosition();
+	std::vector<int> listID;
+	listID.clear();
+	if(pos != NULL){
+		while(pos){
+			int nItem = m_lIMG.GetNextSelectedItem(pos);
+			listID.push_back(nItem);
+		}
+	}
+	for(int i=listID.size()-1;i>=0;i--){
+		CString fileName = getOutPutDir(shorten(fileNPKname,'\\'))+to_(StrToCStr(no.content[listID[i]].get_imgname()));
+		str fn;
+		CStrToStr(fileName, fn);
+		no.extractIMGFile(listID[i], fn);
+	}
+	MessageBox(L"全部提取完毕！",L"提示喵");
+}
+
 
 void CExRabbitDlg::OnImgMenu2Insert()
 {
@@ -1299,6 +1719,8 @@ void CExRabbitDlg::OnPicMenuInsert()
 	dlgInsert2.OnCbnSelchangeCombo1();
 	/////////////////
 	dlgInsert2.ShowWindow(SW_SHOW);
+	saveAlert = true;
+	updateInfo();
 }
 
 
@@ -1309,6 +1731,12 @@ void CExRabbitDlg::OnPicMenuRemove()
 	io.PICremove(row);
 	m_lPicture.SetSelectionMark(row-1);
 	MessageBox(L"已将这个贴图删掉了喵！",L"提示喵！");
+	updatePIClist();
+	updateNPKInfo();
+	updateIMGInfo();
+	updatePICInfo();
+	saveAlert = true;
+	updateInfo();
 }
 
 
@@ -1360,6 +1788,8 @@ void CExRabbitDlg::OnPicMenuReplace()
 	dlgInsert2.OnCbnSelchangeCombo1();
 	///////////////////////////
 	dlgInsert2.ShowWindow(SW_SHOW);
+	saveAlert = true;
+	updateInfo();
 }
 
 
@@ -1377,12 +1807,8 @@ void CExRabbitDlg::OnPicMenuSetPara()
 	dlgSetpara.m_e3.SetWindowText(NumToCStr(pi.get_frmSize().get_W()));
 	dlgSetpara.m_e4.SetWindowText(NumToCStr(pi.get_frmSize().get_H()));
 	dlgSetpara.ShowWindow(SW_SHOW);
-}
-
-
-void CExRabbitDlg::OnPicMenuLinkTo()
-{
-	// TODO: 此项作废
+	saveAlert = true;
+	updateInfo();
 }
 
 
@@ -1395,18 +1821,12 @@ void CExRabbitDlg::OnPicMenuHide()
 	io.PICempty(s, pi);
 	io.PICreplace(pos, pi, s);
 	MessageBox(L"已将选定贴图隐藏！",L"提示喵");
-}
-
-
-void CExRabbitDlg::OnPicMenu2ExtractAllPng()
-{
-	// TODO: 此项作废
-}
-
-
-void CExRabbitDlg::OnPicMenu2ExtractAllIndex()
-{
-	// TODO: 此项作废
+	updatePIClist();
+	updateNPKInfo();
+	updateIMGInfo();
+	updatePICInfo();
+	saveAlert = true;
+	updateInfo();
 }
 
 
@@ -1454,10 +1874,12 @@ void CExRabbitDlg::OnDdsMenuExtractDds()
 	CString fileName;
 	fileName = getOutPutDir(fileIMGname)+L"DDS贴图"+NumToCStr(row)+L".dds";
 	CStrToStr(fileName, fn);
-	matrix mat;
-	io.DDSextract(row, mat);
-	mat.makePNG(fn);
-	mat.release();
+	stream s,s1;
+	io.GetDDSData(row, s);
+	s.uncompressData(s1, COMP_ZLIB2);
+	s1.makeFile(fn);
+	s.release();
+	s.release();
 	MessageBox(L"已保存为"+fileName+L"。",L"提示喵");
 }
 
@@ -1465,90 +1887,300 @@ void CExRabbitDlg::OnDdsMenuExtractDds()
 void CExRabbitDlg::OnDdsMenuExtractAllDds()
 {
 	// TODO: 在此添加命令处理程序代码
+	AfxBeginThread(extractDDSThread, (PVOID)this);
 }
 
 
 void CExRabbitDlg::OnDdsMenuInsert()
 {
 	// TODO: 在此添加命令处理程序代码
+	dlgInsert3.SetWindowText(L"插入DDS贴图");
+	dlgInsert3.iORr = CDlgInsert2::__INSERT;
+	dlgInsert3.m_cb1.ResetContent();
+	dlgInsert3.m_cb1.AddString(L"基于DDS文件");
+	dlgInsert3.m_cb1.AddString(L"基于PNG文件");
+	dlgInsert3.m_cb1.SetCurSel(0);
+	dlgInsert3.OnCbnSelchangeCombo1();
+	dlgInsert3.m_c1.SetCheck(1);
+	dlgInsert3.m_c2.SetCheck(0);
+	dlgInsert3.m_c3.SetCheck(0);
+	dlgInsert3.m_c1.EnableWindow(true);
+	dlgInsert3.m_c2.EnableWindow(true);
+	dlgInsert3.m_c3.EnableWindow(true);
+	dlgInsert3.m_cb1.SetCurSel(0);
+	dlgInsert3.ShowWindow(SW_SHOW);
+	saveAlert = true;
+	updateInfo();
 }
 
 
 void CExRabbitDlg::OnDdsMenuRemove()
 {
 	// TODO: 在此添加命令处理程序代码
+	int row = m_lDDS.GetSelectionMark();
+	io.DDSremove(row);
+	m_lDDS.SetSelectionMark(row-1);
+	MessageBox(L"已将这个DDS贴图删掉了喵！",L"提示喵！");
+	updateDDSlist();
+	updateNPKInfo();
+	updateIMGInfo();
+	updatePICInfo();
+	saveAlert = true;
+	updateInfo();
 }
 
 
 void CExRabbitDlg::OnDdsMenuReplace()
 {
 	// TODO: 在此添加命令处理程序代码
+	dlgInsert3.SetWindowText(L"插入DDS贴图");
+	dlgInsert3.iORr = CDlgInsert2::__REPLACE;
+	dlgInsert3.m_cb1.ResetContent();
+	dlgInsert3.m_cb1.AddString(L"基于DDS文件");
+	dlgInsert3.m_cb1.AddString(L"基于PNG文件");
+	dlgInsert3.m_cb1.SetCurSel(0);
+	dlgInsert3.OnCbnSelchangeCombo1();
+	dlgInsert3.m_c1.SetCheck(1);
+	dlgInsert3.m_c2.SetCheck(0);
+	dlgInsert3.m_c3.SetCheck(0);
+	dlgInsert3.m_c1.EnableWindow(false);
+	dlgInsert3.m_c2.EnableWindow(false);
+	dlgInsert3.m_c3.EnableWindow(false);
+	dlgInsert3.m_cb1.SetCurSel(0);
+	dlgInsert3.ShowWindow(SW_SHOW);
+	saveAlert = true;
+	updateInfo();
 }
-
-
-void CExRabbitDlg::OnDdsMenu2ExtractAllPng()
-{
-	// TODO: 在此添加命令处理程序代码
-}
-
-
-void CExRabbitDlg::OnDdsMenu2ExtractAllDds()
-{
-	// TODO: 在此添加命令处理程序代码
-}
-
 
 void CExRabbitDlg::OnDdsMenu2Insert()
 {
 	// TODO: 在此添加命令处理程序代码
+	OnDdsMenuInsert();
 }
 
 
 void CExRabbitDlg::OnClrMenuInsert()
 {
 	// TODO: 在此添加命令处理程序代码
+	dlgInsert4.SetWindowText(L"插入颜色");
+	dlgInsert4.iORr = CDlgInsert4::__INSERT;
+	dlgInsert4.m_c1.SetCheck(1);
+	dlgInsert4.m_c2.SetCheck(0);
+	dlgInsert4.m_c3.SetCheck(0);
+	dlgInsert4.m_c1.EnableWindow(true);
+	dlgInsert4.m_c2.EnableWindow(true);
+	dlgInsert4.m_c3.EnableWindow(true);
+	dlgInsert4.m_e1.SetWindowText(L"255");
+	dlgInsert4.m_e2.SetWindowText(L"0");
+	dlgInsert4.m_e3.SetWindowText(L"0");
+	dlgInsert4.m_e4.SetWindowText(L"0");
+	dlgInsert4.ShowWindow(SW_SHOW);
+	dlgInsert4.draw();
+	saveAlert = true;
+	updateInfo();
 }
 
 
 void CExRabbitDlg::OnClrmenuRemove()
 {
 	// TODO: 在此添加命令处理程序代码
+	int pos = m_lColor.GetSelectionMark();
+	int clrID = m_cbPro.GetCurSel();
+	if(clrID<0)
+		clrID = 0;
+	if(pos<0)
+		return;
+	io.CLRremove(pos, clrID);
+	MessageBox(L"删除颜色完毕！",L"提示喵");
+	updateCLRlist();
+	updateNPKInfo();
+	updateIMGInfo();
+	updatePICInfo();
+	draw();
+	saveAlert = true;
+	updateInfo();
 }
 
 
 void CExRabbitDlg::OnClrMenuReplace()
 {
 	// TODO: 在此添加命令处理程序代码
+	dlgInsert4.SetWindowText(L"替换颜色");
+	dlgInsert4.iORr = CDlgInsert4::__REPLACE;
+	dlgInsert4.m_c1.SetCheck(1);
+	dlgInsert4.m_c2.SetCheck(0);
+	dlgInsert4.m_c3.SetCheck(0);
+	dlgInsert4.m_c1.EnableWindow(false);
+	dlgInsert4.m_c2.EnableWindow(false);
+	dlgInsert4.m_c3.EnableWindow(false);
+	
+	int pos = m_lColor.GetSelectionMark();
+	int clrID = m_cbPro.GetCurSel();
+	if(clrID<0)
+		clrID = 0;
+	if(pos<0)
+		return;
+	io.paletteData[clrID][pos].get_B();
+	io.paletteData[clrID][pos].get_G();
+	io.paletteData[clrID][pos].get_R();
+	dlgInsert4.m_e1.SetWindowText(NumToCStr(io.paletteData[clrID][pos].get_A()));
+	dlgInsert4.m_e2.SetWindowText(NumToCStr(io.paletteData[clrID][pos].get_R()));
+	dlgInsert4.m_e3.SetWindowText(NumToCStr(io.paletteData[clrID][pos].get_G()));
+	dlgInsert4.m_e4.SetWindowText(NumToCStr(io.paletteData[clrID][pos].get_B()));
+	dlgInsert4.ShowWindow(SW_SHOW);
+	dlgInsert4.draw();
+	saveAlert = true;
+	updateInfo();
 }
 
 
 void CExRabbitDlg::OnClrMenuExtractPalette()
 {
 	// TODO: 在此添加命令处理程序代码
+	int clrID = m_cbPro.GetCurSel();
+	if(clrID<0)
+		clrID = 0;
+	str fn;
+	CString fileName =  getOutPutDir(fileIMGname) + L"调色板"+NumToCStr(clrID)+L".CID";
+	CStrToStr(fileName, fn);
+	stream s,sHead;
+	sHead.allocate(12);
+	sHead.push((b32)0x6F436F4B);
+	sHead.push((b32)0x72756F6C);
+	sHead.push((b32)io.paletteData[clrID].size());
+	s.allocate(12+io.paletteData[clrID].size()+100);
+	s.pushStream(sHead,12);
+	for(int i = 0;i<io.paletteData[clrID].size();i++){
+		s.push(io.paletteData[clrID][i].get_A());
+		s.push(io.paletteData[clrID][i].get_R());
+		s.push(io.paletteData[clrID][i].get_G());
+		s.push(io.paletteData[clrID][i].get_B());
+	}
+	s.makeFile(fn);
+	s.release();
+	sHead.release();
+	MessageBox(L"已保存为"+fileName+L"。",L"提示喵");
 }
 
 
 void CExRabbitDlg::OnClrMenuExtractAllPalette()
 {
 	// TODO: 在此添加命令处理程序代码
+	str fn;
+	CString fileName;
+	stream s,sHead;
+	for(int j = 0;j<io.paletteData.getCount();j++){
+		fileName =  getOutPutDir(fileIMGname) + L"调色板"+NumToCStr(j)+L".CID";
+		CStrToStr(fileName, fn);
+		sHead.allocate(12);
+		sHead.push((b32)0x6F436F4B);
+		sHead.push((b32)0x34726F6C);
+		sHead.push((b32)io.paletteData[j].size());
+		s.allocate(12+io.paletteData[j].size()+100);
+		s.pushStream(sHead,12);
+		for(int i = 0;i<io.paletteData[j].size();i++){
+			s.push(io.paletteData[j][i].get_A());
+			s.push(io.paletteData[j][i].get_R());
+			s.push(io.paletteData[j][i].get_G());
+			s.push(io.paletteData[j][i].get_B());
+		}
+		s.makeFile(fn);
+		s.release();
+		sHead.release();
+	}
+	MessageBox(L"已保存到"+getOutPutDir(fileIMGname)+L"了。",L"提示喵");
 }
+
+void CExRabbitDlg::OnClrmenuLoadpalette()
+{
+	// TODO: 在此添加命令处理程序代码
+	int clrID = m_cbPro.GetCurSel();
+	if(clrID<0)
+		clrID = 0;
+	CString defExt = _T("V4调色板(*.cid)|*.cid");
+	CString extFilter = _T("V4调色板(*.cid)|*.cid||");
+	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
+	CString fileName;
+	str fn;
+	stream s;
+	i32 i,j,k;
+	b8 b;
+	if(dlg.DoModal() == IDOK){
+		fileName = dlg.GetPathName();
+		CStrToStr(fileName, fn);
+		if(!s.loadFile(fn)){
+			MessageBox(L"无法读取文件喵！",L"提示喵");
+			return;
+		}
+		s.read(i);
+		if((b32)i != 0x6F436F4B){
+			MessageBox(L"该调色板未能识别喵！",L"提示喵！");
+			return;
+		}
+		s.read(i);
+		s.read(i);
+		k = io.paletteData[clrID].size();
+		for(j=0;j<k;j++)
+			io.CLRremove(0, clrID);
+		for(j=0;j<i;j++){
+			color clr;
+			s.read(b);
+			clr.set_A(b);
+			s.read(b);
+			clr.set_R(b);
+			s.read(b);
+			clr.set_G(b);
+			s.read(b);
+			clr.set_B(b);
+			io.CLRpush(clr, clrID);
+		}
+		MessageBox(L"读取调色板完毕喵！",L"提示喵");
+		updateCLRlist();
+		updateNPKInfo();
+		updateIMGInfo();
+		updatePICInfo();
+		saveAlert = true;
+		updateInfo();
+	}
+}
+
+
+void CExRabbitDlg::OnClrmenuNewpalette()
+{
+	// TODO: 在此添加命令处理程序代码
+	io.CLRnewPalette();
+	m_cbPro.ResetContent();
+	for(int i = 0;i<io.paletteData.getCount();i++)
+		m_cbPro.AddString(L"调色板方案"+NumToCStr(i));
+	m_cbPro.SetCurSel(io.paletteData.getCount()-1);
+	updateCLRlist();
+	updateNPKInfo();
+	updateIMGInfo();
+	updatePICInfo();
+	draw();
+	saveAlert = true;
+	updateInfo();
+}
+
 
 
 void CExRabbitDlg::OnClrMenu2Insert()
 {
 	// TODO: 在此添加命令处理程序代码
+	OnClrMenuInsert();
+}
+
+void CExRabbitDlg::OnClrmenu2Loadpalette()
+{
+	// TODO: 在此添加命令处理程序代码
+	OnClrmenuLoadpalette();
 }
 
 
-void CExRabbitDlg::OnClrMenu2ExtractPalette()
+void CExRabbitDlg::OnClrmenu2Newpalette()
 {
 	// TODO: 在此添加命令处理程序代码
-}
-
-
-void CExRabbitDlg::OnClrMenu2ExtractAllPalette()
-{
-	// TODO: 在此添加命令处理程序代码
+	OnClrmenuNewpalette();
 }
 
 
@@ -1596,43 +2228,29 @@ void CExRabbitDlg::OnDisplayMenuSwitchDds()
 }
 
 
-void CExRabbitDlg::OnDisplayMenuColorTab()
+void CExRabbitDlg::OnDisplaymenu2Showall()
 {
 	// TODO: 在此添加命令处理程序代码
-	dispSwColorTab = !dispSwColorTab;
+	dispModeShowAll = !dispModeShowAll;
+	if(dispModeShowAll){
+		dispModeAbs =  true;
+		OnDisplaymenu2Autofind();
+	}
 	draw();
 }
 
 
-void CExRabbitDlg::OnDisplayMenuPicBound()
+void CExRabbitDlg::OnDisplaymenu2Autofind()
 {
 	// TODO: 在此添加命令处理程序代码
-	dispSwPicBound = !dispSwPicBound;
-	draw();
+	OnDisplayMenuAutoFind();
 }
 
 
-void CExRabbitDlg::OnDisplayMenuFrmBound()
+void CExRabbitDlg::OnDisplaymenu2SwitchAbs()
 {
 	// TODO: 在此添加命令处理程序代码
-	dispSwFrmBound = !dispSwFrmBound;
-	draw();
-}
-
-
-void CExRabbitDlg::OnDisplayMenuBaseAxis()
-{
-	// TODO: 在此添加命令处理程序代码
-	dispSwAxis = !dispSwAxis;
-	draw();
-}
-
-
-void CExRabbitDlg::OnDisplayMenuGrid()
-{
-	// TODO: 在此添加命令处理程序代码
-	dispSwGrid = !dispSwGrid;
-	draw();
+	OnDisplayMenuSwitchAbs();
 }
 
 
@@ -1640,4 +2258,398 @@ void CExRabbitDlg::OnOK()
 {
 	// TODO: 在此添加专用代码和/或调用基类
 	MessageBox(L"不许按回车喵！",L"提示喵");
+}
+
+
+void CExRabbitDlg::OnMenuhsv()
+{
+	// TODO: 在此添加命令处理程序代码
+	int clrID = m_cbPro.GetCurSel();
+	if(clrID<0)
+		clrID = 0;
+	dlgHSV.m_list.ResetContent();
+	dlgHSV.oldClrList.clear();
+	dlgHSV.midClrList.clear();
+	dlgHSV.newClrList.clear();
+	for(int i = 0;i<io.paletteData[clrID].size();i++){
+		dlgHSV.m_list.AddString(L"颜色"+NumToCStr(i));
+		dlgHSV.oldClrList.push_back(io.paletteData[clrID][i]);
+		dlgHSV.midClrList.push_back(io.paletteData[clrID][i]);
+		dlgHSV.newClrList.push_back(io.paletteData[clrID][i]);
+	}
+	dlgHSV.m_chHSV.SetCheck(1);
+	dlgHSV.m_chRGB.SetCheck(0);
+	dlgHSV.m_e1.SetWindowText(L"H:0");
+	dlgHSV.m_e2.SetWindowText(L"S:0");
+	dlgHSV.m_e3.SetWindowText(L"V:0");
+	dlgHSV.m_s1.SetRange(0,360);
+	dlgHSV.m_s2.SetRange(-100,100);
+	dlgHSV.m_s3.SetRange(-100,100);
+	dlgHSV.m_s1.SetTic(360);
+	dlgHSV.m_s2.SetTic(200);
+	dlgHSV.m_s3.SetTic(200);
+	dlgHSV.m_s1.SetTicFreq(30);
+	dlgHSV.m_s2.SetTicFreq(20);
+	dlgHSV.m_s3.SetTicFreq(20);
+	dlgHSV.m_s1.SetPos(0);
+	dlgHSV.m_s2.SetPos(0);
+	dlgHSV.m_s3.SetPos(0);
+	dlgHSV.firstpos = 0;
+	dlgHSV.ShowWindow(SW_SHOW);
+	dlgHSV.draw();
+	saveAlert = true;
+	updateInfo();
+}
+
+void CExRabbitDlg::OnLvnKeydownListImg(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLVKEYDOWN pLVKeyDow = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	int row = m_lIMG.GetSelectionMark();
+	if(pLVKeyDow->wVKey == VK_UP){
+		if(row>0){
+			row --;
+		}else{
+			*pResult = 0;
+			return;
+		}
+	}
+	if(pLVKeyDow->wVKey == VK_DOWN){
+		if(row<m_lIMG.GetItemCount()-1){
+			row ++;
+		}else{
+			*pResult = 0;
+			return;
+		}
+	}
+	if(saveAlert){
+		switch(MessageBox(L"这个IMG已经被你改动了喵，要保存喵？",L"提示喵",MB_YESNO)){
+		case IDYES:
+			OnBnClickedButtonMenu2();
+			break;
+		case IDNO:
+			saveAlert = false;
+			updateInfo();
+			break;
+		}
+	}
+	if(lazyTime>0){
+		*pResult = 0;
+		return;
+	}
+	crtIMGid = row;
+	if(row>=0){
+		io.Release();
+		no.IMGextract(row, io);
+		fileIMGname = shorten(StrToCStr(no.content[row].get_imgname()),'/');
+		switchIMGver(io.version);
+		updatePIClist();
+		updateCLRlist();
+		updateDDSlist();
+		updateIMGInfo();
+		updatePICInfo();
+	}
+	updateInfo();
+	draw();
+	lazyTime = 10;
+	*pResult = 0;
+}
+
+
+void CExRabbitDlg::OnLvnKeydownListPic(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLVKEYDOWN pLVKeyDow = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	int row = m_lPicture.GetSelectionMark();
+	if(pLVKeyDow->wVKey == VK_UP){
+		if(row>0){
+			row --;
+		}else{
+			*pResult = 0;
+			return;
+		}
+	}
+	if(pLVKeyDow->wVKey == VK_DOWN){
+		if(row<m_lPicture.GetItemCount()-1){
+			row ++;
+		}else{
+			*pResult = 0;
+			return;
+		}
+	}
+	if(lazyTime>0){
+		*pResult = 0;
+		return;
+	}
+	crtCLRDDSid = row;
+	updateInfo();
+	draw();
+	lazyTime = 5;
+	*pResult = 0;
+}
+
+
+void CExRabbitDlg::OnLvnKeydownListClr(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLVKEYDOWN pLVKeyDow = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	int row = m_lColor.GetSelectionMark();
+	if(pLVKeyDow->wVKey == VK_UP){
+		if(row>0){
+			row --;
+		}else{
+			*pResult = 0;
+			return;
+		}
+	}
+	if(pLVKeyDow->wVKey == VK_DOWN){
+		if(row<m_lColor.GetItemCount()-1){
+			row ++;
+		}else{
+			*pResult = 0;
+			return;
+		}
+	}
+	if(lazyTime>0){
+		*pResult = 0;
+		return;
+	}
+	crtCLRDDSid = row;
+	updateInfo();
+	draw();
+	lazyTime = 5;
+	*pResult = 0;
+}
+
+
+void CExRabbitDlg::OnLvnKeydownListDds(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLVKEYDOWN pLVKeyDow = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	int row = m_lDDS.GetSelectionMark();
+	if(pLVKeyDow->wVKey == VK_UP){
+		if(row>0){
+			row --;
+		}else{
+			*pResult = 0;
+			return;
+		}
+	}
+	if(pLVKeyDow->wVKey == VK_DOWN){
+		if(row<m_lDDS.GetItemCount()-1){
+			row ++;
+		}else{
+			*pResult = 0;
+			return;
+		}
+	}
+	if(lazyTime>0){
+		*pResult = 0;
+		return;
+	}
+	crtCLRDDSid = row;
+	updateInfo();
+	draw(true);
+	lazyTime = 5;
+	*pResult = 0;
+}
+
+
+void CExRabbitDlg::OnImgMenuAddtomixed()
+{
+	// TODO: 执行拼合
+	AfxBeginThread(mixThread, PVOID(this));
+	
+}
+
+UINT mixThread(PVOID para){
+	CExRabbitDlg *dlg =  (CExRabbitDlg *)para;
+	NPKobject *nop = &(dlg->no);
+	int imgCount = nop->count;
+	if(imgCount == 0)
+		return 0;
+	dlg->m_edInfo.SetWindowText(L"开始拼合");
+	IMGobject *ioList = new IMGobject[imgCount];
+	IMGobject newIO;
+	newIO.Create(V2);
+	int i,j,k;
+	dlg->m_edInfo.SetWindowText(L"分析IO");
+	for(i=0;i<imgCount;i++){
+		nop->IMGextract(i, ioList[i]);
+	}
+	int maxFrameCount = 0;
+	for(i=0;i<imgCount;i++){
+		if(ioList[i].indexCount> maxFrameCount)
+			maxFrameCount = ioList[i].indexCount;
+	}
+	matrix mat,mat2,matf;
+	stream s;
+	PICinfo pi;
+	point ptLT, ptRB, ptLTtemp, ptRBtemp;//左上角右下角的点，右下角的点包含在图片内
+	std::vector<int> mLeft, mTop, mRight, mBottom;
+	dlg->m_edInfo.SetWindowText(L"尝试拼合");
+	for(k=0;k<maxFrameCount;k++){
+		dlg->m_edInfo.SetWindowText(L"拼合帧号"+NumToCStr(k));
+		mLeft.clear();
+		mTop.clear();
+		mRight.clear();
+		mBottom.clear();
+		for(i=0;i<imgCount;i++){
+			if(ioList[i].GetPICInfo(k, pi)){
+				if(pi.get_format() == LINK){
+					ioList[i].linkFind(k);
+				}
+				ioList[i].GetPICInfo(k, pi);
+				mLeft.push_back(pi.get_basePt().get_X());
+				mTop.push_back(pi.get_basePt().get_Y());
+				mRight.push_back(pi.get_basePt().get_X()+pi.get_picSize().get_W()-1);
+				mBottom.push_back(pi.get_basePt().get_Y()+pi.get_picSize().get_H()-1);
+			}
+		}
+		int tLeft = 100000;
+		int tTop = 100000;
+		int tRight= -100000;
+		int tBottom = -100000;
+		for(i=0;i<mLeft.size();i++){
+			if(mLeft[i]<tLeft)
+				tLeft = mLeft[i];
+			if(mRight[i]>tRight)
+				tRight = mRight[i];
+			if(mTop[i]<tTop)
+				tTop = mTop[i];
+			if(mBottom[i]>tBottom)
+				tBottom = mBottom[i];
+		}
+		ptLT.set(tLeft, tTop);
+		ptRB.set(tRight, tBottom);
+		matf.allocate(tBottom-tTop+1, tRight-tLeft+1);
+		for(i=0;i<imgCount;i++){
+			if(ioList[i].GetPICInfo(k, pi)){
+				if(pi.get_format() == LINK){
+					ioList[i].linkFind(k);
+				}
+				ioList[i].GetPICInfo(k, pi);
+				ioList[i].PICextract(k, mat);
+				mat2.allocate(
+					pi.get_basePt().get_Y()-ptLT.get_Y()+pi.get_picSize().get_H()+10,
+					pi.get_basePt().get_X()-ptLT.get_X()+pi.get_picSize().get_W()+10
+				);
+				mat2.putFore(mat);
+				mat2.elemMoveHonz(pi.get_basePt().get_X()-ptLT.get_X());
+				mat2.elemMoveVert(pi.get_basePt().get_Y()-ptLT.get_Y());
+				matf.putFore(mat2);
+				mat.release();
+				mat2.release();
+			}
+		}
+		newIO.PICpreprocess(matf, s, pi);
+		pi.set_basePt(ptLT);
+		newIO.PICpush(pi, s);
+		matf.release();
+		s.release();
+		dlg->m_pgInfo.SetPos(1000*(k+1)/maxFrameCount);
+	}
+	nop->IMGpush(newIO,"mixed");
+	dlg->updateNPKInfo();
+	dlg->updateIMGlist();
+	delete[] ioList;
+	dlg->m_edInfo.SetWindowText(L"拼合结束");
+	return 0;
+}
+
+void CExRabbitDlg::OnDropFiles(HDROP hDropInfo)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	WCHAR szPath[MAX_PATH] = L"" ;
+	UINT nChars=::DragQueryFile(hDropInfo,0,szPath ,MAX_PATH);    
+	CString fileName(szPath,nChars) ; 
+	str fn;
+	CString fmt = fileName.Right(4);
+	if(fmt == L".NPK" || fmt == L".npk"){
+		if(IDOK == MessageBox(L"打开"+fileName+L"喵？",L"拖曳提示喵")){
+			no.release();
+			CStrToStr(fileName, fn);
+			if(no.loadFile(fn)){
+				MessageBox(L"读取完毕喵！");
+			}else{
+				MessageBox(L"读取失败喵！");
+				return;
+			}
+			fileNPKname = fileName;
+			fileOpen = true;
+			mixMode = false;
+			updateIMGlist();
+			if(no.count>0){
+				m_lIMG.SetSelectionMark(0);
+				crtIMGid = 0;
+			}
+		}
+	}
+	if(fmt == L".MPL" || fmt == L".mpl"){
+		if(IDOK == MessageBox(L"打开"+fileName+L"喵？",L"拖曳提示喵")){
+			no.release();
+			CStrToStr(fileName, fn);
+			if(no.loadFile(fn)){
+				MessageBox(L"读取完毕喵！");
+			}else{
+				MessageBox(L"读取失败喵！");
+				return;
+			}
+			fileNPKname = fileName;
+			fileOpen = true;
+			mixMode =  true;
+			updateIMGlist();
+			if(no.count>0){
+				m_lIMG.SetSelectionMark(0);
+				crtIMGid = 0;
+			}
+		}
+	}
+	if(fmt == L".IMG" || fmt == L".img"){
+		if(!fileOpen){
+			if(IDOK == MessageBox(L"打开"+fileName+L"喵？",L"拖曳提示喵")){
+				io.Release();
+				CStrToStr(fileName, fn);
+				if(io.LoadFile(fn)){
+					MessageBox(L"读取完毕喵！");
+				}else{
+					MessageBox(L"读取失败喵！");
+					return;
+				}
+				no.release();
+				no.create();
+				fileIMGname = fileName;
+				fileNPKname = L"临时NPK";
+				fileOpen = true;
+				mixMode = false;
+				fileName = shorten(fileName, '\\');
+				CStrToStr(fileName, fn);
+				no.IMGpush(io, fn);
+				switchIMGver(io.version);
+				updateIMGlist();
+				updatePIClist();
+				updateCLRlist();
+				updateDDSlist();
+				updateNPKInfo();
+				updateIMGInfo();
+				updatePICInfo();
+				m_lIMG.SetSelectionMark(0);
+				crtIMGid = 0;
+			}
+		}else{
+			if(IDOK == MessageBox(L"将"+fileName+L"添加至IMG列表喵？",L"拖曳提示喵")){	
+				CStrToStr(fileName, fn);
+				IMGobject io(fn);
+				if(no.IMGpush(io, fn)){
+					MessageBox(L"插入完毕喵！");
+				}else{
+					MessageBox(L"插入失败喵！");
+				}
+				io.Release();
+				updateIMGlist();
+				updateNPKInfo();
+			}
+		}
+	}
+	CDialogEx::OnDropFiles(hDropInfo);
 }

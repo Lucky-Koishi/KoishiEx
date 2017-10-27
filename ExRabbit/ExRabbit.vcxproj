@@ -98,12 +98,23 @@
     <None Include="ReadMe.txt" />
     <None Include="res\ExRabbit.ico" />
     <None Include="res\ExRabbit.rc2" />
+    <None Include="res\Folder_Blue_Rabbit_16px_511716_easyicon.net.ico" />
+    <None Include="res\Folder_White_Rabbit_16px_511717_easyicon.net.ico" />
+    <None Include="res\icon1.ico" />
+    <None Include="res\icon2.ico" />
+    <None Include="res\icon3.ico" />
+    <None Include="res\icon4.ico" />
+    <None Include="res\LOGO.bmp" />
+    <None Include="res\LOGO.png" />
     <None Include="进度.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DialogNew.h" />
+    <ClInclude Include="DlgHSV.h" />
     <ClInclude Include="DlgInsert.h" />
     <ClInclude Include="DlgInsert2.h" />
+    <ClInclude Include="DlgInsert3.h" />
+    <ClInclude Include="DlgInsert4.h" />
     <ClInclude Include="DlgRename.h" />
     <ClInclude Include="DlgSetpara.h" />
     <ClInclude Include="DlgTrasform.h" />
@@ -116,8 +127,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DialogNew.cpp" />
+    <ClCompile Include="DlgHSV.cpp" />
     <ClCompile Include="DlgInsert.cpp" />
     <ClCompile Include="DlgInsert2.cpp" />
+    <ClCompile Include="DlgInsert3.cpp" />
+    <ClCompile Include="DlgInsert4.cpp" />
     <ClCompile Include="DlgRename.cpp" />
     <ClCompile Include="DlgSetpara.cpp" />
     <ClCompile Include="DlgTrasform.cpp" />

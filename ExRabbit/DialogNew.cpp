@@ -157,10 +157,16 @@ void CDialogNew::OnBnClickedOk()
 		dlg->no.create();
 		dlg->fileNPKname = L"尚未保存的NPK";
 		dlg->fileOpen = true;
+		dlg->mixMode = false;
 		dlg->updateIMGlist();
 	}else if(m_ch2.GetCheck()){
 		//施工中
-		MessageBox(L"施工中");
+		dlg->no.release();
+		dlg->no.create();
+		dlg->fileNPKname = L"尚未保存的NPK";
+		dlg->fileOpen = true;
+		dlg->mixMode = true;
+		dlg->updateIMGlist();
 	}else if(m_ch3.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
@@ -169,6 +175,7 @@ void CDialogNew::OnBnClickedOk()
 		dlg->fileIMGname = L"new.img";
 		dlg->fileNPKname = L"临时NPK";
 		dlg->fileOpen = true;
+		dlg->mixMode = false;
 		dlg->no.IMGpush(dlg->io, "new.img");
 		dlg->switchIMGver(dlg->io.version);
 		dlg->updateIMGlist();
@@ -186,6 +193,7 @@ void CDialogNew::OnBnClickedOk()
 		dlg->fileIMGname = L"new.img";
 		dlg->fileNPKname = L"临时NPK";
 		dlg->fileOpen = true;
+		dlg->mixMode = false;
 		dlg->no.IMGpush(dlg->io, "new.img");
 		dlg->switchIMGver(dlg->io.version);
 		dlg->updateIMGlist();
@@ -203,6 +211,7 @@ void CDialogNew::OnBnClickedOk()
 		dlg->fileIMGname = L"new.img";
 		dlg->fileNPKname = L"临时NPK";
 		dlg->fileOpen = true;
+		dlg->mixMode = false;
 		dlg->no.IMGpush(dlg->io, "new.img");
 		dlg->switchIMGver(dlg->io.version);
 		dlg->updateIMGlist();
@@ -220,6 +229,7 @@ void CDialogNew::OnBnClickedOk()
 		dlg->fileIMGname = L"new.img";
 		dlg->fileNPKname = L"临时NPK";
 		dlg->fileOpen = true;
+		dlg->mixMode = false;
 		dlg->no.IMGpush(dlg->io, "new.img");
 		dlg->switchIMGver(dlg->io.version);
 		dlg->updateIMGlist();

@@ -1,13 +1,27 @@
-﻿生成启动时间为 2017/9/28 星期四 下午 4:38:31。
+﻿生成启动时间为 2017/10/10 星期二 下午 2:10:43。
      1>项目“K:\KoishiEx\KoishiEx\KoishiEx.vcxproj”在节点 2 上(build 个目标)。
      1>InitializeBuildStatus:
          正在创建“Release\KoishiEx.unsuccessfulbuild”，因为已指定“AlwaysCreate”。
        ClCompile:
          所有输出均为最新。
-         D:\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Release\KoishiEx.pch" /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt KoishiFactory.cpp
+         D:\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Release\KoishiEx.pch" /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt DDS.cpp KoishiBase.cpp KoishiData.cpp KoishiFactory.cpp
+         DDS.cpp
+     1>DDS.cpp(161): warning C4101: “k”: 未引用的局部变量
+         KoishiBase.cpp
+         KoishiData.cpp
          KoishiFactory.cpp
+     1>KoishiFactory.cpp(702): warning C4800: “Koishi::b32”: 将值强制为布尔值“true”或“false”(性能警告)
+     1>KoishiFactory.cpp(1271): warning C4101: “j”: 未引用的局部变量
+     1>KoishiFactory.cpp(1294): warning C4101: “j”: 未引用的局部变量
+     1>KoishiFactory.cpp(1853): warning C4101: “j”: 未引用的局部变量
+     1>KoishiFactory.cpp(1876): warning C4101: “j”: 未引用的局部变量
+     1>KoishiFactory.cpp(1927): warning C4101: “j”: 未引用的局部变量
+     1>KoishiFactory.cpp(2072): warning C4101: “i”: 未引用的局部变量
+     1>KoishiFactory.cpp(2630): warning C4101: “j”: 未引用的局部变量
+     1>KoishiFactory.cpp(2653): warning C4101: “j”: 未引用的局部变量
        Lib:
-         D:\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"K:\KoishiEx\Release\KoishiEx.lib" /NOLOGO /LTCG Release\KoishiBase.obj
+         D:\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"K:\KoishiEx\Release\KoishiEx.lib" /NOLOGO /LTCG Release\DDS.obj
+         Release\KoishiBase.obj
          Release\KoishiData.obj
          Release\KoishiFactory.obj
          Release\sha256.obj
@@ -20,4 +34,4 @@
 
 生成成功。
 
-已用时间 00:00:00.73
+已用时间 00:00:02.87
