@@ -395,7 +395,7 @@ i8 stream::compressData(stream &dest, compressType type){
 	switch(type){
 	case COMP_ZLIB:
 		{
-			b64 tryLength = getLen(); 
+			b64 tryLength = getLen()+1000; 
 			dest.allocate(tryLength);
 			i8 i = (i8)compress(dest.data, (b32*)&tryLength, data, getLen());
 			dest.len = tryLength;

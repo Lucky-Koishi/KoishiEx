@@ -48,18 +48,7 @@ namespace Koishi{
 	extern str IMGext;
 	extern str IMGnameMask;
 	enum IMGversion{V1 = 1, V2 = 2, V4 = 4, V5 = 5, V6 = 6, OGG = -1, VUDEF = 0};
-	enum command{
-		//结构相关
-		CREATE, LOAD, MAKE, RELEASE, CONVERT,
-		//图片相关
-		GETINFO, GETINFOGETDATA, PUSH, INSERT, REMOVE, REPLACE, EXTRACT, PREPROCESS, EMPTY,
-		//DDS相关
-		DDSGETINFO, DDSGETDATA, DDSPUSH, DDSINSERT, DDSREMOVE, DDSREPLACE, DDSEXTRACT, DDSPREPROCESS, 
-		//颜色相关
-		CLRPUSH, CLRINSERT, 
-		//参数相关
-		RENAME, SETPARA
-	};
+	enum command{CREATE, LOAD, MAKE, RELEASE,PUSH, INSERT,REMOVE, REPLACE,RENAME};
 	enum compressType{COMP_NONE = 5, COMP_ZLIB = 6, COMP_ZLIB2 = 7, COMP_UDEF = 0};
 	enum DDSPixelFormatID{DXT1 = 0x12, DXT3=0x13, DXT5=0x14, DPF_UDF = 0};
 	enum colorFormat{ARGB8888 = 0x10, ARGB4444 = 0x0F, ARGB1555 = 0x0E, LINK = 0x11, DDS_DXT1 = 0x12, DDS_DXT3 = 0x13, DDS_DXT5 = 0x14, COLOR_UDEF = 0, V4_FMT, RGB565};
@@ -144,7 +133,7 @@ namespace Koishi{
 		b64 len,maxLen,pt;
 	};
 	/////////////////////////////////////
-	typedef struct{
+	typedef struct colorHSV{
 		i32 H;
 		fl2 S;
 		fl2 V;
@@ -180,9 +169,10 @@ namespace Koishi{
 		void moveRto(b8 newR);
 		void moveGto(b8 newG);
 		void moveBto(b8 newB);
-		void moveR(i8 delta);
-		void moveG(i8 delta);
-		void moveB(i8 delta);
+		void moveR(i16 delta);
+		void moveG(i16 delta);
+		void moveB(i16 delta);
+		void moveA(i16 delta);
 	};
 	////////////////////////////////////
 	class point{
@@ -282,6 +272,9 @@ namespace Koishi{
 	public:
 		bool tinyMake(stream &s, i32 paletteID = 0);
 		bool bigMake(stream &s);
+	public:
+		static bool makeACT(str fileName, const lcolor &lc);
+		static bool loadACT(str fileName, lcolor &lc);
 	protected:
 		llcolor table;
 	};
@@ -343,6 +336,7 @@ namespace Koishi{
 		bool saveFile(const str &fileName);
 		bool create();
 		bool release();
+		bool loadIndex(const str &fileName, std::vector<IMGversion> &versionList);
 	public:
 		bool IMGpush(const IMGobject &obj, const str &imgName);
 		bool IMGinsert(i32 pos, const IMGobject &obj, const str &imgName);
@@ -353,6 +347,7 @@ namespace Koishi{
 		pstream getData(b8 part);
 		b64 getSize() const;
 		bool IMGextract(b32 pos, IMGobject &obj);
+		bool IMGfind(const str &keyword, b32 &pos);
 		bool extractIMGFile(i32 pos, str fileName);
 	public:
 		b32 count;

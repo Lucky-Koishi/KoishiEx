@@ -355,10 +355,29 @@ void CDlgInsert2::OnBnClickedOk()
 	}
 	if(iORr == CDlgInsert2::__INSERT){
 		MessageBox(L"插入成功喵！",L"提示喵！");
+		dlg->m_lPicture.InsertItem(pos, NumToCStr(pos));
 	}else{
 		MessageBox(L"替换成功喵！",L"提示喵！");
 	}
-	dlg->updatePIClist();
+	if(dlg->io.PICcontent[pos].get_format() == LINK){
+		dlg->m_lPicture.SetItemText(pos, 1, FmtToCStr(dlg->io.PICcontent[pos].get_format(), dlg->io.version) + NumToCStr(dlg->io.PICcontent[pos].get_linkTo()));
+		dlg->m_lPicture.SetItemText(pos, 2, L"");
+		dlg->m_lPicture.SetItemText(pos, 3, L"");
+		dlg->m_lPicture.SetItemText(pos, 4, L"");
+		if(dlg->io.version == V5){
+			dlg->m_lPicture.SetItemText(pos, 5, L"");
+		}
+	}else{
+		dlg->m_lPicture.SetItemText(pos, 1, FmtToCStr(dlg->io.PICcontent[pos].get_format(), dlg->io.version));
+		dlg->m_lPicture.SetItemText(pos, 2, PtToCStr(dlg->io.PICcontent[pos].get_basePt()));
+		dlg->m_lPicture.SetItemText(pos, 3, SzToCStr(dlg->io.PICcontent[pos].get_picSize()));
+		dlg->m_lPicture.SetItemText(pos, 4, SzToCStr(dlg->io.PICcontent[pos].get_frmSize()));
+		if(dlg->io.version == V5){
+			dlg->m_lPicture.SetItemText(pos, 5, L"DDS"+NumToCStr(dlg->io.PICcontent[pos].get_DDSIDused())+L":"+PtToCStr(dlg->io.PICcontent[pos].get_DDSpointLT())+L"-"+PtToCStr(dlg->io.PICcontent[pos].get_DDSpointRB()));
+		}
+	}
+	//dlg->updatePIClist();
+	dlg->updateDDSlist();
 	dlg->updateNPKInfo();
 	dlg->updateIMGInfo();
 	dlg->updatePICInfo();

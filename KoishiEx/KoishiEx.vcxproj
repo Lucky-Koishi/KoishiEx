@@ -71,6 +71,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="avatar.h" />
     <ClInclude Include="DDS.h" />
     <ClInclude Include="KoishiEx.h" />
     <ClInclude Include="resource.h" />
@@ -81,6 +82,7 @@
     <ClInclude Include="zlib.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="avatar.cpp" />
     <ClCompile Include="DDS.cpp" />
     <ClCompile Include="KoishiBase.cpp" />
     <ClCompile Include="KoishiData.cpp" />

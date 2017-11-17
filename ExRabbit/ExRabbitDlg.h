@@ -13,6 +13,13 @@
 #include "DlgInsert3.h"
 #include "DlgInsert4.h"
 #include "DlgHSV.h"
+#include "DlgSetXY.h"
+#include "DlgExpand.h"
+#include "DlgColor.h"
+#include "DlgBar.h"
+#include "DlgCanvas.h"
+#include "ToolIMGSearch.h"
+#include "ToolAvatar.h"
 
 #pragma once
 
@@ -46,8 +53,9 @@ protected:
 public:
 	NPKobject no;
 	IMGobject io;
-	CString fileNPKname;
-	CString fileIMGname;
+	IMGobject ioComp;
+	CString fileNPKname;	//NPK名字（全称）
+	CString fileIMGname;	//IMG名字（全称）
 	point basePoint;		//相对坐标
 	bool useBasePt;			//使用相对坐标
 	bool fileOpen;			//打开文件
@@ -56,17 +64,28 @@ public:
 	bool dispModeIndex;
 	bool dispModeDds;
 	bool dispModeShowAll;
+	bool dispModeCompare;
+	bool useColorTable;
+	colorMethod dispMixMode;
 	volatile int drawing;	//绘制中
 	volatile int drawDDS;	//绘制DDS中
 	volatile int extracting;	//提取中
 	volatile int converting;	//转换中
-	volatile int lazyTime;		//响应延时
-	bool saveAlert;
+	volatile int expanding;		//转换中
+	volatile int playing;		//播放中
+	volatile int lazyTime;		//响应延时避免崩溃
+	volatile int sizing;		//正在调整大小
+	bool saveAlert;				//保存了IMG
 	int crtIMGid;
 	int crtPICid;
 	int crtCLRDDSid;
 	volatile IMGversion to_ver;	//转换版本用到的参数
+	struct canvasThreadPara{
+		int x1,y1,x2,y2;
+	}canvasPara;
 public:
+	int width,height;
+	BOOL adjustWindow(int w, int h);
 	BOOL switchIMGver(IMGversion ver);
 	BOOL updateIMGlist();
 	BOOL updatePIClist();
@@ -78,10 +97,8 @@ public:
 	BOOL updateInfo();
 public:
 	CButton m_btnMenu;
-	CEdit m_edInfo;
 	CEdit m_edNPK;
 	CGoodListCtrl m_lIMG;
-	CProgressCtrl m_pgInfo;
 	CDlgInsert dlgInsert;
 	CDlgRename dlgRename;
 	CDlgTrasform dlgTrasform;
@@ -91,10 +108,14 @@ public:
 	CDlgInsert3 dlgInsert3;
 	CDlgInsert4 dlgInsert4;
 	CDlgHSV dlgHSV;
+	CDlgSetXY dlgSetXY;
+	CDlgExpand dlgExpand;
+	CDlgColor dlgColor;
+	CDlgBar dlgBar;
+	CDlgCanvas dlgCanvas;
 	CStatic m_logo;
 	CBitmap m_logoPic;
 	CImageList m_icon;
-	//CButton m_chAxis;
 	CComboBox m_cbPro;
 	CEdit m_edX;
 	CEdit m_edY;
@@ -124,7 +145,7 @@ public:
 	afx_msg void OnMainMenuOpen();
 	afx_msg void OnMainMenuSave();
 	afx_msg void OnMainMenuAbout();
-	afx_msg void OnMainmenuQuit();
+	afx_msg void OnMainMenuQuit();
 	afx_msg void OnImgMenuExtract();
 	afx_msg void OnImgMenuInsert();
 	afx_msg void OnImgMenuRemove();
@@ -154,7 +175,7 @@ public:
 	afx_msg void OnDdsMenuReplace();
 	afx_msg void OnDdsMenu2Insert();
 	afx_msg void OnClrMenuInsert();
-	afx_msg void OnClrmenuRemove();
+	afx_msg void OnClrMenuRemove();
 	afx_msg void OnClrMenuReplace();
 	afx_msg void OnClrMenuExtractPalette();
 	afx_msg void OnClrMenuExtractAllPalette();
@@ -166,11 +187,11 @@ public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnBnClickedButtonMenu2();
 	virtual void OnOK();
-	afx_msg void OnClrmenuLoadpalette();
-	afx_msg void OnClrmenuNewpalette();
-	afx_msg void OnClrmenu2Loadpalette();
-	afx_msg void OnClrmenu2Newpalette();
-	afx_msg void OnMenuhsv();
+	afx_msg void OnClrMenuLoadPalette();
+	afx_msg void OnClrMenuNewPalette();
+	afx_msg void OnClrMenu2LoadPalette();
+	afx_msg void OnClrMenu2NewPalette();
+	afx_msg void OnClrMenuHSV();
 	CEdit m_edInfo2;
 	CEdit m_edInfo3;
 	CEdit m_edInfo4;
@@ -179,20 +200,55 @@ public:
 	CEdit m_edInfo7;
 	CEdit m_edInfo8;
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnImgmenuSelectall();
-	afx_msg void OnImgmenuSelectother();
-	afx_msg void OnImgmenuRemoveallselected();
-	afx_msg void OnImgmenuHideallselected();
-	afx_msg void OnImgmenuExtractallselected();
+	afx_msg void OnImgMenuSelectAll();
+	afx_msg void OnImgMenuSelectOther();
+	afx_msg void OnImgMenuRemoveAllSelected();
+	afx_msg void OnImgMenuHideAllSelected();
+	afx_msg void OnImgMenuExtractAllSelected();
 	afx_msg void OnLvnKeydownListImg(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnKeydownListPic(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnKeydownListClr(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnKeydownListDds(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnImgMenuAddtomixed();
-	afx_msg void OnDisplaymenu2Showall();
-	afx_msg void OnDisplaymenu2Autofind();
-	afx_msg void OnDisplaymenu2SwitchAbs();
+	afx_msg void OnImgMenuAddToMixed();
+	afx_msg void OnDisplayMenu2ShowAll();
+	afx_msg void OnDisplayMenu2AutoFind();
+	afx_msg void OnDisplayMenu2SwitchAbs();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
+	afx_msg void OnMainMenuSaveAs();
+	afx_msg void OnPicMenuSetXY();
+	afx_msg void OnDisplayMenuShowCompare();
+	afx_msg void OnDisplayMenuSetCompare();
+	afx_msg void OnImgMenuCompareAs();
+	afx_msg void OnClrMenuLoadAct();
+	afx_msg void OnClrMenuExportAct();
+	afx_msg void OnPicMenuExpand();
+	afx_msg void OnMix0();
+	afx_msg void OnMix1();
+	afx_msg void OnMix2();
+	afx_msg void OnMix3();
+	afx_msg void OnMix4();
+	afx_msg void OnMix5();
+	afx_msg void OnMix6();
+	afx_msg void OnMix7();
+	afx_msg void OnMix8();
+	afx_msg void OnMix9();
+	afx_msg void OnMix10();
+	afx_msg void OnMix11();
+	afx_msg void OnMix12();
+	afx_msg void OnMix13();
+	afx_msg void OnMix14();
+	afx_msg void OnMix15();
+	afx_msg void OnMix16();
+	afx_msg void OnDisplayMenuPlay();
+	afx_msg void OnClrMenuWin();
+	afx_msg void OnSizing(UINT fwSide, LPRECT pRect);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnStnClickedLogo();
+
+	CToolIMGSearch toolIMGSearch;
+	afx_msg void OnTool1();
+	afx_msg void OnTool2();
+	CToolAvatar toolAvatar;
 };
 
 UINT transformThread(PVOID para);
@@ -201,5 +257,12 @@ UINT extractPIDThread(PVOID para);
 UINT extractDDSThread(PVOID para);
 UINT extractDDSPNGThread(PVOID para);
 UINT drawThread(PVOID para);
+UINT drawDDSThread(PVOID para);
+UINT drawThread2(PVOID para);
+UINT drawThread_bg(PVOID para);
+UINT drawThread_fg(PVOID para);
 UINT lazyThread(PVOID para);
 UINT mixThread(PVOID para);
+UINT canvasThread(PVOID para);
+UINT uncanvasThread(PVOID para);
+UINT playThread(PVOID para);

@@ -385,7 +385,7 @@ void color::moveVto(fl2 newV){
 void color::moveH(i32 delta){
 	colorHSV hsv;
 	getHSV(hsv);
-	hsv.H += delta;
+	hsv.H += 360 + delta;
 	hsv.H %= 360;
 	useHSV(hsv);
 }
@@ -418,7 +418,7 @@ void color::moveGto(b8 newG){
 void color::moveBto(b8 newB){
 	B = newB;
 }
-void color::moveR(i8 delta){
+void color::moveR(i16 delta){
 	if(R + delta>255){
 		R = 255;
 	}else if(R + delta<0){
@@ -427,7 +427,7 @@ void color::moveR(i8 delta){
 		R += delta;
 	}
 }
-void color::moveG(i8 delta){
+void color::moveG(i16 delta){
 	if(G + delta>255){
 		G = 255;
 	}else if(G + delta<0){
@@ -436,13 +436,22 @@ void color::moveG(i8 delta){
 		G += delta;
 	}
 }
-void color::moveB(i8 delta){
+void color::moveB(i16 delta){
 	if(B + delta>255){
 		B = 255;
 	}else if(B + delta<0){
 		B = 0;
 	}else{
 		B += delta;
+	}
+}
+void color::moveA(i16 delta){
+	if(A + delta>255){
+		A = 255;
+	}else if(A + delta<0){
+		A = 0;
+	}else{
+		A += delta;
 	}
 }
 ///////////////////////////////////////////////////////////////
@@ -482,17 +491,6 @@ void size::set(i32 w, i32 h){
 i32 size::area() const{
 	return get_W()*get_H();
 }
-//size Koishi::operator - (const point& pt1, const point& pt2){
-//	return size(pt2.get_X() - pt1.get_X(), pt2.get_Y() - pt1.get_Y());
-//}
-//point Koishi::operator + (const point& pt1, const size& sz){
-//	return point(pt1.get_X() + sz.get_W(), pt1.get_Y() + sz.get_H());
-//}
-//point Koishi::operator - (const point& pt1, const size& sz){
-//	return point(pt1.get_X() - sz.get_W(), pt1.get_Y() - sz.get_H());
-//}
-/////////////////////////////////////////////////////////////////
-//matrix
 matrix::matrix(){
 	column = 0;
 	row = 0;
@@ -721,7 +719,7 @@ void matrix::getElemHonzBound(b32 &lower, b32 &upper) const{
 	b32 i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
-			if(getElem(i, j) != (color)0){
+			if(getElem(i, j).get_A() != 0){
 				if(lower>j){
 					lower = j;
 				}
@@ -738,7 +736,7 @@ void matrix::getElemVertBound(b32 &lower, b32 &upper) const{
 	b32 i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
-			if(getElem(i, j) != (color)0){
+			if(getElem(i, j).get_A() != 0){
 				if(lower>i){
 					lower = i;
 				}
@@ -1048,4 +1046,50 @@ bool palette::bigMake(stream &s){
 		}
 	}
 	return false;
+}
+
+bool palette::makeACT(str fileName, const lcolor &lc){
+	stream s;
+	s.allocate(772);
+	i32 alIndex = 0;
+	for(i32 i = 0;i<256;i++){
+		if(i<lc.size()){
+			if(lc[i].get_A() == 0){
+				alIndex = i;
+			}
+			s.push(lc[i].get_R());
+			s.push(lc[i].get_G());
+			s.push(lc[i].get_B());
+		}else{
+			s.push((b8)0);
+			s.push((b8)0);
+			s.push((b8)0);
+		}
+	}
+	s.push((b8)(lc.size() >> 8));
+	s.push((b8)(lc.size() & 0xff));
+	s.push((b8)0);
+	s.push((b8)(alIndex & 0xff));
+	s.makeFile(fileName);
+	s.release();
+	return true;
+}
+bool palette::loadACT(str fileName, lcolor &lc){
+	stream s;
+	s.loadFile(fileName);
+	if(s.getLen() != 772)
+		return false;
+	i32 clrCount = s[768]*256+s[769];
+	if(clrCount >= 256)
+		return false;
+	i32 alIndex = s[771];
+	if(alIndex >= clrCount)
+		return false;
+	lc.clear();
+	for(i32 i = 0;i<clrCount;i++){
+		lc.push_back(color(0xFF, s[3*i], s[3*i+1], s[3*i+2]));
+	}
+	lc[alIndex].set(0);
+	s.release();
+	return true;
 }

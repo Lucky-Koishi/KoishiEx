@@ -149,7 +149,7 @@ void CDlgInsert::OnBnClickedButton1()
 	if(dlg.DoModal() == IDOK){
 		fileName = dlg.GetPathName();
 		m_ed1.SetWindowText(fileName);
-		m_ed3.SetWindowText(shorten(fileName, '\\'));
+		m_ed3.SetWindowText(toSl(shorten(fileName)));
 	}
 }
 
@@ -170,10 +170,10 @@ void CDlgInsert::OnBnClickedOk()
 		m_ed2.GetWindowText(posStr);
 		pos = _ttoi(posStr);
 	}
+	CString fileName;
+	str fn;
 	if(m_ch6.GetCheck()){
-		CString fileName;
 		m_ed1.GetWindowText(fileName);
-		str fn;
 		CStrToStr(fileName, fn);
 		IMGobject io(fn);
 		m_ed3.GetWindowText(fileName);
@@ -188,9 +188,7 @@ void CDlgInsert::OnBnClickedOk()
 		IMGversion iv = ivl[m_cb1.GetCurSel()];
 		IMGobject io;
 		io.Create(iv);
-		CString fileName;
 		m_ed3.GetWindowText(fileName);
-		str fn;
 		CStrToStr(fileName, fn);
 		if(dlg->no.IMGinsert(pos, io, fn)){
 			MessageBox(L"²åÈëÍê±Ï£¡");
@@ -198,7 +196,10 @@ void CDlgInsert::OnBnClickedOk()
 			MessageBox(L"²åÈëÊ§°Ü£¡");
 		}
 	}
-	dlg->updateIMGlist();
+	//dlg->updateIMGlist();
+	{
+		dlg->m_lIMG.InsertItem(pos, shorten(fileName));
+	}
 	dlg->updateNPKInfo();
 	ShowWindow(SW_HIDE);
 }

@@ -155,7 +155,7 @@ void CDialogNew::OnBnClickedOk()
 	if(m_ch1.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
-		dlg->fileNPKname = L"尚未保存的NPK";
+		dlg->fileNPKname = L"newNPK.npk";
 		dlg->fileOpen = true;
 		dlg->mixMode = false;
 		dlg->updateIMGlist();
@@ -163,7 +163,7 @@ void CDialogNew::OnBnClickedOk()
 		//施工中
 		dlg->no.release();
 		dlg->no.create();
-		dlg->fileNPKname = L"尚未保存的NPK";
+		dlg->fileNPKname = L"new_mix_plan.mpl";
 		dlg->fileOpen = true;
 		dlg->mixMode = true;
 		dlg->updateIMGlist();
@@ -172,8 +172,8 @@ void CDialogNew::OnBnClickedOk()
 		dlg->no.create();
 		dlg->io.Release();
 		dlg->io.Create(V2);
-		dlg->fileIMGname = L"new.img";
-		dlg->fileNPKname = L"临时NPK";
+		dlg->fileIMGname = L"newV2.img";
+		dlg->fileNPKname = L"newNPK.npk";
 		dlg->fileOpen = true;
 		dlg->mixMode = false;
 		dlg->no.IMGpush(dlg->io, "new.img");
@@ -190,8 +190,8 @@ void CDialogNew::OnBnClickedOk()
 		dlg->no.create();
 		dlg->io.Release();
 		dlg->io.Create(V4);
-		dlg->fileIMGname = L"new.img";
-		dlg->fileNPKname = L"临时NPK";
+		dlg->fileIMGname = L"newV4.img";
+		dlg->fileNPKname = L"newNPK.npk";
 		dlg->fileOpen = true;
 		dlg->mixMode = false;
 		dlg->no.IMGpush(dlg->io, "new.img");
@@ -208,8 +208,8 @@ void CDialogNew::OnBnClickedOk()
 		dlg->no.create();
 		dlg->io.Release();
 		dlg->io.Create(V5);
-		dlg->fileIMGname = L"new.img";
-		dlg->fileNPKname = L"临时NPK";
+		dlg->fileIMGname = L"newV5.img";
+		dlg->fileNPKname = L"newNPK.npk";
 		dlg->fileOpen = true;
 		dlg->mixMode = false;
 		dlg->no.IMGpush(dlg->io, "new.img");
@@ -226,12 +226,16 @@ void CDialogNew::OnBnClickedOk()
 		dlg->no.create();
 		dlg->io.Release();
 		dlg->io.Create(V6);
-		dlg->fileIMGname = L"new.img";
-		dlg->fileNPKname = L"临时NPK";
+		dlg->fileIMGname = L"newV6.img";
+		dlg->fileNPKname = L"newNPK.npk";
 		dlg->fileOpen = true;
 		dlg->mixMode = false;
 		dlg->no.IMGpush(dlg->io, "new.img");
+		dlg->io.CLRnewPalette();
 		dlg->switchIMGver(dlg->io.version);
+		dlg->m_cbPro.ResetContent();
+		dlg->m_cbPro.AddString(L"调色板方案0");
+		dlg->m_cbPro.SetCurSel(0);
 		dlg->updateIMGlist();
 		dlg->updatePIClist();
 		dlg->updateCLRlist();

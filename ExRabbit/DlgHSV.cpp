@@ -242,7 +242,7 @@ void CDlgHSV::draw(){
 	color clr;
 	int k1;
 	for(k = 0;k<iCount;k++){
-		k1 = selected[k]+firstpos;
+		k1 = selected[k]-firstpos;
 		if(k1>=0 && k1<30){
 			for(i=k1*15;i<k1*15+15;i++){
 				for(j=0;j<30;j++){

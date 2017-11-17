@@ -114,6 +114,16 @@ bool NPKobject::IMGextract(b32 pos, IMGobject &obj){
 	getData(3)->readStream(temps, (b64)(content[pos].get_imgsize()));
 	return obj.Load(temps);
 }
+bool NPKobject::IMGfind(const str &keyword, b32 &pos){
+	i32 i = 0;
+	for(i=0;i<count;i++){
+		if(content[i].get_imgname().find(keyword) != str::npos){
+			pos = i;
+			return true;
+		}
+	}
+	return false;
+}
 bool NPKobject::extractIMGFile(i32 pos, str fileName){
 	if(pos<0 || pos>=count){
 		return false;
@@ -122,6 +132,48 @@ bool NPKobject::extractIMGFile(i32 pos, str fileName){
 	getData(3)->ptMoveTo(content[pos].get_imgoffset()-getData(0)->getLen() - getData(1)->getLen() - getData(2) -> getLen());
 	getData(3)->readStream(temps, (b64)(content[pos].get_imgsize()));
 	return temps.makeFile(fileName);
+}
+bool NPKobject::loadIndex(const str &fileName, std::vector<IMGversion> &versionList){
+	stream data;
+	stream s;
+	if(!data.loadFile(fileName))
+		return false;
+	b32 dword;
+	i32 i;
+	IMGindex ii;
+	data.ptMoveTo(0);
+	if(data.readString(16) != "NeoplePack_Bill"){
+		return false;
+	}
+	data.read(dword);
+	count = dword;
+	content.clear();
+	for(i=0;i<count;i++){
+		data.read(dword);
+		ii.set_imgoffset(dword);
+		data.read(dword);
+		ii.set_imgsize(dword);
+		s.allocate(256);
+		data.readStream(s, 256);
+		s.nameMask();
+		ii.set_imgname((str)s);
+		s.release();
+		content.push_back(ii);
+	}
+	versionList.clear();
+	for(i=0;i<count;i++){
+		data.ptMoveTo(content[i].get_imgoffset());
+		data.read(dword);
+		if(dword == 0x706f654e){
+			data.ptMoveTo(content[i].get_imgoffset()+24);
+			data.read(dword);
+			versionList.push_back(IMGversion(dword));
+		}else{
+			versionList.push_back(IMGversion(0));
+		}
+	}
+	data.release();
+	return true;
 }
 bool NPKobject::invoke(b16 command, void *para1, void *para2, void *para3){
 	switch(command){

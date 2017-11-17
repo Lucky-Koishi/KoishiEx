@@ -95,6 +95,8 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="..\BUGtrace.txt" />
+    <None Include="..\mplserial.txt" />
     <None Include="ReadMe.txt" />
     <None Include="res\ExRabbit.ico" />
     <None Include="res\ExRabbit.rc2" />
@@ -104,12 +106,18 @@
     <None Include="res\icon2.ico" />
     <None Include="res\icon3.ico" />
     <None Include="res\icon4.ico" />
+    <None Include="res\icon5.ico" />
+    <None Include="res\icon6.ico" />
+    <None Include="res\iconud.ico" />
     <None Include="res\LOGO.bmp" />
     <None Include="res\LOGO.png" />
-    <None Include="进度.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DialogNew.h" />
+    <ClInclude Include="DlgBar.h" />
+    <ClInclude Include="DlgCanvas.h" />
+    <ClInclude Include="DlgColor.h" />
+    <ClInclude Include="DlgExpand.h" />
     <ClInclude Include="DlgHSV.h" />
     <ClInclude Include="DlgInsert.h" />
     <ClInclude Include="DlgInsert2.h" />
@@ -117,6 +125,7 @@
     <ClInclude Include="DlgInsert4.h" />
     <ClInclude Include="DlgRename.h" />
     <ClInclude Include="DlgSetpara.h" />
+    <ClInclude Include="DlgSetXY.h" />
     <ClInclude Include="DlgTrasform.h" />
     <ClInclude Include="ExRabbit.h" />
     <ClInclude Include="ExRabbitDlg.h" />
@@ -124,9 +133,15 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="ToolAvatar.h" />
+    <ClInclude Include="ToolIMGSearch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DialogNew.cpp" />
+    <ClCompile Include="DlgBar.cpp" />
+    <ClCompile Include="DlgCanvas.cpp" />
+    <ClCompile Include="DlgColor.cpp" />
+    <ClCompile Include="DlgExpand.cpp" />
     <ClCompile Include="DlgHSV.cpp" />
     <ClCompile Include="DlgInsert.cpp" />
     <ClCompile Include="DlgInsert2.cpp" />
@@ -134,6 +149,7 @@
     <ClCompile Include="DlgInsert4.cpp" />
     <ClCompile Include="DlgRename.cpp" />
     <ClCompile Include="DlgSetpara.cpp" />
+    <ClCompile Include="DlgSetXY.cpp" />
     <ClCompile Include="DlgTrasform.cpp" />
     <ClCompile Include="ExRabbit.cpp" />
     <ClCompile Include="ExRabbitDlg.cpp" />
@@ -142,6 +158,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ToolAvatar.cpp" />
+    <ClCompile Include="ToolIMGSearch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ExRabbit.rc" />

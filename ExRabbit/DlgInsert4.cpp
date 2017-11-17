@@ -116,6 +116,8 @@ void CDlgInsert4::OnBnClickedOk()
 	dlg->updateIMGInfo();
 	dlg->updatePICInfo();
 	dlg->draw();
+	dlg->dlgColor.setClr(&dlg->io.paletteData[dlg->m_cbPro.GetCurSel()]);
+	dlg->dlgColor.draw();
 	ShowWindow(SW_HIDE);
 }
 

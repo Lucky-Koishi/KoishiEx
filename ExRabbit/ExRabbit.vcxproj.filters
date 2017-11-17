@@ -22,7 +22,6 @@
     <None Include="res\ExRabbit.ico">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="进度.txt" />
     <None Include="res\LOGO.png">
       <Filter>资源文件</Filter>
     </None>
@@ -47,6 +46,17 @@
     <None Include="res\Folder_White_Rabbit_16px_511717_easyicon.net.ico">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="..\BUGtrace.txt" />
+    <None Include="res\icon5.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon6.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\iconud.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\mplserial.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExRabbit.h">
@@ -94,6 +104,27 @@
     <ClInclude Include="DlgHSV.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="DlgSetXY.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgExpand.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgColor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgBar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgCanvas.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolIMGSearch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExRabbit.cpp">
@@ -133,6 +164,27 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="DlgHSV.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgSetXY.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgExpand.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgColor.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgBar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgCanvas.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolIMGSearch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
