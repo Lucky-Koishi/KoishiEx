@@ -140,9 +140,16 @@ BOOL CDlgColor::OnInitDialog()
 	for(int i = 0;i<256;i++)
 		chosenClr[i] = false;
 	m_c1.ResetContent();
-	m_c1.AddString(L"HSV调节");
-	m_c1.AddString(L"RGB调节");
-	m_c1.AddString(L"透明度调节");
+	//m_c1.AddString(L"HSV调节");
+	//m_c1.AddString(L"RGB调节");
+	//m_c1.AddString(L"透明度调节");
+	CString HSVAdjust, RGBAdjust, AlphaAdjust;
+	HSVAdjust.LoadStringW(IDS_STRING_HSVADJUST);
+	RGBAdjust.LoadStringW(IDS_STRING_RGBADJUST);
+	AlphaAdjust.LoadStringW(IDS_STRING_ALPHAADJUST);
+	m_c1.AddString(HSVAdjust);
+	m_c1.AddString(RGBAdjust);
+	m_c1.AddString(AlphaAdjust);
 	m_c1.SetCurSel(0);
 	m_s1.SetRange(-100,100, TRUE);
 	m_s2.SetRange(-100,100, TRUE);
@@ -532,17 +539,23 @@ void CDlgColor::OnCtImportAct()
 	if(clrID<0)
 		clrID = 0;
 	CString defExt = _T("Photoshop颜色表(*.act)|*.act");
+	defExt.LoadStringW(IDS_STRING_PHOTOSHOPPALETTE);
 	CString extFilter = _T("Photoshop颜色表(*.act)|*.act||");
+	extFilter.LoadStringW(IDS_STRING_PHOTOSHOPPALETTE2);
 	CFileDialog fdlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	CString fileName;
 	str fn;
 	int i,k;
 	lcolor lc;
+	CString info, title;
 	if(fdlg.DoModal() == IDOK){
 		fileName = fdlg.GetPathName();
 		CStrToStr(fileName, fn);
 		if(!palette::loadACT(fn, lc)){
-			MessageBox(L"未识别的调色板文件喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_NOTRECOGNIZEDPALETTE);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"未识别的调色板文件喵！",L"提示喵");
 			return;
 		}
 		k = dlg->io.paletteData[clrID].size();
@@ -552,7 +565,10 @@ void CDlgColor::OnCtImportAct()
 			dlg->io.CLRpush(lc[i], clrID);
 		}
 		dlg->saveAlert = true;
-		MessageBox(L"读取完毕喵！",L"提示喵");
+		info.LoadStringW(IDS_STRING_READFINISHED);
+		title.LoadStringW(IDS_MESSAGE_TITLE);
+		//MessageBox(L"读取完毕喵！",L"提示喵");
+		MessageBox(info, title);
 		dlg->updateInfo();
 		dlg->updateNPKInfo();
 		dlg->updatePICInfo();
@@ -569,23 +585,32 @@ void CDlgColor::OnCtImportCid()
 	if(clrID<0)
 		clrID = 0;
 	CString defExt = _T("V4调色板(*.cid)|*.cid");
+	defExt.LoadStringW(IDS_STRING_V4PALETTE);
 	CString extFilter = _T("V4调色板(*.cid)|*.cid||");
+	extFilter.LoadStringW(IDS_STRING_V4PALETTE2);
 	CFileDialog fdlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	CString fileName;
 	str fn;
 	stream s;
 	i32 i,j,k;
 	b8 b;
+	CString info, title;
 	if(fdlg.DoModal() == IDOK){
 		fileName = fdlg.GetPathName();
 		CStrToStr(fileName, fn);
 		if(!s.loadFile(fn)){
-			MessageBox(L"无法读取文件喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_UNABLETOREAD);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"无法读取文件喵！",L"提示喵");
 			return;
 		}
 		s.read(i);
 		if((b32)i != 0x6F436F4B){
-			MessageBox(L"该调色板未能识别喵！",L"提示喵！");
+			info.LoadStringW(IDS_STRING_NOTRECOGNIZEDPALETTE);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"该调色板未能识别喵！",L"提示喵！");
 			return;
 		}
 		s.read(i);
@@ -605,7 +630,10 @@ void CDlgColor::OnCtImportCid()
 			clr.set_B(b);
 			dlg->io.CLRpush(clr, clrID);
 		}
-		MessageBox(L"读取调色板完毕喵！",L"提示喵");
+		//MessageBox(L"读取调色板完毕喵！",L"提示喵");
+		info.LoadStringW(IDS_STRING_READFINISHED);
+		title.LoadStringW(IDS_MESSAGE_TITLE);
+		MessageBox(info, title);
 		dlg->updateNPKInfo();
 		dlg->updatePICInfo();
 		dlg->saveAlert = true;
@@ -626,7 +654,12 @@ void CDlgColor::OnCtExportAct()
 	CString fileName =  getOutPutDir(dlg->fileNPKname,dlg->fileIMGname) + L"Palette"+NumToCStr(clrID)+L".ACT";
 	CStrToStr(fileName, fn);
 	palette::makeACT(fn, dlg->io.paletteData[clrID]);
-	MessageBox(L"已保存为"+fileName+L"。",L"提示喵");
+	CString info, title;
+	info.LoadStringW(IDS_STRING_SAVEDAS);
+	info = info + fileName;
+	title.LoadStringW(IDS_MESSAGE_TITLE);
+	MessageBox(info, title);
+	//MessageBox(L"已保存为"+fileName+L"。",L"提示喵");
 }
 
 
@@ -656,5 +689,10 @@ void CDlgColor::OnCtExportCid()
 	s.makeFile(fn);
 	s.release();
 	sHead.release();
-	MessageBox(L"已保存为"+fileName+L"。",L"提示喵");
+	CString info, title;
+	info.LoadStringW(IDS_STRING_SAVEDAS);
+	info = info + fileName;
+	title.LoadStringW(IDS_MESSAGE_TITLE);
+	MessageBox(info, title);
+	//MessageBox(L"已保存为"+fileName+L"。",L"提示喵");
 }

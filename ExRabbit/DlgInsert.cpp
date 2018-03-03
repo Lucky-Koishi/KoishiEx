@@ -144,6 +144,8 @@ void CDlgInsert::OnBnClickedButton1()
 	// TODO: 在此添加控件通知处理程序代码
 	CString defExt = _T("IMG文件(*.IMG)|*.IMG");
 	CString extFilter = _T("IMG文件(*.IMG)|*.IMG||");
+	defExt.LoadStringW(IDS_STRING_IMGFILETYPE);
+	extFilter.LoadStringW(IDS_STRING_IMGFILETYPE2);
 	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	CString fileName;
 	if(dlg.DoModal() == IDOK){
@@ -158,6 +160,7 @@ void CDlgInsert::OnBnClickedOk()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CExRabbitDlg* dlg = (CExRabbitDlg*)GetParent();
+	CString info, title;
 	int pos;
 	if(m_ch1.GetCheck()){
 		pos = dlg->crtIMGid;
@@ -179,9 +182,15 @@ void CDlgInsert::OnBnClickedOk()
 		m_ed3.GetWindowText(fileName);
 		CStrToStr(fileName, fn);
 		if(dlg->no.IMGinsert(pos, io, fn)){
-			MessageBox(L"插入完毕！");
+			info.LoadStringW(IDS_STRING_INSERTFINISHED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"插入完毕！");
 		}else{
-			MessageBox(L"插入失败！");
+			info.LoadStringW(IDS_STRING_INSERTFAILED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"插入失败！");
 		}
 	}else if(m_ch5.GetCheck()){
 		IMGversion ivl[4] = {V2,V4,V5,V6};
@@ -191,9 +200,15 @@ void CDlgInsert::OnBnClickedOk()
 		m_ed3.GetWindowText(fileName);
 		CStrToStr(fileName, fn);
 		if(dlg->no.IMGinsert(pos, io, fn)){
-			MessageBox(L"插入完毕！");
+			info.LoadStringW(IDS_STRING_INSERTFINISHED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"插入完毕！");
 		}else{
-			MessageBox(L"插入失败！");
+			info.LoadStringW(IDS_STRING_INSERTFAILED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"插入失败！");
 		}
 	}
 	//dlg->updateIMGlist();

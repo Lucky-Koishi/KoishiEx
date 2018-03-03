@@ -21,6 +21,12 @@ CToolAvatar::~CToolAvatar()
 {
 }
 
+CString CToolAvatar::LoadStringToOutput(__in UINT id) {
+	CString output;
+	output.LoadStringW(id);
+	return output;
+}
+
 void CToolAvatar::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
@@ -125,6 +131,7 @@ BOOL CToolAvatar::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化
 	m_cType.ResetContent();
+	/*
 	m_cType.AddString(L"未选择");
 	m_cType.AddString(L"鬼剑士");
 	m_cType.AddString(L"鬼剑士(女)");
@@ -139,6 +146,21 @@ BOOL CToolAvatar::OnInitDialog()
 	m_cType.AddString(L"暗夜使者");
 	m_cType.AddString(L"守护者");
 	m_cType.AddString(L"魔枪士");
+	*/
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_NOTSELECTED));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_SWORDMANM));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_SWORDMANF));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_FIGHTERF));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_FIGHTERM));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_GUNNERM));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_GUNNERF));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_MAGEF));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_MAGEM));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_PRIESTM));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_PRIESTF));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_THIEF));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_KNIGHT));
+	m_cType.AddString(LoadStringToOutput(IDS_STRING_DEMONICLANCER));
 	m_cType.SetCurSel(0);
 	cbPart[0] = &m_cPart1;
 	cbPart[1] = &m_cPart2;
@@ -169,6 +191,7 @@ BOOL CToolAvatar::OnInitDialog()
 	imgCount = 0;
 
 	m_cPart13.ResetContent();
+	/*
 	m_cPart13.AddString(L"选择动作");
 	m_cPart13.AddString(L"站立(平常)");
 	m_cPart13.AddString(L"站立(备战)");
@@ -180,6 +203,18 @@ BOOL CToolAvatar::OnInitDialog()
 	m_cPart13.AddString(L"释放");
 	m_cPart13.AddString(L"被攻击");
 	m_cPart13.AddString(L"倒地");
+	*/
+	m_cPart13.AddString(LoadStringToOutput(IDS_STRING_SELECTACTION));
+	m_cPart13.AddString(LoadStringToOutput(IDS_STRING_REST));
+	m_cPart13.AddString(LoadStringToOutput(IDS_STRING_FIGHT));
+	m_cPart13.AddString(LoadStringToOutput(IDS_STRING_WALK));
+	m_cPart13.AddString(LoadStringToOutput(IDS_STRING_RUN));
+	m_cPart13.AddString(LoadStringToOutput(IDS_STRING_JUMP));
+	m_cPart13.AddString(LoadStringToOutput(IDS_STRING_ATTACK));
+	m_cPart13.AddString(LoadStringToOutput(IDS_STRING_ZSKILL));
+	m_cPart13.AddString(LoadStringToOutput(IDS_STRING_CAST));
+	m_cPart13.AddString(LoadStringToOutput(IDS_STRING_DAMAGED));
+	m_cPart13.AddString(LoadStringToOutput(IDS_STRING_FALLDOWN));
 	m_cPart13.SetCurSel(0);
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
@@ -190,6 +225,8 @@ void CToolAvatar::OnBnClickedButton1()
 	// TODO: 在此添加控件通知处理程序代码
 	HWND hwnd= GetSafeHwnd();   //得到窗口句柄
 	CString filePath= L"";	//得到文件路径
+	CString tra, title;
+	title.LoadStringW(IDS_MESSAGE_TITLE);
 	LPMALLOC pMalloc;
 	if(::SHGetMalloc(&pMalloc) == NOERROR){	//取得IMalloc分配器接口
 		BROWSEINFO bi;
@@ -198,7 +235,9 @@ void CToolAvatar::OnBnClickedButton1()
 		bi.hwndOwner = hwnd;
 		bi.pidlRoot	= NULL;
 		bi.pszDisplayName = pszBuffer;
-		bi.lpszTitle = _T("选择文件夹");
+		tra.LoadStringW(IDS_STRING_SELECTFOLDER);
+		bi.lpszTitle = tra;
+		//bi.lpszTitle = _T("选择文件夹");
 		bi.ulFlags =  BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS | BIF_RETURNFSANCESTORS;
 		bi.lpfn = NULL;
 		bi.lParam = 0;
@@ -209,7 +248,9 @@ void CToolAvatar::OnBnClickedButton1()
 			}
 			pMalloc->Free(pidl);	//释放内存
 			if(filePath.GetLength()<=1){
-				MessageBox(L"并不是有效的文件夹喵！",L"提示喵");
+				tra.LoadStringW(IDS_STRING_NOTAVAILABLEFOLDER);
+				MessageBox(tra, title);
+				//MessageBox(L"并不是有效的文件夹喵！",L"提示喵");
 			}else{
 				m_e1.SetWindowText(filePath);
 				m_cType.SetCurSel(0);
@@ -233,6 +274,7 @@ UINT CToolAvatar::loadNPKThread(PVOID para){
 	CToolAvatar *dlg = (CToolAvatar*)para;
 	KoishiTitle::charElem ch = (KoishiTitle::charElem)dlg->m_cType.GetCurSel();
 	CString path;
+	CString tra;
 	str fn;
 	dlg->m_e1.GetWindowText(path);
 	dlg->m_p1.SetPos(0);
@@ -246,11 +288,15 @@ UINT CToolAvatar::loadNPKThread(PVOID para){
 		CStrToStr(path+L"\\"+GetRequestNPK(ch,(KoishiTitle::mainPartElem)(i+1)),fn);
 		dlg->noList[i].release();
 		dlg->cbPart[i]->ResetContent();
-		dlg->cbPart[i]->AddString(L"读取中");
+		tra.LoadStringW(IDS_STRING_READING);
+		dlg->cbPart[i]->AddString(tra);
+		//dlg->cbPart[i]->AddString(L"读取中");
 		dlg->cbPart[i]->SetCurSel(0);
 		if(!dlg->noList[i].loadFile(fn)){
 			dlg->cbPart[i]->DeleteString(0);
-			dlg->cbPart[i]->AddString(L"无");
+			tra.LoadStringW(IDS_STRING_NULL);
+			dlg->cbPart[i]->AddString(tra);
+			//dlg->cbPart[i]->AddString(L"无");
 			dlg->cbPart[i]->SetCurSel(0);
 			continue;
 		}
@@ -268,9 +314,13 @@ UINT CToolAvatar::loadNPKThread(PVOID para){
 			dlg->cbPart[i]->AddString(((tnList[j]==1)?L"(tn)":L"")+charStr[ch]+L"_"+partStr[i]+StrToCStr(KoishiTitle::avaFmt(idList[j])));
 		}
 		dlg->cbPart[i]->DeleteString(0);
-		dlg->cbPart[i]->InsertString(0,L"无");
+		tra.LoadStringW(IDS_STRING_NULL);
+		dlg->cbPart[i]->InsertString(0,tra);
+		//dlg->cbPart[i]->InsertString(0,L"无");
 		dlg->cbPart[i]->SetCurSel(0);
-		dlg->ioSuffix[i] = L"无";
+		tra.LoadStringW(IDS_STRING_NULL);
+		dlg->ioSuffix[i] = tra;
+		//dlg->ioSuffix[i] = L"无";
 		if(dlg->cbPart[i]->GetCount()>1){
 			dlg->cbPart[i]->SetCurSel(1);
 			dlg->cbPart[i]->GetLBText(1, dlg->ioSuffix[i]);	//命名
@@ -395,6 +445,7 @@ void CToolAvatar::OnCbnSelchangeCombo3()
 	// TODO: 在此添加控件通知处理程序代码
 	IMGobject io;
 	CString cs;
+	CString tra;
 	str imgn;
 	b32 temp;
 	m_cPart1.GetLBText(m_cPart1.GetCurSel(), cs);
@@ -410,7 +461,9 @@ void CToolAvatar::OnCbnSelchangeCombo3()
 			}
 		}else{
 			m_cPalette1.EnableWindow(false);
-			m_cPalette1.AddString(L"非V6");
+			tra.LoadStringW(IDS_STRING_NOTV6);
+			m_cPalette1.AddString(tra);
+			//m_cPalette1.AddString(L"非V6");
 		}
 		m_cPalette1.SetCurSel(0);
 	}
@@ -423,6 +476,7 @@ void CToolAvatar::OnCbnSelchangeCombo4()
 	// TODO: 在此添加控件通知处理程序代码
 	IMGobject io;
 	CString cs;
+	CString tra;
 	str imgn;
 	b32 temp;
 	m_cPart2.GetLBText(m_cPart2.GetCurSel(), cs);
@@ -438,7 +492,9 @@ void CToolAvatar::OnCbnSelchangeCombo4()
 			}
 		}else{
 			m_cPalette2.EnableWindow(false);
-			m_cPalette2.AddString(L"非V6");
+			tra.LoadStringW(IDS_STRING_NOTV6);
+			m_cPalette2.AddString(tra);
+			//m_cPalette2.AddString(L"非V6");
 		}
 		m_cPalette2.SetCurSel(0);
 	}
@@ -451,6 +507,7 @@ void CToolAvatar::OnCbnSelchangeCombo5()
 	// TODO: 在此添加控件通知处理程序代码
 	IMGobject io;
 	CString cs;
+	CString tra;
 	str imgn;
 	b32 temp;
 	m_cPart3.GetLBText(m_cPart3.GetCurSel(), cs);
@@ -466,7 +523,9 @@ void CToolAvatar::OnCbnSelchangeCombo5()
 			}
 		}else{
 			m_cPalette3.EnableWindow(false);
-			m_cPalette3.AddString(L"非V6");
+			tra.LoadStringW(IDS_STRING_NOTV6);
+			m_cPalette3.AddString(tra);
+			//m_cPalette3.AddString(L"非V6");
 		}
 		m_cPalette3.SetCurSel(0);
 	}
@@ -479,6 +538,7 @@ void CToolAvatar::OnCbnSelchangeCombo6()
 	// TODO: 在此添加控件通知处理程序代码
 	IMGobject io;
 	CString cs;
+	CString tra;
 	str imgn;
 	b32 temp;
 	m_cPart4.GetLBText(m_cPart4.GetCurSel(), cs);
@@ -494,7 +554,9 @@ void CToolAvatar::OnCbnSelchangeCombo6()
 			}
 		}else{
 			m_cPalette4.EnableWindow(false);
-			m_cPalette4.AddString(L"非V6");
+			tra.LoadStringW(IDS_STRING_NOTV6);
+			m_cPalette4.AddString(tra);
+			//m_cPalette4.AddString(L"非V6");
 		}
 		m_cPalette4.SetCurSel(0);
 	}
@@ -507,6 +569,7 @@ void CToolAvatar::OnCbnSelchangeCombo7()
 	// TODO: 在此添加控件通知处理程序代码
 	IMGobject io;
 	CString cs;
+	CString tra;
 	str imgn;
 	b32 temp;
 	m_cPart5.GetLBText(m_cPart5.GetCurSel(), cs);
@@ -522,7 +585,9 @@ void CToolAvatar::OnCbnSelchangeCombo7()
 			}
 		}else{
 			m_cPalette5.EnableWindow(false);
-			m_cPalette5.AddString(L"非V6");
+			tra.LoadStringW(IDS_STRING_NOTV6);
+			m_cPalette5.AddString(tra);
+			//m_cPalette5.AddString(L"非V6");
 		}
 		m_cPalette5.SetCurSel(0);
 	}
@@ -535,6 +600,7 @@ void CToolAvatar::OnCbnSelchangeCombo8()
 	// TODO: 在此添加控件通知处理程序代码
 	IMGobject io;
 	CString cs;
+	CString tra;
 	str imgn;
 	b32 temp;
 	m_cPart6.GetLBText(m_cPart6.GetCurSel(), cs);
@@ -550,7 +616,9 @@ void CToolAvatar::OnCbnSelchangeCombo8()
 			}
 		}else{
 			m_cPalette6.EnableWindow(false);
-			m_cPalette6.AddString(L"非V6");
+			tra.LoadStringW(IDS_STRING_NOTV6);
+			m_cPalette6.AddString(tra);
+			//m_cPalette6.AddString(L"非V6");
 		}
 		m_cPalette6.SetCurSel(0);
 	}
@@ -563,6 +631,7 @@ void CToolAvatar::OnCbnSelchangeCombo9()
 	// TODO: 在此添加控件通知处理程序代码
 	IMGobject io;
 	CString cs;
+	CString tra;
 	str imgn;
 	b32 temp;
 	m_cPart7.GetLBText(m_cPart7.GetCurSel(), cs);
@@ -578,7 +647,9 @@ void CToolAvatar::OnCbnSelchangeCombo9()
 			}
 		}else{
 			m_cPalette7.EnableWindow(false);
-			m_cPalette7.AddString(L"非V6");
+			tra.LoadStringW(IDS_STRING_NOTV6);
+			m_cPalette7.AddString(tra);
+			//m_cPalette7.AddString(L"非V6");
 		}
 		m_cPalette7.SetCurSel(0);
 	}
@@ -591,6 +662,7 @@ void CToolAvatar::OnCbnSelchangeCombo10()
 	// TODO: 在此添加控件通知处理程序代码
 	IMGobject io;
 	CString cs;
+	CString tra;
 	str imgn;
 	b32 temp;
 	m_cPart8.GetLBText(m_cPart8.GetCurSel(), cs);
@@ -606,7 +678,9 @@ void CToolAvatar::OnCbnSelchangeCombo10()
 			}
 		}else{
 			m_cPalette8.EnableWindow(false);
-			m_cPalette8.AddString(L"非V6");
+			tra.LoadStringW(IDS_STRING_NOTV6);
+			m_cPalette8.AddString(tra);
+			//m_cPalette8.AddString(L"非V6");
 		}
 		m_cPalette8.SetCurSel(0);
 	}
@@ -619,6 +693,7 @@ void CToolAvatar::OnCbnSelchangeCombo11()
 	// TODO: 在此添加控件通知处理程序代码
 	IMGobject io;
 	CString cs;
+	CString tra;
 	str imgn;
 	b32 temp;
 	m_cPart9.GetLBText(m_cPart9.GetCurSel(), cs);
@@ -636,7 +711,9 @@ void CToolAvatar::OnCbnSelchangeCombo11()
 			}
 		}else{
 			m_cPalette9.EnableWindow(false);
-			m_cPalette9.AddString(L"非V6");
+			tra.LoadStringW(IDS_STRING_NOTV6);
+			m_cPalette9.AddString(tra);
+			//m_cPalette9.AddString(L"非V6");
 		}
 		m_cPalette9.SetCurSel(0);
 	}
@@ -649,6 +726,7 @@ void CToolAvatar::OnCbnSelchangeCombo12()
 	// TODO: 在此添加控件通知处理程序代码
 	IMGobject io;
 	CString cs;
+	CString tra;
 	str imgn;
 	b32 temp;
 	m_cPart10.GetLBText(m_cPart10.GetCurSel(), cs);
@@ -664,7 +742,9 @@ void CToolAvatar::OnCbnSelchangeCombo12()
 			}
 		}else{
 			m_cPalette10.EnableWindow(false);
-			m_cPalette10.AddString(L"非V6");
+			tra.LoadStringW(IDS_STRING_NOTV6);
+			m_cPalette10.AddString(tra);
+			//m_cPalette10.AddString(L"非V6");
 		}
 		m_cPalette10.SetCurSel(0);
 	}
@@ -675,7 +755,11 @@ void CToolAvatar::OnCbnSelchangeCombo12()
 void CToolAvatar::OnBnClickedButton15()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	MessageBox(L"只要指定文件夹即可以使用的纸娃娃系统。\r\bn允许按照时装ID浏览时装效果，也可以将浏览的时装添加到EX里进行编辑。\r\n --By kfu(colg)");
+	CString info, title;
+	title.LoadStringW(IDS_MESSAGE_TITLE);
+	info.LoadStringW(IDS_STRING_DRESSINGROOMINTRODUCTION);
+	MessageBox(info, title);
+	//MessageBox(L"只要指定文件夹即可以使用的纸娃娃系统。\r\bn允许按照时装ID浏览时装效果，也可以将浏览的时装添加到EX里进行编辑。\r\n --By kfu(colg)");
 }
 
 
@@ -693,8 +777,12 @@ void CToolAvatar::OnBnClickedButton3()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	IMGobject io;
+	CString info, title;
+	title.LoadStringW(IDS_MESSAGE_TITLE);
 	if(!noList[KoishiTitle::mp_skin-1].IMGextract(0,io)){
-		MessageBox(L"当前皮肤NPK文件未识别，因而无法识别帧数。",L"提示喵");
+		info.LoadStringW(IDS_STRING_FRAMENOTRECOGNIZED);
+		MessageBox(info, title);
+		//MessageBox(L"当前皮肤NPK文件未识别，因而无法识别帧数。",L"提示喵");
 		return;
 	}
 	frmID++;
@@ -778,6 +866,8 @@ void CToolAvatar::OnBnClickedButton14()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CExRabbitDlg *dlg = (CExRabbitDlg*)GetParent();
+	CString info, title;
+	title.LoadStringW(IDS_MESSAGE_TITLE);
 	dlg->no.release();
 	dlg->no.create();
 	dlg->fileNPKname = L"newNPK.npk";
@@ -788,7 +878,9 @@ void CToolAvatar::OnBnClickedButton14()
 	dlg->updateIMGlist();
 	for(int i = 0;i<imgCount;i++)
 		dlg->no.IMGinsert(0, ioList[i], ioName[i]);
-	MessageBox(L"已经将有效IMG都弄到EX里了喵！",L"提示喵");
+	info.LoadStringW(IDS_STRING_ALLIMPORTED);
+	MessageBox(info, title);
+	//MessageBox(L"已经将有效IMG都弄到EX里了喵！",L"提示喵");
 	dlg->updateIMGlist();
 	dlg->updateNPKInfo();
 }
@@ -834,8 +926,12 @@ void CToolAvatar::OnCbnSelchangeCombo13()
 	}; 
 	frmID = m[(m_cType.GetCurSel()-1)%13][m_cPart13.GetCurSel()%11];
 	IMGobject io;
+	CString info, title;
+	title.LoadStringW(IDS_MESSAGE_TITLE);
 	if(!noList[KoishiTitle::mp_skin-1].IMGextract(0,io)){
-		MessageBox(L"当前皮肤NPK文件未识别，因而无法动作。",L"提示喵");
+		info.LoadStringW(IDS_STRING_ACTIONNOTRECOGNIZED);
+		MessageBox(info, title);
+		//MessageBox(L"当前皮肤NPK文件未识别，因而无法动作。",L"提示喵");
 		return;
 	}
 	if(frmID>io.indexCount-1)

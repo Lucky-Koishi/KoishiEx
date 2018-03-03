@@ -95,6 +95,7 @@ void CDlgInsert4::OnBnClickedOk()
 	}
 	b8 a,r,g,b;
 	CString cstr;
+	CString info, title;
 	m_e1.GetWindowText(cstr);
 	a = (b8)_ttoi(cstr);
 	m_e2.GetWindowText(cstr);
@@ -106,10 +107,16 @@ void CDlgInsert4::OnBnClickedOk()
 	color clr(a,r,g,b);
 	if(iORr == __INSERT){
 		dlg->io.CLRinsert(pos, clr, clrID);
-		MessageBox(L"插入颜色完毕！",L"提示喵");
+		info.LoadStringW(IDS_STRING_INSERTCOLORFINISHED);
+		title.LoadStringW(IDS_MESSAGE_TITLE);
+		MessageBox(info, title);
+		//MessageBox(L"插入颜色完毕！",L"提示喵");
 	}else{
 		dlg->io.CLRreplace(pos, clr, clrID);
-		MessageBox(L"替换颜色完毕！",L"提示喵");
+		info.LoadStringW(IDS_STRING_REPLACECOLORFINISHED);
+		title.LoadStringW(IDS_MESSAGE_TITLE);
+		MessageBox(info, title);
+		//MessageBox(L"替换颜色完毕！",L"提示喵");
 	}
 	dlg->updateCLRlist();
 	dlg->updateNPKInfo();

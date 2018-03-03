@@ -64,12 +64,25 @@ BOOL CDlgExpand::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化
 	m_cb.ResetContent();
-	m_cb.AddString(L"扩充当前帧");
-	m_cb.AddString(L"裁切当前帧");
-	m_cb.AddString(L"修整当前帧");
-	m_cb.AddString(L"根据坐标扩充/裁切当前帧");
-	m_cb.AddString(L"根据坐标扩充/裁切所有帧");
-	m_cb.AddString(L"修整所有帧");
+	//m_cb.AddString(L"扩充当前帧");
+	//m_cb.AddString(L"裁切当前帧");
+	//m_cb.AddString(L"修整当前帧");
+	//m_cb.AddString(L"根据坐标扩充/裁切当前帧");
+	//m_cb.AddString(L"根据坐标扩充/裁切所有帧");
+	//m_cb.AddString(L"修整所有帧");
+	CString tmp;
+	tmp.LoadStringW(IDS_STRING_EXPANDCURRENTFRAME);
+	m_cb.AddString(tmp);
+	tmp.LoadStringW(IDS_STRING_CROPCURRENTFRAME);
+	m_cb.AddString(tmp);
+	tmp.LoadStringW(IDS_STRING_FIXCURRENTFRAME);
+	m_cb.AddString(tmp);
+	tmp.LoadStringW(IDS_STRING_EXPANDORFIXCURRENTFRAMEBYCOORDINATES);
+	m_cb.AddString(tmp);
+	tmp.LoadStringW(IDS_STRING_EXPANDORFIXALLFRAMESBYCOORDINATES);
+	m_cb.AddString(tmp);
+	tmp.LoadStringW(IDS_STRING_FIXALLFRAMES);
+	m_cb.AddString(tmp);
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }
@@ -77,6 +90,7 @@ BOOL CDlgExpand::OnInitDialog()
 void CDlgExpand::OnCbnSelchangeCombo2()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	CString tmp;
 	m_c1.EnableWindow(true);
 	m_c2.EnableWindow(true);
 	m_c3.EnableWindow(true);
@@ -92,20 +106,36 @@ void CDlgExpand::OnCbnSelchangeCombo2()
 	m_b4.GetWindowText(cstr8);
 	switch(m_cb.GetCurSel()){
 	case 0:
-		m_s1.SetWindowText(L"向左扩充px");
-		m_s2.SetWindowText(L"向上扩充px");
-		m_s3.SetWindowText(L"向右扩充px");
-		m_s4.SetWindowText(L"向下扩充px");
+		tmp.LoadStringW(IDS_STRING_LEFTEXPANDPX);
+		m_s1.SetWindowText(tmp);
+		tmp.LoadStringW(IDS_STRING_UPEXPANDPX);
+		m_s2.SetWindowText(tmp);
+		tmp.LoadStringW(IDS_STRING_RIGHTEXPANDPX);
+		m_s3.SetWindowText(tmp);
+		tmp.LoadStringW(IDS_STRING_DOWNEXPANDPX);
+		m_s4.SetWindowText(tmp);
+		//m_s1.SetWindowText(L"向左扩充px");
+		//m_s2.SetWindowText(L"向上扩充px");
+		//m_s3.SetWindowText(L"向右扩充px");
+		//m_s4.SetWindowText(L"向下扩充px");
 		m_c1.SetWindowText(L"0");
 		m_c2.SetWindowText(L"0");
 		m_c3.SetWindowText(L"0");
 		m_c4.SetWindowText(L"0");
 		break;
 	case 1:
-		m_s1.SetWindowText(L"左边裁切px");
-		m_s2.SetWindowText(L"上边裁切px");
-		m_s3.SetWindowText(L"右边裁切px");
-		m_s4.SetWindowText(L"下边裁切px");
+		tmp.LoadStringW(IDS_STRING_LEFTCROPPX);
+		m_s1.SetWindowText(tmp);
+		tmp.LoadStringW(IDS_STRING_UPCropPX);
+		m_s2.SetWindowText(tmp);
+		tmp.LoadStringW(IDS_STRING_RIGHTCROPPX);
+		m_s3.SetWindowText(tmp);
+		tmp.LoadStringW(IDS_STRING_DOWNCROPPX);
+		m_s4.SetWindowText(tmp);
+		//m_s1.SetWindowText(L"左边裁切px");
+		//m_s2.SetWindowText(L"上边裁切px");
+		//m_s3.SetWindowText(L"右边裁切px");
+		//m_s4.SetWindowText(L"下边裁切px");
 		m_c1.SetWindowText(L"0");
 		m_c2.SetWindowText(L"0");
 		m_c3.SetWindowText(L"0");
@@ -122,20 +152,36 @@ void CDlgExpand::OnCbnSelchangeCombo2()
 		m_c4.SetWindowText(L"");
 		break;
 	case 3:
-		m_s1.SetWindowText(L"左上X坐标");
-		m_s2.SetWindowText(L"左上Y坐标");
-		m_s3.SetWindowText(L"右下X坐标");
-		m_s4.SetWindowText(L"右下Y坐标");
+		tmp.LoadStringW(IDS_STRING_UPPERLEFTX);
+		m_s1.SetWindowText(tmp);
+		tmp.LoadStringW(IDS_STRING_UPPERLEFTY);
+		m_s2.SetWindowText(tmp);
+		tmp.LoadStringW(IDS_STRING_LOWERRIGHTX);
+		m_s3.SetWindowText(tmp);
+		tmp.LoadStringW(IDS_STRING_LOWERRIGHTY);
+		m_s4.SetWindowText(tmp);
+		//m_s1.SetWindowText(L"左上X坐标");
+		//m_s2.SetWindowText(L"左上Y坐标");
+		//m_s3.SetWindowText(L"右下X坐标");
+		//m_s4.SetWindowText(L"右下Y坐标");
 		m_c1.SetWindowText(cstr1);
 		m_c2.SetWindowText(cstr2);
 		m_c3.SetWindowText(cstr3);
 		m_c4.SetWindowText(cstr4);
 		break;
 	case 4:
-		m_s1.SetWindowText(L"左上X坐标");
-		m_s2.SetWindowText(L"左上Y坐标");
-		m_s3.SetWindowText(L"右下X坐标");
-		m_s4.SetWindowText(L"右下Y坐标");
+		tmp.LoadStringW(IDS_STRING_UPPERLEFTX);
+		m_s1.SetWindowText(tmp);
+		tmp.LoadStringW(IDS_STRING_UPPERLEFTY);
+		m_s2.SetWindowText(tmp);
+		tmp.LoadStringW(IDS_STRING_LOWERRIGHTX);
+		m_s3.SetWindowText(tmp);
+		tmp.LoadStringW(IDS_STRING_LOWERRIGHTY);
+		m_s4.SetWindowText(tmp);
+		//m_s1.SetWindowText(L"左上X坐标");
+		//m_s2.SetWindowText(L"左上Y坐标");
+		//m_s3.SetWindowText(L"右下X坐标");
+		//m_s4.SetWindowText(L"右下Y坐标");
 		m_c1.SetWindowText(cstr5);
 		m_c2.SetWindowText(cstr6);
 		m_c3.SetWindowText(cstr7);
@@ -160,6 +206,7 @@ void CDlgExpand::OnBnClickedOk()
 	// TODO: 在此添加控件通知处理程序代码
 	CExRabbitDlg *dlg = (CExRabbitDlg *)GetParent();
 	CString cstr1, cstr2, cstr3, cstr4;
+	CString info, title;
 	int x1,y1,x2,y2;
 	m_c1.GetWindowText(cstr1);
 	m_c2.GetWindowText(cstr2);
@@ -174,7 +221,10 @@ void CDlgExpand::OnBnClickedOk()
 	case 0:
 		{
 			if(x1<0 || x2<0 || y1< 0 || y2<0){
-				MessageBox(L"扩充距离不能为负喵！",L"提示喵");
+				info.LoadStringW(IDS_STRING_EXPANDNOTNEGATIVE);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"扩充距离不能为负喵！",L"提示喵");
 				return;
 			}
 			matrix mat,mat2;
@@ -196,13 +246,19 @@ void CDlgExpand::OnBnClickedOk()
 			s.release();
 			mat.release();
 			mat2.release();
-			MessageBox(L"扩充完毕了喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_EXPANDFINISHED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"扩充完毕了喵！",L"提示喵");
 		}
 		break;
 	case 1:
 		{
 			if(x1<0 || x2<0 || y1< 0 || y2<0){
-				MessageBox(L"裁切距离不能为负喵！",L"提示喵");
+				info.LoadStringW(IDS_STRING_EXPANDNOTNEGATIVE);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"裁切距离不能为负喵！",L"提示喵");
 				return;
 			}
 			matrix mat,mat2;
@@ -210,7 +266,10 @@ void CDlgExpand::OnBnClickedOk()
 			PICinfo pi;
 			dlg->io.GetPICInfo(row, pi);
 			if(x1+x2>=pi.get_picSize().get_W()||y1+y2>=pi.get_picSize().get_H()){
-				MessageBox(L"如果就这样裁切，图片就会没掉喵！\r\n请重新调整裁切距离喵！",L"提示喵");
+				info.LoadStringW(IDS_STRING_REQUIREREADJUSTCROP);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"如果就这样裁切，图片就会没掉喵！\r\n请重新调整裁切距离喵！",L"提示喵");
 				return;
 			}
 			dlg->io.PICextract(row, mat, 0);
@@ -228,7 +287,10 @@ void CDlgExpand::OnBnClickedOk()
 			s.release();
 			mat.release();
 			mat2.release();
-			MessageBox(L"裁切完毕了喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_CROPFINISHED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"裁切完毕了喵！",L"提示喵");
 		}
 		break;
 	case 2:
@@ -243,7 +305,10 @@ void CDlgExpand::OnBnClickedOk()
 			mat.getElemVertBound(y1_,y2_);
 			if(x1_>=x2_){
 				//完全空
-				MessageBox(L"空帧无法进行修整喵！",L"提示喵");
+				info.LoadStringW(IDS_STRING_NULLFRAMEUNABLETOFIX);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"空帧无法进行修整喵！",L"提示喵");
 			}else{
 				mat.getSubMatrix(mat2, y1_, y2_+1, x1_, x2_+1);
 				dlg->io.PICpreprocess(mat2, s, pi);
@@ -256,7 +321,10 @@ void CDlgExpand::OnBnClickedOk()
 					dlg->m_lPicture.SetItemText(row, 3, SzToCStr(dlg->io.PICcontent[row].get_picSize()));
 					dlg->m_lPicture.SetItemText(row, 4, SzToCStr(dlg->io.PICcontent[row].get_frmSize()));
 				}
-				MessageBox(L"修整完毕了喵！",L"提示喵");
+				info.LoadStringW(IDS_STRING_FIXFINISHED);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"修整完毕了喵！",L"提示喵");
 			}
 			s.release();
 			mat.release();
@@ -266,7 +334,10 @@ void CDlgExpand::OnBnClickedOk()
 	case 3:
 		{
 			if(x1>x2 || y1>y2){
-				MessageBox(L"左上角坐标必须在右下角坐标的左上方喵！",L"提示喵");
+				info.LoadStringW(IDS_STRING_UPPERLEFTREQUIRY);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"左上角坐标必须在右下角坐标的左上方喵！",L"提示喵");
 				return;
 			}
 			matrix mat,mat2,mat3;
@@ -301,13 +372,19 @@ void CDlgExpand::OnBnClickedOk()
 			mat.release();
 			mat2.release();
 			mat3.release();
-			MessageBox(L"处理完毕了喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_FIXFINISHED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"处理完毕了喵！",L"提示喵");
 		}
 		break;
 	case 4:
 		{
 			if(x1>x2 || y1>y2){
-				MessageBox(L"左上角坐标必须在右下角坐标的左上方喵！",L"提示喵");
+				info.LoadStringW(IDS_STRING_UPPERLEFTREQUIRY);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"左上角坐标必须在右下角坐标的左上方喵！",L"提示喵");
 				return;
 			}
 			dlg->canvasPara.x1 = x1;

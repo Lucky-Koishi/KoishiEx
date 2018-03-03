@@ -65,6 +65,7 @@ public:
 	static UINT drawThread_av(PVOID para);
 	static UINT drawThread_bg(PVOID para);
 	static UINT drawThread_fg(PVOID para);
+	CString LoadStringToOutput(__in UINT id);
 	CProgressCtrl m_p1;
 	afx_msg void OnCbnSelchangeCombo3();
 	afx_msg void OnCbnSelchangeCombo4();

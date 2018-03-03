@@ -194,7 +194,11 @@ void CDlgSetpara::OnBnClickedOk()
 			}
 		}
 	}
-	MessageBox(L"修改完毕！",L"提示喵！");
+	CString info, title;
+	info.LoadStringW(IDS_STRING_MODIFYFINISHED);
+	title.LoadStringW(IDS_MESSAGE_TITLE);
+	MessageBox(info, title);
+	//MessageBox(L"修改完毕！",L"提示喵！");
 	dlg->updateNPKInfo();
 	dlg->updateIMGInfo();
 	dlg->updatePICInfo();

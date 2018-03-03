@@ -153,6 +153,10 @@ void CDlgInsert2::OnBnClickedButton1()
 		_T("索引数据(*.pid)|*.pid"),
 		_T("dds图像(*.dds)|*.dds")
 	}; 
+	listExt[0].LoadStringW(IDS_STRING_PNGTYPE);
+	listExt[1].LoadStringW(IDS_STRING_PNGTYPE);
+	listExt[2].LoadStringW(IDS_STRING_INDEXTYPE);
+	listExt[3].LoadStringW(IDS_STRING_DDSTYPE);
 	CString defExt = listExt[mode];
 	CString extFilter = listExt[mode] + L"||";
 	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
@@ -207,6 +211,7 @@ void CDlgInsert2::OnBnClickedOk()
 	stream s,s1;
 	CString cstr;
 	CString cstr1,cstr2;
+	CString info, title;
 	str fn;
 	matrix mat;
 	i32 i;
@@ -220,28 +225,51 @@ void CDlgInsert2::OnBnClickedOk()
 		i = _ttoi(cstr);
 		if(iORr == CDlgInsert2::__INSERT){
 			if(i>dlg->io.indexCount || i<0){
-				MessageBox(L"添加该索引项后，不存在ID为"+cstr+L"的索引项喵！",L"提示喵");
+				info.LoadStringW(IDS_INDEXNOTEXiST);
+				info.Format(info, cstr);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"添加该索引项后，不存在ID为"+cstr+L"的索引项喵！",L"提示喵");
 				return;
 			}
 			if(i<pos && dlg->io.PICcontent[i].get_format() == LINK){
-				MessageBox(L"添加该索引项后，ID为"+cstr+L"的索引项是指向型索引项喵！\r\n不能再由其他指向型索引项去指向它喵！",L"提示喵");
+				info.LoadStringW(IDS_STRING_INDEXLINK);
+				info.Format(info, cstr);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"添加该索引项后，ID为"+cstr+L"的索引项是指向型索引项喵！\r\n不能再由其他指向型索引项去指向它喵！",L"提示喵");
 				return;
 			}
 			if(pos == -1 || i==pos || i > pos && dlg->io.PICcontent[i-1].get_format() == LINK){
-				MessageBox(L"添加该索引项后，ID为"+cstr+L"的索引项是指向型索引项喵！\r\n不能再由其他指向型索引项去指向它喵！",L"提示喵");
+				info.LoadStringW(IDS_STRING_INDEXLINK);
+				info.Format(info, cstr);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"添加该索引项后，ID为"+cstr+L"的索引项是指向型索引项喵！\r\n不能再由其他指向型索引项去指向它喵！",L"提示喵");
 				return;
 			}
 		}else{
 			if(i>dlg->io.indexCount-1 || i<0){
-				MessageBox(L"不存在ID为"+cstr+L"的索引项喵！",L"提示喵");
+				info.LoadStringW(IDS_INDEXNOTEXiST);
+				info.Format(info, cstr);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"不存在ID为"+cstr+L"的索引项喵！",L"提示喵");
 				return;
 			}
 			if(dlg->io.PICcontent[i].get_format() == LINK){
-				MessageBox(L"ID为"+cstr+L"的索引项已经是指向型索引项喵！\r\n不能再由其他指向型索引项去指向它喵！",L"提示喵");
+				info.LoadStringW(IDS_STRING_ALREADYINDEXLINK);
+				info.Format(info, cstr);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"ID为"+cstr+L"的索引项已经是指向型索引项喵！\r\n不能再由其他指向型索引项去指向它喵！",L"提示喵");
 				return;
 			}
 			if(i==pos){
-				MessageBox(L"指向型索引项不能指向自己喵！",L"提示喵");
+				info.LoadStringW(IDS_STRING_UNABLETOLINKTOITSELF);
+				title.LoadStringW(IDS_MESSAGE_TITLE);
+				MessageBox(info, title);
+				//MessageBox(L"指向型索引项不能指向自己喵！",L"提示喵");
 				return;
 			}
 		}
@@ -256,11 +284,17 @@ void CDlgInsert2::OnBnClickedOk()
 		m_ed1.GetWindowText(cstr);
 		CStrToStr(cstr, fn);
 		if(!mat.loadPNG(fn)){
-			MessageBox(L"读取PNG文件失败喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_FAILEDTOREADPNGFILE);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"读取PNG文件失败喵！",L"提示喵");
 			return;
 		}
 		if(!dlg->io.PICpreprocess(mat, s, pi)){
-			MessageBox(L"颜色表溢出，确保插入的PNG所含颜色与该IMG调色板所含颜色总数小于256！",L"提示喵");
+			info.LoadStringW(IDS_COLORSHEETOVERFLOW);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"颜色表溢出，确保插入的PNG所含颜色与该IMG调色板所含颜色总数小于256！",L"提示喵");
 			return;
 		}
 		m_ed4.GetWindowText(cstr1);
@@ -279,12 +313,18 @@ void CDlgInsert2::OnBnClickedOk()
 		m_ed1.GetWindowText(cstr);
 		CStrToStr(cstr, fn);
 		if(!s.loadFile(fn)){
-			MessageBox(L"无法读取文件喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_FAILEDTOREADFILE);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"无法读取文件喵！",L"提示喵");
 			return;
 		}
 		s.read(i1);
 		if((b32)i1 != 0x73696F4B){
-			MessageBox(L"该PID未能识别喵！",L"提示喵！");
+			info.LoadStringW(IDS_STRING_PIDNOTRECOGNIZED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"该PID未能识别喵！",L"提示喵！");
 			return;
 		}
 		s.read(i1);
@@ -313,7 +353,11 @@ void CDlgInsert2::OnBnClickedOk()
 		m_ed8.GetWindowText(cstr);//DDSUSED
 		i = _ttoi(cstr);
 		if(i>(i32)dlg->io.DDScontent.size()-1){
-			MessageBox(L"不存在ID为"+cstr+L"的DDS图像喵！\r\n最大的DDS图像ID为"+NumToCStr(dlg->io.DDScontent.size()-1)+L"喵！",L"提示喵");
+			info.LoadStringW(IDS_DDSIMAGENOTEXIST);
+			info.Format(info, cstr, NumToCStr(dlg->io.DDScontent.size() - 1));
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"不存在ID为"+cstr+L"的DDS图像喵！\r\n最大的DDS图像ID为"+NumToCStr(dlg->io.DDScontent.size()-1)+L"喵！",L"提示喵");
 			return;
 		}
 		dlg->io.GetDDSInfo(i, di);
@@ -329,11 +373,17 @@ void CDlgInsert2::OnBnClickedOk()
 		x2 = _ttoi(cstr1);
 		y2 = _ttoi(cstr2);
 		if(x1>=x2 || y1>=y2){
-			MessageBox(L"右下角的坐标两点必须都大于左上角的坐标喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_LOWERTWOPOINTSREQUIRY);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"右下角的坐标两点必须都大于左上角的坐标喵！",L"提示喵");
 			return;
 		}
 		if(x2>=(i32)di.get_width() || y2>=(i32)di.get_height() || x1<=0 || y1<=0){
-			MessageBox(L"所有坐标点必须都位于DDS图像内喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_POINTSINDDSREQUIRY);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"所有坐标点必须都位于DDS图像内喵！",L"提示喵");
 			return;
 		}
 		pi.set_DDSpointLT(point(x1,y1));
@@ -354,10 +404,16 @@ void CDlgInsert2::OnBnClickedOk()
 		break;
 	}
 	if(iORr == CDlgInsert2::__INSERT){
-		MessageBox(L"插入成功喵！",L"提示喵！");
+		info.LoadStringW(IDS_STRING_INSERTFINISHED);
+		title.LoadStringW(IDS_MESSAGE_TITLE);
+		MessageBox(info, title);
+		//MessageBox(L"插入成功喵！",L"提示喵！");
 		dlg->m_lPicture.InsertItem(pos, NumToCStr(pos));
 	}else{
-		MessageBox(L"替换成功喵！",L"提示喵！");
+		info.LoadStringW(IDS_STRING_REPLACEFINISHED);
+		title.LoadStringW(IDS_MESSAGE_TITLE);
+		MessageBox(info, title);
+		//MessageBox(L"替换成功喵！",L"提示喵！");
 	}
 	if(dlg->io.PICcontent[pos].get_format() == LINK){
 		dlg->m_lPicture.SetItemText(pos, 1, FmtToCStr(dlg->io.PICcontent[pos].get_format(), dlg->io.version) + NumToCStr(dlg->io.PICcontent[pos].get_linkTo()));

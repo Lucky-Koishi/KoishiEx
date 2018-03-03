@@ -87,6 +87,8 @@ void CDlgInsert3::OnBnClickedButton1()
 		_T("dds图像(*.dds)|*.dds"),
 		_T("png图像(*.png)|*.png")
 	}; 
+	listExt[0].LoadStringW(IDS_STRING_DDSTYPE);
+	listExt[1].LoadStringW(IDS_STRING_PNGTYPE);
 	CString defExt = listExt[mode];
 	CString extFilter = listExt[mode] + L"||";
 	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
@@ -102,6 +104,7 @@ void CDlgInsert3::OnBnClickedOk()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CExRabbitDlg* dlg = (CExRabbitDlg*)GetParent();
+	CString info, title;
 	int pos = 0;
 	if(m_c1.GetCheck()){
 		pos = dlg->m_lDDS.GetSelectionMark();
@@ -122,11 +125,17 @@ void CDlgInsert3::OnBnClickedOk()
 		m_ed1.GetWindowText(cstr);
 		CStrToStr(cstr, fn);
 		if(!s1.loadFile(fn)){
-			MessageBox(L"无法打开文件喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_FAILEDTOREADFILE);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"无法打开文件喵！",L"提示喵");
 			return;
 		}
 		if(!d.load(s1)){
-			MessageBox(L"DDS文件无效喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_DDSFILEINVALID);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"DDS文件无效喵！",L"提示喵");
 			return;
 		}
 		s1.compressData(s, COMP_ZLIB);
@@ -142,7 +151,10 @@ void CDlgInsert3::OnBnClickedOk()
 			di.set_fourCCID(DXT5);
 			break;
 		default:
-			MessageBox(L"DDS格式不支持喵！只支持DX1、DXT3和DXT5喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_DDSNOTSUPPORTED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"DDS格式不支持喵！只支持DX1、DXT3和DXT5喵！",L"提示喵");
 			return;
 		}
 		di.set_lengthOfDDS(s1.getLen());
@@ -151,10 +163,16 @@ void CDlgInsert3::OnBnClickedOk()
 		di.set_height(d.getHeader()->height);
 		if(iORr == __INSERT){
 			dlg->io.DDSinsert(pos, di, s);
-			MessageBox(L"插入DDS贴图成功喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_INSERTDDSFINISHED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"插入DDS贴图成功喵！",L"提示喵");
 		}else{
 			dlg->io.DDSreplace(pos, di, s);
-			MessageBox(L"替换DDS贴图成功喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_REPLACEDDSFINISHED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"替换DDS贴图成功喵！",L"提示喵");
 		}
 		break;
 	case 1:
@@ -162,19 +180,31 @@ void CDlgInsert3::OnBnClickedOk()
 		m_ed1.GetWindowText(cstr);
 		CStrToStr(cstr, fn);
 		if(!mat.loadPNG(fn)){
-			MessageBox(L"读取PNG文件失败喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_FAILEDTOREADPNGFILE);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"读取PNG文件失败喵！",L"提示喵");
 			return;
 		}
 		if(!dlg->io.DDSpreprocess(mat, s, di)){
-			MessageBox(L"转换为DDS失败！",L"提示喵");
+			info.LoadStringW(IDS_STRING_FAILEDTOCONVERTTODDS);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"转换为DDS失败！",L"提示喵");
 			return;
 		}
 		if(iORr == __INSERT){
 			dlg->io.DDSinsert(pos, di, s);
-			MessageBox(L"插入DDS贴图成功喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_INSERTDDSFINISHED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"插入DDS贴图成功喵！",L"提示喵");
 		}else{
 			dlg->io.DDSreplace(pos, di, s);
-			MessageBox(L"替换DDS贴图成功喵！",L"提示喵");
+			info.LoadStringW(IDS_STRING_REPLACEDDSFINISHED);
+			title.LoadStringW(IDS_MESSAGE_TITLE);
+			MessageBox(info, title);
+			//MessageBox(L"替换DDS贴图成功喵！",L"提示喵");
 		}
 		break;
 	}

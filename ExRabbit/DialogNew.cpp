@@ -60,6 +60,7 @@ void CDialogNew::OnBnClickedCheck1()
 	m_ch6.SetCheck(false);
 	CString info = L"新建一个NPK文件。\r\n";
 	info += L"新建一个不含有任何IMG的NPK文件，您需要自行添加所需要的外部IMG文件。";
+	info.LoadStringW(IDS_STRING_CREATENPKINFO);
 	m_ed1.SetWindowText(info);
 }
 
@@ -76,6 +77,7 @@ void CDialogNew::OnBnClickedCheck2()
 	CString info = L"新建一个拼合方案。\r\n";
 	info += L"拼合方案是类似于NPK的一种结构，不同的是，系统将视其内部IMG为图层，从而按照IMG顺序显示所有贴图。\r\n";
 	info += L"您可以像IMG那样调整每个图层的信息，然后通过浏览来确定最后拼合的效果。\r\n";
+	info.LoadStringW(IDS_STRING_CREATEMERGEINFO);
 	m_ed1.SetWindowText(info);
 }
 
@@ -93,6 +95,7 @@ void CDialogNew::OnBnClickedCheck3()
 	info += L"V2是适用程度最广的IMG文件，可以存储任意类型的图片，但占空间较大。\r\n";
 	info += L"您可以使用V2进行图像添加、替换、拼合等操作，并且除非是计算机环境或软件自身因素导致，执行是一定成功的。\r\n";
 	info += L"您即将建立一个V2的IMG文件，您需要自行添加贴图文件。";
+	info.LoadStringW(IDS_STRING_CREATEV2IMG);
 	m_ed1.SetWindowText(info);
 }
 
@@ -110,6 +113,7 @@ void CDialogNew::OnBnClickedCheck4()
 	info += L"V4是时装适用的IMG文件，以调色板索引方式存储图像。\r\n";
 	info += L"您可以使用V4进行颜色编辑等操作，添加贴图操作也同样支持，但插入贴图颜色过多的话则会执行失败。\r\n";
 	info += L"您即将建立一个V4的IMG文件，您需要自行添加贴图文件和调色板信息，我们建议您使用索引方式添加贴图。";
+	info.LoadStringW(IDS_STRING_CREATEV4IMG);
 	m_ed1.SetWindowText(info);
 }
 
@@ -127,6 +131,7 @@ void CDialogNew::OnBnClickedCheck7()
 	info += L"V5是大部分技能特效适用的IMG文件，以DDS格式存储大图像并且以区域引用方式转换成每个图片帧的小图像。\r\n";
 	info += L"您可以使用V5文件进行DDS操作，建议您使用现成的DDS贴图进行添加、替换操作，本作支持将PNG贴图转化为DDS但会严重失真，应慎用。\r\n";
 	info += L"您即将建立一个V5的IMG文件，您需要自行添加DDS贴图，并通过设置引用DDS标号以及范围来创建普通的帧贴图。";
+	info.LoadStringW(IDS_STRING_CREATEV5IMG);
 	m_ed1.SetWindowText(info);
 }
 
@@ -144,6 +149,7 @@ void CDialogNew::OnBnClickedCheck8()
 	info += L"V6是索引数据相同但调色板不同的若干V4结合而成的组合体，被广泛应用于多种颜色版本的时装文件。\r\n";
 	info += L"您可以使用V6文件进行颜色操作，操作方式跟V4类似，使用V6可以制作与一个V4相同形状但不同颜色款式的IMG。\r\n";
 	info += L"您即将建立一个V6的IMG文件，您需要自行添加颜色方案，并可以像V4那样操作它，但鉴于效率问题，您不能使用添加贴图功能。";
+	info.LoadStringW(IDS_STRING_CREATEV6IMG);
 	m_ed1.SetWindowText(info);
 }
 
@@ -234,7 +240,10 @@ void CDialogNew::OnBnClickedOk()
 		dlg->io.CLRnewPalette();
 		dlg->switchIMGver(dlg->io.version);
 		dlg->m_cbPro.ResetContent();
-		dlg->m_cbPro.AddString(L"调色板方案0");
+		//dlg->m_cbPro.AddString(L"调色板方案0");
+		CString cbProText;
+		cbProText.LoadStringW(IDS_STRING_PALETTE0);
+		dlg->m_cbPro.AddString(cbProText);
 		dlg->m_cbPro.SetCurSel(0);
 		dlg->updateIMGlist();
 		dlg->updatePIClist();
