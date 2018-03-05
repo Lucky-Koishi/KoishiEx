@@ -182,7 +182,7 @@ BOOL CToolAvatar::OnInitDialog()
 	cbPalette[7] = &m_cPalette8;
 	cbPalette[8] = &m_cPalette9;
 	cbPalette[9] = &m_cPalette10;
-	m_e1.SetWindowText(L"K:\\ImagePacks2");
+	m_e1.SetWindowText(L"D:\\Neople\\DFO\\ImagePacks2");
 	m_p1.SetRange32(0,1000);
 	
 	canvas.allocate(220,220);

@@ -585,7 +585,7 @@ BOOL CExRabbitDlg::updateInfo() {
 }
 BOOL CExRabbitDlg::updateIMGInfo() {
 	CString cstr, t;
-	cstr = L"\"" + fileIMGname;
+	cstr = fileIMGname;
 	t.LoadStringW(IDS_STRING_WORDIN);
 	cstr += t + fileNPKname;
 	//cstr += L"\"ÓÚ\""+fileNPKname;
