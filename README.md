@@ -2,7 +2,7 @@
 恋恋のEX API以及兔子版源代码
 
 KoishiEx文件夹是自己做的EXAPI；
-ExRabbit文件夹是兔子版的源代码，目前更新至兔子.2.1。
+ExRabbit文件夹是兔子版的源代码，目前更新至兔子.5.1。
 
 EXAPI是完全开源的，可以随意使用（不过似乎要设置一下ZLIB和LIBPNG相关的一些林林总总东东，比如说debug版本需要忽略特定默认库libcmt.lib等），如果大家发现有什么BUG或者有什么帮助改进API的想法可以联系我 swablu@qq.com 
 对于VS2015以上版本，你需要重新对ZLIB和LIBPNG进行编译，并用编译后的LIB文件替换到源代码里的这些文件后才能使用。
@@ -16,7 +16,7 @@ BUGTRACE.txt记录了兔子版各版本的更新履历。
 Koishi's EX API and the source code of the Rabbit version.
 
 The folder "KoishiEx" is the source code of API made by myself.
-The folder "ExRabbit" is the source code of the Rabbit version, which has currently updated to Rab.2.1.
+The folder "ExRabbit" is the source code of the Rabbit version, which has currently updated to Rab.5.1.
 
 The API is completely opened and can be used freely(But you seem to setup your project for ZLIB and LIBPNG, such as the ignoring default library "libcmt.lib" when using the DEBUG mode, etc.). Please contact me if you find any bugs or have an idea for helping improve the API. Email: swablu@qq.com
 If your Visual Studio's version is VS2015 or higher, you need to recompile ZLIB and LIBPNG and replace the files in source code by the generated files.
