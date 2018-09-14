@@ -22,28 +22,13 @@
     <None Include="res\ExRabbit.ico">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\LOGO.png">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="res\LOGO.bmp">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\icon1.ico">
       <Filter>资源文件</Filter>
     </None>
     <None Include="res\icon2.ico">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\icon3.ico">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="res\icon4.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\Folder_Blue_Rabbit_16px_511716_easyicon.net.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\Folder_White_Rabbit_16px_511717_easyicon.net.ico">
       <Filter>资源文件</Filter>
     </None>
     <None Include="..\BUGtrace.txt" />
@@ -56,7 +41,45 @@
     <None Include="res\iconud.ico">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="..\mplserial.txt" />
+    <None Include="res\icon8.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\pic_icon.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ico00001.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ico00002.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ico00003.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ico00004.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ico00005.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ico00006.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ico00007.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\clr_icon.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ico00008.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\QRCODE.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ico00009.ico">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExRabbit.h">
@@ -74,9 +97,6 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgInsert.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Func.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -89,19 +109,7 @@
     <ClInclude Include="DialogNew.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgInsert2.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="DlgSetpara.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgInsert3.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgInsert4.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgHSV.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DlgSetXY.h">
@@ -116,13 +124,46 @@
     <ClInclude Include="DlgBar.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgCanvas.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="ToolIMGSearch.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ToolAvatar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolDict.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgSetting.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolIndexing.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgInsertIMG.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgInsertPicture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgInsertColor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgInsertTexture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogImportFrame.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogAbout.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolSPK.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolForceEx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgLoseBlack.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -134,9 +175,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgInsert.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Func.cpp">
@@ -151,19 +189,7 @@
     <ClCompile Include="DialogNew.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgInsert2.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="DlgSetpara.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgInsert3.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgInsert4.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgHSV.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="DlgSetXY.cpp">
@@ -178,13 +204,46 @@
     <ClCompile Include="DlgBar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgCanvas.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="ToolIMGSearch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ToolAvatar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolDict.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgSetting.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolIndexing.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgInsertIMG.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgInsertPicture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgInsertColor.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgInserTexture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DialogImportFrame.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DialogAbout.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolSPK.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolForceEx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgLoseBlack.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

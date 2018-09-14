@@ -30,4 +30,13 @@ public:
 	afx_msg void OnBnClickedCheck2();
 	afx_msg void OnBnClickedCheck3();
 	afx_msg void OnBnClickedCheck4();
+	CComboBox m_c1;
+	CComboBox m_c2;
+	CButton m_ch5;
+	CEdit m_e1;
+	CEdit m_e2;
+	afx_msg void OnBnClickedCheck7();
+	afx_msg void OnCbnSelchangeCombo1();
+	afx_msg void OnCbnSelchangeCombo3();
+	CButton m_s1;
 };

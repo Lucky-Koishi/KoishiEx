@@ -2,6 +2,9 @@
 
 
 // CToolAvatar 对话框
+#define AVATAR_MAX_NPK_COUNT				10			//时装NPK文件数的最大值
+#define AVATAR_MAX_LAYER_COUNT				64			//时装图层（即IMG数）的最大值
+
 
 class CToolAvatar : public CDialogEx
 {
@@ -20,52 +23,36 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CComboBox m_cType;
-	CComboBox m_cPart1;
-	CComboBox m_cPart2;
-	CComboBox m_cPart3;
-	CComboBox m_cPart4;
-	CComboBox m_cPart5;
-	CComboBox m_cPart6;
-	CComboBox m_cPart7;
-	CComboBox m_cPart8;
-	CComboBox m_cPart9;
-	CComboBox m_cPart10;
-	CComboBox m_cPalette1;
-	CComboBox m_cPalette2;
-	CComboBox m_cPalette3;
-	CComboBox m_cPalette4;
-	CComboBox m_cPalette5;
-	CComboBox m_cPalette6;
-	CComboBox m_cPalette7;
-	CComboBox m_cPalette8;
-	CComboBox m_cPalette9;
-	CComboBox m_cPalette10;
+	CComboBox m_cPart1,m_cPart2,m_cPart3,m_cPart4,m_cPart5;
+	CComboBox m_cPart6,m_cPart7,m_cPart8,m_cPart9,m_cPart10;
+	CComboBox m_cPalette1,m_cPalette2,m_cPalette3,m_cPalette4,m_cPalette5;
+	CComboBox m_cPalette6,m_cPalette7,m_cPalette8,m_cPalette9,m_cPalette10;
+	CComboBox *cbPart		[AVATAR_MAX_NPK_COUNT];		//10个时装ID组合框的指针
+	CComboBox *cbPalette	[AVATAR_MAX_NPK_COUNT];	//10个时装调色板组合框的指针
 	CEdit m_e1;
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnCbnSelchangeCombo1();
 	virtual BOOL OnInitDialog();
+
 	void draw();
 	volatile bool drawing;			//正在绘制
-	volatile int imgDrawing;		//正在绘制第几个
-	volatile bool preLoaded;		//前一个IMGloading
-	volatile bool preDrawed[64];	//前一个Drawing(0是背景),1才是第0号图层
-	int frmID;		//帧数
-	point basePoint;	//基准点
-	NPKobject noList[10];
-	CString ioSuffix[10];
-	IMGobject ioList[64];
-	str ioName[64];
-	int pltID[64];
-	int imgCount;
-	CComboBox *cbPart[10];
-	CComboBox *cbPalette[10];
-	matrix canvas;
-	static CString GetRequestNPK(KoishiTitle::charElem ch, KoishiTitle::mainPartElem pt);//不适用于WEAPON
+	int frmID;					//当前帧
+	point basePoint;			//基准点
+	NPKobject	noList		[AVATAR_MAX_NPK_COUNT];		//NPK对象·选择角色后确认
+	CString		ioSuffix	[AVATAR_MAX_NPK_COUNT];		//AvatarID的名字（组合框里显示的名字）·选择角色后确认
+	
+	IMGobject	ioList		[AVATAR_MAX_LAYER_COUNT];	//IMG对象·选择部件后更新
+	int			pltID		[AVATAR_MAX_LAYER_COUNT];	//调色板·选择调色板后更新
+	matrix		layer		[AVATAR_MAX_LAYER_COUNT];	//图层矩阵·选择部件和选择帧后更新
+	str			ioName		[AVATAR_MAX_LAYER_COUNT];	//IMG路径名·导出时使用
+	void updateIMG(int cb);								//根据组合框内的内容改变IMG（会变更矩阵并绘制）
+	void updateByPalette(int cb);						//根据调色板内容改变矩阵
+	void updateByFrame(int frame);						//根据帧数改变改变所有矩阵（会绘制）
+	void updateMatrix(int cb);							//根据部件 更新矩阵
+	void getCanvas(matrix &mat);						//根据图层确定画布矩阵
 	static UINT loadNPKThread(PVOID para);
-	static UINT drawThread_av(PVOID para);
-	static UINT drawThread_bg(PVOID para);
-	static UINT drawThread_fg(PVOID para);
-	CString LoadStringToOutput(__in UINT id);
+	static UINT drawThread_av(PVOID para);		//总绘制线程
+
 	CProgressCtrl m_p1;
 	afx_msg void OnCbnSelchangeCombo3();
 	afx_msg void OnCbnSelchangeCombo4();

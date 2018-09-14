@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
-    <None Include="..\概述.txt" />
+    <None Include="..\mplserial.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -67,6 +67,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="avatar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="KoishiExpand.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

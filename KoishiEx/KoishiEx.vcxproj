@@ -67,7 +67,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="..\概述.txt" />
+    <None Include="..\mplserial.txt" />
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +86,7 @@
     <ClCompile Include="DDS.cpp" />
     <ClCompile Include="KoishiBase.cpp" />
     <ClCompile Include="KoishiData.cpp" />
+    <ClCompile Include="KoishiExpand.cpp" />
     <ClCompile Include="KoishiFactory.cpp" />
     <ClCompile Include="sha256.cpp" />
     <ClCompile Include="stdafx.cpp">

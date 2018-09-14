@@ -23,20 +23,23 @@ namespace KoishiTitle{
 		i32 subPartID;
 		bool isMask1;
 	public:
-		bool useName(str imgName);
-		i32 getWeight() const;
+		bool useName(str imgName);		//解析IMG路径名
+		i32 getWeight() const;			//获得权重
+		i32 getWeight2() const;			//获得权重2（跟1不同，将顺序压缩到1-N）
 	};
-	typedef struct{
+	typedef struct mixSeqElemW{
 		mainPartElem mainPart;
 		subPartElem subPart;
+		i32 subPartID;
 	}mixSeqElem;
-	extern mixSeqElem mixSeqList[55];
-	extern bool isnum(b8 chars);
-	extern str replaceAll(const str &oldStr, const str &oldChar, const str &newChar);
-	extern str shorten(const str &path);
-	extern str fileUnslash(const str &filePath);
-	extern str imgUnslash(const str &imgPath);
-	extern str imgSlash(const str &imgPath);
-	extern str imgAddV4Num(const str &imgName, i32 num);
-	extern str avaFmt(int i);
+	//解析路径名用的辅助函数
+	extern mixSeqElem mixSeqList[64];
+	extern bool isnum(b8 chars);			//返回一个字节是否属于数字范围内即'0'-'9'之间
+	extern str shorten(const str &path);	//缩短路径名至最后一个节点
+	extern str imgAddV4Num(const str &imgName, i32 num);	//V6变成V4时使用
+	extern str avaFmt(int i);			//获得时装用ID对应的字符串（≤4位补零）
+	//其他辅助函数
+	extern str GetAvatarNPKFileName(charElem ch, mainPartElem pt);	//根据角色和部件获得所在NPK文件名·暂不支持武器
+	extern str GetAvatarIMG_Fmt_CH_XXXX(charElem ch, mainPartElem pt);	//根据角色和部件返回类似于sg_body的短路径名
+	extern str GetAvatarSubPartString(subPartElem sp);
 }

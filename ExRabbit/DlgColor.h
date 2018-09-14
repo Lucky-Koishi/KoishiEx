@@ -42,11 +42,11 @@ public:
 	CEdit m_e2;
 	CEdit m_e3;
 	afx_msg void OnNMCustomdrawSlider1(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMreleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawSlider2(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawSlider3(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMReleasedcaptureSlider2(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMReleasedcaptureSlider3(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMreleasedcaptureSlider2(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMreleasedcaptureSlider3(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButton6();
 	afx_msg void OnBnClickedButton7();
 	afx_msg void OnBnClickedCancel();

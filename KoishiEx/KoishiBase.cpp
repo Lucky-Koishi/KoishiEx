@@ -2,9 +2,6 @@
 #include "KoishiEx.h"
 #include <math.h>
 
-#define MIN(a,b) ((a)>(b)?b:a)
-#define MAX(a,b) ((a)>(b)?a:b)
-
 #pragma comment(lib, "libpng15.lib")
 #include "png.h"
 
@@ -67,11 +64,11 @@ void color::set(b32 colorDt, colorFormat clrFmt){
 		set_G((colorDt & 0x03e0) >> 5 << 3);
 		set_B((colorDt & 0x001f) >> 0 << 3);
 		break;
-		////////////
-		///V4专用///
-		//ABGR8888//
-		////////////
-	case V4_FMT:
+		//////////////////
+		//索引颜色调色板//
+		/////ABGR8888/////
+		//////////////////
+	case INDEX_FMT_PALETTE:
 		set_A((colorDt & 0xff000000) >> 24);
 		set_R((colorDt & 0x000000ff) >> 0);
 		set_G((colorDt & 0x0000ff00) >> 8);
@@ -79,7 +76,7 @@ void color::set(b32 colorDt, colorFormat clrFmt){
 		break;
 	case RGB565:
 		//////////////////////////////////////
-		///////////////ARGB1555///////////////
+		////////////////RGB565////////////////
 		//1 1 1 1 1 1 1 1 //1 1 1 1 1 1 1 1 //
 		//|   R   | |     G     | |   B   | //
 		//////////////////////////////////////
@@ -89,7 +86,29 @@ void color::set(b32 colorDt, colorFormat clrFmt){
 		set_B((colorDt & 0x001f) >> 0 << 3);
 		break;
 	default:
-		set(colorDt);
+		set(colorDt, ARGB8888);
+		break;
+	}
+}
+void color::make(b32 &colorDt, colorFormat clrFmt){
+	switch(clrFmt){
+	case ARGB8888:
+		colorDt = (A<<24)|(R<<16)|(G<<8)|B;
+		break;
+	case ARGB4444:
+		colorDt = (A>>4<<12)|(R>>4<<8)|(G>>4<<4)|(B>>4);
+		break;
+	case ARGB1555:
+		colorDt = (A>>7<<15)|(R>>3<<10)|(G>>3<<5)|(B>>3);
+		break;
+	case INDEX_FMT_PALETTE:
+		colorDt = (A<<24)|R|(G<<8)|(B<<16);
+		break;
+	case RGB565:
+		colorDt = 0xFF|(R>>3<<11)|(G>>2<<5)|(B>>3);
+		break;
+	default:
+		colorDt = (A<<24)|(R<<16)|(G<<8)|B;
 		break;
 	}
 }
@@ -454,6 +473,29 @@ void color::moveA(i16 delta){
 		A += delta;
 	}
 }
+int color::EuclideanDistanceSquareOf(const color &a, const color &b){
+	return (int)(a.R-b.R)*(a.R-b.R)+(a.G-b.G)*(a.G-b.G)+(a.B-b.B)*(a.B-b.B);
+}
+color color::lose(const color &c, b8 part){
+	return color(c.get_A(), c.get_R()/part*part, c.get_G()/part*part, c.get_B()/part*part);
+}
+color color::loseBit(const color &c, b8 bit){
+	return color(c.get_A(), c.get_R()>>bit<<bit, c.get_G()>>bit<<bit, c.get_B()>>bit<<bit);
+}
+color color::loseBlack(const color &c, b8 gamma){
+	b8 newR = c.get_R();
+	b8 newG = c.get_G();
+	b8 newB = c.get_B();
+	b8 newA = 255 - (255 - newR)  * (255 - newG)  * (255 - newB)/ 255/ 255;
+	double gm = pow((double)newA/255, gamma);
+	//while(gamma--){
+		//printf("%d ",newA);
+		//newA = (newA * newA / 255);
+	//}
+	newA = gm*255;
+	//printf("%d (RGB %d %d %d)\n",newA, newR, newG, newB);
+	return color(c.get_A()*newA/255, newR, newG, newB);
+}
 ///////////////////////////////////////////////////////////////
 //point & size
 point::point(){
@@ -536,6 +578,9 @@ matrix& matrix::operator = (const matrix &_mat){
 	return *this;
 }
 
+bool matrix::valid(){
+	return !(data == NULL);
+}
 void matrix::allocate(b32 _row, b32 _column){
 	if(!data){
 		row  = _row;
@@ -575,44 +620,87 @@ void matrix::push(color _clr){
 		pt++;
 }
 
-b64 matrix::push(const stream &_s, colorFormat cf){
-	b32 len = _s.getLen();
+b64 matrix::push(const stream &s, colorFormat cf){
+	b32 len = s.getLen();
 	b32 i = 0;
 	switch(cf){
-		case ARGB4444:
-		while(i+1<len){
-			//一个字节一个字节读的话是B/G/R/A
-			push(color(_s[i+1]<<8 | _s[i+0], ARGB4444));
-			i+=2;
-		}
-		break;
-		case ARGB1555:
-		while(i+1<len){
-			//一个字节一个字节读的话是B/G/R/A
-			push(color(_s[i+1]<<8 | _s[i+0], ARGB1555));
-			i+=2;
-		}
-		break;
-		default:
+	case ARGB8888:
 		while(i+3<len){
-			//一个字节一个字节读的话是B/G/R/A
-			push(color(_s[i+3], _s[i+2], _s[i+1], _s[i+0]));
+			push(color(s[i+3], s[i+2], s[i+1], s[i+0]));
 			i+=4;
 		}
+		break;
+	case ARGB4444:
+		while(i+1<len){
+			push(color(s[i+1]<<8 | s[i+0], ARGB4444));
+			i+=2;
+		}
+		break;
+	case ARGB1555:
+		while(i+1<len){
+			push(color(s[i+1]<<8 | s[i+0], ARGB1555));
+			i+=2;
+		}
+		break;
+	case INDEX_FMT_PALETTE:
+		while(i<len){
+			push(color(s[i], 0, 0, 0));
+			i++;
+		}
+		break;
+	case RGB565:
+		while(i+1<len){
+			push(color(s[i+1]<<8 | s[i+0], RGB565));
+			i+=2;
+		}
+		break;
+	default:
+		return push(s, ARGB8888);
 		break;
 	}
 	return i;
 }
 
-b64 matrix::make(stream &_s) const{
-	_s.allocate(4*column*row);
-	for(b32 i = 0; i< column*row; i++){
-		_s.push(data[i].get_B());
-		_s.push(data[i].get_G());
-		_s.push(data[i].get_R());
-		_s.push(data[i].get_A());
+b64 matrix::make(stream &s, colorFormat cf) const{
+	b32 i = 0;
+	b32 colorData;
+	switch(cf){
+	case ARGB8888:
+		s.allocate(4*column*row);
+		for(i = 0; i< column*row; i++){
+			data[i].make(colorData,ARGB8888);
+			s.push(colorData);
+		}
+		break;
+	case ARGB4444:
+		s.allocate(2*column*row);
+		for(i = 0; i< column*row; i++){
+			data[i].make(colorData,ARGB4444);
+			s.push((b16)(colorData & 0xFFFF));
+		}
+		break;
+	case ARGB1555:
+		s.allocate(2*column*row);
+		for(i = 0; i< column*row; i++){
+			data[i].make(colorData,ARGB1555);
+			s.push((b16)(colorData & 0xFFFF));
+		}
+		break;
+	case RGB565:
+		s.allocate(2*column*row);
+		for(i = 0; i< column*row; i++){
+			data[i].make(colorData,RGB565);
+			s.push((b16)(colorData & 0xFFFF));
+		}
+		break;
+	case INDEX_FMT_PALETTE:
+		s.allocate(column*row);
+		for(i = 0; i< column*row; i++){
+			s.push((b8)data[i].get_A());
+		}
+		break;
 	}
-	return _s.ptPos();
+	return s.ptPos();
 }
 
 pcolor matrix::operator[] (b32 _i) const{
@@ -832,6 +920,31 @@ void matrix::putBack(const matrix &layer, colorMethod _met){
 			_clr = getElem(i,j);
 			_clr.mixWith(layer[i][j], _met);
 			setElem(i,j,_clr);
+		}
+	}
+}
+
+void matrix::lose(b8 fine){
+	b32 i,j;
+	for(i = 0;i<row;i++){
+		for(j = 0;j<column;j++){
+			setElem(i, j ,Koishi::color::lose(getElem(i,j),fine));
+		}
+	}
+}
+void matrix::loseBit(b8 bit){
+	b32 i,j;
+	for(i = 0;i<row;i++){
+		for(j = 0;j<column;j++){
+			setElem(i, j ,Koishi::color::loseBit(getElem(i,j),bit));
+		}
+	}
+}
+void matrix::loseBlack(b8 gamma){
+	b32 i,j;
+	for(i = 0;i<row;i++){
+		for(j = 0;j<column;j++){
+			setElem(i, j ,Koishi::color::loseBlack(getElem(i,j),gamma));
 		}
 	}
 }

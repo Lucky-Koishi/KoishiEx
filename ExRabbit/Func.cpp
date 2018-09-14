@@ -4,8 +4,9 @@
 #include "../KoishiEx/KoishiBase.cpp"
 #include "../KoishiEx/Koishidata.cpp"
 #include "../KoishiEx/Koishifactory.cpp"
+#include "../KoishiEx/koishiexpand.cpp"
 #include "../KoishiEx/sha256.cpp"
-#include "../KoishiEx/dds.cpp"
+#include "../KoishiEx/DDS.cpp"
 #include "../KoishiEx/avatar.cpp"
 #include "goodlistctrl.cpp"
 
@@ -26,6 +27,11 @@ CString StrToCStr(str str1){
 CString NumToCStr(int n){
 	CString s;
 	s.Format(L"%d",n);
+	return s;
+}
+CString NumToCStr(double n){
+	CString s;
+	s.Format(L"%.3lf",n);
 	return s;
 }
 CString shorten(CString str1){
@@ -119,68 +125,4 @@ CString getCurDir(){
 	}  
 	CString savePathStr = strCurDrt;
 	return savePathStr;
-}
-CString getOutPutDir(){
-	TCHAR strCurDrt[500];  
-	int nLen = ::GetCurrentDirectory(500,strCurDrt);  
-	if( strCurDrt[nLen]!='\\' )  
-	{  
-		strCurDrt[nLen++] = '\\';  
-		strCurDrt[nLen] = '\0';  
-	}  
-	CString savePathStr = strCurDrt;
-	savePathStr += L"output";
-	::CreateDirectory(savePathStr, NULL);
-	return savePathStr+L"\\";
-}
-CString getOutPutDir(CString npkName){
-	TCHAR strCurDrt[500];  
-	int nLen = ::GetCurrentDirectory(500,strCurDrt);  
-	if( strCurDrt[nLen]!='\\' )  
-	{  
-		strCurDrt[nLen++] = '\\';  
-		strCurDrt[nLen] = '\0';  
-	}  
-	CString savePathStr = strCurDrt;
-	savePathStr += L"output";
-	::CreateDirectory(savePathStr, NULL);
-	savePathStr += L"\\(NPK)"+shorten(npkName);
-	::CreateDirectory(savePathStr, NULL);
-	return savePathStr+L"\\";
-}
-CString getOutPutDir(CString npkName, CString imgName){
-	TCHAR strCurDrt[500];  
-	int nLen = ::GetCurrentDirectory(500,strCurDrt);  
-	if( strCurDrt[nLen]!='\\' )  
-	{  
-		strCurDrt[nLen++] = '\\';  
-		strCurDrt[nLen] = '\0';  
-	}  
-	CString savePathStr = strCurDrt;
-	savePathStr += L"output";
-	::CreateDirectory(savePathStr, NULL);
-	savePathStr += L"\\(NPK)"+shorten(npkName);
-	::CreateDirectory(savePathStr, NULL);
-	savePathStr += L"\\(IMG)"+shorten(imgName);
-	::CreateDirectory(savePathStr, NULL);
-	return savePathStr+L"\\";
-}
-CString getOutPutDir(CString npkName, CString imgName, int clPro){
-	TCHAR strCurDrt[500];  
-	int nLen = ::GetCurrentDirectory(500,strCurDrt);  
-	if( strCurDrt[nLen]!='\\' )  
-	{  
-		strCurDrt[nLen++] = '\\';  
-		strCurDrt[nLen] = '\0';  
-	}  
-	CString savePathStr = strCurDrt;
-	savePathStr += L"output";
-	::CreateDirectory(savePathStr, NULL);
-	savePathStr += L"\\(NPK)"+shorten(npkName);
-	::CreateDirectory(savePathStr, NULL);
-	savePathStr += L"\\(IMG)"+shorten(imgName);
-	::CreateDirectory(savePathStr, NULL);
-	savePathStr += L"\\(CID)Palette"+NumToCStr(clPro);
-	::CreateDirectory(savePathStr, NULL);
-	return savePathStr+L"\\";
 }

@@ -54,15 +54,16 @@ END_MESSAGE_MAP()
 BOOL CToolIMGSearch::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-	CString tra;
+
 	// TODO:  在此添加额外的初始化
 	m_list.SetExtendedStyle(m_list.GetExtendedStyle()|LVS_EX_ONECLICKACTIVATE|LVS_EX_FULLROWSELECT);
-	tra.LoadStringW(IDS_STRING_LOCATORCOLOMN);
-	m_list.EasyInsertColumn(tra);
-	//m_list.EasyInsertColumn(L"NPK名字,350,IMG名字,550,IMG版本,50,NPK路径,550");
+	m_list.EasyInsertColumn(L"NPK名字,350,IMG名字,550,IMG版本,50,NPK路径,550");
 	m_p1.SetRange32(0,1000);
 	m_b6.EnableWindow(false);
 	stopSign =false;
+
+	CExRabbitDlg *dlg = (CExRabbitDlg*)GetParent();
+	m_e1.SetWindowText(dlg->imPack2Dir);
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }
@@ -72,8 +73,6 @@ void CToolIMGSearch::OnBnClickedButton3()
 	// TODO: 在此添加控件通知处理程序代码
 	HWND hwnd= GetSafeHwnd();   //得到窗口句柄
 	CString filePath= L"";	//得到文件路径
-	CString tra, title;
-	title.LoadStringW(IDS_MESSAGE_TITLE);
 	LPMALLOC pMalloc;
 	if(::SHGetMalloc(&pMalloc) == NOERROR){	//取得IMalloc分配器接口
 		BROWSEINFO bi;
@@ -82,9 +81,7 @@ void CToolIMGSearch::OnBnClickedButton3()
 		bi.hwndOwner = hwnd;
 		bi.pidlRoot	= NULL;
 		bi.pszDisplayName = pszBuffer;
-		tra.LoadStringW(IDS_STRING_SELECTFOLDER);
-		bi.lpszTitle = tra;
-		//bi.lpszTitle = _T("选择文件夹");
+		bi.lpszTitle = _T("选择文件夹");
 		bi.ulFlags =  BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS | BIF_RETURNFSANCESTORS;
 		bi.lpfn = NULL;
 		bi.lParam = 0;
@@ -95,9 +92,7 @@ void CToolIMGSearch::OnBnClickedButton3()
 			}
 			pMalloc->Free(pidl);	//释放内存
 			if(filePath.GetLength()<=1){
-				tra.LoadStringW(IDS_STRING_NOTAVAILABLEFOLDER);
-				MessageBox(tra, title);
-				//MessageBox(L"并不是有效的文件夹喵！",L"提示喵");
+				MessageBox(L"并不是有效的文件夹喵！",L"提示喵");
 			}else{
 				m_e1.SetWindowText(filePath);
 			}
@@ -121,23 +116,15 @@ void CToolIMGSearch::OnBnClickedButton5()
 void CToolIMGSearch::OnBnClickedButton2()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	CString info, title;
-	info.LoadStringW(IDS_STRING_IMGLOCATORINTRODUCTION);
-	title.LoadStringW(IDS_MESSAGE_TITLE);
-	MessageBox(info, title);
-	//MessageBox(L"可以在指定文件夹内的所有NPK检索含有关键词的IMG文件，并用EX工具读取他们。\r\n --by 精灵-传说(colg)");
+	MessageBox(L"可以在指定文件夹内的所有NPK检索含有关键词的IMG文件，并用EX工具读取他们。\r\n --by 精灵-传说(colg)");
 }
 
 
 void CToolIMGSearch::OnBnClickedButton11()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	CString info, title;
-	title.LoadStringW(IDS_MESSAGE_TITLE);
 	if(m_list.GetItemCount()<1){
-		info.LoadStringW(IDS_STRING_NORECORD);
-		MessageBox(info, title);
-		//MessageBox(L"并没有记录喵！",L"提示喵");
+		MessageBox(L"并没有记录喵！",L"提示喵");
 		return;
 	}
 	AfxBeginThread(ThreadToolIMGSearchOutput, (PVOID)this);
@@ -147,13 +134,9 @@ void CToolIMGSearch::OnBnClickedButton11()
 void CToolIMGSearch::OnBnClickedButton10()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	CString info, title;
-	title.LoadStringW(IDS_MESSAGE_TITLE);
 	int row = m_list.GetSelectionMark();
 	if(row<0){
-		info.LoadStringW(IDS_STRING_SELECTNPKFIRST);
-		MessageBox(info, title);
-		//MessageBox(L"选择一个NPK喵！",L"提示喵");
+		MessageBox(L"选择一个NPK喵！",L"提示喵");
 		return;
 	}
 	CExRabbitDlg *dlg = (CExRabbitDlg*)GetParent();
@@ -161,20 +144,13 @@ void CToolIMGSearch::OnBnClickedButton10()
 	CStrToStr(m_list.GetItemText(row, 3), fn);
 	dlg->no.release();
 	if(dlg->no.loadFile(fn)){
-		info.LoadStringW(IDS_STRING_READFINISHED);
-		MessageBox(info, title);
-		//MessageBox(L"读取完毕！");
+		MessageBox(L"读取完毕！");
 	}else{
-		info.LoadStringW(IDS_STRING_READFAILED);
-		MessageBox(info, title);
-		//MessageBox(L"读取失败！");
+		MessageBox(L"读取失败！");
 		return;
 	}
 	dlg->fileNPKname = m_list.GetItemText(row, 0);
-	dlg->fileOpen = true;
-	dlg->mixMode = false;
 	dlg->saveAlert = false;
-	dlg->dispModeShowAll = false;
 	dlg->updateIMGlist();
 	if(dlg->no.count>0){
 		dlg->m_lIMG.SetSelectionMark(0);
@@ -193,7 +169,6 @@ UINT ThreadToolIMGSearch(PVOID para){
 	CToolIMGSearch *dlg = (CToolIMGSearch *)para;
 	CFileFind fileFind;
 	CString dir,keyWordCStr;
-	CString info, title;
 	dlg->m_e1.GetWindowText(dir);
 	dlg->m_e2.GetWindowText(keyWordCStr);
 	dlg->m_b6.EnableWindow(true);
@@ -246,18 +221,15 @@ UINT ThreadToolIMGSearch(PVOID para){
 	dlg->m_e1.EnableWindow(true);
 	dlg->m_e2.EnableWindow(true);
 	dlg->m_b6.EnableWindow(false);
-	info.LoadStringW(IDS_STRING_QUERYFINISHED);
-	title.LoadStringW(IDS_MESSAGE_TITLE);
-	dlg->MessageBox(info, title);
-	//dlg->MessageBox(L"查询完毕了喵！",L"提示喵");
+	dlg->MessageBox(L"查询完毕了喵！",L"提示喵");
 	return 0;
 }
 
 UINT ThreadToolIMGSearchOutput(PVOID para){
 	CToolIMGSearch *dlg = (CToolIMGSearch *)para;
+	CExRabbitDlg *pDlg = (CExRabbitDlg *)dlg->GetParent();
 	CStdioFile csf;
-	CString info, title, tmp;
-	csf.Open(getOutPutDir()+L"IMGQueryResult.csv", CFile::modeCreate|CFile::modeWrite);
+	csf.Open(pDlg->getOutPutDir()+L"IMG查询结果.csv", CFile::modeCreate|CFile::modeWrite);
 	dlg->m_p1.SetPos(0);
 	dlg->m_b11.EnableWindow(false);
 	csf.WriteString(L"NPK list, IMG list, IMG version, NPK path\n");
@@ -268,11 +240,7 @@ UINT ThreadToolIMGSearchOutput(PVOID para){
 	dlg->m_p1.SetPos(1000);
 	dlg->m_b11.EnableWindow(true);
 	csf.Close();
-	title.LoadStringW(IDS_MESSAGE_TITLE);
-	tmp.LoadStringW(IDS_STRING_SAVEDTOQUERYRESULT);
-	info.Format(tmp, getOutPutDir());
-	dlg->MessageBox(info, title);
-	//dlg->MessageBox(L"保存到"+getOutPutDir()+L"IMGQueryResult.csv了喵！",L"提示喵");
+	dlg->MessageBox(L"保存到"+pDlg->getOutPutDir()+L"IMG查询结果.csv了喵！",L"提示喵");
 	return 0;
 }
 

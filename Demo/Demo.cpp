@@ -10,10 +10,22 @@
 #include "TestFunc.h"
 #include "../KoishiEx//DDS.cpp"
 #include "../KoishiEx//avatar.cpp"
-
+#include "../KoishiEx//KoishiExpand.cpp"
+#include <string>
+#include <iostream>
+#include <fstream> 
+#include <exception>
+#include <time.h>
+#include <stdlib.h>
+#include <io.h>
 using namespace Koishi;
-int _tmain(int argc, _TCHAR* argv[])
-{
+using namespace KoishiTitle;
+using namespace KoishiExpand;
+
+int _tmain(int argc, _TCHAR* argv[]){
+	matrix mat;
+	mat.loadPNG("13.png");
+	mat.loseBlack(1);
+	mat.makePNG("131.png");
 	return 0;
 }
-

@@ -95,7 +95,7 @@ namespace KoishiDDS{
 		void DXT3_uncompress(matrix &mat);
 		void DXT5_uncompress(const stream &udata, lcolor &clist);
 		void DXT5_uncompress(matrix &mat);
-		void DXT5_uncompress2(matrix &mat);
+		void DXT5_uncompress2(matrix &mat);	//DXT5 ´ø·Ö¿é
 		void DXT5_compress(const lcolor &clist, stream &dest);
 		void DXT5_compress(const matrix &mat);
 	};

@@ -49,7 +49,6 @@ void CDlgRename::OnBnClickedOk()
 	CStrToStr(cstr, fn);
 	dlg->no.IMGrename(i, fn);
 	dlg->updateNPKInfo();
-	dlg->updateIMGInfo();
 	{
 		dlg->m_lIMG.SetItemText(i, 0, shorten(cstr));
 		dlg->fileIMGname = cstr;

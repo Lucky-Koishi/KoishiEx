@@ -3,7 +3,9 @@
 #include "sha256.h"
 
 #pragma comment(lib, "zlib.lib")
+#pragma comment(lib, "libbz2.lib")
 #include "zlib.h"
+#include "bzlib.h"
 
 using namespace Koishi;
 
@@ -448,3 +450,60 @@ i8 stream::uncompressData(stream &dest, compressType type, b64 tryLength){
 		break;
 	}
  }
+
+i64 stream::findStream(const stream &s,b64 startPos){
+	int fLine = s.getLen();
+	int i;
+	while(startPos + fLine <= getLen()){
+		bool isOK = true;
+		for(i=0;i<fLine;i++){
+			if(data[startPos+i] != s[i]){
+				isOK = false;
+				break;
+			}
+		}
+		if(isOK){
+			return startPos;
+		}else{
+			startPos ++;
+		}
+	}
+	return -1;
+}
+
+b64 stream::splitStream(const stream &s, lb64 &posList, lb64 &lenList){
+	i64 startPos = 0;
+	i64 fLine = s.getLen();
+	posList.clear();
+	lenList.clear();
+	posList.push_back(0);
+	while(true){
+		i64 p = findStream(s, startPos);
+		if(p == -1){
+			lenList.push_back(getLen()-startPos);
+			break;
+		}else{
+			lenList.push_back(p-startPos);
+			posList.push_back(p+fLine);
+			startPos = p + fLine;
+		}
+	}
+	return posList.size();
+}
+
+//进行BZ2压缩
+i8 stream::BZcompress(stream &dest){
+	unsigned int len = 10*getLen();
+	dest.allocate(len);
+	int i = BZ2_bzBuffToBuffCompress((char*)dest.data, &len, (char*)data, getLen(), 1, 0, 0);
+	dest.len = len;
+	return i;
+}
+//进行BZ2解压
+i8 stream::BZdecompress(stream &dest){
+	unsigned int len = 100*getLen();
+	dest.allocate(len);
+	int i = BZ2_bzBuffToBuffDecompress((char*)dest.data, &len, (char*)data, getLen(), 0, 0);
+	dest.len = len;
+	return i;
+}

@@ -42,11 +42,11 @@ BEGIN_MESSAGE_MAP(CDlgColor, CDialogEx)
 	ON_WM_RBUTTONDOWN()
 	ON_CBN_SELCHANGE(IDC_COMBO1, &CDlgColor::OnCbnSelchangeCombo1)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, &CDlgColor::OnNMCustomdrawSlider1)
-	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER1, &CDlgColor::OnNMReleasedcaptureSlider1)
+	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER1, &CDlgColor::OnNMreleasedcaptureSlider1)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, &CDlgColor::OnNMCustomdrawSlider2)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER3, &CDlgColor::OnNMCustomdrawSlider3)
-	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER2, &CDlgColor::OnNMReleasedcaptureSlider2)
-	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER3, &CDlgColor::OnNMReleasedcaptureSlider3)
+	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER2, &CDlgColor::OnNMreleasedcaptureSlider2)
+	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER3, &CDlgColor::OnNMreleasedcaptureSlider3)
 	ON_BN_CLICKED(IDC_BUTTON6, &CDlgColor::OnBnClickedButton6)
 	ON_BN_CLICKED(IDC_BUTTON7, &CDlgColor::OnBnClickedButton7)
 	ON_BN_CLICKED(IDCANCEL, &CDlgColor::OnBnClickedCancel)
@@ -120,8 +120,8 @@ void CDlgColor::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	CMenu menu, *pPopup;  
-    menu.LoadMenu(IDR_MENU);  
-    pPopup = menu.GetSubMenu(11);  
+    menu.LoadMenu(IDR_CLR_MENU);  
+    pPopup = menu.GetSubMenu(0);  
     CPoint myPoint;  
     ClientToScreen(&myPoint);  
     GetCursorPos(&myPoint); //鼠标位置  
@@ -140,16 +140,9 @@ BOOL CDlgColor::OnInitDialog()
 	for(int i = 0;i<256;i++)
 		chosenClr[i] = false;
 	m_c1.ResetContent();
-	//m_c1.AddString(L"HSV调节");
-	//m_c1.AddString(L"RGB调节");
-	//m_c1.AddString(L"透明度调节");
-	CString HSVAdjust, RGBAdjust, AlphaAdjust;
-	HSVAdjust.LoadStringW(IDS_STRING_HSVADJUST);
-	RGBAdjust.LoadStringW(IDS_STRING_RGBADJUST);
-	AlphaAdjust.LoadStringW(IDS_STRING_ALPHAADJUST);
-	m_c1.AddString(HSVAdjust);
-	m_c1.AddString(RGBAdjust);
-	m_c1.AddString(AlphaAdjust);
+	m_c1.AddString(L"HSV调节");
+	m_c1.AddString(L"RGB调节");
+	m_c1.AddString(L"透明度调节");
 	m_c1.SetCurSel(0);
 	m_s1.SetRange(-100,100, TRUE);
 	m_s2.SetRange(-100,100, TRUE);
@@ -294,6 +287,7 @@ void CDlgColor::draw(){
 	img.Create(320, 320, 32);
 	UCHAR* pst = (UCHAR*)img.GetBits();
 	int pit = img.GetPitch();
+	CDC *pDC = GetDC();
 	for(i=0;i<320;i++){
 		for(j=0;j<320;j++){
 			*(pst + pit*j + 4*i + 0) = canvas[i][j].get_B();
@@ -301,8 +295,9 @@ void CDlgColor::draw(){
 			*(pst + pit*j + 4*i + 2) = canvas[i][j].get_R();
 		}
 	}
-	img.Draw(GetDC()->m_hDC,0,0);
+	img.Draw(pDC->m_hDC,0,0);
 	img.Destroy();
+	ReleaseDC(pDC);
 	canvas.release();
 }
 
@@ -378,7 +373,7 @@ void CDlgColor::OnNMCustomdrawSlider3(NMHDR *pNMHDR, LRESULT *pResult)
 
 
 //调节根据basePlc进行，点击其他处将更新basePlc
-void CDlgColor::OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult)
+void CDlgColor::OnNMreleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CExRabbitDlg *dlg = (CExRabbitDlg *)GetParent();
@@ -446,17 +441,17 @@ void CDlgColor::OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-void CDlgColor::OnNMReleasedcaptureSlider2(NMHDR *pNMHDR, LRESULT *pResult)
+void CDlgColor::OnNMreleasedcaptureSlider2(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// TODO: 在此添加控件通知处理程序代码
-	OnNMReleasedcaptureSlider1(pNMHDR, pResult);
+	OnNMreleasedcaptureSlider1(pNMHDR, pResult);
 }
 
 
-void CDlgColor::OnNMReleasedcaptureSlider3(NMHDR *pNMHDR, LRESULT *pResult)
+void CDlgColor::OnNMreleasedcaptureSlider3(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// TODO: 在此添加控件通知处理程序代码
-	OnNMReleasedcaptureSlider1(pNMHDR, pResult);
+	OnNMreleasedcaptureSlider1(pNMHDR, pResult);
 }
 
 
@@ -464,8 +459,8 @@ void CDlgColor::OnBnClickedButton6()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CMenu menu, *pPopup;  
-    menu.LoadMenu(IDR_MENU);  
-    pPopup = menu.GetSubMenu(12);  
+    menu.LoadMenu(IDR_CLR_MENU);  
+    pPopup = menu.GetSubMenu(1);  
     CPoint myPoint;  
     ClientToScreen(&myPoint);  
     GetCursorPos(&myPoint); //鼠标位置  
@@ -477,8 +472,8 @@ void CDlgColor::OnBnClickedButton7()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CMenu menu, *pPopup;  
-    menu.LoadMenu(IDR_MENU);  
-    pPopup = menu.GetSubMenu(13);  
+    menu.LoadMenu(IDR_CLR_MENU);  
+    pPopup = menu.GetSubMenu(2);  
     CPoint myPoint;  
     ClientToScreen(&myPoint);  
     GetCursorPos(&myPoint); //鼠标位置  
@@ -539,23 +534,17 @@ void CDlgColor::OnCtImportAct()
 	if(clrID<0)
 		clrID = 0;
 	CString defExt = _T("Photoshop颜色表(*.act)|*.act");
-	defExt.LoadStringW(IDS_STRING_PHOTOSHOPPALETTE);
 	CString extFilter = _T("Photoshop颜色表(*.act)|*.act||");
-	extFilter.LoadStringW(IDS_STRING_PHOTOSHOPPALETTE2);
 	CFileDialog fdlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	CString fileName;
 	str fn;
 	int i,k;
 	lcolor lc;
-	CString info, title;
 	if(fdlg.DoModal() == IDOK){
 		fileName = fdlg.GetPathName();
 		CStrToStr(fileName, fn);
 		if(!palette::loadACT(fn, lc)){
-			info.LoadStringW(IDS_STRING_NOTRECOGNIZEDPALETTE);
-			title.LoadStringW(IDS_MESSAGE_TITLE);
-			MessageBox(info, title);
-			//MessageBox(L"未识别的调色板文件喵！",L"提示喵");
+			MessageBox(L"未识别的调色板文件喵！",L"提示喵");
 			return;
 		}
 		k = dlg->io.paletteData[clrID].size();
@@ -565,10 +554,7 @@ void CDlgColor::OnCtImportAct()
 			dlg->io.CLRpush(lc[i], clrID);
 		}
 		dlg->saveAlert = true;
-		info.LoadStringW(IDS_STRING_READFINISHED);
-		title.LoadStringW(IDS_MESSAGE_TITLE);
-		//MessageBox(L"读取完毕喵！",L"提示喵");
-		MessageBox(info, title);
+		MessageBox(L"读取完毕喵！",L"提示喵");
 		dlg->updateInfo();
 		dlg->updateNPKInfo();
 		dlg->updatePICInfo();
@@ -585,32 +571,23 @@ void CDlgColor::OnCtImportCid()
 	if(clrID<0)
 		clrID = 0;
 	CString defExt = _T("V4调色板(*.cid)|*.cid");
-	defExt.LoadStringW(IDS_STRING_V4PALETTE);
 	CString extFilter = _T("V4调色板(*.cid)|*.cid||");
-	extFilter.LoadStringW(IDS_STRING_V4PALETTE2);
 	CFileDialog fdlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	CString fileName;
 	str fn;
 	stream s;
 	i32 i,j,k;
 	b8 b;
-	CString info, title;
 	if(fdlg.DoModal() == IDOK){
 		fileName = fdlg.GetPathName();
 		CStrToStr(fileName, fn);
 		if(!s.loadFile(fn)){
-			info.LoadStringW(IDS_STRING_UNABLETOREAD);
-			title.LoadStringW(IDS_MESSAGE_TITLE);
-			MessageBox(info, title);
-			//MessageBox(L"无法读取文件喵！",L"提示喵");
+			MessageBox(L"无法读取文件喵！",L"提示喵");
 			return;
 		}
 		s.read(i);
 		if((b32)i != 0x6F436F4B){
-			info.LoadStringW(IDS_STRING_NOTRECOGNIZEDPALETTE);
-			title.LoadStringW(IDS_MESSAGE_TITLE);
-			MessageBox(info, title);
-			//MessageBox(L"该调色板未能识别喵！",L"提示喵！");
+			MessageBox(L"该调色板未能识别喵！",L"提示喵！");
 			return;
 		}
 		s.read(i);
@@ -630,10 +607,7 @@ void CDlgColor::OnCtImportCid()
 			clr.set_B(b);
 			dlg->io.CLRpush(clr, clrID);
 		}
-		//MessageBox(L"读取调色板完毕喵！",L"提示喵");
-		info.LoadStringW(IDS_STRING_READFINISHED);
-		title.LoadStringW(IDS_MESSAGE_TITLE);
-		MessageBox(info, title);
+		MessageBox(L"读取调色板完毕喵！",L"提示喵");
 		dlg->updateNPKInfo();
 		dlg->updatePICInfo();
 		dlg->saveAlert = true;
@@ -651,15 +625,10 @@ void CDlgColor::OnCtExportAct()
 	if(clrID<0)
 		clrID = 0;
 	str fn;
-	CString fileName =  getOutPutDir(dlg->fileNPKname,dlg->fileIMGname) + L"Palette"+NumToCStr(clrID)+L".ACT";
+	CString fileName =  dlg->getOutPutDir(dlg->fileNPKname,dlg->fileIMGname) + L"Palette"+NumToCStr(clrID)+L".ACT";
 	CStrToStr(fileName, fn);
 	palette::makeACT(fn, dlg->io.paletteData[clrID]);
-	CString info, title;
-	info.LoadStringW(IDS_STRING_SAVEDAS);
-	info = info + fileName;
-	title.LoadStringW(IDS_MESSAGE_TITLE);
-	MessageBox(info, title);
-	//MessageBox(L"已保存为"+fileName+L"。",L"提示喵");
+	MessageBox(L"已保存为"+fileName+L"。",L"提示喵");
 }
 
 
@@ -671,7 +640,7 @@ void CDlgColor::OnCtExportCid()
 	if(clrID<0)
 		clrID = 0;
 	str fn;
-	CString fileName =  getOutPutDir(dlg->fileNPKname,dlg->fileIMGname) + L"Palette"+NumToCStr(clrID)+L".CID";
+	CString fileName =  dlg->getOutPutDir(dlg->fileNPKname,dlg->fileIMGname) + L"Palette"+NumToCStr(clrID)+L".CID";
 	CStrToStr(fileName, fn);
 	stream s,sHead;
 	sHead.allocate(12);
@@ -689,10 +658,5 @@ void CDlgColor::OnCtExportCid()
 	s.makeFile(fn);
 	s.release();
 	sHead.release();
-	CString info, title;
-	info.LoadStringW(IDS_STRING_SAVEDAS);
-	info = info + fileName;
-	title.LoadStringW(IDS_MESSAGE_TITLE);
-	MessageBox(info, title);
-	//MessageBox(L"已保存为"+fileName+L"。",L"提示喵");
+	MessageBox(L"已保存为"+fileName+L"。",L"提示喵");
 }

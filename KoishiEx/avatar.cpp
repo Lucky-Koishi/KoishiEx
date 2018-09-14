@@ -101,7 +101,7 @@ bool avatar::useName(str fileName){
 		mainPart = mp_shoes;
 	}else if(fileName.find("belt") != str::npos){
 		mainPart = mp_belt;
-	}else if(fileName.find("skin") != str::npos){
+	}else if(fileName.find("body") != str::npos){
 		mainPart = mp_skin;
 	}else{
 		mainPart = mp_weapon;
@@ -163,31 +163,6 @@ str KoishiTitle::shorten(const str &path){
 		path2 = path1;
 	}
 	return path2;
-}
-str KoishiTitle::replaceAll(const str &oldStr, const str &oldChar, const str &newChar){
-	str newStr = oldStr;
-	str::size_type pos;
-	while(true){
-		pos = newStr.find_last_of(oldChar);
-		if(pos != str::npos){
-			newStr.replace(pos, oldChar.length(), newChar);
-		}else{
-			break;
-		}
-	}
-	return newStr;
-}
-str KoishiTitle::fileUnslash(const str &filePath){
-	str newStr = replaceAll(filePath, "\\", "_");
-	newStr = replaceAll(newStr, "/", "_");
-	newStr = replaceAll(newStr, ":", "");
-	return newStr;
-}
-str KoishiTitle::imgUnslash(const str &imgPath){
-	return replaceAll(imgPath, "/", "_");
-}
-str KoishiTitle::imgSlash(const str &imgPath){
-	return replaceAll(imgPath, "_", "/");
 }
 str KoishiTitle::imgAddV4Num(const str &imgName, i32 num){
 	str newName = imgName;
@@ -317,6 +292,120 @@ i32 KoishiTitle::avatar::getWeight() const{
 	return 0;
 }
 
+i32 KoishiTitle::avatar::getWeight2() const{
+	if(mainPart == mp_shoes && subPart == sp_f)
+		return 63;
+	if(mainPart == mp_belt && subPart == sp_f )
+		return 62;
+	if(mainPart == mp_pants && subPart == sp_f )
+		return 61;
+	if(mainPart == mp_coat && subPart == sp_f )
+		return 60;
+	if(mainPart == mp_neck && subPart == sp_f )
+		return 59;
+	if(mainPart == mp_face && subPart == sp_f )
+		return 58;
+	if(mainPart == mp_cap && subPart == sp_f )
+		return 57;
+	if(mainPart == mp_face && subPart == sp_g )
+		return 56;
+	if(mainPart == mp_face && subPart == sp_a )
+		return 55;
+	if(mainPart == mp_weapon && subPart == sp_c)
+		return 52 + subPartID;
+	if(mainPart == mp_cap && subPart == sp_c )
+		return 51;
+	if(mainPart == mp_hair && subPart == sp_c )
+		return 50;
+	if(mainPart == mp_neck && subPart == sp_e )
+		return 49;
+	if(mainPart == mp_coat && subPart == sp_c )
+		return 48;
+	if(mainPart == mp_neck && subPart == sp_g )
+		return 47;
+	if(mainPart == mp_neck && subPart == sp_c )
+		return 46;
+	if(mainPart == mp_weapon && subPart == sp_a)
+		return 43 + subPartID;
+	if(mainPart == mp_cap && subPart == sp_g )
+		return 42;
+	if(mainPart == mp_cap && subPart == sp_a )
+		return 41;
+	if(mainPart == mp_hair && subPart == sp_a )
+		return 40;
+	if(mainPart == mp_neck && subPart == sp_x )
+		return 39;
+	if(mainPart == mp_belt && subPart == sp_g )
+		return 38;
+	if(mainPart == mp_belt && subPart == sp_c )
+		return 37;
+	if(mainPart == mp_face && subPart == sp_c )
+		return 36;
+	if(mainPart == mp_neck && subPart == sp_a )
+		return 35;
+	if(mainPart == mp_coat && subPart == sp_g )
+		return 34;
+	if(mainPart == mp_coat && subPart == sp_a )
+		return 33;
+	if(mainPart == mp_belt && subPart == sp_a )
+		return 32;
+	if(mainPart == mp_shoes && subPart == sp_c )
+		return 31;
+	if(mainPart == mp_pants && subPart == sp_g )
+		return 30;
+	if(mainPart == mp_pants && subPart == sp_a )
+		return 29;
+	if(mainPart == mp_shoes && subPart == sp_g )
+		return 28;
+	if(mainPart == mp_shoes && subPart == sp_a )
+		return 27;
+	if(mainPart == mp_pants && subPart == sp_b )
+		return 26;
+	if(mainPart == mp_shoes && subPart == sp_h )
+		return 25;
+	if(mainPart == mp_shoes && subPart == sp_b )
+		return 24;
+	if(mainPart == mp_pants && subPart == sp_h )
+		return 23;
+	if(mainPart == mp_pants && subPart == sp_d )
+		return 22;
+	if(mainPart == mp_belt && subPart == sp_b )
+		return 21;
+	if(mainPart == mp_neck && subPart == sp_b )
+		return 20;
+	if(mainPart == mp_coat && subPart == sp_h )
+		return 19;
+	if(mainPart == mp_coat && subPart == sp_b )
+		return 18;
+	if(mainPart == mp_belt && subPart == sp_d )
+		return 17;
+	if(mainPart == mp_hair && subPart == sp_b )
+		return 16;
+	if(mainPart == mp_cap && subPart == sp_h )
+		return 15;
+	if(mainPart == mp_cap && subPart == sp_b )
+		return 14;
+	if(mainPart == mp_weapon && subPart == sp_b)
+		return 11 + subPartID;
+	if(mainPart == mp_neck && subPart == sp_d )
+		return 10;
+	if(mainPart == mp_neck && subPart == sp_h )
+		return 9;
+	if(mainPart == mp_coat && subPart == sp_d )
+		return 8;
+	if(mainPart == mp_hair && subPart == sp_d )
+		return 7;
+	if(mainPart == mp_cap && subPart == sp_d )
+		return 6;
+	if(mainPart == mp_weapon && subPart == sp_d)
+		return 3 + subPartID;
+	if(mainPart == mp_face && subPart == sp_b )
+		return 2;
+	if(mainPart == mp_skin)
+		return 1;
+	return 0;
+}
+
 str KoishiTitle::avaFmt(int i){
 	str s = "";
 	if(i>9999)
@@ -328,60 +417,87 @@ str KoishiTitle::avaFmt(int i){
 	return s;
 }
 
-KoishiTitle::mixSeqElem KoishiTitle::mixSeqList[55] = {
-	{mp_shoes, sp_f},
-	{mp_belt, sp_f},
-	{mp_pants, sp_f},
-	{mp_coat, sp_f},
-	{mp_neck, sp_f},
-	{mp_face, sp_f},
-	{mp_cap, sp_f},
-	{mp_face, sp_g},
-	{mp_face, sp_a},
-	{mp_weapon, sp_c},
-	{mp_cap, sp_c},
-	{mp_hair, sp_c},
-	{mp_neck, sp_e},
-	{mp_coat, sp_c},
-	{mp_neck, sp_g},
-	{mp_neck, sp_c},
-	{mp_weapon, sp_a},
-	{mp_cap, sp_g},
-	{mp_cap, sp_a},
-	{mp_hair, sp_a},
-	{mp_neck, sp_x},
-	{mp_belt, sp_g},
-	{mp_belt, sp_c},
-	{mp_face, sp_c},
-	{mp_neck, sp_a},
-	{mp_coat, sp_g},
-	{mp_coat, sp_a},
-	{mp_belt, sp_a},
-	{mp_shoes, sp_c},
-	{mp_pants, sp_g},
-	{mp_pants, sp_a},
-	{mp_shoes, sp_g},
-	{mp_shoes, sp_a},
-	{mp_pants, sp_b},
-	{mp_shoes, sp_h},
-	{mp_shoes, sp_b},
-	{mp_pants, sp_h},
-	{mp_pants, sp_d},
-	{mp_belt, sp_b},
-	{mp_neck, sp_b},
-	{mp_coat, sp_h},
-	{mp_coat, sp_b},
-	{mp_belt, sp_d},
-	{mp_hair, sp_b},
-	{mp_cap, sp_h},
-	{mp_cap, sp_b},
-	{mp_weapon, sp_b},
-	{mp_neck, sp_d},
-	{mp_neck, sp_h},
-	{mp_coat, sp_d},
-	{mp_hair, sp_d},
-	{mp_cap, sp_d},
-	{mp_weapon, sp_d},
-	{mp_face, sp_b},
-	{mp_skin, sp_udef}
+KoishiTitle::mixSeqElem KoishiTitle::mixSeqList[64] = {
+	{mp_shoes,	sp_f, 0},
+	{mp_belt,	sp_f, 0},
+	{mp_pants,	sp_f, 0},
+	{mp_coat,	sp_f, 0},
+	{mp_neck,	sp_f, 0},
+	{mp_face,	sp_f, 0},
+	{mp_cap,	sp_f, 0},
+	{mp_face,	sp_g, 0},
+	{mp_face,	sp_a, 0},
+	{mp_weapon, sp_c, 2},
+	{mp_weapon, sp_c, 1},
+	{mp_weapon, sp_c, 0},
+	{mp_cap,	sp_c, 0},
+	{mp_hair,	sp_c, 0},
+	{mp_neck,	sp_e, 0},
+	{mp_coat,	sp_c, 0},
+	{mp_neck,	sp_g, 0},
+	{mp_neck,	sp_c, 0},
+	{mp_weapon, sp_a, 2},
+	{mp_weapon, sp_a, 1},
+	{mp_weapon, sp_a, 0},
+	{mp_cap,	sp_g, 0},
+	{mp_cap,	sp_a, 0},
+	{mp_hair,	sp_a, 0},
+	{mp_neck,	sp_x, 0},
+	{mp_belt,	sp_g, 0},
+	{mp_belt,	sp_c, 0},
+	{mp_face,	sp_c, 0},
+	{mp_neck,	sp_a, 0},
+	{mp_coat,	sp_g, 0},
+	{mp_coat,	sp_a, 0},
+	{mp_belt,	sp_a, 0},
+	{mp_shoes,	sp_c, 0},
+	{mp_pants,	sp_g, 0},
+	{mp_pants,	sp_a, 0},
+	{mp_shoes,	sp_g, 0},
+	{mp_shoes,	sp_a, 0},
+	{mp_pants,	sp_b, 0},
+	{mp_shoes,	sp_h, 0},
+	{mp_shoes,	sp_b, 0},
+	{mp_pants,	sp_h, 0},
+	{mp_pants,	sp_d, 0},
+	{mp_belt,	sp_b, 0},
+	{mp_neck,	sp_b, 0},
+	{mp_coat,	sp_h, 0},
+	{mp_coat,	sp_b, 0},
+	{mp_belt,	sp_d, 0},
+	{mp_hair,	sp_b, 0},
+	{mp_cap,	sp_h, 0},
+	{mp_cap,	sp_b, 0},
+	{mp_weapon, sp_b, 2},
+	{mp_weapon, sp_b, 1},
+	{mp_weapon, sp_b, 0},
+	{mp_neck,	sp_d, 0},
+	{mp_neck,	sp_h, 0},
+	{mp_coat,	sp_d, 0},
+	{mp_hair,	sp_d, 0},
+	{mp_cap,	sp_d, 0},
+	{mp_weapon,	sp_d, 2},
+	{mp_weapon,	sp_d, 1},
+	{mp_weapon,	sp_d, 0},
+	{mp_face,	sp_b, 0},
+	{mp_skin,	sp_udef, 0}
 };
+
+extern str KoishiTitle::GetAvatarNPKFileName(charElem ch, mainPartElem pt){
+	str fix1 = "sprite_character_";
+	str fix2[15] = {"","swordman_","swordman_at","fighter_","fighter_at","gunner_","gunner_at","mage_","mage_at","priest_","priest_at","thief_","knight_","demoniclancer_","gunblader_"};
+	str fix3 = "equipment_avatar_";
+	str fix4[10] = {"","cap","hair","face","neck","coat","pants","belt","shoes","skin"};
+	str fix5 = ".NPK";
+	return fix1+fix2[ch]+fix3+fix4[pt]+fix5;
+}
+extern str KoishiTitle::GetAvatarIMG_Fmt_CH_XXXX(charElem ch, mainPartElem pt){
+	str fix1[15] = {"","sm_","sg_","ft_","fm_","gn_","gg_","mg_","mm_","pr_","pg_","th_","kn_","dl_","gb_"};
+	str fix2[10] = {"","cap","hair","face","neck","coat","pants","belt","shoes","body"};
+	return fix1[ch]+fix2[pt];
+}
+
+extern str KoishiTitle::GetAvatarSubPartString(subPartElem sp){
+	str fix[10] = {"","a","b","c","d","e","f","g","h","x"};
+	return fix[sp];
+}

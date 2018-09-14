@@ -93,7 +93,7 @@ void CDlgSetpara::OnBnClickedOk()
 	point pt;
 	size sz;
 	if(m_c1.GetCheck()){
-		dlg->io.GetPICInfo(pos, pi);
+		dlg->io.PICgetInfo(pos, pi);
 		m_e1.GetWindowText(cstr1);
 		m_e2.GetWindowText(cstr2);
 		i1 = _ttoi(cstr1);
@@ -104,35 +104,28 @@ void CDlgSetpara::OnBnClickedOk()
 			i2 += pi.get_basePt().get_Y();
 		}
 		pt.set(i1,i2);
-		dlg->io.SetPICInfoPara(pos, 1, &pt);
+		dlg->io.PICsetInfoPara(pos, 1, &pt);
 		m_e3.GetWindowText(cstr1);
 		m_e4.GetWindowText(cstr2);
 		i1 = _ttoi(cstr1);
 		i2 = _ttoi(cstr2);
 		sz.set(i1,i2);
-		dlg->io.SetPICInfoPara(pos, 2, &sz);
+		dlg->io.PICsetInfoPara(pos, 2, &sz);
 		{
 			dlg->m_lPicture.SetItemText(pos, 1, FmtToCStr(dlg->io.PICcontent[pos].get_format(), dlg->io.version));
 			dlg->m_lPicture.SetItemText(pos, 2, PtToCStr(dlg->io.PICcontent[pos].get_basePt()));
 			dlg->m_lPicture.SetItemText(pos, 3, SzToCStr(dlg->io.PICcontent[pos].get_picSize()));
 			dlg->m_lPicture.SetItemText(pos, 4, SzToCStr(dlg->io.PICcontent[pos].get_frmSize()));
 			if(dlg->io.version == V5){
-				dlg->m_lPicture.SetItemText(pos, 5, L"DDS"+NumToCStr(dlg->io.PICcontent[pos].get_DDSIDused())+L":"+PtToCStr(dlg->io.PICcontent[pos].get_DDSpointLT())+L"-"+PtToCStr(dlg->io.PICcontent[pos].get_DDSpointRB()));
+				dlg->m_lPicture.SetItemText(pos, 5, L"纹理集"+NumToCStr(dlg->io.PICcontent[pos].get_TEXusing())+L":"+PtToCStr(dlg->io.PICcontent[pos].get_TEXpointLT())+L"-"+PtToCStr(dlg->io.PICcontent[pos].get_TEXpointRB()));
 			}
 		}
 	}else if(m_c2.GetCheck()){
-		POSITION pos = dlg->m_lPicture.GetFirstSelectedItemPosition();
 		std::vector<int> listID;
-		listID.clear();
-		if(pos != NULL){
-			while(pos){
-				int nItem = dlg->m_lPicture.GetNextSelectedItem(pos);
-				listID.push_back(nItem);
-			}
-		}
+		dlg->getSelected(&dlg->m_lPicture, 0, 1, listID);
 		for(int i = 0;i<listID.size();i++){
 			if(dlg->io.PICcontent[listID[i]].get_format() != LINK){
-				dlg->io.GetPICInfo(listID[i], pi);
+				dlg->io.PICgetInfo(listID[i], pi);
 				m_e1.GetWindowText(cstr1);
 				m_e2.GetWindowText(cstr2);
 				i1 = _ttoi(cstr1);
@@ -143,20 +136,20 @@ void CDlgSetpara::OnBnClickedOk()
 					i2 += pi.get_basePt().get_Y();
 				}
 				pt.set(i1,i2);
-				dlg->io.SetPICInfoPara(listID[i], 1, &pt);
+				dlg->io.PICsetInfoPara(listID[i], 1, &pt);
 				m_e3.GetWindowText(cstr1);
 				m_e4.GetWindowText(cstr2);
 				i1 = _ttoi(cstr1);
 				i2 = _ttoi(cstr2);
 				sz.set(i1,i2);
-				dlg->io.SetPICInfoPara(listID[i], 2, &sz);
+				dlg->io.PICsetInfoPara(listID[i], 2, &sz);
 				{
 					dlg->m_lPicture.SetItemText(listID[i], 1, FmtToCStr(dlg->io.PICcontent[listID[i]].get_format(), dlg->io.version));
 					dlg->m_lPicture.SetItemText(listID[i], 2, PtToCStr(dlg->io.PICcontent[listID[i]].get_basePt()));
 					dlg->m_lPicture.SetItemText(listID[i], 3, SzToCStr(dlg->io.PICcontent[listID[i]].get_picSize()));
 					dlg->m_lPicture.SetItemText(listID[i], 4, SzToCStr(dlg->io.PICcontent[listID[i]].get_frmSize()));
 					if(dlg->io.version == V5){
-						dlg->m_lPicture.SetItemText(listID[i], 5, L"DDS"+NumToCStr(dlg->io.PICcontent[listID[i]].get_DDSIDused())+L":"+PtToCStr(dlg->io.PICcontent[listID[i]].get_DDSpointLT())+L"-"+PtToCStr(dlg->io.PICcontent[listID[i]].get_DDSpointRB()));
+						dlg->m_lPicture.SetItemText(listID[i], 5, L"纹理集"+NumToCStr(dlg->io.PICcontent[listID[i]].get_TEXusing())+L":"+PtToCStr(dlg->io.PICcontent[listID[i]].get_TEXpointLT())+L"-"+PtToCStr(dlg->io.PICcontent[listID[i]].get_TEXpointRB()));
 					}
 				}
 			}
@@ -164,7 +157,7 @@ void CDlgSetpara::OnBnClickedOk()
 	}else if(m_c4.GetCheck()){
 		for(int i = 0;i<dlg->io.indexCount;i++){
 			if(dlg->io.PICcontent[i].get_format() != LINK){
-				dlg->io.GetPICInfo(i, pi);
+				dlg->io.PICgetInfo(i, pi);
 				m_e1.GetWindowText(cstr1);
 				m_e2.GetWindowText(cstr2);
 				i1 = _ttoi(cstr1);
@@ -175,32 +168,27 @@ void CDlgSetpara::OnBnClickedOk()
 					i2 += pi.get_basePt().get_Y();
 				}
 				pt.set(i1,i2);
-				dlg->io.SetPICInfoPara(i, 1, &pt);
+				dlg->io.PICsetInfoPara(i, 1, &pt);
 				m_e3.GetWindowText(cstr1);
 				m_e4.GetWindowText(cstr2);
 				i1 = _ttoi(cstr1);
 				i2 = _ttoi(cstr2);
 				sz.set(i1,i2);
-				dlg->io.SetPICInfoPara(i, 2, &sz);
+				dlg->io.PICsetInfoPara(i, 2, &sz);
 				{
 					dlg->m_lPicture.SetItemText(i, 1, FmtToCStr(dlg->io.PICcontent[i].get_format(), dlg->io.version));
 					dlg->m_lPicture.SetItemText(i, 2, PtToCStr(dlg->io.PICcontent[i].get_basePt()));
 					dlg->m_lPicture.SetItemText(i, 3, SzToCStr(dlg->io.PICcontent[i].get_picSize()));
 					dlg->m_lPicture.SetItemText(i, 4, SzToCStr(dlg->io.PICcontent[i].get_frmSize()));
 					if(dlg->io.version == V5){
-						dlg->m_lPicture.SetItemText(i, 5, L"DDS"+NumToCStr(dlg->io.PICcontent[i].get_DDSIDused())+L":"+PtToCStr(dlg->io.PICcontent[i].get_DDSpointLT())+L"-"+PtToCStr(dlg->io.PICcontent[i].get_DDSpointRB()));
+						dlg->m_lPicture.SetItemText(i, 5, L"纹理集"+NumToCStr(dlg->io.PICcontent[i].get_TEXusing())+L":"+PtToCStr(dlg->io.PICcontent[i].get_TEXpointLT())+L"-"+PtToCStr(dlg->io.PICcontent[i].get_TEXpointRB()));
 					}
 				}
 			}
 		}
 	}
-	CString info, title;
-	info.LoadStringW(IDS_STRING_MODIFYFINISHED);
-	title.LoadStringW(IDS_MESSAGE_TITLE);
-	MessageBox(info, title);
-	//MessageBox(L"修改完毕！",L"提示喵！");
+	MessageBox(L"修改完毕喵！",L"提示喵！");
 	dlg->updateNPKInfo();
-	dlg->updateIMGInfo();
 	dlg->updatePICInfo();
 	dlg->draw();
 	ShowWindow(SW_HIDE);

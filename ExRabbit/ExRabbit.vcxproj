@@ -96,35 +96,44 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="..\BUGtrace.txt" />
-    <None Include="..\mplserial.txt" />
     <None Include="ReadMe.txt" />
+    <None Include="res\clr_icon.ico" />
     <None Include="res\ExRabbit.ico" />
     <None Include="res\ExRabbit.rc2" />
-    <None Include="res\Folder_Blue_Rabbit_16px_511716_easyicon.net.ico" />
-    <None Include="res\Folder_White_Rabbit_16px_511717_easyicon.net.ico" />
-    <None Include="res\icon1.ico" />
+    <None Include="res\ico00001.ico" />
+    <None Include="res\ico00002.ico" />
+    <None Include="res\ico00003.ico" />
+    <None Include="res\ico00004.ico" />
+    <None Include="res\ico00005.ico" />
+    <None Include="res\ico00006.ico" />
+    <None Include="res\ico00007.ico" />
+    <None Include="res\ico00008.ico" />
+    <None Include="res\ico00009.ico" />
     <None Include="res\icon2.ico" />
-    <None Include="res\icon3.ico" />
     <None Include="res\icon4.ico" />
     <None Include="res\icon5.ico" />
     <None Include="res\icon6.ico" />
+    <None Include="res\icon8.ico" />
     <None Include="res\iconud.ico" />
     <None Include="res\LOGO.bmp" />
-    <None Include="res\LOGO.png" />
+    <None Include="res\pic_icon.ico" />
+    <None Include="res\QRCODE.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DialogAbout.h" />
+    <ClInclude Include="DialogImportFrame.h" />
     <ClInclude Include="DialogNew.h" />
     <ClInclude Include="DlgBar.h" />
-    <ClInclude Include="DlgCanvas.h" />
     <ClInclude Include="DlgColor.h" />
     <ClInclude Include="DlgExpand.h" />
-    <ClInclude Include="DlgHSV.h" />
-    <ClInclude Include="DlgInsert.h" />
-    <ClInclude Include="DlgInsert2.h" />
-    <ClInclude Include="DlgInsert3.h" />
-    <ClInclude Include="DlgInsert4.h" />
+    <ClInclude Include="DlgInsertIMG.h" />
+    <ClInclude Include="DlgInsertPicture.h" />
+    <ClInclude Include="DlgInsertTexture.h" />
+    <ClInclude Include="DlgInsertColor.h" />
+    <ClInclude Include="DlgLoseBlack.h" />
     <ClInclude Include="DlgRename.h" />
     <ClInclude Include="DlgSetpara.h" />
+    <ClInclude Include="DlgSetting.h" />
     <ClInclude Include="DlgSetXY.h" />
     <ClInclude Include="DlgTrasform.h" />
     <ClInclude Include="ExRabbit.h" />
@@ -134,21 +143,27 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ToolAvatar.h" />
+    <ClInclude Include="ToolDict.h" />
+    <ClInclude Include="ToolForceEx.h" />
     <ClInclude Include="ToolIMGSearch.h" />
+    <ClInclude Include="ToolIndexing.h" />
+    <ClInclude Include="ToolSPK.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DialogAbout.cpp" />
+    <ClCompile Include="DialogImportFrame.cpp" />
     <ClCompile Include="DialogNew.cpp" />
     <ClCompile Include="DlgBar.cpp" />
-    <ClCompile Include="DlgCanvas.cpp" />
     <ClCompile Include="DlgColor.cpp" />
     <ClCompile Include="DlgExpand.cpp" />
-    <ClCompile Include="DlgHSV.cpp" />
-    <ClCompile Include="DlgInsert.cpp" />
-    <ClCompile Include="DlgInsert2.cpp" />
-    <ClCompile Include="DlgInsert3.cpp" />
-    <ClCompile Include="DlgInsert4.cpp" />
+    <ClCompile Include="DlgInsertIMG.cpp" />
+    <ClCompile Include="DlgInsertPicture.cpp" />
+    <ClCompile Include="DlgInserTexture.cpp" />
+    <ClCompile Include="DlgInsertColor.cpp" />
+    <ClCompile Include="DlgLoseBlack.cpp" />
     <ClCompile Include="DlgRename.cpp" />
     <ClCompile Include="DlgSetpara.cpp" />
+    <ClCompile Include="DlgSetting.cpp" />
     <ClCompile Include="DlgSetXY.cpp" />
     <ClCompile Include="DlgTrasform.cpp" />
     <ClCompile Include="ExRabbit.cpp" />
@@ -159,7 +174,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ToolAvatar.cpp" />
+    <ClCompile Include="ToolDict.cpp" />
+    <ClCompile Include="ToolForceEx.cpp" />
     <ClCompile Include="ToolIMGSearch.cpp" />
+    <ClCompile Include="ToolIndexing.cpp" />
+    <ClCompile Include="ToolSPK.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ExRabbit.rc" />

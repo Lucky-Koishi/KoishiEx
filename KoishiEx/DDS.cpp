@@ -33,8 +33,9 @@ bool DDS::load(const stream &s){
 		b = false;
 	_s.read(_v);
 	header.flags = _v;
-	if(_v != 0x81007)
-		b = false;
+	if(_v != 0x81007){
+	//	b = false;
+	}
 	_s.read(_v);
 	header.height = _v;
 	_s.read(_v);
@@ -85,6 +86,10 @@ bool DDS::loadFile(const str &DDSfileName){
 	stream s;
 	bool b = true;
 	b &= s.loadFile(DDSfileName);
+	if(!b){
+		s.release();
+		return b;
+	}
 	b &= load(s);
 	s.release();
 	return b;
