@@ -16,17 +16,17 @@ stream::stream(){
 	data = NULL;
 	pt = 0;
 }
-stream::stream(b64 _len){
+stream::stream(longex _len){
 	maxLen = _len;
 	len = 0;
 	pt = 0;
-	data = new b8[maxLen];
+	data = new uchar[maxLen];
 }
 stream::stream(const stream& _s){
 	maxLen = _s.maxLen;
 	len = _s.len;
 	pt = 0;
-	data = new b8[maxLen];
+	data = new uchar[maxLen];
 	if(data)
 		memcpy(data, _s.data, maxLen);
 }
@@ -40,32 +40,32 @@ stream& stream::operator = (const stream &_s){
 		delete[] data;
 	maxLen = _s.maxLen;
 	len = _s.len;
-	data = new b8[maxLen];
+	data = new uchar[maxLen];
 	if(data)
 		memcpy(data, _s.data, maxLen);
 	return *this;
 }
-void stream::allocate(b64 _len){
+void stream::allocate(longex _len){
 	if(!data){
 		len = 0;
 		pt = 0;
 		maxLen = _len;
-		data = new b8[maxLen];
-		for(b32 i = 0;i<maxLen;i++){
+		data = new uchar[maxLen];
+		for(dword i = 0;i<maxLen;i++){
 			data[i] = 0;
 		}
 	}
 }
-void stream::reallocate(b64 _len){
+void stream::reallocate(longex _len){
 	if(_len<maxLen){
 		return;
 	}
-	pb8 buff = new b8[len];
-	b64 buffLen = len;
+	uchar *buff = new uchar[len];
+	longex buffLen = len;
 	memcpy(buff, data, buffLen);
 	release();
 	allocate(_len);
-	for(b64 i = 0;i<buffLen;i++){
+	for(longex i = 0;i<buffLen;i++){
 		push(buff[i]);
 	}
 	delete[] buff;
@@ -78,7 +78,7 @@ void stream::release(){
 		len = 0;
 	}
 }
-b8& stream::operator[] (b64 _i) const{
+uchar& stream::operator[] (longex _i) const{
 	return data[_i];
 }
 stream::operator str(){
@@ -87,35 +87,17 @@ stream::operator str(){
 void stream::clear(){
 	len = 0;
 }
-b8 stream::push(b8 _d){
+uchar stream::push(uchar _d){
 	data[len++] = _d;
 	return 1;
 }
-b8 stream::push(b16 _d){
+uchar stream::push(word _d){
 	data[len++] = _d & 0xFF;
 	_d >>= 8;
 	data[len++] = _d & 0xFF;
 	return 1;
 }
-b8 stream::push(b32 _d){
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	return 1;
-}
-b8 stream::push(b64 _d){
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
+uchar stream::push(dword _d){
 	data[len++] = _d & 0xFF;
 	_d >>= 8;
 	data[len++] = _d & 0xFF;
@@ -125,17 +107,35 @@ b8 stream::push(b64 _d){
 	data[len++] = _d & 0xFF;
 	return 1;
 }
-b8 stream::push(i32 _i){
-	return push((b32)_i);
-}
-b8 stream::pushString(str _s){
-	for(b64 i = 0;i<_s.size();i++)
-		data[len++] = (b8)_s[i];
+uchar stream::push(longex _d){
+	data[len++] = _d & 0xFF;
+	_d >>= 8;
+	data[len++] = _d & 0xFF;
+	_d >>= 8;
+	data[len++] = _d & 0xFF;
+	_d >>= 8;
+	data[len++] = _d & 0xFF;
+	_d >>= 8;
+	data[len++] = _d & 0xFF;
+	_d >>= 8;
+	data[len++] = _d & 0xFF;
+	_d >>= 8;
+	data[len++] = _d & 0xFF;
+	_d >>= 8;
+	data[len++] = _d & 0xFF;
 	return 1;
 }
-b64 stream::replace(const b8 &whos, const b8 &to){
-	b64 count = 0;
-	for(b64 i = 0;i<len;i++){
+uchar stream::push(long _i){
+	return push((dword)_i);
+}
+uchar stream::pushString(str _s){
+	for(longex i = 0;i<_s.size();i++)
+		data[len++] = (uchar)_s[i];
+	return 1;
+}
+longex stream::replace(const uchar &whos, const uchar &to){
+	longex count = 0;
+	for(longex i = 0;i<len;i++){
 		if(data[i]==whos){
 			count ++;
 			data[i] = to;
@@ -143,102 +143,102 @@ b64 stream::replace(const b8 &whos, const b8 &to){
 	}
 	return count;
 }
-b8 stream::pushStream(const stream &_s, b64 _len){
+uchar stream::pushStream(const stream &_s, longex _len){
 	if(getLen() + _len > getMaxLen()){
 		reallocate(getLen() + _len * 5);
 	}
-	for(b64 i = 0;i<_len;i++)
+	for(longex i = 0;i<_len;i++)
 		data[len++] = _s.data[i];
 	return 1;
 }
-b64 stream::getLen() const{
+longex stream::getLen() const{
 	return len;
 }
-b64 stream::getMaxLen() const{
+longex stream::getMaxLen() const{
 	return maxLen;
 }
-b64 stream::ptPos() const{
+longex stream::getPtPos() const{
 	return pt;
 }
-b64 stream::ptMove(i64 dist){
-	i64 now = (i64)pt;
-	i64 goa = now + dist;
+longex stream::ptMove(longex dist){
+	longex now = (longex)pt;
+	longex goa = now + dist;
 	if(goa<0){
 		pt = 0;
-	}else if((b64)goa>len){
+	}else if((longex)goa>len){
 		pt = len;
 	}else{
-		pt = (b64)goa;
+		pt = (longex)goa;
 	}
 	return pt;
 }
-b64 stream::ptMoveTo(i64 pos){
+longex stream::ptMoveTo(longex pos){
 	if(pos<0)
 		pos = 0;
 	if(pos>len)
 		pos = len;
-	pt = (b64)pos;
+	pt = (longex)pos;
 	return pt;
 }
-b8 stream::read(b8 &_d){
+uchar stream::read(uchar &_d){
 	if(pt > len - 1){
 		return 0;
 	}
 	_d = data[pt];
-	ptMove(sizeof(b8));
+	ptMove(sizeof(uchar));
 	return 1;
 }
-b8 stream::read(b16 &_d){
+uchar stream::read(word &_d){
 	if(pt > len -2){
 		return 0;
 	}
 	_d = data[pt] | data[pt+1]<<8;
-	ptMove(sizeof(b16));
+	ptMove(sizeof(word));
 	return 1;
 }
-b8 stream::read(b32 &_d){
+uchar stream::read(dword &_d){
 	if(pt > len -4){
 		return 0;
 	}
 	_d = data[pt] | data[pt+1]<<8 | data[pt+2]<<16 | data[pt+3]<<24;
-	ptMove(sizeof(b32));
+	ptMove(sizeof(dword));
 	return 1;
 }
-b8 stream::read(b64 &_d){
+uchar stream::read(longex &_d){
 	if(pt > len -8){
 		return 0;
 	}
-	_d = data[pt] | data[pt+1]<<8 | data[pt+2]<<16 | data[pt+3]<<24 | ((b64)(data[pt+4] | data[pt+5]<<8 | data[pt+6]<<16 | data[pt+7]<<24)<<32);
+	_d = data[pt] | data[pt+1]<<8 | data[pt+2]<<16 | data[pt+3]<<24 | ((longex)(data[pt+4] | data[pt+5]<<8 | data[pt+6]<<16 | data[pt+7]<<24)<<32);
 	ptMove(sizeof(64));
 	return 1;
 }
-b8 stream::read(i32 &_i){
-	b32 bresult;
+uchar stream::read(long &_i){
+	dword bresult;
 	read(bresult);
-	_i = (i32)bresult;
+	_i = (long)bresult;
 	return 1;
 }
-str stream::readString(b32 _len){
+str stream::readString(dword _len){
 	if(pt > len -_len){
 		return "";
 	}
 	stream _s(_len+1);
 	readStream(_s, _len);
-	_s.push((b8)0);
+	_s.push((uchar)0);
 	return (char*)_s.data;
 }
-void stream::readStream(stream &dest, b64 _len){
+void stream::readStream(stream &dest, longex _len){
 	if(pt > len -_len){
 		_len = len - pt;
 	}
 	dest.reallocate(_len);
 	dest.clear();
-	for(b64 i = 0; i<_len;i++){
+	for(longex i = 0; i<_len;i++){
 		dest.push(data[pt+i]);
 	}
 	pt += _len;
 }
-void stream::insertStream(const stream &_s, b64 _len, b64 _pos){
+void stream::insertStream(const stream &_s, longex _len, longex _pos){
 	//len超过s的长度
 	if(_len > _s.getLen()){
 		_len = _s.getLen();
@@ -253,7 +253,7 @@ void stream::insertStream(const stream &_s, b64 _len, b64 _pos){
 	}
 	//开始处理
 	stream prefix, suffix;
-	b64 i;
+	longex i;
 	//首部时prefix无效
 	if(_pos>0){
 		prefix.allocate(_pos);
@@ -278,7 +278,7 @@ void stream::insertStream(const stream &_s, b64 _len, b64 _pos){
 	prefix.release();
 	suffix.release();
 }
-void stream::deleteStream(b64 _pos, b64 _len){
+void stream::deleteStream(longex _pos, longex _len){
 	//
 	if(_pos > getLen()){
 		_pos = getLen();
@@ -291,7 +291,7 @@ void stream::deleteStream(b64 _pos, b64 _len){
 		return;
 	//开始处理
 	stream prefix, suffix;
-	b64 i;
+	longex i;
 	//首部时prefix无效
 	if(_pos>0){
 		prefix.allocate(_pos);
@@ -315,14 +315,14 @@ void stream::deleteStream(b64 _pos, b64 _len){
 	prefix.release();
 	suffix.release();
 }
-bool stream::modify(b64 _pos, b8 _d){
+bool stream::modify(longex _pos, uchar _d){
 	if(_pos<getLen() || _pos>=0){
 		data[_pos] = _d;
 		return true;
 	}
 	return false;
 }
-bool stream::modify(b64 _pos, i32 _i){
+bool stream::modify(longex _pos, long _i){
 	if(_pos<getLen()-4 || _pos>=0){
 		data[_pos] = (_i & 0xff);
 		data[_pos+1] = ((_i >> 8) & 0xff);
@@ -345,7 +345,7 @@ bool stream::loadFile(str fileName){
 	if(!fl)
 		return false;
 	fseek(fl, 0, SEEK_END);
-	b64 sz = ftell(fl);
+	longex sz = ftell(fl);
 	reallocate(sz+1);
 	fseek(fl, 0, SEEK_SET);
 	len = fread((void*)data, 1, sz, fl);
@@ -357,49 +357,50 @@ void stream::nameMask(){
 	if(len < 256){
 		return;
 	}
-	for(i32 i = 0;i<255;i++){
+	str IMGnameMask = "puchikon@neople dungeon and fighter DNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNF";
+	for(long i = 0;i<255;i++){
 		data[i]^= IMGnameMask[i];
 	}
 }
 
 void stream::getSHA256(stream &dest){
-	pb8 buf = new b8[32];
-	b64 len = getLen();
+	uchar *buff = new uchar[32];
+	longex len = getLen();
 	KoishiSHA256::SHA256 sha;
 	sha.reset();
 	sha.add(data, len);
-	sha.getHash(buf);
-	i32 i;
+	sha.getHash(buff);
+	long i;
 	dest.allocate(32);
 	for(i=0;i<32;i++){
-		dest.push(buf[i]);
+		dest.push(buff[i]);
 	}
-	delete[] buf;
+	delete[] buff;
 }
 
 void stream::getSHA256(stream &dest, const stream &added){
 	stream s(*this);
 	s.pushStream(added, added.getLen());
-	pb8 buf = new b8[32];
-	b64 len = s.getLen()/17*17;
+	uchar *buff = new uchar[32];
+	longex len = s.getLen()/17*17;
 	KoishiSHA256::SHA256 sha;
 	sha.reset();
 	sha.add(s.data, len);
-	sha.getHash(buf);
-	i32 i;
+	sha.getHash(buff);
+	long i;
 	dest.allocate(32);
 	for(i=0;i<32;i++){
-		dest.push(buf[i]);
+		dest.push(buff[i]);
 	}
-	delete[] buf;
+	delete[] buff;
 }
-i8 stream::compressData(stream &dest, compressType type){
+int stream::compressData(stream &dest, compressType type){
 	switch(type){
 	case COMP_ZLIB:
 		{
-			b64 tryLength = getLen()+1000; 
+			longex tryLength = getLen()+1000; 
 			dest.allocate(tryLength);
-			i8 i = (i8)compress(dest.data, (b32*)&tryLength, data, getLen());
+			int i = (int)compress(dest.data, (dword*)&tryLength, data, getLen());
 			dest.len = tryLength;
 			return i;
 		}
@@ -418,12 +419,12 @@ i8 stream::compressData(stream &dest, compressType type){
 		break;
 	}
  }
-i8 stream::uncompressData(stream &dest, compressType type, b64 tryLength){
+int stream::uncompressData(stream &dest, compressType type, longex tryLength){
 	switch(type){
 	case COMP_ZLIB:
 		{
 			 dest.allocate(tryLength);
-			 i8 i = (i8)uncompress(dest.data, (b32*)&tryLength, data, getLen());
+			 int i = (int)uncompress(dest.data, (dword*)&tryLength, data, getLen());
 			 dest.len = tryLength;
 			 return i;
 		}
@@ -431,7 +432,7 @@ i8 stream::uncompressData(stream &dest, compressType type, b64 tryLength){
 	case COMP_ZLIB2:
 		{
 			 dest.allocate(tryLength);
-			 i8 i = (i8)uncompress(dest.data, (b32*)&tryLength, data, getLen());
+			 int i = (int)uncompress(dest.data, (dword*)&tryLength, data, getLen());
 			 dest.len = tryLength;
 			 return i;
 		}
@@ -451,7 +452,7 @@ i8 stream::uncompressData(stream &dest, compressType type, b64 tryLength){
 	}
  }
 
-i64 stream::findStream(const stream &s,b64 startPos){
+longex stream::findStream(const stream &s,longex startPos){
 	int fLine = s.getLen();
 	int i;
 	while(startPos + fLine <= getLen()){
@@ -471,14 +472,14 @@ i64 stream::findStream(const stream &s,b64 startPos){
 	return -1;
 }
 
-b64 stream::splitStream(const stream &s, lb64 &posList, lb64 &lenList){
-	i64 startPos = 0;
-	i64 fLine = s.getLen();
+longex stream::splitStream(const stream &s, queueex &posList, queueex &lenList){
+	longex startPos = 0;
+	longex fLine = s.getLen();
 	posList.clear();
 	lenList.clear();
 	posList.push_back(0);
 	while(true){
-		i64 p = findStream(s, startPos);
+		longex p = findStream(s, startPos);
 		if(p == -1){
 			lenList.push_back(getLen()-startPos);
 			break;
@@ -492,7 +493,7 @@ b64 stream::splitStream(const stream &s, lb64 &posList, lb64 &lenList){
 }
 
 //进行BZ2压缩
-i8 stream::BZcompress(stream &dest){
+int stream::BZcompress(stream &dest){
 	unsigned int len = 10*getLen();
 	dest.allocate(len);
 	int i = BZ2_bzBuffToBuffCompress((char*)dest.data, &len, (char*)data, getLen(), 1, 0, 0);
@@ -500,7 +501,7 @@ i8 stream::BZcompress(stream &dest){
 	return i;
 }
 //进行BZ2解压
-i8 stream::BZdecompress(stream &dest){
+int stream::BZdecompress(stream &dest){
 	unsigned int len = 100*getLen();
 	dest.allocate(len);
 	int i = BZ2_bzBuffToBuffDecompress((char*)dest.data, &len, (char*)data, getLen(), 0, 0);

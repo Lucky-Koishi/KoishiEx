@@ -19,13 +19,27 @@
 #include <stdlib.h>
 #include <io.h>
 using namespace Koishi;
-using namespace KoishiTitle;
+using namespace KoishiAvatar;
+using namespace KoishiExpand::KoishiMarkTool;
 using namespace KoishiExpand;
-
 int _tmain(int argc, _TCHAR* argv[]){
-	matrix mat;
-	mat.loadPNG("13.png");
-	mat.loseBlack(1);
-	mat.makePNG("131.png");
+	NPKobject no("I:\\ImagePacks2\\sprite_item_avatar_mage.NPK");
+	std::vector<matrix> mat1;
+	KoishiExpand::exhibit ex;
+	ex.create(2800, 2800);
+	for(int i = 0;i<no.count;i++){
+		IMGobject io;
+		no.IMGextract(i, io);
+		for(int j = 0;j<io.indexCount;j++){
+			matrix mat;
+			io.PICextract(j, mat);
+			mat1.push_back(mat);
+			ex.putMatrix(mat, true);
+			printf("_");
+		}
+		printf("|");
+	}
+	ex.canvas.makePNG("1.png");
+	while(1);
 	return 0;
 }

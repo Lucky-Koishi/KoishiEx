@@ -21,8 +21,8 @@ DDSHeader *DDS::getHeader(){
 bool DDS::load(const stream &s){
 	stream _s(s);
 	bool b = true;
-	b32 _v;
-	i32 i;
+	dword _v;
+	long i;
 	_s.read(_v);
 	header.magic = _v;
 	if(_v != 0x20534444)
@@ -97,38 +97,38 @@ bool DDS::loadFile(const str &DDSfileName){
 bool DDS::make(stream &s){
 	s.allocate(128+data1.getLen()+data2.getLen()+2000);
 
-	s.push((b32)header.magic);
-	s.push((b32)header.headSize);
-	s.push((b32)header.flags);
-	s.push((b32)header.height);
-	s.push((b32)header.width);
-	s.push((b32)header.pitchOrLinearSize);
-	s.push((b32)header.depth);
-	s.push((b32)header.mipMapCount);
-	s.push((b32)header.reserved1[0]);
-	s.push((b32)header.reserved1[1]);
-	s.push((b32)header.reserved1[2]);
-	s.push((b32)header.reserved1[3]);
-	s.push((b32)header.reserved1[4]);
-	s.push((b32)header.reserved1[5]);
-	s.push((b32)header.reserved1[6]);
-	s.push((b32)header.reserved1[7]);
-	s.push((b32)header.reserved1[8]);
-	s.push((b32)header.reserved1[9]);
-	s.push((b32)header.reserved1[10]);
-	s.push((b32)header.pixelFormat.size);
-	s.push((b32)header.pixelFormat.flags);
-	s.push((b32)header.pixelFormat.fourCC);
-	s.push((b32)header.pixelFormat.rgbBitCount);
-	s.push((b32)header.pixelFormat.rBitMask);
-	s.push((b32)header.pixelFormat.gBitMask);
-	s.push((b32)header.pixelFormat.bBitMask);
-	s.push((b32)header.pixelFormat.aBitMask);
-	s.push((b32)header.caps1);
-	s.push((b32)header.caps2);
-	s.push((b32)header.caps3);
-	s.push((b32)header.caps4);
-	s.push((b32)header.reserved2);
+	s.push((dword)header.magic);
+	s.push((dword)header.headSize);
+	s.push((dword)header.flags);
+	s.push((dword)header.height);
+	s.push((dword)header.width);
+	s.push((dword)header.pitchOrLinearSize);
+	s.push((dword)header.depth);
+	s.push((dword)header.mipMapCount);
+	s.push((dword)header.reserved1[0]);
+	s.push((dword)header.reserved1[1]);
+	s.push((dword)header.reserved1[2]);
+	s.push((dword)header.reserved1[3]);
+	s.push((dword)header.reserved1[4]);
+	s.push((dword)header.reserved1[5]);
+	s.push((dword)header.reserved1[6]);
+	s.push((dword)header.reserved1[7]);
+	s.push((dword)header.reserved1[8]);
+	s.push((dword)header.reserved1[9]);
+	s.push((dword)header.reserved1[10]);
+	s.push((dword)header.pixelFormat.size);
+	s.push((dword)header.pixelFormat.flags);
+	s.push((dword)header.pixelFormat.fourCC);
+	s.push((dword)header.pixelFormat.rgbBitCount);
+	s.push((dword)header.pixelFormat.rBitMask);
+	s.push((dword)header.pixelFormat.gBitMask);
+	s.push((dword)header.pixelFormat.bBitMask);
+	s.push((dword)header.pixelFormat.aBitMask);
+	s.push((dword)header.caps1);
+	s.push((dword)header.caps2);
+	s.push((dword)header.caps3);
+	s.push((dword)header.caps4);
+	s.push((dword)header.reserved2);
 	s.pushStream(data1,data1.getLen());
 	s.pushStream(data2,data2.getLen());
 	return false;
@@ -165,8 +165,8 @@ bool DDS::compress(const matrix &mat){
 	header.magic = 0x20534444;
 	header.headSize = 0x7c;
 	header.flags = 0x81007;
-	header.height = (mat.getRowCount()+3)/4*4;
-	header.width = (mat.getColumnCount()+3)/4*4;
+	header.height = (mat.getHeight()+3)/4*4;
+	header.width = (mat.getWidth()+3)/4*4;
 	header.pitchOrLinearSize = data1.getLen();
 	header.depth = 0;
 	header.mipMapCount = 0;
@@ -196,47 +196,47 @@ bool DDS::compress(const matrix &mat){
 	header.reserved2 = 0;
 	return true;
 }
-b16 DDS::RGB8888TO565(color c8888){
-	b16 c565 = 0;
-	c565 |= (c8888.get_B() >> 3 << 11);
-	c565 |= (c8888.get_G() >> 2 << 5);
-	c565 |= (c8888.get_R() >> 3);
+word DDS::RGB8888TO565(color c8888){
+	word c565 = 0;
+	c565 |= (c8888.B >> 3 << 11);
+	c565 |= (c8888.G >> 2 << 5);
+	c565 |= (c8888.R >> 3);
 	return c565;
 }
-color DDS::RGB565TO8888(b16 c565){
+color DDS::RGB565TO8888(word c565){
 	color c8888(0);
-	c8888.set_A(0xFF);
-	c8888.set_R((c565 & 0xf800)>>8);
-	c8888.set_G((c565 & 0x07e0)>>3);
-	c8888.set_B((c565 & 0x001f)<<3);
+	c8888.A = (0xFF);
+	c8888.R = ((c565 & 0xf800)>>8);
+	c8888.G = ((c565 & 0x07e0)>>3);
+	c8888.B = ((c565 & 0x001f)<<3);
 	return c8888;
 }
-void DDS::DXT1_uncompress(const stream &udata, lcolor &clist){
-	i16 i;
-	b32 clrPart = udata[0] | (udata[1]<<8) | (udata[2]<<16) | (udata[3]<<24);
-	b32 idxPart = udata[4] | (udata[5]<<8) | (udata[6]<<16) | (udata[7]<<24);
-	b16 uc1 = clrPart & 0xffff;
-	b16 uc2 = clrPart >> 16;
+void DDS::DXT1_uncompress(const stream &udata, colorList &clist){
+	int i;
+	dword clrPart = udata[0] | (udata[1]<<8) | (udata[2]<<16) | (udata[3]<<24);
+	dword idxPart = udata[4] | (udata[5]<<8) | (udata[6]<<16) | (udata[7]<<24);
+	word uc1 = clrPart & 0xffff;
+	word uc2 = clrPart >> 16;
 	color cTempList[4];
 	cTempList[0] = RGB565TO8888(uc1);
 	cTempList[1] = RGB565TO8888(uc2);
 	if(uc1<=uc2){
-		cTempList[2].set_A(0xff);
-		cTempList[2].set_B((cTempList[0].get_B()+cTempList[1].get_B())/2);
-		cTempList[2].set_R((cTempList[0].get_R()+cTempList[1].get_R())/2);
-		cTempList[2].set_G((cTempList[0].get_G()+cTempList[1].get_G())/2);
-		cTempList[3].set_A(0x00);
+		cTempList[2].A = (0xff);
+		cTempList[2].B = ((cTempList[0].B+cTempList[1].B)/2);
+		cTempList[2].R = ((cTempList[0].R+cTempList[1].R)/2);
+		cTempList[2].G = ((cTempList[0].G+cTempList[1].G)/2);
+		cTempList[3].A = (0x00);
 	}else{
-		cTempList[2].set_A(0xff);
-		cTempList[2].set_B((2*cTempList[0].get_B()+cTempList[1].get_B())/3);
-		cTempList[2].set_R((2*cTempList[0].get_R()+cTempList[1].get_R())/3);
-		cTempList[2].set_G((2*cTempList[0].get_G()+cTempList[1].get_G())/3);
-		cTempList[3].set_A(0xff);
-		cTempList[3].set_B((cTempList[0].get_B()+2*cTempList[1].get_B())/3);
-		cTempList[3].set_R((cTempList[0].get_R()+2*cTempList[1].get_R())/3);
-		cTempList[3].set_G((cTempList[0].get_G()+2*cTempList[1].get_G())/3);
+		cTempList[2].A = (0xff);
+		cTempList[2].B = ((2*cTempList[0].B+cTempList[1].B)/3);
+		cTempList[2].R = ((2*cTempList[0].R+cTempList[1].R)/3);
+		cTempList[2].G = ((2*cTempList[0].G+cTempList[1].G)/3);
+		cTempList[3].A = (0xff);
+		cTempList[3].B = ((cTempList[0].B+2*cTempList[1].B)/3);
+		cTempList[3].R = ((cTempList[0].R+2*cTempList[1].R)/3);
+		cTempList[3].G = ((cTempList[0].G+2*cTempList[1].G)/3);
 	}
-	b16 iTempList[16];
+	word iTempList[16];
 	for(i = 0;i<16;i++){
 		iTempList[i] = idxPart & 0x0003;
 		idxPart >>= 2;
@@ -247,11 +247,11 @@ void DDS::DXT1_uncompress(const stream &udata, lcolor &clist){
 	}
 }
 void DDS::DXT1_uncompress(matrix &mat){
-	mat.allocate(header.height, header.width);
-	b32 blockrow = mat.getRowCount()/4;
-	b32 blockcol = mat.getColumnCount()/4;
-	i32 i,j;
-	lcolor _cl;
+	mat.create(header.height, header.width);
+	dword blockrow = mat.getHeight()/4;
+	dword blockcol = mat.getWidth()/4;
+	long i,j;
+	colorList _cl;
 	stream s;
 	for(j=0;j<blockrow;j++){
 		for(i=0;i<blockcol;i++){
@@ -277,32 +277,32 @@ void DDS::DXT1_uncompress(matrix &mat){
 		}
 	}
 }
-void DDS::DXT3_uncompress(const stream &udata, lcolor &clist){
-	i16 i;
-	b32 clrPart = udata[8] | (udata[9]<<8) | (udata[10]<<16) | (udata[11]<<24);
-	b32 idxPart = udata[12] | (udata[13]<<8) | (udata[14]<<16) | (udata[15]<<24);
+void DDS::DXT3_uncompress(const stream &udata, colorList &clist){
+	int i;
+	dword clrPart = udata[8] | (udata[9]<<8) | (udata[10]<<16) | (udata[11]<<24);
+	dword idxPart = udata[12] | (udata[13]<<8) | (udata[14]<<16) | (udata[15]<<24);
 	//颜色提取
-	b16 uc1 = clrPart & 0xffff;	//关键颜色1
-	b16 uc2 = clrPart >> 16;	//关键颜色2
+	word uc1 = clrPart & 0xffff;	//关键颜色1
+	word uc2 = clrPart >> 16;	//关键颜色2
 	color cTempList[4];			//四种颜色计算
 	cTempList[0] = RGB565TO8888(uc1);
 	cTempList[1] = RGB565TO8888(uc2);
-	cTempList[2].set_A(0xff);	//透明度先缺省
-	cTempList[2].set_B((2*cTempList[0].get_B()+cTempList[1].get_B())/3);
-	cTempList[2].set_R((2*cTempList[0].get_R()+cTempList[1].get_R())/3);
-	cTempList[2].set_G((2*cTempList[0].get_G()+cTempList[1].get_G())/3);
-	cTempList[3].set_A(0xff);	//透明度先缺省
-	cTempList[3].set_B((cTempList[0].get_B()+2*cTempList[1].get_B())/3);
-	cTempList[3].set_R((cTempList[0].get_R()+2*cTempList[1].get_R())/3);
-	cTempList[3].set_G((cTempList[0].get_G()+2*cTempList[1].get_G())/3);
+	cTempList[2].A = (0xff);	//透明度先缺省
+	cTempList[2].B = ((2*cTempList[0].B+cTempList[1].B)/3);
+	cTempList[2].R = ((2*cTempList[0].R+cTempList[1].R)/3);
+	cTempList[2].G = ((2*cTempList[0].G+cTempList[1].G)/3);
+	cTempList[3].A = (0xff);	//透明度先缺省
+	cTempList[3].B = ((cTempList[0].B+2*cTempList[1].B)/3);
+	cTempList[3].R = ((cTempList[0].R+2*cTempList[1].R)/3);
+	cTempList[3].G = ((cTempList[0].G+2*cTempList[1].G)/3);
 	//颜色索引
-	b16 iTempList1[16];
+	word iTempList1[16];
 	for(i = 0;i<16;i++){
 		iTempList1[i] = idxPart & 0x0003;
 		idxPart >>= 2;
 	}
 	//透明提取
-	b16 iTempList2[16];
+	word iTempList2[16];
 	iTempList2[0] = (udata[0] & 0xf) * 0x11;
 	iTempList2[1] = (udata[0] >>  4) * 0x11;
 	iTempList2[2] = (udata[1] & 0xf) * 0x11;
@@ -323,16 +323,16 @@ void DDS::DXT3_uncompress(const stream &udata, lcolor &clist){
 	color cTemp;
 	for(i = 0;i<16;i++){
 		cTemp = cTempList[iTempList1[i]];
-		cTemp.set_A(iTempList2[i]);
+		cTemp.A = (iTempList2[i]);
 		clist.push_back(cTemp);
 	}
 }
 void DDS::DXT3_uncompress(matrix &mat){
-	mat.allocate(header.height, header.width);
-	b32 blockrow = mat.getRowCount()/4;
-	b32 blockcol = mat.getColumnCount()/4;
-	i32 i,j;
-	lcolor _cl;
+	mat.create(header.height, header.width);
+	dword blockrow = mat.getHeight()/4;
+	dword blockcol = mat.getWidth()/4;
+	long i,j;
+	colorList _cl;
 	stream s;
 	for(j=0;j<blockrow;j++){
 		for(i=0;i<blockcol;i++){
@@ -358,34 +358,34 @@ void DDS::DXT3_uncompress(matrix &mat){
 		}
 	}
 }
-void DDS::DXT5_uncompress(const stream &udata, lcolor &clist){
-	i16 i;
-	b32 clrPart = udata[8] | (udata[9]<<8) | (udata[10]<<16) | (udata[11]<<24);
-	b32 idxPart = udata[12] | (udata[13]<<8) | (udata[14]<<16) | (udata[15]<<24);
+void DDS::DXT5_uncompress(const stream &udata, colorList &clist){
+	int i;
+	dword clrPart = udata[8] | (udata[9]<<8) | (udata[10]<<16) | (udata[11]<<24);
+	dword idxPart = udata[12] | (udata[13]<<8) | (udata[14]<<16) | (udata[15]<<24);
 	//颜色提取
-	b16 uc1 = clrPart & 0xffff;	//关键颜色1
-	b16 uc2 = clrPart >> 16;	//关键颜色2
+	word uc1 = clrPart & 0xffff;	//关键颜色1
+	word uc2 = clrPart >> 16;	//关键颜色2
 	color cTempList[4];			//四种颜色计算
 	cTempList[0] = RGB565TO8888(uc1);
 	cTempList[1] = RGB565TO8888(uc2);
-	cTempList[2].set_A(0xff);	//透明度先缺省
-	cTempList[2].set_B((2*cTempList[0].get_B()+cTempList[1].get_B())/3);
-	cTempList[2].set_R((2*cTempList[0].get_R()+cTempList[1].get_R())/3);
-	cTempList[2].set_G((2*cTempList[0].get_G()+cTempList[1].get_G())/3);
-	cTempList[3].set_A(0xff);	//透明度先缺省
-	cTempList[3].set_B((cTempList[0].get_B()+2*cTempList[1].get_B())/3);
-	cTempList[3].set_R((cTempList[0].get_R()+2*cTempList[1].get_R())/3);
-	cTempList[3].set_G((cTempList[0].get_G()+2*cTempList[1].get_G())/3);
+	cTempList[2].A = (0xff);	//透明度先缺省
+	cTempList[2].B = ((2*cTempList[0].B+cTempList[1].B)/3);
+	cTempList[2].R = ((2*cTempList[0].R+cTempList[1].R)/3);
+	cTempList[2].G = ((2*cTempList[0].G+cTempList[1].G)/3);
+	cTempList[3].A = (0xff);	//透明度先缺省
+	cTempList[3].B = ((cTempList[0].B+2*cTempList[1].B)/3);
+	cTempList[3].R = ((cTempList[0].R+2*cTempList[1].R)/3);
+	cTempList[3].G = ((cTempList[0].G+2*cTempList[1].G)/3);
 	//颜色索引
-	b16 iTempList1[16];
+	word iTempList1[16];
 	for(i = 0;i<16;i++){
 		iTempList1[i] = idxPart & 0x0003;
 		idxPart >>= 2;
 	}
 	//透明提取
-	b8 ua1 = udata[0];	//关键透明度1
-	b8 ua2 = udata[1];	//关键透明度2
-	b8 aTempList[8];
+	Koishi::uchar ua1 = udata[0];	//关键透明度1
+	Koishi::uchar ua2 = udata[1];	//关键透明度2
+	Koishi::uchar aTempList[8];
 	aTempList[0] = ua1;
 	aTempList[1] = ua2;
 	if(ua1<=ua2){
@@ -404,7 +404,7 @@ void DDS::DXT5_uncompress(const stream &udata, lcolor &clist){
 		aTempList[7] = (1*ua1 + 6*ua2)/7;
 	}
 	//透明度索引
-	b16 iTempList2[16];
+	word iTempList2[16];
 	iTempList2[0] = ((udata[2] & 0x07) >> 0);
 	iTempList2[1] = ((udata[2] & 0x38) >> 3);
 	iTempList2[2] = ((udata[2] & 0xC0) >> 6) | ((udata[3] & 0x01) << 2);
@@ -425,16 +425,16 @@ void DDS::DXT5_uncompress(const stream &udata, lcolor &clist){
 	color cTemp;
 	for(i = 0;i<16;i++){
 		cTemp = cTempList[iTempList1[i]];
-		cTemp.set_A(aTempList[iTempList2[i]]);
+		cTemp.A = (aTempList[iTempList2[i]]);
 		clist.push_back(cTemp);
 	}
 }
 void DDS::DXT5_uncompress(matrix &mat){
-	mat.allocate(header.height, header.width);
-	b32 blockrow = mat.getRowCount()/4;
-	b32 blockcol = mat.getColumnCount()/4;
-	i32 i,j;
-	lcolor _cl;
+	mat.create(header.height, header.width);
+	dword blockrow = mat.getHeight()/4;
+	dword blockcol = mat.getWidth()/4;
+	long i,j;
+	colorList _cl;
 	stream s;
 	for(j=0;j<blockrow;j++){
 		for(i=0;i<blockcol;i++){
@@ -460,67 +460,27 @@ void DDS::DXT5_uncompress(matrix &mat){
 		}
 	}
 }
-void DDS::DXT5_uncompress2(matrix &mat){
-	mat.allocate(header.height*5/4, header.width*5/4);
-	b32 blockrow = header.height/4;
-	b32 blockcol = header.width/4;
-	i32 i,j;
-	lcolor _cl;
-	stream s;
-	for(j=0;j<blockrow;j++){
-		for(i=0;i<blockcol;i++){
-			data1.readStream(s, 16);
-			DXT5_uncompress(s, _cl);
-			mat[5*j+0][5*i+0] = _cl[0];
-			mat[5*j+0][5*i+1] = _cl[1];
-			mat[5*j+0][5*i+2] = _cl[2];
-			mat[5*j+0][5*i+3] = _cl[3];
-			mat[5*j+0][5*i+4] = 0;
-			mat[5*j+1][5*i+0] = _cl[4];
-			mat[5*j+1][5*i+1] = _cl[5];
-			mat[5*j+1][5*i+2] = _cl[6];
-			mat[5*j+1][5*i+3] = _cl[7];
-			mat[5*j+1][5*i+4] = 0;
-			mat[5*j+2][5*i+0] = _cl[8];
-			mat[5*j+2][5*i+1] = _cl[9];
-			mat[5*j+2][5*i+2] = _cl[10];
-			mat[5*j+2][5*i+3] =	_cl[11];
-			mat[5*j+2][5*i+4] = 0;
-			mat[5*j+3][5*i+0] = _cl[12];
-			mat[5*j+3][5*i+1] = _cl[13];
-			mat[5*j+3][5*i+2] = _cl[14];
-			mat[5*j+3][5*i+3] = _cl[15];
-			mat[5*j+3][5*i+4] = 0;
-			mat[5*j+4][5*i+4] = 0;
-			mat[5*j+4][5*i+4] = 0;
-			mat[5*j+4][5*i+4] = 0;
-			mat[5*j+4][5*i+4] = 0;
-			mat[5*j+4][5*i+4] = 0;
-			s.release();
-		}
-	}
-}
-void DDS::DXT5_compress(const lcolor &clist, stream &dest){
-	i16 i;
-	b8 iTempList[16];		//存储透明度索引
-	b8 cTempList[16];		//存储颜色索引
+void DDS::DXT5_compress(const colorList &clist, stream &dest){
+	int i;
+	Koishi::uchar iTempList[16];		//存储透明度索引
+	Koishi::uchar cTempList[16];		//存储颜色索引
 	dest.allocate(16);
 	//透明度处理
 	//确定是否使用alpha7=0,alph8=0xff
 	bool flUseBound = false;
 	for(i=0;i<16;i++){
-		if(clist[i].get_A() == 0 || clist[i].get_A() == 0xff){
+		if(clist[i].A == 0 || clist[i].A == 0xff){
 			flUseBound = true;
 			break;
 		}
 	}
 	if(flUseBound){
 		//ua1需要小于等于ua2，分5份
-		b8 ua1 = 0xff;	//非零最小值初始化
-		b8 ua2 = 0;		//非FF最大值初始化
-		b8 uTemp;
+		Koishi::uchar ua1 = 0xff;	//非零最小值初始化
+		Koishi::uchar ua2 = 0;		//非FF最大值初始化
+		Koishi::uchar uTemp;
 		for(i=0;i<16;i++){
-			uTemp = clist[i].get_A();
+			uTemp = clist[i].A;
 			if(uTemp != 0 && uTemp<ua1){
 				ua1 = uTemp;
 			}
@@ -535,14 +495,14 @@ void DDS::DXT5_compress(const lcolor &clist, stream &dest){
 		//计算落在哪个区间里
 		//(a7)0____|____(a1)___|___(a3)___|___(a4)___|___(a5)___|___(a6)___|___(a2)_______|_______0xff(a8)
 		//扩充8位，以便除法运算更为精确
-		b16 uTempb;
-		b16 uab1 = ua1 << 8;
-		b16 uab2 = ua2 << 8;
-		b16 uad1 = uab1/2;
-		b16 uad2 = (uab2-uab1)/10;
-		b16 uad3 = (0xffff-uab2)/2;
+		word uTempb;
+		word uab1 = ua1 << 8;
+		word uab2 = ua2 << 8;
+		word uad1 = uab1/2;
+		word uad2 = (uab2-uab1)/10;
+		word uad3 = (0xffff-uab2)/2;
 		for(i=0;i<16;i++){
-			uTempb = clist[i].get_A()<<8;
+			uTempb = clist[i].A<<8;
 			if(uTempb <uad1){
 				iTempList[i] = 6;
 			}else if(uTempb < uab1+uad2){
@@ -563,19 +523,19 @@ void DDS::DXT5_compress(const lcolor &clist, stream &dest){
 		}
 		dest.push(ua1);
 		dest.push(ua2);
-		dest.push((b8)((iTempList[0]>>0)|(iTempList[1]<<3)|(iTempList[2]<<6)));
-		dest.push((b8)((iTempList[2]>>2)|(iTempList[3]<<1)|(iTempList[4]<<4)|(iTempList[5]<<7)));
-		dest.push((b8)((iTempList[5]>>1)|(iTempList[6]<<2)|(iTempList[7]<<5)));
-		dest.push((b8)((iTempList[8]>>0)|(iTempList[9]<<3)|(iTempList[10]<<6)));
-		dest.push((b8)((iTempList[10]>>2)|(iTempList[11]<<1)|(iTempList[12]<<4)|(iTempList[13]<<7)));
-		dest.push((b8)((iTempList[13]>>1)|(iTempList[14]<<2)|(iTempList[15]<<5)));
+		dest.push((Koishi::uchar)((iTempList[0]>>0)|(iTempList[1]<<3)|(iTempList[2]<<6)));
+		dest.push((Koishi::uchar)((iTempList[2]>>2)|(iTempList[3]<<1)|(iTempList[4]<<4)|(iTempList[5]<<7)));
+		dest.push((Koishi::uchar)((iTempList[5]>>1)|(iTempList[6]<<2)|(iTempList[7]<<5)));
+		dest.push((Koishi::uchar)((iTempList[8]>>0)|(iTempList[9]<<3)|(iTempList[10]<<6)));
+		dest.push((Koishi::uchar)((iTempList[10]>>2)|(iTempList[11]<<1)|(iTempList[12]<<4)|(iTempList[13]<<7)));
+		dest.push((Koishi::uchar)((iTempList[13]>>1)|(iTempList[14]<<2)|(iTempList[15]<<5)));
 	}else{
 		//ua1需要大于ua2，分7份
-		b8 ua1 = 0;		//最大值初始化
-		b8 ua2 = 0xff;	//最小值初始化
-		b8 uTemp;
+		Koishi::uchar ua1 = 0;		//最大值初始化
+		Koishi::uchar ua2 = 0xff;	//最小值初始化
+		Koishi::uchar uTemp;
 		for(i=0;i<16;i++){
-			uTemp = clist[i].get_A();
+			uTemp = clist[i].A;
 			if(uTemp>ua1){
 				ua1 = uTemp;
 			}
@@ -586,12 +546,12 @@ void DDS::DXT5_compress(const lcolor &clist, stream &dest){
 		//计算落在哪个区间里
 		//...__(a2)__|__(a8)__|__(a7)__|__(a6)__|__(a5)__|__(a4)__|__(a3)__|__(a1)__...
 		//扩充8位，以便除法运算更为精确
-		b16 uTempb;
-		b16 uab1 = ua1 << 8;
-		b16 uab2 = ua2 << 8;
-		b16 uad = (uab2-uab1)/14;
+		word uTempb;
+		word uab1 = ua1 << 8;
+		word uab2 = ua2 << 8;
+		word uad = (uab2-uab1)/14;
 		for(i=0;i<16;i++){
-			uTempb = clist[i].get_A()<<8;
+			uTempb = clist[i].A<<8;
 			if(uTempb <uab2+uad){
 				iTempList[i] = 1;
 			}else if(uTempb < uab2+3*uad){
@@ -612,22 +572,22 @@ void DDS::DXT5_compress(const lcolor &clist, stream &dest){
 		}
 		dest.push(ua1);
 		dest.push(ua2);
-		dest.push((b8)((iTempList[0]>>0)|(iTempList[1]<<3)|(iTempList[2]<<6)));
-		dest.push((b8)((iTempList[2]>>2)|(iTempList[3]<<1)|(iTempList[4]<<4)|(iTempList[5]<<7)));
-		dest.push((b8)((iTempList[5]>>1)|(iTempList[6]<<2)|(iTempList[7]<<5)));
-		dest.push((b8)((iTempList[8]>>0)|(iTempList[9]<<3)|(iTempList[10]<<6)));
-		dest.push((b8)((iTempList[10]>>2)|(iTempList[11]<<1)|(iTempList[12]<<4)|(iTempList[13]<<7)));
-		dest.push((b8)((iTempList[13]>>1)|(iTempList[14]<<2)|(iTempList[15]<<5)));
+		dest.push((Koishi::uchar)((iTempList[0]>>0)|(iTempList[1]<<3)|(iTempList[2]<<6)));
+		dest.push((Koishi::uchar)((iTempList[2]>>2)|(iTempList[3]<<1)|(iTempList[4]<<4)|(iTempList[5]<<7)));
+		dest.push((Koishi::uchar)((iTempList[5]>>1)|(iTempList[6]<<2)|(iTempList[7]<<5)));
+		dest.push((Koishi::uchar)((iTempList[8]>>0)|(iTempList[9]<<3)|(iTempList[10]<<6)));
+		dest.push((Koishi::uchar)((iTempList[10]>>2)|(iTempList[11]<<1)|(iTempList[12]<<4)|(iTempList[13]<<7)));
+		dest.push((Koishi::uchar)((iTempList[13]>>1)|(iTempList[14]<<2)|(iTempList[15]<<5)));
 	}
 	//颜色处理
 	//不同于DXT1，无需考虑两个关键颜色谁大谁小，默认uc1<=uc2，但采用alpha7=0,alph8=0xff时不应该考虑alpha=7或8的时候的情形
-	b32 ucb1 = 0xffffff;	//小关键颜色 高位R 中位G 低位B
-	b32 ucb2 = 0;			//大关键颜色
+	dword ucb1 = 0xffffff;	//小关键颜色 高位R 中位G 低位B
+	dword ucb2 = 0;			//大关键颜色
 	for(i=0;i<16;i++){
-		b64 tempClr = clist[i].get_R() | clist[i].get_G() << 8 | clist[i].get_B() <<16; 
+		longex tempClr = clist[i].R | clist[i].G << 8 | clist[i].B <<16; 
 		//若使用边界透明度，则不能考虑透明度为0的情形
 		if(flUseBound){
-			if(clist[i].get_A() != 0){
+			if(clist[i].A != 0){
 				if(tempClr>ucb2){
 					ucb2 = tempClr;
 				}
@@ -646,9 +606,9 @@ void DDS::DXT5_compress(const lcolor &clist, stream &dest){
 	}
 	//计算落在哪个区间里
 	//...__(a1)__|__(a3)__|__(a4)__|__(a2)__...
-	b32 ucdb = (ucb2-ucb1)/6;
+	dword ucdb = (ucb2-ucb1)/6;
 	for(i=0;i<16;i++){
-		b32 tempClr = clist[i].get_R() | clist[i].get_G() << 8 | clist[i].get_B() << 16; 
+		dword tempClr = clist[i].R | clist[i].G << 8 | clist[i].B << 16; 
 		if(tempClr <ucb1+ucdb){
 			cTempList[i] = 0;
 		}else if(tempClr < ucb1+ucdb*3){
@@ -661,21 +621,21 @@ void DDS::DXT5_compress(const lcolor &clist, stream &dest){
 	}
 	dest.push(RGB8888TO565(color(ucb1 >> 16, ucb1 >> 8 & 0xff, ucb1 & 0xff)));
 	dest.push(RGB8888TO565(color(ucb2 >> 16, ucb2 >> 8 & 0xff, ucb2 & 0xff)));
-	dest.push((b8)((cTempList[0]>>0)|(cTempList[1]<<2)|(cTempList[2]<<4)|(cTempList[3]<<6)));
-	dest.push((b8)((cTempList[4]>>0)|(cTempList[5]<<2)|(cTempList[6]<<4)|(cTempList[7]<<6)));
-	dest.push((b8)((cTempList[8]>>0)|(cTempList[9]<<2)|(cTempList[10]<<4)|(cTempList[11]<<6)));
-	dest.push((b8)((cTempList[12]>>0)|(cTempList[13]<<2)|(cTempList[14]<<4)|(cTempList[15]<<6)));
+	dest.push((Koishi::uchar)((cTempList[0]>>0)|(cTempList[1]<<2)|(cTempList[2]<<4)|(cTempList[3]<<6)));
+	dest.push((Koishi::uchar)((cTempList[4]>>0)|(cTempList[5]<<2)|(cTempList[6]<<4)|(cTempList[7]<<6)));
+	dest.push((Koishi::uchar)((cTempList[8]>>0)|(cTempList[9]<<2)|(cTempList[10]<<4)|(cTempList[11]<<6)));
+	dest.push((Koishi::uchar)((cTempList[12]>>0)|(cTempList[13]<<2)|(cTempList[14]<<4)|(cTempList[15]<<6)));
 }
 
 void DDS::DXT5_compress(const matrix &mat){
 	matrix mat1;
-	b32 blockrow = (mat.getRowCount()+3)/4;
-	b32 blockcol = (mat.getColumnCount()+3)/4;
+	dword blockrow = (mat.getHeight()+3)/4;
+	dword blockcol = (mat.getWidth()+3)/4;
 	data1.reallocate(blockrow*blockcol*16);
-	mat.expandMatrix(mat1, 0, 4*blockrow-mat.getRowCount(), 0, 4*blockcol-mat.getColumnCount());
-	b32 i,j;
+	mat.expand(mat1, 0, 4*blockrow-mat.getHeight(), 0, 4*blockcol-mat.getWidth());
+	dword i,j;
 	stream s;
-	lcolor clrList;
+	colorList clrList;
 	for(j=0;j<blockrow;j++){
 		for(i=0;i<blockcol;i++){
 			clrList.clear();

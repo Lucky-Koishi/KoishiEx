@@ -1,6 +1,6 @@
 
 #include <time.h>
-
+/*
 clock_t start, end;
 #define TIC start = clock()
 #define TOC end = clock();printf("%f seconds.\n", (double)(end-start)/CLOCKS_PER_SEC)
@@ -37,9 +37,9 @@ void disp(int* l, int len){
 
 void disp(matrix _mat){
 	int i,j;
-	for(i=0;i<_mat.getRowCount();i++){
-		for(j=0;j<_mat.getColumnCount();j++){
-			printf("%08X ", (unsigned long)(b32)_mat[i][j]);
+	for(i=0;i<_mat.getHeight();i++){
+		for(j=0;j<_mat.getWidth();j++){
+			printf("%08X ", (unsigned long)(dword)_mat[i][j]);
 		}
 		printf("\n");
 	}
@@ -47,8 +47,8 @@ void disp(matrix _mat){
 
 void disp0(matrix _mat){
 	int i,j;
-	for(i=0;i<_mat.getRowCount();i++){
-		for(j=0;j<_mat.getColumnCount();j++){
+	for(i=0;i<_mat.getHeight();i++){
+		for(j=0;j<_mat.getWidth();j++){
 			if(_mat[i][j] != 0){
 				printf("X");
 			}else{
@@ -61,10 +61,10 @@ void disp0(matrix _mat){
 
 void disp1(matrix _mat){
 	int i,j;
-	for(i=0;i<_mat.getRowCount();i++){
-		for(j=0;j<_mat.getColumnCount();j++){
-			if(_mat[i][j].get_A() != 0){
-				printf("%X", (unsigned long)(b32)_mat[i][j].get_A()>>4);
+	for(i=0;i<_mat.getHeight();i++){
+		for(j=0;j<_mat.getWidth();j++){
+			if(_mat[i][j].A != 0){
+				printf("%X", (unsigned long)(dword)_mat[i][j].A>>4);
 			}else{
 				printf("-");
 			}
@@ -314,7 +314,7 @@ void charMat(char p, matrix &mat){
 	}else{
 		situ = 40;
 	}
-	mat.allocate(5,5);
+	mat.create(5,5);
 	int i;
 	for(i=0;i<25;i++){
 		mat.push(b[situ][i]?color(0xff,0,0,0):color(0,0,0,0));
@@ -323,13 +323,13 @@ void charMat(char p, matrix &mat){
 void strMat(const str &s, matrix &mat){
 	char p;
 	matrix subMat;
-	mat.allocate(5,6*s.size()+6);
+	mat.create(5,6*s.size()+6);
 	mat.fill(0);
 	for(int i = 0;i<s.size();i++){
 		p = s[s.size()-i-1];
 		charMat(p, subMat);
 		mat.putFore(subMat);
-		mat.elemMoveHonz(6);
-		subMat.release();
+		mat.moveHonz(6);
+		subMat.destory();
 	}
-}
+}*/

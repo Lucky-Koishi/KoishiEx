@@ -58,7 +58,7 @@ void CToolDict::OnBnClickedButton4()
 {
 	// TODO: 修改辞典文件
 	CExRabbitDlg *dlg = (CExRabbitDlg*)GetParent();
-	ShellExecute(0,L"open",dlg->getOutPutDir()+L"npkdict.txt",L"",L"",SW_MAXIMIZE);
+	ShellExecute(0,L"open",dlg->profile.getSupportPath()+L"npkdict.txt",L"",L"",SW_MAXIMIZE);
 }
 
 
@@ -123,7 +123,7 @@ void CToolDict::OnBnClickedButton18()
 		dlg->saveAlert = false;
 		MessageBox(L"已经打开所选文件喵！",L"提示喵");
 		dlg->updateIMGlist();
-		dlg->updateNPKInfo();
+		dlg->updateInfo();
 	}else{
 		MessageBox(L"资源文件夹中不存在选定文件喵！",L"提示喵");
 	}
@@ -139,7 +139,7 @@ void CToolDict::OnBnClickedCancel()
 UINT ThreadToolDictLoadDict(PVOID para){
 	CToolDict *dlg = (CToolDict *)para;
 	CStdioFile file;
-	if(!file.Open(dlg->dictDir+L"npkdict.txt",CFile::modeCreate|CFile::modeNoTruncate|CFile::modeReadWrite)){
+	if(!file.Open(dlg->contentDir+L"npkdict.txt",CFile::modeCreate|CFile::modeNoTruncate|CFile::modeReadWrite)){
 		dlg->MessageBox(L"无法打开辞典！\r\n确认你没有使用Excel打开它！",L"提示喵");
 		return 0;
 	}
@@ -167,7 +167,7 @@ UINT ThreadToolDictLoadDict(PVOID para){
 UINT ThreadToolDictSearchDict(PVOID para){
 	CToolDict *dlg = (CToolDict *)para;
 	CStdioFile file;
-	file.Open(dlg->dictDir+L"npkdict.txt",CFile::modeCreate|CFile::modeNoTruncate|CFile::modeReadWrite);
+	file.Open(dlg->contentDir+L"npkdict.txt",CFile::modeCreate|CFile::modeNoTruncate|CFile::modeReadWrite);
 	char *old_locale = _strdup(setlocale(LC_CTYPE,NULL));
 	setlocale(LC_CTYPE, "chs");
 	CString cstr;
@@ -194,9 +194,10 @@ BOOL CToolDict::OnInitDialog()
 	CExRabbitDlg *dlg = (CExRabbitDlg*)GetParent();
 	// TODO:  在此添加额外的初始化
 	m_l1.EasyInsertColumn(L"NPK文件,335,标记,200");
-	m_e2.SetWindowText(dlg->imPack2Dir);
+	m_e2.SetWindowText(dlg->profile.getNPKdictPath());
+	contentDir = dlg->profile.getSupportPath();
+	resourceDir = dlg->profile.getNPKdictPath();
 	m_p1.SetRange32(0,1000);
-	dictDir = dlg->getOutPutDir();
 	AfxBeginThread(ThreadToolDictLoadDict, (PVOID)this);
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE

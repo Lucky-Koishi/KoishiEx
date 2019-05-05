@@ -63,7 +63,7 @@ BOOL CToolIMGSearch::OnInitDialog()
 	stopSign =false;
 
 	CExRabbitDlg *dlg = (CExRabbitDlg*)GetParent();
-	m_e1.SetWindowText(dlg->imPack2Dir);
+	m_e1.SetWindowText(dlg->profile.getNPKdictPath());
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }
@@ -153,7 +153,7 @@ void CToolIMGSearch::OnBnClickedButton10()
 	dlg->saveAlert = false;
 	dlg->updateIMGlist();
 	if(dlg->no.count>0){
-		dlg->m_lIMG.SetSelectionMark(0);
+		GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(0);
 		dlg->crtIMGid = 0;
 	}
 }
@@ -168,9 +168,9 @@ void CToolIMGSearch::OnBnClickedOk()
 UINT ThreadToolIMGSearch(PVOID para){
 	CToolIMGSearch *dlg = (CToolIMGSearch *)para;
 	CFileFind fileFind;
-	CString dir,keyWordCStr;
+	CString dir,keyWord;
 	dlg->m_e1.GetWindowText(dir);
-	dlg->m_e2.GetWindowText(keyWordCStr);
+	dlg->m_e2.GetWindowText(keyWord);
 	dlg->m_b6.EnableWindow(true);
 	dlg->m_p1.SetPos(0);
 	dir += L"\\*.npk";
@@ -188,15 +188,12 @@ UINT ThreadToolIMGSearch(PVOID para){
     }
 	int i,j;
 	NPKobject no;
-	str fn,keyword;
-	CStrToStr(keyWordCStr, keyword);
 	dlg->m_list.DeleteAllItems();
 	for(i=0;i<fileList.size();i++){
-		CStrToStr(filePath[i], fn);
-		no.loadIndex(fn,unused);
+		no.loadIndex(CStrToStr(filePath[i]),unused);
 		for(j=0;j<no.count;j++){
-			if(no.content[j].get_imgname().find(keyword) != str::npos){
-				dlg->m_list.EasyInsertItem(fileList[i]+L","+StrToCStr(no.content[j].get_imgname())+L","+NumToCStr(unused[j])+L","+filePath[i]);
+			if(no.content[j].imgname.find(CStrToStr(keyWord)) != str::npos){
+				dlg->m_list.EasyInsertItem(fileList[i]+L","+StrToCStr(no.content[j].imgname)+L","+NumToCStr(unused[j])+L","+filePath[i]);
 				if(j%10==1){
 					dlg->m_p1.SetPos(1000*i/fileList.size()+1000*j/fileList.size()/no.count);
 					if(dlg->stopSign){
@@ -229,7 +226,7 @@ UINT ThreadToolIMGSearchOutput(PVOID para){
 	CToolIMGSearch *dlg = (CToolIMGSearch *)para;
 	CExRabbitDlg *pDlg = (CExRabbitDlg *)dlg->GetParent();
 	CStdioFile csf;
-	csf.Open(pDlg->getOutPutDir()+L"IMG查询结果.csv", CFile::modeCreate|CFile::modeWrite);
+	csf.Open(pDlg->profile.getSupportPath()+L"IMG查询结果.csv", CFile::modeCreate|CFile::modeWrite);
 	dlg->m_p1.SetPos(0);
 	dlg->m_b11.EnableWindow(false);
 	csf.WriteString(L"NPK list, IMG list, IMG version, NPK path\n");
@@ -240,7 +237,7 @@ UINT ThreadToolIMGSearchOutput(PVOID para){
 	dlg->m_p1.SetPos(1000);
 	dlg->m_b11.EnableWindow(true);
 	csf.Close();
-	dlg->MessageBox(L"保存到"+pDlg->getOutPutDir()+L"IMG查询结果.csv了喵！",L"提示喵");
+	dlg->MessageBox(L"保存到"+pDlg->profile.getSupportPath()+L"IMG查询结果.csv了喵！",L"提示喵");
 	return 0;
 }
 

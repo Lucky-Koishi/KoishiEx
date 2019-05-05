@@ -77,7 +77,7 @@ UINT CToolForceEx::extractIMGthread(PVOID para){
 		return 0;
 	}
 	dlg->GetDlgItem(IDC_BUTTON4)->EnableWindow(FALSE);
-	lb64 pos, len;
+	queueex pos, len;
 	sMagic.allocate(10);
 	sMagic.pushString("Neople I");
 	s.splitStream(sMagic, pos, len);

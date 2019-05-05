@@ -32,7 +32,8 @@ public:
 	afx_msg void OnBnClickedCancel();
 	virtual BOOL OnInitDialog();
 	CEdit m_e3;
-	CString dictDir;
+	CString contentDir;
+	CString resourceDir;
 	afx_msg void OnBnClickedButton17();
 };
 

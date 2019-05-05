@@ -2,6 +2,7 @@
 #include "GoodListCtrl.h"
 
 // CToolSPK ¶Ô»°¿ò
+using namespace KoishiExpand::KoishiDownloadTool;
 
 class CToolSPK : public CDialogEx
 {

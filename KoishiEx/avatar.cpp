@@ -1,153 +1,14 @@
 #include "StdAfx.h"
-#include "avatar.h"
+#include "KoishiEx.h"
 
-using namespace KoishiTitle;
-
-avatar::avatar(void)
-{
-}
+using namespace KoishiAvatar;
 
 
-avatar::~avatar(void)
-{
-}
-
-bool avatar::useName(str fileName){
-	str numstr = "";
-	b8 p;
-	i32 i;
-	if(fileName.find("(tn)") == str::npos){
-		isTN = false;
-	}else{
-		isTN = true;
-	}
-	if(fileName.find("_mask1") == str::npos){
-		isMask1 = false;
-		i = fileName.size()-5;
-	}else{
-		isMask1 = true;
-		i = fileName.size()-11;
-	}
-	bool spc;//分两种情况进行讨论：mg_pants2000.img和mg_pants2000a2.img
-	if(spc = isnum(p = fileName[i])){
-		subPartID = atoi((const char*)&p);
-		i --;
-	}else{
-		subPartID = 0;
-	}
-	switch(fileName[i]){
-	case 'a':
-		subPart = sp_a;
-		i--;
-		break;
-	case 'b':
-		subPart = sp_b;
-		i--;
-		break;
-	case 'c':
-		subPart = sp_c;
-		i--;
-		break;
-	case 'd':
-		subPart = sp_d;
-		i--;
-		break;
-	case 'e':
-		subPart = sp_e;
-		i--;
-		break;
-	case 'f':
-		subPart = sp_f;
-		i--;
-		break;
-	case 'g':
-		subPart = sp_g;
-		i--;
-		break;
-	case 'h':
-		subPart = sp_h;
-		i--;
-		break;
-	case 'x':
-		subPart = sp_x;
-		i--;
-		break;
-	default:
-		subPart = sp_udef;
-		if(spc)
-			i++;
-		break;
-	}
-	while(isnum(p = fileName[i--])){
-		numstr.push_back(p);
-	}
-	if(numstr.length() == 0)
-		return false;
-	std::reverse(numstr.begin(), numstr.end());
-	mainPartID = std::stoi(numstr);
-	if(fileName.find("coat") != str::npos){
-		mainPart = mp_coat;
-	}else if(fileName.find("pants") != str::npos){
-		mainPart = mp_pants; 
-	}else if(fileName.find("cap") != str::npos){
-		mainPart = mp_cap;
-	}else if(fileName.find("hair") != str::npos){
-		mainPart = mp_hair;
-	}else if(fileName.find("face") != str::npos){
-		mainPart = mp_face;
-	}else if(fileName.find("neck") != str::npos){
-		mainPart = mp_neck;
-	}else if(fileName.find("shoes") != str::npos){
-		mainPart = mp_shoes;
-	}else if(fileName.find("belt") != str::npos){
-		mainPart = mp_belt;
-	}else if(fileName.find("body") != str::npos){
-		mainPart = mp_skin;
-	}else{
-		mainPart = mp_weapon;
-	}
-	numstr = "";
-	i = 0;
-	if(isTN){
-		i = 4;
-	}
-	numstr.push_back(fileName[i]);
-	numstr.push_back(fileName[i+1]);
-	if(numstr == "sm"){
-		chars = ch_sm;
-	}else if(numstr == "sg"){
-		chars = ch_sg;
-	}else if(numstr == "ft"){
-		chars = ch_ft;
-	}else if(numstr == "fm"){
-		chars = ch_fm;
-	}else if(numstr == "gn"){
-		chars = ch_gn;
-	}else if(numstr == "gg"){
-		chars = ch_gg;
-	}else if(numstr == "mg"){
-		chars = ch_mg;
-	}else if(numstr == "mm"){
-		chars = ch_mm;
-	}else if(numstr == "pr"){
-		chars = ch_pr;
-	}else if(numstr == "pg"){
-		chars = ch_pg;
-	}else if(numstr == "th"){
-		chars = ch_th;
-	}else if(numstr == "kn"){
-		chars = ch_kn;
-	}else if(numstr == "dl"){
-		chars = ch_dl;
-	}
-	return true;
-}
-
-bool KoishiTitle::isnum(b8 chars){
+bool KoishiAvatar::isnum(Koishi::uchar chars){
 	return chars >= '0' && chars <= '9';
 }
 
-str KoishiTitle::shorten(const str &path){
+str KoishiAvatar::shorten(const str &path){
 	str path1,path2;
 	str::size_type st;
 	st = path.find_last_of('\\');
@@ -164,12 +25,12 @@ str KoishiTitle::shorten(const str &path){
 	}
 	return path2;
 }
-str KoishiTitle::imgAddV4Num(const str &imgName, i32 num){
+str KoishiAvatar::imgAddV4Num(const str &imgName, long num){
 	str newName = imgName;
-	i32 i1 = num % 10;	//个位数
-	i32 i2 = num / 10 % 10;	//十位数
-	b8 c1 = '0'+i1;
-	b8 c2 = '0'+i2;
+	long i1 = num % 10;	//个位数
+	long i2 = num / 10 % 10;	//十位数
+	Koishi::uchar c1 = '0'+i1;
+	Koishi::uchar c2 = '0'+i2;
 	str::size_type pos = imgName.find_last_of('0');
 	if(pos != str::npos){
 		newName[pos] = c1;
@@ -178,326 +39,726 @@ str KoishiTitle::imgAddV4Num(const str &imgName, i32 num){
 	return newName;
 }
 
-i32 KoishiTitle::avatar::getWeight() const{
-	if(mainPart == mp_shoes && subPart == sp_f)
-		return 2880;
-	if(mainPart == mp_belt && subPart == sp_f )
-		return 2870;
-	if(mainPart == mp_pants && subPart == sp_f )
-		return 2860;
-	if(mainPart == mp_coat && subPart == sp_f )
-		return 2850;
-	if(mainPart == mp_neck && subPart == sp_f )
-		return 2840;
-	if(mainPart == mp_face && subPart == sp_f )
-		return 2830;
-	if(mainPart == mp_cap && subPart == sp_f )
-		return 2810;
-	if(mainPart == mp_face && subPart == sp_g )
-		return 2750;
-	if(mainPart == mp_face && subPart == sp_a )
-		return 2700;
-	if(mainPart == mp_weapon && subPart == sp_c)
-		return 2600 + subPartID;
-	if(mainPart == mp_cap && subPart == sp_c )
-		return 2500;
-	if(mainPart == mp_hair && subPart == sp_c )
-		return 2400;
-	if(mainPart == mp_neck && subPart == sp_e )
-		return 2350;
-	if(mainPart == mp_coat && subPart == sp_c )
-		return 2300;
-	if(mainPart == mp_neck && subPart == sp_g )
-		return 2251;
-	if(mainPart == mp_neck && subPart == sp_c )
-		return 2200;
-	if(mainPart == mp_weapon && subPart == sp_a)
-		return 2150 + subPartID;
-	if(mainPart == mp_cap && subPart == sp_g )
-		return 2125;
-	if(mainPart == mp_cap && subPart == sp_a )
-		return 2100;
-	if(mainPart == mp_hair && subPart == sp_a )
-		return 2000;
-	if(mainPart == mp_neck && subPart == sp_x )
-		return 1975;
-	if(mainPart == mp_belt && subPart == sp_g )
-		return 1951;
-	if(mainPart == mp_belt && subPart == sp_c )
-		return 1950;
-	if(mainPart == mp_face && subPart == sp_c )
-		return 1925;
-	if(mainPart == mp_neck && subPart == sp_a )
-		return 1900;
-	if(mainPart == mp_coat && subPart == sp_g )
-		return 1850;
-	if(mainPart == mp_coat && subPart == sp_a )
-		return 1800;
-	if(mainPart == mp_belt && subPart == sp_a )
-		return 1700;
-	if(mainPart == mp_shoes && subPart == sp_c )
-		return 1600;
-	if(mainPart == mp_pants && subPart == sp_g )
-		return 1501;
-	if(mainPart == mp_pants && subPart == sp_a )
-		return 1500;
-	if(mainPart == mp_shoes && subPart == sp_g )
-		return 1450;
-	if(mainPart == mp_shoes && subPart == sp_a )
-		return 1400;
-	if(mainPart == mp_pants && subPart == sp_b )
-		return 1300;
-	if(mainPart == mp_shoes && subPart == sp_h )
-		return 1250;
-	if(mainPart == mp_shoes && subPart == sp_b )
-		return 1200;
-	if(mainPart == mp_pants && subPart == sp_h )
-		return 1151;
-	if(mainPart == mp_pants && subPart == sp_d )
-		return 1150;
-	if(mainPart == mp_belt && subPart == sp_b )
-		return 1100;
-	if(mainPart == mp_neck && subPart == sp_b )
-		return 1000;
-	if(mainPart == mp_coat && subPart == sp_h )
-		return 925;
-	if(mainPart == mp_coat && subPart == sp_b )
-		return 900;
-	if(mainPart == mp_belt && subPart == sp_d )
-		return 850;
-	if(mainPart == mp_hair && subPart == sp_b )
-		return 800;
-	if(mainPart == mp_cap && subPart == sp_h )
-		return 750;
-	if(mainPart == mp_cap && subPart == sp_b )
-		return 700;
-	if(mainPart == mp_weapon && subPart == sp_b)
-		return 650 + subPartID;
-	if(mainPart == mp_neck && subPart == sp_d )
-		return 600;
-	if(mainPart == mp_neck && subPart == sp_h )
-		return 550;
-	if(mainPart == mp_coat && subPart == sp_d )
-		return 500;
-	if(mainPart == mp_hair && subPart == sp_d )
-		return 400;
-	if(mainPart == mp_cap && subPart == sp_d )
-		return 300;
-	if(mainPart == mp_weapon && subPart == sp_d)
-		return 200 + subPartID;
-	if(mainPart == mp_face && subPart == sp_b )
-		return 100;
-	if(mainPart == mp_skin)
-		return 50;
-	return 0;
-}
 
-i32 KoishiTitle::avatar::getWeight2() const{
-	if(mainPart == mp_shoes && subPart == sp_f)
-		return 63;
-	if(mainPart == mp_belt && subPart == sp_f )
-		return 62;
-	if(mainPart == mp_pants && subPart == sp_f )
-		return 61;
-	if(mainPart == mp_coat && subPart == sp_f )
-		return 60;
-	if(mainPart == mp_neck && subPart == sp_f )
-		return 59;
-	if(mainPart == mp_face && subPart == sp_f )
-		return 58;
-	if(mainPart == mp_cap && subPart == sp_f )
-		return 57;
-	if(mainPart == mp_face && subPart == sp_g )
-		return 56;
-	if(mainPart == mp_face && subPart == sp_a )
-		return 55;
-	if(mainPart == mp_weapon && subPart == sp_c)
-		return 52 + subPartID;
-	if(mainPart == mp_cap && subPart == sp_c )
-		return 51;
-	if(mainPart == mp_hair && subPart == sp_c )
-		return 50;
-	if(mainPart == mp_neck && subPart == sp_e )
-		return 49;
-	if(mainPart == mp_coat && subPart == sp_c )
-		return 48;
-	if(mainPart == mp_neck && subPart == sp_g )
-		return 47;
-	if(mainPart == mp_neck && subPart == sp_c )
-		return 46;
-	if(mainPart == mp_weapon && subPart == sp_a)
-		return 43 + subPartID;
-	if(mainPart == mp_cap && subPart == sp_g )
-		return 42;
-	if(mainPart == mp_cap && subPart == sp_a )
-		return 41;
-	if(mainPart == mp_hair && subPart == sp_a )
-		return 40;
-	if(mainPart == mp_neck && subPart == sp_x )
-		return 39;
-	if(mainPart == mp_belt && subPart == sp_g )
-		return 38;
-	if(mainPart == mp_belt && subPart == sp_c )
-		return 37;
-	if(mainPart == mp_face && subPart == sp_c )
-		return 36;
-	if(mainPart == mp_neck && subPart == sp_a )
-		return 35;
-	if(mainPart == mp_coat && subPart == sp_g )
-		return 34;
-	if(mainPart == mp_coat && subPart == sp_a )
-		return 33;
-	if(mainPart == mp_belt && subPart == sp_a )
-		return 32;
-	if(mainPart == mp_shoes && subPart == sp_c )
-		return 31;
-	if(mainPart == mp_pants && subPart == sp_g )
-		return 30;
-	if(mainPart == mp_pants && subPart == sp_a )
-		return 29;
-	if(mainPart == mp_shoes && subPart == sp_g )
-		return 28;
-	if(mainPart == mp_shoes && subPart == sp_a )
-		return 27;
-	if(mainPart == mp_pants && subPart == sp_b )
-		return 26;
-	if(mainPart == mp_shoes && subPart == sp_h )
-		return 25;
-	if(mainPart == mp_shoes && subPart == sp_b )
-		return 24;
-	if(mainPart == mp_pants && subPart == sp_h )
-		return 23;
-	if(mainPart == mp_pants && subPart == sp_d )
-		return 22;
-	if(mainPart == mp_belt && subPart == sp_b )
-		return 21;
-	if(mainPart == mp_neck && subPart == sp_b )
-		return 20;
-	if(mainPart == mp_coat && subPart == sp_h )
-		return 19;
-	if(mainPart == mp_coat && subPart == sp_b )
-		return 18;
-	if(mainPart == mp_belt && subPart == sp_d )
-		return 17;
-	if(mainPart == mp_hair && subPart == sp_b )
-		return 16;
-	if(mainPart == mp_cap && subPart == sp_h )
-		return 15;
-	if(mainPart == mp_cap && subPart == sp_b )
-		return 14;
-	if(mainPart == mp_weapon && subPart == sp_b)
-		return 11 + subPartID;
-	if(mainPart == mp_neck && subPart == sp_d )
-		return 10;
-	if(mainPart == mp_neck && subPart == sp_h )
-		return 9;
-	if(mainPart == mp_coat && subPart == sp_d )
-		return 8;
-	if(mainPart == mp_hair && subPart == sp_d )
-		return 7;
-	if(mainPart == mp_cap && subPart == sp_d )
-		return 6;
-	if(mainPart == mp_weapon && subPart == sp_d)
-		return 3 + subPartID;
-	if(mainPart == mp_face && subPart == sp_b )
-		return 2;
-	if(mainPart == mp_skin)
-		return 1;
-	return 0;
-}
-
-str KoishiTitle::avaFmt(int i){
+str KoishiAvatar::getAvatarIDString(int i){
 	str s = "";
-	if(i>9999)
+	if(i>9999){
 		s.push_back('0'+i/10000);
+	}
 	s.push_back('0'+(i/1000)%10);
 	s.push_back('0'+(i/100)%10);
 	s.push_back('0'+(i/10)%10);
 	s.push_back('0'+i%10);
 	return s;
 }
-
-KoishiTitle::mixSeqElem KoishiTitle::mixSeqList[64] = {
-	{mp_shoes,	sp_f, 0},
-	{mp_belt,	sp_f, 0},
-	{mp_pants,	sp_f, 0},
-	{mp_coat,	sp_f, 0},
-	{mp_neck,	sp_f, 0},
-	{mp_face,	sp_f, 0},
-	{mp_cap,	sp_f, 0},
-	{mp_face,	sp_g, 0},
-	{mp_face,	sp_a, 0},
-	{mp_weapon, sp_c, 2},
-	{mp_weapon, sp_c, 1},
-	{mp_weapon, sp_c, 0},
-	{mp_cap,	sp_c, 0},
-	{mp_hair,	sp_c, 0},
-	{mp_neck,	sp_e, 0},
-	{mp_coat,	sp_c, 0},
-	{mp_neck,	sp_g, 0},
-	{mp_neck,	sp_c, 0},
-	{mp_weapon, sp_a, 2},
-	{mp_weapon, sp_a, 1},
-	{mp_weapon, sp_a, 0},
-	{mp_cap,	sp_g, 0},
-	{mp_cap,	sp_a, 0},
-	{mp_hair,	sp_a, 0},
-	{mp_neck,	sp_x, 0},
-	{mp_belt,	sp_g, 0},
-	{mp_belt,	sp_c, 0},
-	{mp_face,	sp_c, 0},
-	{mp_neck,	sp_a, 0},
-	{mp_coat,	sp_g, 0},
-	{mp_coat,	sp_a, 0},
-	{mp_belt,	sp_a, 0},
-	{mp_shoes,	sp_c, 0},
-	{mp_pants,	sp_g, 0},
-	{mp_pants,	sp_a, 0},
-	{mp_shoes,	sp_g, 0},
-	{mp_shoes,	sp_a, 0},
-	{mp_pants,	sp_b, 0},
-	{mp_shoes,	sp_h, 0},
-	{mp_shoes,	sp_b, 0},
-	{mp_pants,	sp_h, 0},
-	{mp_pants,	sp_d, 0},
-	{mp_belt,	sp_b, 0},
-	{mp_neck,	sp_b, 0},
-	{mp_coat,	sp_h, 0},
-	{mp_coat,	sp_b, 0},
-	{mp_belt,	sp_d, 0},
-	{mp_hair,	sp_b, 0},
-	{mp_cap,	sp_h, 0},
-	{mp_cap,	sp_b, 0},
-	{mp_weapon, sp_b, 2},
-	{mp_weapon, sp_b, 1},
-	{mp_weapon, sp_b, 0},
-	{mp_neck,	sp_d, 0},
-	{mp_neck,	sp_h, 0},
-	{mp_coat,	sp_d, 0},
-	{mp_hair,	sp_d, 0},
-	{mp_cap,	sp_d, 0},
-	{mp_weapon,	sp_d, 2},
-	{mp_weapon,	sp_d, 1},
-	{mp_weapon,	sp_d, 0},
-	{mp_face,	sp_b, 0},
-	{mp_skin,	sp_udef, 0}
-};
-
-extern str KoishiTitle::GetAvatarNPKFileName(charElem ch, mainPartElem pt){
+void KoishiAvatar::getMQData(int order, avatarPart &part, avatarLayer &layer){
+	int mixSeqList[63][2] = {
+		{APART_SHOES,	ALAYER_F},{APART_BELT,	ALAYER_F},{APART_PANTS,	ALAYER_F},{APART_COAT,	ALAYER_F},
+		{APART_NECK,	ALAYER_F},{APART_FACE,	ALAYER_F},{APART_CAP,	ALAYER_F},{APART_FACE,	ALAYER_G},
+		{APART_FACE,	ALAYER_A},{APART_WEAPON,ALAYER_C2},{APART_WEAPON,ALAYER_C1},{APART_WEAPON,	ALAYER_C},
+		{APART_CAP,		ALAYER_C},{APART_HAIR,	ALAYER_C},{APART_NECK,	ALAYER_E},{APART_COAT,	ALAYER_C},
+		{APART_NECK,	ALAYER_G},{APART_NECK,	ALAYER_C},{APART_WEAPON,ALAYER_A2},{APART_WEAPON,	ALAYER_A1},
+		{APART_WEAPON,	ALAYER_A},{APART_CAP,	ALAYER_G},{APART_CAP,	ALAYER_A},{APART_HAIR,	ALAYER_A},
+		{APART_NECK,	ALAYER_X},{APART_BELT,	ALAYER_G},{APART_BELT,	ALAYER_C},{APART_FACE,	ALAYER_C},
+		{APART_NECK,	ALAYER_A},{APART_COAT,	ALAYER_G},{APART_COAT,	ALAYER_A},{APART_BELT,	ALAYER_A},
+		{APART_SHOES,	ALAYER_C},{APART_PANTS,	ALAYER_G},{APART_PANTS,	ALAYER_A},{APART_SHOES,	ALAYER_G},
+		{APART_SHOES,	ALAYER_A},{APART_PANTS,	ALAYER_B},{APART_SHOES,	ALAYER_H},{APART_SHOES,	ALAYER_B},
+		{APART_PANTS,	ALAYER_H},{APART_PANTS,	ALAYER_D},{APART_BELT,	ALAYER_B},{APART_NECK,	ALAYER_B},
+		{APART_COAT,	ALAYER_H},{APART_COAT,	ALAYER_B},{APART_BELT,	ALAYER_D},{APART_HAIR,	ALAYER_B},
+		{APART_CAP,		ALAYER_H},{APART_CAP,	ALAYER_B},{APART_WEAPON,	ALAYER_B2},{APART_WEAPON,	ALAYER_B1},
+		{APART_WEAPON,	ALAYER_B},{APART_NECK,	ALAYER_D},{APART_NECK,	ALAYER_H},{APART_COAT,	ALAYER_D},
+		{APART_HAIR,	ALAYER_D},{APART_CAP,	ALAYER_D},{APART_WEAPON,	ALAYER_D2},{APART_WEAPON,	ALAYER_D1},
+		{APART_WEAPON,	ALAYER_D},{APART_FACE,	ALAYER_B},{APART_BODY,	ALAYER_UD}
+	};
+	if(order>62)
+		order = 62;
+	part = (avatarPart)mixSeqList[order][0];
+	layer = (avatarLayer)mixSeqList[order][1];
+}
+extern avatarPart KoishiAvatar::getMQPart(int order){
+	avatarPart ap;
+	avatarLayer al;
+	getMQData(order, ap, al);
+	return ap;
+}
+extern avatarLayer KoishiAvatar::getMQLayer(int order){
+	avatarPart ap;
+	avatarLayer al;
+	getMQData(order, ap, al);
+	return al;
+}
+extern str KoishiAvatar::getCareerNPKName(avatarCareer cr){
+	str fix[15] = {"","swordman_","swordman_at","fighter_","fighter_at","gunner_","gunner_at","mage_","mage_at","priest_","priest_at","thief_","knight_","demoniclancer_","gunblader_"};
+	return fix[cr];
+}
+extern str KoishiAvatar::getCareerIMGName(avatarCareer cr){
+	str fix[15] = {"","sm_","sg_","ft_","fm_","gn_","gg_","mg_","mm_","pr_","pg_","th_","kn_","dl_","gb_"};
+	return fix[cr];
+}
+extern str KoishiAvatar::getAvatarPartNPKName(avatarPart pt){
+	str fix[10] = {"","cap","hair","face","neck","coat","pants","belt","shoes","skin"};
+	return fix[pt];
+}
+extern str KoishiAvatar::getAvatarPartIMGName(avatarPart pt){
+	str fix[10] = {"","cap","hair","face","neck","coat","pants","belt","shoes","body"};
+	return fix[pt];
+}
+extern str KoishiAvatar::getAvatarLayerName(avatarLayer ly){
+	str fix[28] = {"","a","a1","a2","b","b1","b2","c","c1","c2","d","d1","d2","e","e1","e2","f","f1","f2","g","g1","g2","h","h1","h2","x","x1","x2"};
+	return fix[ly];
+}
+extern str KoishiAvatar::getAvatarNPKName(avatarCareer ch, avatarPart pt){
 	str fix1 = "sprite_character_";
-	str fix2[15] = {"","swordman_","swordman_at","fighter_","fighter_at","gunner_","gunner_at","mage_","mage_at","priest_","priest_at","thief_","knight_","demoniclancer_","gunblader_"};
-	str fix3 = "equipment_avatar_";
-	str fix4[10] = {"","cap","hair","face","neck","coat","pants","belt","shoes","skin"};
-	str fix5 = ".NPK";
-	return fix1+fix2[ch]+fix3+fix4[pt]+fix5;
+	str fix2 = "equipment_avatar_";
+	str fix3 = ".NPK";
+	return fix1 + getCareerNPKName(ch) + fix2 + getAvatarPartNPKName(pt) + fix3;
 }
-extern str KoishiTitle::GetAvatarIMG_Fmt_CH_XXXX(charElem ch, mainPartElem pt){
-	str fix1[15] = {"","sm_","sg_","ft_","fm_","gn_","gg_","mg_","mm_","pr_","pg_","th_","kn_","dl_","gb_"};
-	str fix2[10] = {"","cap","hair","face","neck","coat","pants","belt","shoes","body"};
-	return fix1[ch]+fix2[pt];
+extern str KoishiAvatar::getAvatarIMGName(avatarCareer ch, avatarPart pt){
+	return getCareerIMGName(ch) + getAvatarPartIMGName(pt);
+}
+extern str KoishiAvatar::getIconNPKName(avatarCareer cr){
+	str fix[15] = {"","swordman","atswordman","fighter","atfighter","gunner","atgunner","mage","atmage","priest","atpriest","thief","knight","demoniclancer","gunblader"};
+	return "sprite_item_avatar_"+fix[cr]+".NPK";
+}
+extern std::vector<str> KoishiAvatar::getIconIMGName(avatarCareer cr, avatarPart pt){
+	std::vector<str> imgNameList;
+	if(pt == APART_BODY){
+		imgNameList.push_back(getCareerIMGName(cr) + "abody");
+		imgNameList.push_back(getCareerIMGName(cr) + "atong");
+	}else{
+		imgNameList.push_back(getCareerIMGName(cr) + "a" + getAvatarPartIMGName(pt));
+	}
+	return imgNameList;
+}
+extern color KoishiAvatar::getCareerColor(avatarCareer cr){
+	color clrList[15] = {
+		color(0xFF, 0xFF, 0xFF, 0xFF),
+		color(0xFF, 0x00, 0xCC, 0xFF),
+		color(0xFF, 0xCC, 0x55, 0x88),
+		color(0xFF, 0xFF, 0x99, 0x66),
+		color(0xFF, 0xFF, 0xEE, 0x99),
+		color(0xFF, 0xCC, 0x99, 0xEE),
+		color(0xFF, 0x99, 0xFF, 0xFF),
+		color(0xFF, 0xFF, 0xCC, 0xFF),
+		color(0xFF, 0xCC, 0xCC, 0xFF),
+		color(0xFF, 0xCC, 0xCC, 0xCC),
+		color(0xFF, 0xFF, 0xFF, 0xCC),
+		color(0xFF, 0xDD, 0x99, 0xEE),
+		color(0xFF, 0x99, 0xFF, 0x66),
+		color(0xFF, 0x77, 0x77, 0xFF),
+		color(0xFF, 0xDD, 0xCC, 0x88)
+	};
+	return clrList[cr];
+}
+extern point KoishiAvatar::getAvatarModelOffset(avatarCareer cr, avatarPart pt){
+	point ptList[15][10] = {
+		{point(0,0), point(0,0),point(0,0),point(0,0),point(0,0),point(0,0),point(0,0),point(0,0),point(0,0)},
+		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
+		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
+		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
+		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
+		{point(0,0), point(0,-50),point(0,-40),point(0,-40),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,50),point(0,0)},
+		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
+		{point(0,0), point(0,-30),point(0,-30),point(0,-30),point(0,-10),point(0,-10),point(0,10),point(0,0),point(0,30),point(0,0)},
+		{point(0,0), point(0,-30),point(0,-30),point(0,-30),point(0,-10),point(0,-10),point(0,10),point(0,0),point(0,30),point(0,0)},
+		{point(0,0), point(-20,-50),point(-20,-40),point(-20,-40),point(-20,-20),point(-20,-10),point(-20,20),point(-20,0),point(-20,50),point(-20,0)},
+		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
+		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
+		{point(0,0), point(5,-30),point(5,-30),point(5,-30),point(5,-10),point(5,-10),point(5,10),point(5,0),point(5,30),point(5,0)},
+		{point(0,0), point(0,-50),point(0,-40),point(0,-40),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,50),point(0,0)},
+		{point(0,0), point(0,-50),point(0,-40),point(0,-40),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,50),point(0,0)},
+	};
+	return ptList[cr][pt];
+}
+extern long KoishiAvatar::getCareerRepresentativeFrame(avatarCareer cr){
+	long frameList[15] = {0, 176, 0, 113, 0, 0, 0, 12, 0, 150, 0, 0, 0, 0, 0};
+	return frameList[cr];
+}
+extern bool KoishiAvatar::parseAvatarName(const str &avatarName, avatar &av, avatarLayer &al){
+	str numstr = "";
+	Koishi::uchar p, q;
+	long i;
+	av.isTN = !(avatarName.find("(tn)") == str::npos);
+	if(avatarName.find("_mask1") != str::npos){
+		return false;
+	}
+	if(avatarName.size() <= 5){
+		return false;
+	}
+	i = avatarName.size()-5;
+	p = avatarName[i-1];
+	q = avatarName[i];
+	al = ALAYER_UD;
+	if(q == 'a'){
+		al = ALAYER_A;
+		i --;
+	}
+	if(q == 'b'){
+		al = ALAYER_B;
+		i --;
+	}
+	if(q == 'c'){
+		al = ALAYER_C;
+		i --;
+	}
+	if(q == 'd'){
+		al = ALAYER_D;
+		i --;
+	}
+	if(q == 'e'){
+		al = ALAYER_E;
+		i --;
+	}
+	if(q == 'f'){
+		al = ALAYER_F;
+		i --;
+	}
+	if(q == 'g'){
+		al = ALAYER_G;
+		i --;
+	}
+	if(q == 'h'){
+		al = ALAYER_H;
+		i --;
+	}
+	if(q == 'x'){
+		al = ALAYER_X;
+		i --;
+	}
+	if(p == 'a' && q == '1'){
+		al = ALAYER_A2;
+		i -= 2;
+	}
+	if(p == 'b' && q == '1'){
+		al = ALAYER_B2;
+		i -= 2;
+	}
+	if(p == 'c' && q == '1'){
+		al = ALAYER_C2;
+		i -= 2;
+	}
+	if(p == 'd' && q == '1'){
+		al = ALAYER_D2;
+		i -= 2;
+	}
+	if(p == 'e' && q == '1'){
+		al = ALAYER_E2;
+		i -= 2;
+	}
+	if(p == 'f' && q == '1'){
+		al = ALAYER_F2;
+		i -= 2;
+	}
+	if(p == 'g' && q == '1'){
+		al = ALAYER_G2;
+		i -= 2;
+	}
+	if(p == 'h' && q == '1'){
+		al = ALAYER_H2;
+		i -= 2;
+	}
+	if(p == 'x' && q == '1'){
+		al = ALAYER_X2;
+		i -= 2;
+	}
+	if(p == 'a' && q == '2'){
+		al = ALAYER_A2;
+		i -= 2;
+	}
+	if(p == 'b' && q == '2'){
+		al = ALAYER_B2;
+		i -= 2;
+	}
+	if(p == 'c' && q == '2'){
+		al = ALAYER_C2;
+		i -= 2;
+	}
+	if(p == 'd' && q == '2'){
+		al = ALAYER_D2;
+		i -= 2;
+	}
+	if(p == 'e' && q == '2'){
+		al = ALAYER_E2;
+		i -= 2;
+	}
+	if(p == 'f' && q == '2'){
+		al = ALAYER_F2;
+		i -= 2;
+	}
+	if(p == 'g' && q == '2'){
+		al = ALAYER_G2;
+		i -= 2;
+	}
+	if(p == 'h' && q == '2'){
+		al = ALAYER_H2;
+		i -= 2;
+	}
+	if(p == 'x' && q == '2'){
+		al = ALAYER_X2;
+		i -= 2;
+	}
+	while(isnum(p = avatarName[i--])){
+		numstr.push_back(p);
+	}
+	if(numstr.length() == 0)
+		return false;
+	std::reverse(numstr.begin(), numstr.end());
+	av.ID = std::stoi(numstr);
+	if(avatarName.find("coat") != str::npos){
+		av.part = APART_COAT;
+	}else if(avatarName.find("pants") != str::npos){
+		av.part = APART_PANTS; 
+	}else if(avatarName.find("cap") != str::npos){
+		av.part = APART_CAP;
+	}else if(avatarName.find("hair") != str::npos){
+		av.part = APART_HAIR;
+	}else if(avatarName.find("face") != str::npos){
+		av.part = APART_FACE;
+	}else if(avatarName.find("neck") != str::npos){
+		av.part = APART_NECK;
+	}else if(avatarName.find("shoes") != str::npos){
+		av.part = APART_SHOES;
+	}else if(avatarName.find("belt") != str::npos){
+		av.part = APART_BELT;
+	}else if(avatarName.find("body") != str::npos){
+		av.part = APART_BODY;
+	}else{
+		return false;
+	}
+	if(avatarName.find("sm_") != str::npos){
+		av.carrer = ACAREER_SM;
+	}else if(avatarName.find("sg_") != str::npos){
+		av.carrer = ACAREER_SG; 
+	}else if(avatarName.find("ft_") != str::npos){
+		av.carrer = ACAREER_FT;
+	}else if(avatarName.find("fm_") != str::npos){
+		av.carrer = ACAREER_FM;
+	}else if(avatarName.find("gn_") != str::npos){
+		av.carrer = ACAREER_GN;
+	}else if(avatarName.find("gg_") != str::npos){
+		av.carrer = ACAREER_GG;
+	}else if(avatarName.find("mg_") != str::npos){
+		av.carrer = ACAREER_MG;
+	}else if(avatarName.find("mm_") != str::npos){
+		av.carrer = ACAREER_MM;
+	}else if(avatarName.find("pr_") != str::npos){
+		av.carrer = ACAREER_PR;
+	}else if(avatarName.find("pg_") != str::npos){
+		av.carrer = ACAREER_PG;
+	}else if(avatarName.find("th_") != str::npos){
+		av.carrer = ACAREER_TH;
+	}else if(avatarName.find("kn_") != str::npos){
+		av.carrer = ACAREER_KN;
+	}else if(avatarName.find("dl_") != str::npos){
+		av.carrer = ACAREER_DL;
+	}else if(avatarName.find("gb_") != str::npos){
+		av.carrer = ACAREER_GB;
+	}else{
+		return false;
+	}
+	return true;
+}
+extern str KoishiAvatar::makeAvatarName(avatar av, avatarLayer al){
+	str output = "";
+	if(av.isTN){
+		output += "(tn)";
+	}
+	output += getCareerIMGName(av.carrer);
+	output += getAvatarPartIMGName(av.part);
+	output += getAvatarIDString(av.ID);
+	output += getAvatarLayerName(al);
+	return output;
+}
+avatar::avatar(){
+	carrer = ACAREER_UD;
+	part = APART_UD;
+	ID = -1;
+	isTN = false;
+	v6palette = 0;
+	for(int i=0;i<ALAYER_MAXCOUNT;i++){
+		layer[i] = false;
+	}
+}
+avatarAlbum::avatarAlbum(){
+	valid = false;
+	selected = 0;
+	selectedPalette = 0;
+	selectedFrame = 0;
+}
+void avatarAlbum::clear(){
+	avatarList.clear();
+	avatarPos.clear();
+	sourceNPK.release();
+	for(int i=0;i<ALAYER_MAXCOUNT;i++){
+		layerIMG[i].release();
+		layerIMGpath[i] = "";
+		layerIMGpos[i] = -1;
+		layerMatrix[i].destory();
+		selected = 0;
+		selectedPalette = 0;
+		selectedFrame = 0;
+	}
+	valid = false;
+}
+bool avatarAlbum::loadNPK(){
+	str fileName = resoucePath + ::getAvatarNPKName(career, part);
+	sourceNPK.release();
+	if(!sourceNPK.loadFile(fileName)){
+		valid = false;
+		return false;
+	}
+	//更新列表
+	for(int i = 0;i<sourceNPK.count;i++){
+		avatar av;
+		avatarLayer layer;
+		if(!::parseAvatarName(shorten(sourceNPK.content[i].imgname), av, layer))
+			continue;
+		bool isNew = true;
+		for(int j = 0;j<avatarList.size();j++){
+			if(avatarList[j].ID == av.ID && avatarList[j].isTN == av.isTN){
+				avatarList[j].layer[layer] = true;
+				avatarPos[j][layer] = i;
+				isNew = false;
+				break;
+			}
+		}
+		if(isNew){
+			av.layer[layer] = true;
+			av.v6palette = sourceNPK.getPaletteCount(i);
+			std::vector<long> newi;
+			for(long j =0;j<ALAYER_MAXCOUNT;j++)
+				newi.push_back(-1);
+			newi[layer] = i;
+			avatarPos.push_back(newi);
+			avatarList.push_back(av);
+			/////////////////////////////////////
+			std::vector<long> newAvatarPosByBigram;
+			avatarBigram bigram;
+			bigram.ID = av.ID;
+			bigram.isTN = av.isTN;
+			bigram.originPos = avatarList.size() - 1;
+			if(av.v6palette == 0){
+				bigram.paletteID = -1;
+				bigramList.push_back(bigram);
+				newAvatarPosByBigram.push_back(bigramList.size() - 1);
+			}else{
+				for(int j = 0;j<av.v6palette;j++){
+					bigram.paletteID = j;
+					bigramList.push_back(bigram);
+					newAvatarPosByBigram.push_back(bigramList.size() - 1);
+				}
+			}
+			avatarPosAtBigramList.push_back(newAvatarPosByBigram);
+		}
+	}
+	valid = true;
+	if(part == APART_BODY || part == APART_COAT || part == APART_PANTS || part == APART_HAIR || part == APART_SHOES){
+		changeIMGByID(0);
+	}else{
+		changeIMG(-1);
+	}
+	return true;
+}
+bool avatarAlbum::changeIMG(long newSelect){
+	if(newSelect >= (long)avatarList.size() || newSelect < -1)
+		return false;
+	selected = newSelect;
+	selectedPalette = 0;
+	for(int i = 0;i<ALAYER_MAXCOUNT;i++){
+		if(selected == -1){
+			layerIMGpos[i] = -1;
+			layerIMG[i].release();
+			layerIMGpath[i] = "";
+		}else{
+			layerIMGpos[i] = avatarPos[selected][i];
+			layerIMG[i].release();
+			layerIMGpath[i] = "";
+			if(avatarPos[selected][i] != -1){
+				sourceNPK.IMGextract(avatarPos[selected][i], layerIMG[i]);
+				layerIMGpath[i] = sourceNPK.content[i].imgname;
+			}
+		}
+	}
+	updateMatrix();
+	return true;
+}
+bool avatarAlbum::changeIMGByID(long avatarID, bool isTN){
+	for(int i = 0;i<avatarList.size();i++){
+		if(avatarList[i].ID == avatarID && avatarList[i].isTN == isTN){
+			changeIMG(i);
+			updateMatrix();
+			return true;
+		}
+		if(avatarList[i].ID == avatarID /100 * 100 && avatarList[i].v6palette > (avatarID % 100) && avatarList[i].isTN == isTN){
+			changeIMG(i);
+			selectedPalette = avatarID % 100;
+			updateMatrix();
+			return true;
+		}
+	}
+	return false;
+}
+long avatarAlbum::findPosByID(long avatarID, bool isTN){
+	for(int i = 0;i<avatarList.size();i++){
+		if(avatarList[i].ID == avatarID && avatarList[i].isTN == isTN){
+			return i;
+		}
+		if(avatarList[i].ID == avatarID /100 * 100 && avatarList[i].v6palette > (avatarID % 100) && avatarList[i].isTN == isTN){
+			return i;
+		}
+	}
+	return -1;
+}
+bool avatarAlbum::changePalette(long paletteID){
+	if(selected == -1)
+		return false;
+	if(paletteID >= avatarList[selected].v6palette)
+		return false;
+	selectedPalette = paletteID;
+	updateMatrix();
+	return true;
+}
+bool avatarAlbum::changeFrame(long frame){
+	selectedFrame = frame;
+	updateMatrix();
+	return true;
+}
+bool avatarAlbum::updateMatrix(){
+	for(int i = 0;i<ALAYER_MAXCOUNT;i++){
+		layerMatrix[i].destory();
+		getMatrix((avatarLayer)i, layerMatrix[i]);
+	}
+	return true;
+}
+bool avatarAlbum::getBasePoint(avatarLayer al, point &pt){
+	if(layerIMGpos[al] == -1)
+		return false;
+	if(selectedFrame >= layerIMG[al].indexCount)
+		return false;
+	PICinfo pi;
+	layerIMG[al].PICgetInfo(layerIMG[al].linkFind(selectedFrame), pi);
+	pt = pi.basePt;
+	return true;
+}
+bool avatarAlbum::getMatrix(avatarLayer al, matrix &mat){
+	if(layerIMGpos[al] == -1)
+		return false;
+	if(selectedFrame >= layerIMG[al].indexCount)
+		return false;
+	return layerIMG[al].PICextract(selectedFrame, mat, selectedPalette);
+}
+///////////////////////////////////////////////
+void avatarFactory::clear(){
+	for(int i = 0;i<APART_MAXCOUNT;i++){
+		partAlbum[i].clear();
+	}
+}
+void avatarFactory::setPath(str pathStr){
+	resoucePath = pathStr;
+	for(int i = 0;i<APART_MAXCOUNT;i++){
+		partAlbum[i].resoucePath = pathStr;
+	}
+}
+void avatarFactory::setCarrer(avatarCareer ac){
+	career = ac;
+	for(int i = 0;i<APART_MAXCOUNT;i++){
+		partAlbum[i].career = ac;
+	}
+}
+bool avatarFactory::loadNPK(avatarPart ap){
+	partAlbum[ap].part = ap;
+	return partAlbum[ap].loadNPK();
+}
+bool avatarFactory::changeFrame(int newFrame){
+	for(int i = 0;i<APART_MAXCOUNT;i++){
+		partAlbum[i].changeFrame(newFrame);
+	}
+	return true;
+}
+bool avatarFactory::changeIMG(avatarPart ap, long selected){
+	return partAlbum[ap].changeIMG(selected);
+}
+long avatarFactory::changeIMGByID(avatarPart ap, long ID, bool isTN){
+	return partAlbum[ap].changeIMGByID(ID, isTN);
 }
 
-extern str KoishiTitle::GetAvatarSubPartString(subPartElem sp){
-	str fix[10] = {"","a","b","c","d","e","f","g","h","x"};
-	return fix[sp];
+void avatarFactory::makeNPK(NPKobject &no){
+	no.release();
+	no.create();
+	for(int i = 0;i<TOTAL_LAYER_COUNT;i++){
+		avatarPart ap;
+		avatarLayer al;
+		::getMQData(TOTAL_LAYER_COUNT - 1 - i, ap, al);
+		if(ap == APART_WEAPON)
+			continue;
+		if(partAlbum[ap].layerIMGpos[al] == -1)
+			continue;
+		no.IMGpush(partAlbum[ap].layerIMG[al], partAlbum[ap].layerIMGpath[al]);
+	}
+}
+void avatarFactory::updateMatrix(avatarPart ap){
+	partAlbum[ap].updateMatrix();
+}
+void avatarFactory::makeMatrix(point leftTopPos, size displaySize, matrix &mat){
+	mat.create(displaySize);
+	for(int i = 0;i<TOTAL_LAYER_COUNT;i++){
+		avatarPart ap;
+		avatarLayer al;
+		::getMQData(TOTAL_LAYER_COUNT - 1 -i, ap, al);
+		if(ap == APART_WEAPON)
+			continue;
+		if(partAlbum[ap].layerIMGpos[al] == -1)
+			continue;
+		point basePt;
+		partAlbum[ap].getBasePoint(al, basePt);
+		mat.putFore(partAlbum[ap].layerMatrix[al], LAY, basePt - leftTopPos);
+	}
+}
+void avatarFactory::makeModel(matrix &outputMat, color baseColor, size modelSize, avatarPart ap, int selected, int paletteID, point offsetPos, int frame, PICinfo *ptrModelPI, matrix *ptrModelMat){
+	long w = MAX(10, modelSize.W);
+	long h = MAX(30, modelSize.H);
+	outputMat.create(h, w);
+	uchar r = baseColor.R;
+	uchar g = baseColor.G;
+	uchar b = baseColor.B;
+	color color1 = color(0xFF-((0xFF-r)>>1), 0xFF-((0xFF-g)>>1), 0xFF-((0xFF-b)>>1));
+	color color2 = baseColor;
+	color color3 = color(r>>1, g>>1, b>>1);
+	outputMat.fill(baseColor);
+	outputMat.line(point(0,0), point(0, h-1), color1);
+	outputMat.line(point(0,0), point(w-1, 0), color1);
+	outputMat.line(point(1,1), point(1, h-2), color1);
+	outputMat.line(point(1,1), point(w-2, 1), color1);
+	outputMat.line(point(w-1,h-1), point(0, h-1), color3);
+	outputMat.line(point(w-1,h-1), point(w-1, 0), color3);
+	outputMat.line(point(w-2,h-2), point(1, h-2), color3);
+	outputMat.line(point(w-2,h-2), point(w-2, 1), color3);
+	outputMat.line(point(3,3), point(3, h-24), color3);
+	outputMat.line(point(3,3), point(w-4, 3), color3);
+	outputMat.line(point(w-4,h-24), point(3, h-24), color1);
+	outputMat.line(point(w-4,h-24), point(w-4, 3), color1);
+
+	matrix strMat;
+	if(selected >= 0){
+		KoishiExpand::KoishiMarkTool::StrMatLarge(KoishiAvatar::getAvatarIDString(partAlbum[ap].avatarList[selected].ID + paletteID), strMat);
+	}else{
+		KoishiExpand::KoishiMarkTool::StrMatLarge("NA", strMat);
+	}
+	outputMat.putFore(strMat, LAY, point(w/2-strMat.getWidth()/2, h-12-strMat.getHeight()/2));
+
+	matrix dispMat1;
+	dispMat1.create(h-28,w-8);
+	matrix dispMat;
+	IMGobject dispIO;
+	PICinfo dispPI;
+	point bodyDeltaPoint, bodyBasePoint;
+
+	bodyDeltaPoint = point((modelSize.W - ptrModelPI->picSize.W) / 2, (modelSize.H - ptrModelPI->picSize.H) / 2) - offsetPos;
+	bodyBasePoint = ptrModelPI->basePt;
+	dispMat1.putFore(*ptrModelMat, LAY, bodyDeltaPoint);
+	if(selected < 0)
+		return;
+	for(int i = 0;i<partAlbum[ap].avatarPos[selected].size();i++){
+		if(partAlbum[ap].avatarPos[selected][i] == -1)
+			continue;
+		partAlbum[ap].sourceNPK.IMGextract(partAlbum[ap].avatarPos[selected][i], dispIO);
+		dispIO.PICgetInfo(dispIO.linkFind(frame), dispPI);
+		dispIO.PICextract(frame, dispMat, paletteID);
+		dispMat1.putFore(dispMat, LAY, bodyDeltaPoint-bodyBasePoint+dispPI.basePt);
+		dispIO.release();
+		dispMat.destory();
+	}
+	outputMat.putFore(dispMat1, LAY, point(4,4));
+}
+void avatarFactory::makeButton(matrix &outputMat, color baseColor, size modelSize, int iconCtrl){
+	long w = MAX(10, modelSize.W);
+	long h = MAX(30, modelSize.H);
+	outputMat.create(h, w);
+	uchar r = baseColor.R;
+	uchar g = baseColor.G;
+	uchar b = baseColor.B;
+	color color1 = color(0xFF-((0xFF-r)>>1), 0xFF-((0xFF-g)>>1), 0xFF-((0xFF-b)>>1));
+	color color2 = baseColor;
+	color color3 = color(r>>1, g>>1, b>>1);
+	outputMat.fill(baseColor);
+	outputMat.line(point(0,0), point(0, h-1), color1);
+	outputMat.line(point(0,0), point(w-1, 0), color1);
+	outputMat.line(point(1,1), point(1, h-2), color1);
+	outputMat.line(point(1,1), point(w-2, 1), color1);
+	outputMat.line(point(w-1,h-1), point(0, h-1), color3);
+	outputMat.line(point(w-1,h-1), point(w-1, 0), color3);
+	outputMat.line(point(w-2,h-2), point(1, h-2), color3);
+	outputMat.line(point(w-2,h-2), point(w-2, 1), color3);
+	point centerPoint = point(w/2, h/2);
+	switch(iconCtrl){
+	case 0:
+		outputMat.line(centerPoint + point(0, -6), centerPoint + point(0, 7), color3);
+		outputMat.line(centerPoint + point(1, -5), centerPoint + point(1, 7), color3);
+		outputMat.line(centerPoint + point(2, -4), centerPoint + point(2, 7), color3);
+		outputMat.line(centerPoint + point(3, -3), centerPoint + point(3, 7), color3);
+		outputMat.line(centerPoint + point(4, -2), centerPoint + point(4, 0), color3);
+		outputMat.line(centerPoint + point(5, -1), centerPoint + point(5, 0), color3);
+		outputMat.line(centerPoint + point(6, 0), centerPoint + point(6, 0), color3);
+		outputMat.line(centerPoint + point(-1, -5), centerPoint + point(-1, 7), color3);
+		outputMat.line(centerPoint + point(-2, -4), centerPoint + point(-2, 7), color3);
+		outputMat.line(centerPoint + point(-3, -3), centerPoint + point(-3, 7), color3);
+		outputMat.line(centerPoint + point(-4, -2), centerPoint + point(-4, 0), color3);
+		outputMat.line(centerPoint + point(-5, -1), centerPoint + point(-5, 0), color3);
+		outputMat.line(centerPoint + point(-6, 0), centerPoint + point(-6, 0), color3);
+		break;
+	case 1:
+		outputMat.line(centerPoint + point(0, -7), centerPoint + point(0, 6), color3);
+		outputMat.line(centerPoint + point(1, -7), centerPoint + point(1, 5), color3);
+		outputMat.line(centerPoint + point(2, -7), centerPoint + point(2, 4), color3);
+		outputMat.line(centerPoint + point(3, -7), centerPoint + point(3, 3), color3);
+		outputMat.line(centerPoint + point(4, 0), centerPoint + point(4, 2), color3);
+		outputMat.line(centerPoint + point(5, 0), centerPoint + point(5, 1), color3);
+		outputMat.line(centerPoint + point(6, 0), centerPoint + point(6, 0), color3);
+		outputMat.line(centerPoint + point(-1, -7), centerPoint + point(-1, 5), color3);
+		outputMat.line(centerPoint + point(-2, -7), centerPoint + point(-2, 4), color3);
+		outputMat.line(centerPoint + point(-3, -7), centerPoint + point(-3, 3), color3);
+		outputMat.line(centerPoint + point(-4, 0), centerPoint + point(-4, 2), color3);
+		outputMat.line(centerPoint + point(-5, 0), centerPoint + point(-5, 1), color3);
+		outputMat.line(centerPoint + point(-6, 0), centerPoint + point(-6, 0), color3);
+		break;
+	case 2:
+		outputMat.line(centerPoint + point(-7, -7), centerPoint + point(7, 7), color3);
+		outputMat.line(centerPoint + point(-7, -6), centerPoint + point(6, 7), color3);
+		outputMat.line(centerPoint + point(-7, -5), centerPoint + point(5, 7), color3);
+		outputMat.line(centerPoint + point(-7, -4), centerPoint + point(4, 7), color3);
+		outputMat.line(centerPoint + point(-6, -7), centerPoint + point(7, 6), color3);
+		outputMat.line(centerPoint + point(-5, -7), centerPoint + point(7, 5), color3);
+		outputMat.line(centerPoint + point(-4, -7), centerPoint + point(7, 4), color3);
+		outputMat.line(centerPoint + point(-7, 7), centerPoint + point(7, -7), color3);
+		outputMat.line(centerPoint + point(-7, 6), centerPoint + point(6, -7), color3);
+		outputMat.line(centerPoint + point(-7, 5), centerPoint + point(5, -7), color3);
+		outputMat.line(centerPoint + point(-7, 4), centerPoint + point(4, -7), color3);
+		outputMat.line(centerPoint + point(-6, 7), centerPoint + point(7, -6), color3);
+		outputMat.line(centerPoint + point(-5, 7), centerPoint + point(7, -5), color3);
+		outputMat.line(centerPoint + point(-4, 7), centerPoint + point(7, -4), color3);
+		break;
+	case 3:
+		outputMat.line(centerPoint + point(3, -4), centerPoint + point(3, -4), color3);
+		outputMat.line(centerPoint + point(2, -3), centerPoint + point(2, -5), color3);
+		outputMat.line(centerPoint + point(1, -2), centerPoint + point(1, -6), color3);
+		outputMat.line(centerPoint + point(0, -1), centerPoint + point(0, -7), color3);
+		outputMat.line(centerPoint + point(-1, 0), centerPoint + point(-1, -8), color3);
+		outputMat.line(centerPoint + point(-2, -2), centerPoint + point(-2, -6), color3);
+		outputMat.line(centerPoint + point(-7, 2), centerPoint + point(-7, -2), color3);
+		outputMat.line(centerPoint + point(-6, 4), centerPoint + point(-6, -4), color3);
+		outputMat.line(centerPoint + point(-5, 5), centerPoint + point(-5, -5), color3);
+		outputMat.line(centerPoint + point(-4, 6), centerPoint + point(-4, -6), color3);
+		outputMat.line(centerPoint + point(-3, 6), centerPoint + point(-3, -6), color3);
+		outputMat.line(centerPoint + point(-2, 7), centerPoint + point(-2, 2), color3);
+		outputMat.line(centerPoint + point(-1, 7), centerPoint + point(-1, 3), color3);
+		outputMat.line(centerPoint + point(0, 7), centerPoint + point(0, 3), color3);
+		outputMat.line(centerPoint + point(1, 7), centerPoint + point(1, 3), color3);
+		outputMat.line(centerPoint + point(2, 7), centerPoint + point(2, 2), color3);
+		outputMat.line(centerPoint + point(3, 6), centerPoint + point(3, -1), color3);
+		outputMat.line(centerPoint + point(4, 6), centerPoint + point(4, -1), color3);
+		outputMat.line(centerPoint + point(5, 5), centerPoint + point(5, -1), color3);
+		outputMat.line(centerPoint + point(6, 4), centerPoint + point(6, -1), color3);
+		outputMat.line(centerPoint + point(7, 2), centerPoint + point(7, -1), color3);
+		break;
+	}
 }

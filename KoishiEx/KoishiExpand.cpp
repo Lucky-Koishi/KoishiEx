@@ -1,220 +1,66 @@
 #include "StdAfx.h"
 #include "KoishiEx.h"
-#include "avatar.h"
 #include <fstream> 
 
 using namespace Koishi;
-
-void KoishiExpand::CharMat(char p, Koishi::matrix &mat, Koishi::color clr){
+using namespace KoishiAvatar;
+using namespace KoishiExpand::KoishiMarkTool;
+void KoishiExpand::KoishiMarkTool::CharMat(char p, matrix &mat, color clr){
 	if(p>='a'&& p <= 'z'){
 		p = p-'a'+'A';
 	}
-	int b[41][25]={
-		{0,1,1,1,0,
-		 1,0,0,1,1,
-		 1,0,1,0,1,
-		 1,1,0,0,1,
-		 0,1,1,1,0},
-		{0,0,1,0,0,
-		 0,1,1,0,0,
-		 0,0,1,0,0,
-		 0,0,1,0,0,
-		 0,1,1,1,0},
-		{0,1,1,1,0,
-		 1,0,0,0,1,
-		 0,0,1,1,0,
-		 0,1,0,0,0,
-		 1,1,1,1,1},
-		{0,1,1,1,0,
-		 1,0,0,0,1,
-		 0,0,1,1,0,
-		 1,0,0,0,1,
-		 0,1,1,1,0},
-		{0,0,1,1,0,
-		 0,1,0,1,0,
-		 1,0,0,1,0,
-		 1,1,1,1,1,
-		 0,0,0,1,0},
-		{1,1,1,1,1,
-		 1,0,0,0,0,
-		 1,1,1,1,0,
-		 0,0,0,0,1,
-		 1,1,1,1,0},
-		{0,1,1,1,1,
-		 1,0,0,0,0,
-		 1,1,1,1,0,
-		 1,0,0,0,1,
-		 0,1,1,1,0},
-		{1,1,1,1,1,
-		 0,0,0,0,1,
-		 0,0,0,1,0,
-		 0,0,1,0,0,
-		 0,1,0,0,0},
-		{0,1,1,1,0,
-		 1,0,0,0,1,
-		 0,1,1,1,0,
-		 1,0,0,0,1,
-		 0,1,1,1,0},
-		{0,1,1,1,0,
-		 1,0,0,0,1,
-		 0,1,1,1,1,
-		 0,0,0,0,1,
-		 0,0,1,1,0},
-		{0,1,1,1,0,
-		 1,0,0,0,1,
-		 1,1,1,1,1,
-		 1,0,0,0,1,
-		 1,0,0,0,1},
-		{1,1,1,1,0,
-		 1,0,0,0,1,
-		 1,1,1,1,0,
-		 1,0,0,0,1,
-		 1,1,1,1,0},
-		{0,1,1,1,1,
-		 1,0,0,0,0,
-		 1,0,0,0,0,
-		 1,0,0,0,0,
-		 0,1,1,1,1},
-		{1,1,1,1,0,
-		 1,0,0,0,1,
-		 1,0,0,0,1,
-		 1,0,0,0,1,
-		 1,1,1,1,0},
-		{1,1,1,1,1,
-		 1,0,0,0,0,
-		 1,1,1,1,0,
-		 1,0,0,0,0,
-		 1,1,1,1,1},
-		{1,1,1,1,1,
-		 1,0,0,0,0,
-		 1,1,1,1,0,
-		 1,0,0,0,0,
-		 1,0,0,0,0},
-		{0,1,1,1,1,
-		 1,0,0,0,0,
+	int b[43][25]={
+		{0,1,1,1,0,1,0,0,1,1,1,0,1,0,1,1,1,0,0,1,0,1,1,1,0},
+		{0,0,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,1,1,0},
+		{0,1,1,1,0,1,0,0,0,1,0,0,1,1,0,0,1,0,0,0,1,1,1,1,1},
+		{0,1,1,1,0,1,0,0,0,1,0,0,1,1,0,1,0,0,0,1,0,1,1,1,0},
+		{0,0,1,1,0,0,1,0,1,0,1,0,0,1,0,1,1,1,1,1,0,0,0,1,0},
+		{1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0},
+		{0,1,1,1,1,1,0,0,0,0,1,1,1,1,0,1,0,0,0,1,0,1,1,1,0},
+		{1,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0},
+		{0,1,1,1,0,1,0,0,0,1,0,1,1,1,0,1,0,0,0,1,0,1,1,1,0},
+		{0,1,1,1,0,1,0,0,0,1,0,1,1,1,1,0,0,0,0,1,0,0,1,1,0},
+		{0,1,1,1,0,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1},
+		{1,1,1,1,0,1,0,0,0,1,1,1,1,1,0,1,0,0,0,1,1,1,1,1,0},
+		{0,1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,1,1,1},
+		{1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0},
+		{1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,1,0,0,0,0,1,1,1,1,1},
+		{1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0},
+		{0,1,1,1,1,1,0,0,0,0,1,0,1,1,1,1,0,0,0,1,0,1,1,1,1},
+		{1,0,0,0,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1},
+		{0,1,1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,1,1,0},
+		{0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,1,0,0,0,1,0,1,1,1,0},
+		{1,0,0,0,1,1,0,0,1,0,1,1,1,0,0,1,0,0,1,0,1,0,0,0,1},
+		{1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,1,1,1,1},
+		{1,0,0,0,1,1,1,0,1,1,1,0,1,0,1,1,0,0,0,1,1,0,0,0,1},
+		{1,0,0,0,1,1,1,0,0,1,1,0,1,0,1,1,0,0,1,1,1,0,0,0,1},
+		{0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0},
+		{1,1,1,1,0,1,0,0,0,1,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0},
+		{0,1,1,1,0,1,0,0,0,1,1,0,1,0,1,1,0,0,1,0,0,1,1,0,1},
+		{1,1,1,1,0,1,0,0,0,1,1,1,1,1,0,1,0,0,0,1,1,0,0,0,1},
+		{0,1,1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1,0},
+		{1,1,1,1,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0},
+		{1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0},
+		{1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0},
+		{1,0,0,0,1,1,0,0,0,1,1,0,1,0,1,1,0,1,0,1,0,1,0,1,0},
+		{1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,1},
+		{1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0},
+		{1,1,1,1,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,1,1,1,1},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0},
+		{0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,0,0},
+		{0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,1,1,1,
+		 0,0,0,1,1,
+		 1,1,1,0,1,
+		 1,0,1,0,0,
+		 1,1,1,0,0},
+		{0,0,1,1,1,
+		 0,0,1,0,1,
 		 1,0,1,1,1,
-		 1,0,0,0,1,
-		 0,1,1,1,1},
-		{1,0,0,0,1,
-		 1,0,0,0,1,
-		 1,1,1,1,1,
-		 1,0,0,0,1,
-		 1,0,0,0,1},
-		{0,1,1,1,0,
-		 0,0,1,0,0,
-		 0,0,1,0,0,
-		 0,0,1,0,0,
-		 0,1,1,1,0},
-		{0,0,0,0,1,
-		 0,0,0,0,1,
-		 0,0,0,0,1,
-		 1,0,0,0,1,
-		 0,1,1,1,0},
-		{1,0,0,0,1,
-		 1,0,0,1,0,
-		 1,1,1,0,0,
-		 1,0,0,1,0,
-		 1,0,0,0,1},
-		{1,0,0,0,0,
-		 1,0,0,0,0,
-		 1,0,0,0,0,
-		 1,0,0,0,0,
-		 1,1,1,1,1},
-		{1,0,0,0,1,
-		 1,1,0,1,1,
-		 1,0,1,0,1,
-		 1,0,0,0,1,
-		 1,0,0,0,1},
-		{1,0,0,0,1,
-		 1,1,0,0,1,
-		 1,0,1,0,1,
-		 1,0,0,1,1,
-		 1,0,0,0,1},
-		{0,1,1,1,0,
-		 1,0,0,0,1,
-		 1,0,0,0,1,
-		 1,0,0,0,1,
-		 0,1,1,1,0},
-		{1,1,1,1,0,
-		 1,0,0,0,1,
-		 1,1,1,1,0,
-		 1,0,0,0,0,
-		 1,0,0,0,0},
-		{0,1,1,1,0,
-		 1,0,0,0,1,
-		 1,0,1,0,1,
-		 1,0,0,1,0,
-		 0,1,1,0,1},
-		{1,1,1,1,0,
-		 1,0,0,0,1,
-		 1,1,1,1,0,
-		 1,0,0,0,1,
-		 1,0,0,0,1},
-		{0,1,1,1,1,
-		 1,0,0,0,0,
-		 0,1,1,1,0,
-		 0,0,0,0,1,
-		 1,1,1,1,0},
-		{1,1,1,1,1,
-		 0,0,1,0,0,
-		 0,0,1,0,0,
-		 0,0,1,0,0,
-		 0,0,1,0,0},
-		{1,0,0,0,1,
-		 1,0,0,0,1,
-		 1,0,0,0,1,
-		 1,0,0,0,1,
-		 0,1,1,1,0},
-		{1,0,0,0,1,
-		 1,0,0,0,1,
-		 1,0,0,0,1,
-		 0,1,0,1,0,
-		 0,0,1,0,0},
-		{1,0,0,0,1,
-		 1,0,0,0,1,
-		 1,0,1,0,1,
-		 1,0,1,0,1,
-		 0,1,0,1,0},
-		{1,0,0,0,1,
-		 0,1,0,1,0,
-		 0,0,1,0,0,
-		 0,1,0,1,0,
-		 1,0,0,0,1},
-		{1,0,0,0,1,
-		 0,1,0,1,0,
-		 0,0,1,0,0,
-		 0,0,1,0,0,
-		 0,0,1,0,0},
-		{1,1,1,1,1,
-		 0,0,0,1,0,
-		 0,0,1,0,0,
 		 0,1,0,0,0,
-		 1,1,1,1,1},
-		{0,0,0,0,0,
-		 0,0,0,0,0,
-		 0,0,0,0,0,
-		 0,0,1,0,0,
-		 0,0,0,0,0},
-		{0,0,0,0,0,
-		 0,0,0,0,0,
-		 0,0,0,0,0,
-		 0,0,0,0,0,
-		 0,1,1,1,0},
-		{0,0,1,0,0,
-		 0,1,0,0,0,
-		 0,1,0,0,0,
-		 0,1,0,0,0,
-		 0,0,1,0,0},
-		{0,0,1,0,0,
-		 0,0,0,1,0,
-		 0,0,0,1,0,
-		 0,0,0,1,0,
-		 0,0,1,0,0},
-		{0,0,0,0,0,
-		 0,0,0,0,0,
-		 0,0,0,0,0,
-		 0,0,0,0,0,
-		 0,0,0,0,0}
+		 1,0,1,0,0}
 	};
 	int situ = 0;
 	if(p >= 'A' && p <= 'Z'){
@@ -229,113 +75,60 @@ void KoishiExpand::CharMat(char p, Koishi::matrix &mat, Koishi::color clr){
 		situ = 38;
 	}else if(p == ')'){
 		situ = 39;
+	}else if(p == '&'){
+		//男性
+		situ = 41;
+	}else if(p == '*'){
+		//女性
+		situ = 42;
 	}else{
 		situ = 40;
 	}
-	mat.allocate(5,5);
+	mat.create(5,5);
 	int i;
 	for(i=0;i<25;i++){
 		mat.push(b[situ][i]?clr:color(0,0,0,0));
 	}
 }
-void KoishiExpand::StrMat(std::string str, Koishi::matrix &mat, Koishi::color clr){
+void KoishiExpand::KoishiMarkTool::StrMat(str s, matrix &mat, color clr){
 	char p;
+	if(s.size() == 0){
+		s = " ";
+	}
 	matrix subMat;
-	mat.allocate(5,6*str.size()+6);
+	mat.create(5,6*s.size()-1);
 	mat.fill(0);
-	for(int i = 0;i<str.size();i++){
-		p = str[str.size()-i-1];
-		KoishiExpand::CharMat(p, subMat, clr);
+	for(int i = 0;i<s.size();i++){
+		p = s[s.size()-i-1];
+		CharMat(p, subMat, clr);
 		mat.putFore(subMat);
-		mat.elemMoveHonz(6);
-		subMat.release();
+		if(i != s.size()-1){
+			mat.moveHonz(6);
+		}
+		subMat.destory();
 	}
 }
-void KoishiExpand::CharMat2(char p, Koishi::matrix &mat, Koishi::color clr){
+void KoishiExpand::KoishiMarkTool::CharMatLarge(char p, Koishi::matrix &mat, Koishi::color clr){
 	if(p>='a'&& p <= 'z'){
 		p = p-'a'+'A';
 	}
-	int b[41][100]={
-		{1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,0,0,0,0,0,0,1,1,
-		 1,1,0,0,0,0,1,1,1,1,
-		 1,1,0,0,0,1,0,0,1,1,
-		 1,1,0,0,1,0,0,0,1,1,
-		 1,1,1,1,0,0,0,0,1,1,
-		 1,1,0,0,0,0,0,0,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1},
-		{0,0,0,1,1,1,0,0,0,0,
-		 0,0,0,1,1,1,0,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,1,1,1,1,0,0,0,
-		 0,0,0,1,1,1,1,0,0,0},
-		{1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 0,0,0,0,0,0,0,0,1,1,
-		 0,0,0,0,0,0,0,0,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,0,0,0,0,0,0,0,0,
-		 1,1,0,0,0,0,0,0,0,0,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1},
-		{1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 0,0,0,0,0,0,0,0,1,1,
-		 0,0,0,0,0,0,0,0,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 0,0,0,0,0,0,0,0,1,1,
-		 0,0,0,0,0,0,0,0,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1},
-		{0,0,0,0,0,1,1,1,0,0,
-		 0,0,0,0,1,1,1,1,0,0,
-		 0,0,0,1,1,0,1,1,0,0,
-		 0,0,1,1,0,0,1,1,0,0,
-		 0,1,1,0,0,0,1,1,0,0,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 0,0,0,0,0,0,1,1,0,0,
-		 0,0,0,0,0,0,1,1,0,0,
-		 0,0,0,0,0,0,1,1,0,0},
-		{1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,0,0,0,0,0,0,0,0,
-		 1,1,0,0,0,0,0,0,0,0,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 0,0,0,0,0,0,0,0,1,1,
-		 0,0,0,0,0,0,0,0,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1},
-		{1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,0,0,0,0,0,0,0,0,
-		 1,1,0,0,0,0,0,0,0,0,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,0,0,0,0,0,0,1,1,
-		 1,1,0,0,0,0,0,0,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1},
-		{1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 0,0,0,0,0,0,0,1,1,0,
-		 0,0,0,0,0,0,1,1,0,0,
-		 0,0,0,0,0,1,1,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0},
+	int b[44][100]={
+		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,1,0,0,1,1,
+		 1,1,0,0,1,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+		{0,0,0,1,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,
+		 0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0},
+		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,
+		 1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,
+		 1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+		{0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,0,1,1,0,0,0,0,1,1,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,
+		 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0},
+		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
+		 1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
+		 1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,
+		 0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0},
 		{1,1,1,1,1,1,1,1,1,1,
 		 1,1,1,1,1,1,1,1,1,1,
 		 1,1,0,0,0,0,0,0,1,1,
@@ -606,66 +399,48 @@ void KoishiExpand::CharMat2(char p, Koishi::matrix &mat, Koishi::color clr){
 		 0,0,0,0,1,1,0,0,0,0,
 		 0,0,0,0,1,1,0,0,0,0,
 		 0,0,0,0,1,1,0,0,0,0},
-		{1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1,
-		 0,0,0,0,0,0,0,1,1,0,
-		 0,0,0,0,0,0,1,1,0,0,
-		 0,0,0,0,1,1,1,0,0,0,
-		 0,0,0,1,1,1,0,0,0,0,
-		 0,0,1,1,0,0,0,0,0,0,
-		 0,1,1,0,0,0,0,0,0,0,
-		 1,1,1,1,1,1,1,1,1,1,
-		 1,1,1,1,1,1,1,1,1,1},
-		{0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
+		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,1,0,0,0,
+		 0,0,0,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0},
+		{0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,
+		 0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0},
+		{0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,
+		 0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		 {0,0,0,0,1,1,0,0,0,0,
+		 0,0,0,1,1,1,1,0,0,0,
 		 0,0,1,1,1,1,1,1,0,0,
-		 0,0,1,1,1,1,1,1,0,0},
-		{0,0,0,0,0,1,1,0,0,0,
+		 0,1,1,0,1,1,0,1,1,0,
+		 0,0,0,1,1,1,1,0,0,0,
+		 0,0,1,1,1,1,1,1,0,0,
+		 0,0,1,1,0,0,1,1,0,0,
+		 0,0,1,1,0,0,1,1,0,0,
+		 0,0,1,1,1,1,1,1,0,0,
+		 0,0,0,1,1,1,1,0,0,0},
+		 {0,0,0,1,1,1,1,0,0,0,
+		 0,0,1,1,1,1,1,1,0,0,
+		 0,0,1,1,0,0,1,1,0,0,
+		 0,0,1,1,0,0,1,1,0,0,
+		 0,0,1,1,1,1,1,1,0,0,
+		 0,0,0,1,1,1,1,0,0,0,
 		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,1,1,0,0,0,0,0,
-		 0,0,0,1,1,0,0,0,0,0,
-		 0,0,0,1,1,0,0,0,0,0,
-		 0,0,0,1,1,0,0,0,0,0,
-		 0,0,0,1,1,0,0,0,0,0,
-		 0,0,0,1,1,0,0,0,0,0,
+		 0,0,1,1,1,1,1,1,0,0,
+		 0,0,1,1,1,1,1,1,0,0,
+		 0,0,0,0,1,1,0,0,0,0},
+		 {1,1,1,1,1,1,1,1,1,1,
+		 1,1,1,1,1,1,1,1,1,1,
+		 1,1,0,0,0,0,0,0,1,1,
+		 1,1,0,0,0,0,0,0,1,1,
+		 0,0,0,0,1,1,1,1,1,1,
+		 0,0,0,0,1,1,1,1,1,1,
 		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,0,1,1,0,0,0},
-		{0,0,0,1,1,0,0,0,0,0,
+		 0,0,0,0,0,0,0,0,0,0,
 		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,0,0,1,1,0,0,0,
-		 0,0,0,0,0,1,1,0,0,0,
-		 0,0,0,0,0,1,1,0,0,0,
-		 0,0,0,0,0,1,1,0,0,0,
-		 0,0,0,0,0,1,1,0,0,0,
-		 0,0,0,0,0,1,1,0,0,0,
-		 0,0,0,0,1,1,0,0,0,0,
-		 0,0,0,1,1,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0,
-		 0,0,0,0,0,0,0,0,0,0}
+		 0,0,0,0,1,1,0,0,0,0}
 	};
 	int situ = 0;
 	if(p >= 'A' && p <= 'Z'){
@@ -680,37 +455,51 @@ void KoishiExpand::CharMat2(char p, Koishi::matrix &mat, Koishi::color clr){
 		situ = 38;
 	}else if(p == ')'){
 		situ = 39;
+	}else if(p == '&'){
+		//男性
+		situ = 41;
+	}else if(p == '*'){
+		//女性
+		situ = 42;
+	}else if(p == '?'){
+		situ = 43;
 	}else{
 		situ = 40;
 	}
-	mat.allocate(10,10);
+	mat.create(10,10);
 	int i;
 	for(i=0;i<100;i++){
 		mat.push(b[situ][i]?clr:color(0,0,0,0));
 	}
 }
-void KoishiExpand::StrMat2(std::string str, Koishi::matrix &mat, Koishi::color clr){
+void KoishiExpand::KoishiMarkTool::StrMatLarge(str s, Koishi::matrix &mat, Koishi::color clr){
 	char p;
+	if(s.size() == 0){
+		s = " ";
+	}
 	matrix subMat;
-	mat.allocate(10,11*str.size()+11);
+	mat.create(10,11*s.size()-1);
 	mat.fill(0);
-	for(int i = 0;i<str.size();i++){
-		p = str[str.size()-i-1];
-		KoishiExpand::CharMat2(p, subMat, clr);
+	for(int i = 0;i<s.size();i++){
+		p = s[s.size()-i-1];
+		CharMatLarge(p, subMat, clr);
 		mat.putFore(subMat);
-		mat.elemMoveHonz(11);
-		subMat.release();
+		if(i != s.size()-1){
+			mat.moveHonz(11);
+		}
+		subMat.destory();
 	}
 }
 
-bool KoishiExpand::AvatarMarking(std::string avatarNPKfileName){
+bool KoishiExpand::KoishiMarkTool::AvatarMarking(std::string avatarNPKfileName){
 	int i, j, k;
 	NPKobject inputNo;
 	NPKobject outputNo;
 	IMGobject io;
 
+
 	if(!inputNo.loadFile(avatarNPKfileName)){
-		//printf("No good npk files...\n");
+		printf("No good npk files...\n");
 		return false;
 	}
 	outputNo.create();
@@ -719,23 +508,23 @@ bool KoishiExpand::AvatarMarking(std::string avatarNPKfileName){
 	std::vector<int> imgSitList;
 	std::vector<int> imgIDList;
 	std::vector<int> imgPartList;
-	KoishiTitle::avatar av;
+	//avatarName av;
 
 	imgSitList.clear();
 	imgIDList.clear();
 	imgPartList.clear();
-	//printf("Calculating marking imgs...\n");
+	printf("Calculating marking imgs...\n");
 	for(i=0;i<inputNo.count;i++){
-		av.useName(KoishiTitle::shorten(inputNo.content[i].get_imgname()));
-		if(imgIDList.size() == 0 || imgIDList[imgIDList.size()-1] != av.mainPartID){
+		//av.parse(KoishiAvatar::shorten(inputNo.content[i].get_imgname()));
+		/*if(imgIDList.size() == 0 || imgIDList[imgIDList.size()-1] != av.ID){
 			inputNo.IMGextract(i, io);
 			if(io.PICcontent[0].get_dataSize()>2){
-				imgIDList.push_back(av.mainPartID);
+				imgIDList.push_back(av.ID);
 				imgSitList.push_back(i);
-				imgPartList.push_back((int)av.mainPart);
+				imgPartList.push_back((int)av.part);
 			}
 			io.release();
-		}
+		}*/
 	}
 	////////////////////////////////////////////////////////////////////
 	//第二步：打标
@@ -749,22 +538,21 @@ bool KoishiExpand::AvatarMarking(std::string avatarNPKfileName){
 	stream s;
 	PICinfo pi;
 	for(i=0;i<imgSitList.size();i++){
-		//i=14;
 		situ = imgSitList[i];
 		inputNo.IMGextract(situ, io);
 		inputNo.IMGextract(situ, ioTemp);
-		imgName = inputNo.content[situ].get_imgname();
-		//printf("Marking ");
-		//printf(KoishiTitle::shorten(imgName).c_str());
-		//printf("(%d/%d):\n",1+i, imgSitList.size());
+		imgName = inputNo.content[situ].imgname;
+		printf("Marking ");
+		printf(KoishiAvatar::shorten(imgName).c_str());
+		printf("(%d/%d):\n",1+i, imgSitList.size());
 		if(io.version == V6 && io.paletteData.getCount()<=0){
 			io.release();
-			//printf("No palettes...\n");
+			printf("No palettes...\n");
 			continue;
 		}
 		if(io.version != V2 && io.paletteData[0].size()<=1){
 			io.release();
-			//printf("Palette color lacking...\n");
+			printf("Palette color lacking...\n");
 			continue;
 		}
 		if(io.version == V2){
@@ -776,28 +564,28 @@ bool KoishiExpand::AvatarMarking(std::string avatarNPKfileName){
 					}
 					int x1,y1,x2,y2;
 					int alphaIndex = 0;
-					x1 = MIN(20, pi.get_basePt().get_X());
-					y1 = MIN(180, pi.get_basePt().get_Y());
-					x2 = pi.get_basePt().get_X()+pi.get_picSize().get_W();
-					y2 = pi.get_basePt().get_Y()+pi.get_picSize().get_H();
-					mat.allocate(y2-y1, x2-x1);
+					x1 = MIN(20, pi.get_basePt().X);
+					y1 = MIN(180, pi.get_basePt().Y);
+					x2 = pi.get_basePt().X+pi.get_picSize().W;
+					y2 = pi.get_basePt().Y+pi.get_picSize().H;
+					mat.create(y2-y1, x2-x1);
 					io.PICextract(k, orginMat);
 					mat.putFore(orginMat);
-					mat.elemMoveHonz(pi.get_basePt().get_X()-x1);
-					mat.elemMoveVert(pi.get_basePt().get_Y()-y1);
-					KoishiExpand::StrMat2(KoishiTitle::shorten(imgName), markMat);
-					markMoved.allocate((markMat.getRowCount()+1)*13, markMat.getColumnCount()+100);
+					mat.moveHonz(pi.get_basePt().X-x1);
+					mat.moveVert(pi.get_basePt().Y-y1);
+					StrMatLarge(KoishiAvatar::shorten(imgName), markMat);
+					markMoved.create((markMat.getHeight()+1)*13, markMat.getWidth()+100);
 					markMoved.putFore(markMat);
-					markMoved.elemMoveHonz(20-x1);
-					markMoved.elemMoveVert(180-y1+(markMat.getRowCount()+1)*imgPartList[i]);
+					markMoved.moveHonz(20-x1);
+					markMoved.moveVert(180-y1+(markMat.getHeight()+1)*imgPartList[i]);
 					mat.putFore(markMoved);
 					io.PICpreprocess(mat, s, pi);
 					pi.set_basePt(point(x1,y1));
 					ioTemp.PICreplace(k, pi, s);
-					mat.release();
-					markMat.release();
-					markMoved.release();
-					orginMat.release();
+					mat.destory();
+					markMat.destory();
+					markMoved.destory();
+					orginMat.destory();
 					s.release();
 				}
 			}
@@ -812,31 +600,31 @@ bool KoishiExpand::AvatarMarking(std::string avatarNPKfileName){
 					int x1,y1,x2,y2;
 					int alphaIndex = 0;
 					for(j=0;j<io.paletteData[0].size();j++){
-						if(io.paletteData[0][j].get_A() == 0){
+						if(io.paletteData[0][j].A == 0){
 							alphaIndex = j;
 							break;
 						}
 					}
-					x1 = MIN(20, pi.get_basePt().get_X());
-					y1 = MIN(180, pi.get_basePt().get_Y());
-					x2 = pi.get_basePt().get_X()+pi.get_picSize().get_W();
-					y2 = pi.get_basePt().get_Y()+pi.get_picSize().get_H();
+					x1 = MIN(20, pi.get_basePt().X);
+					y1 = MIN(180, pi.get_basePt().Y);
+					x2 = pi.get_basePt().X+pi.get_picSize().W;
+					y2 = pi.get_basePt().Y+pi.get_picSize().H;
 
-					mat.allocate(y2-y1, x2-x1);
+					mat.create(y2-y1, x2-x1);
 					io.PICextractIndexMatrix(k, orginMat);
 					mat.putFore(orginMat);
-					mat.elemMoveHonz(pi.get_basePt().get_X()-x1);
-					mat.elemMoveVert(pi.get_basePt().get_Y()-y1);
-					KoishiExpand::StrMat2(KoishiTitle::shorten(imgName), markMat, color((alphaIndex==1)?2:1,0,0,0));
-					markMoved.allocate((markMat.getRowCount()+1)*13, markMat.getColumnCount()+100);
+					mat.moveHonz(pi.get_basePt().X-x1);
+					mat.moveVert(pi.get_basePt().Y-y1);
+					StrMatLarge(KoishiAvatar::shorten(imgName), markMat, color((alphaIndex==1)?2:1,0,0,0));
+					markMoved.create((markMat.getHeight()+1)*13, markMat.getWidth()+100);
 					markMoved.putFore(markMat);
-					markMoved.elemMoveHonz(20-x1);
-					markMoved.elemMoveVert(180-y1+(markMat.getRowCount()+1)*imgPartList[i]);
+					markMoved.moveHonz(20-x1);
+					markMoved.moveVert(180-y1+(markMat.getHeight()+1)*imgPartList[i]);
 					mat.putFore(markMoved);
 
-					for(m1=0;m1<mat.getRowCount();m1++){
-						for(m2=0;m2<mat.getColumnCount();m2++){
-							if((m1<pi.get_basePt().get_Y()-y1 || m2<pi.get_basePt().get_X()-x1) && mat[m1][m2] == color(0,0,0,0)){
+					for(m1=0;m1<mat.getHeight();m1++){
+						for(m2=0;m2<mat.getWidth();m2++){
+							if((m1<pi.get_basePt().Y-y1 || m2<pi.get_basePt().X-x1) && mat[m1][m2] == color(0,0,0,0)){
 								mat.setElem(m1,m2,color(alphaIndex,0,0,0));
 							}
 						}
@@ -844,10 +632,10 @@ bool KoishiExpand::AvatarMarking(std::string avatarNPKfileName){
 					io.PICpreprocessIndexMatrix(mat, s, pi);
 					pi.set_basePt(point(x1,y1));
 					ioTemp.PICreplace(k, pi, s);
-					mat.release();
-					markMat.release();
-					markMoved.release();
-					orginMat.release();
+					mat.destory();
+					markMat.destory();
+					markMoved.destory();
+					orginMat.destory();
 					s.release();
 				}
 			}
@@ -855,30 +643,138 @@ bool KoishiExpand::AvatarMarking(std::string avatarNPKfileName){
 		outputNo.IMGpush(ioTemp, imgName);
 		io.release();
 		ioTemp.release();
-		//printf("Done.\n");
+		printf("Done.\n");
 	}
 	outputNo.saveFile("(marked)"+avatarNPKfileName);
 	inputNo.release();
 	outputNo.release();
 	return true;
 }
-bool KoishiExpand::AvatarBatchMarking(std::string avatarNPKfileListName){
+bool KoishiExpand::KoishiMarkTool::AvatarBatchMarking(std::string avatarNPKfileListName){
 	std::ifstream myfile(avatarNPKfileListName); 
 	if(!myfile.is_open()){
-		//printf("No NPK list file exists");
-		//system("pause");
+		printf("No NPK list file exists");
+		system("pause");
 		return false;
 	}
 	str temp;
 	while(getline(myfile,temp)){
-		//printf("Now dealing ");
-		//printf(temp.c_str());
-		//printf("...\n");
+		printf("Now dealing ");
+		printf(temp.c_str());
+		printf("...\n");
 		AvatarMarking(temp);
 	}
 	return true;
 }
+bool KoishiExpand::KoishiMarkTool::MatrixMarking(const matrix &sourceMatrix, matrix &destMatrix, str codeString, int situ){
+	matrix strMatrix;
+	StrMatLarge(codeString, strMatrix);
+	switch(situ){
+	case 1:
+		//上方外侧
+		strMatrix.expand(0,sourceMatrix.getHeight()+1, 0, 0);
+		sourceMatrix.expand(destMatrix, strMatrix.getHeight()+1, 0, 0, sourceMatrix.getWidth() > strMatrix.getWidth() ? 0 : strMatrix.getWidth());
+		destMatrix.putBack(strMatrix);
+		break;
+	case 2:
+		//右方外侧
+		strMatrix.expand(0, 0, sourceMatrix.getWidth()+1, 0);
+		sourceMatrix.expand(destMatrix, 0, sourceMatrix.getHeight() > strMatrix.getHeight() ? 0 : strMatrix.getHeight(), 0, strMatrix.getWidth()+1);
+		destMatrix.putBack(strMatrix);
+		break;
+	default:
+		return false;
+		break;
+	}
+	return true;
+}
+bool KoishiExpand::KoishiMarkTool::MatrixMarking(const matrix &sourceMatrix, matrix &destMatrix, str codeString, point deltaPoint, color textColor){
+	matrix strMatrix;
+	StrMatLarge(codeString, strMatrix, textColor);
+	long topEx = 0;
+	long leftEx = 0;
+	long rightEx = 0;
+	long bottomEx = 0;
+	if(deltaPoint.Y < 0){
+		topEx = -deltaPoint.Y;
+	}
+	if(deltaPoint.X < 0){
+		leftEx = -deltaPoint.X;
+	}
+	if(deltaPoint.X + strMatrix.getWidth() > sourceMatrix.getWidth()){
+		rightEx = deltaPoint.X + strMatrix.getWidth() - sourceMatrix.getWidth();
+	}
+	if(deltaPoint.Y + strMatrix.getHeight() > sourceMatrix.getHeight()){
+		bottomEx = deltaPoint.Y + strMatrix.getHeight() - sourceMatrix.getHeight();
+	}
+	sourceMatrix.expand(destMatrix, topEx, bottomEx, leftEx, rightEx);
+	strMatrix.expand(deltaPoint.Y > 0 ? deltaPoint.Y:0, 0, deltaPoint.X > 0 ? deltaPoint.X:0, 0); 
+	destMatrix.putBack(strMatrix);
+	return true;
 
+}
+bool KoishiExpand::KoishiMarkTool::MatrixShowcasing(const matrix &sourceMatrix, matrix &destMatrix, int num, int size){
+	matrix strMatrix, showcaseMatrix;
+	matrix cutMatrix;
+	if(size<8){
+		size = 8;
+	}
+	destMatrix.create(size+20, size);
+	//绘制框架
+	showcaseMatrix.create(size+20, size);
+	color cList[4] = {color(0,0,0), color(0xFF, 0x33, 0x00),color(0xFF, 0x66, 0x33),color(0xFF, 0x99, 0x66)};
+	showcaseMatrix.fill(cList[2]);
+	showcaseMatrix.rectangle(point(0,0), point(size-1,size+19), cList[0]);
+	showcaseMatrix.rectangle(point(1,1), point(size-2,size+18), cList[0]);
+	showcaseMatrix.line(point(2,2), point(2,size+17), cList[3]);
+	showcaseMatrix.line(point(2,2), point(size-3,2), cList[3]);
+	showcaseMatrix.line(point(3,3), point(3,size+16), cList[3]);
+	showcaseMatrix.line(point(3,3), point(size-4,3), cList[3]);
+	showcaseMatrix.line(point(size-3,size+17), point(3,size+17), cList[1]);
+	showcaseMatrix.line(point(size-3,size+17), point(size-3,3), cList[1]);
+	showcaseMatrix.line(point(size-4,size+16), point(4,size+16), cList[1]);
+	showcaseMatrix.line(point(size-4,size+16), point(size-4,4), cList[1]);
+	showcaseMatrix.line(point(5,5), point(size-6,5), cList[1]);
+	showcaseMatrix.line(point(5,5), point(5,size-6), cList[1]);
+	showcaseMatrix.line(point(size-6,5), point(size-6,size-6), cList[3]);
+	showcaseMatrix.line(point(5,size-6), point(size-6,size-6), cList[3]);
+	//绘制数字
+	StrMatLarge(KoishiAvatar::getAvatarIDString(num), strMatrix);
+	strMatrix.expand(size + 8 - strMatrix.getHeight()/2, 0, size / 2 - strMatrix.getWidth()/2, 0);
+	//裁切Matrix
+	long left = 0;
+	long right = sourceMatrix.getWidth();
+	long top = 0;
+	long bottom = sourceMatrix.getHeight();
+	if(sourceMatrix.getWidth() > size - 12){
+		left = (sourceMatrix.getWidth() - size + 12) / 2;
+		right -= left;
+	}if(sourceMatrix.getHeight() > size - 12){
+		top = (sourceMatrix.getHeight() - size + 12) / 2;
+		bottom -= top;
+	}
+	sourceMatrix.clip(cutMatrix, top, bottom, left, right);
+	cutMatrix.expand( size/2 - cutMatrix.getHeight()/2, 0, size/2 - cutMatrix.getWidth()/2, 0);
+	destMatrix.putFore(showcaseMatrix);
+	destMatrix.putFore(strMatrix);
+	destMatrix.putFore(cutMatrix);
+	return true;
+}
+
+bool KoishiExpand::KoishiMarkTool::MatrixPSstyle(const matrix &sourceMatrix, matrix &destMatrix, color clrBound, color clrBG1, color clrBG2){
+	long i, j;
+	destMatrix.create(sourceMatrix.getHeight(), sourceMatrix.getWidth());
+	for(i = 0;i<destMatrix.getWidth();i++){
+		for(j = 0;j<destMatrix.getHeight();j++){
+			destMatrix.setElem(j, i, (i%10<5&&j%10<5||i%10>=5&&j%10>=5)?clrBG1:clrBG2);
+			if(i==0||j==0||i==destMatrix.getWidth()-1||j==destMatrix.getHeight()-1){
+				destMatrix.setElem(j,i,clrBound);
+			}
+		}
+	}
+	destMatrix.putFore(sourceMatrix);
+	return true;
+}
 KoishiExpand::Indexing::Indexing(){
 	millages = 0;
 }
@@ -898,8 +794,8 @@ void KoishiExpand::Indexing::deal(IMGobject &goal, int colorCount){
 	matrix mat;
 	stream s,s1;
 	palette pl;
-	lcolor lc;
-	li32 li;
+	colorList lc;
+	queue li;
 	int i,j,k;
 	lc.clear();
 	li.clear();
@@ -910,9 +806,9 @@ void KoishiExpand::Indexing::deal(IMGobject &goal, int colorCount){
 		//提取矩阵
 		for(j=0;j<mat.getElemCount();j++){
 			color c = mat.getElem(j);
-			if(c.get_A()<=0x7F)
+			if(c.A<=0x7F)
 				continue;
-			c.set_A(0xFF);
+			c.A = 0xFF;
 			int count = pl.findColor(c,0);
 			if(count==-1){
 				pl[0].push_back(c);
@@ -924,13 +820,13 @@ void KoishiExpand::Indexing::deal(IMGobject &goal, int colorCount){
 				int aabb = 0;
 			}
 		}
-		mat.release();
+		mat.destory();
 		millages = 500*i/io.indexCount;
 	}
 	lc = pl[0];
 	//取出数目最多的若干个颜色
-	lcolor lc2; //这个就是新的色表
-	li32 li2;
+	colorList lc2; //这个就是新的色表
+	queue li2;
 	lc2.clear();
 	li2.clear();
 	if(colorCount>lc.size()){
@@ -969,10 +865,10 @@ void KoishiExpand::Indexing::deal(IMGobject &goal, int colorCount){
 		s.allocate(pi.get_picSize().area()+100);		//直接分配内存
 		for(j=0;j<mat.getElemCount();j++){
 			color c = mat.getElem(j);
-			if(c.get_A()<=0x7F){
-				s.push((b8)0);
+			if(c.A <= 0x7F){
+				s.push((Koishi::uchar)0);
 			}else{
-				c.set_A(0xFF);
+				c.A = 0xFF;
 				int lowdist = 0x7FFFFFFF;
 				int lowID = -1;
 				for(k=0;k<lc2.size();k++){
@@ -982,7 +878,7 @@ void KoishiExpand::Indexing::deal(IMGobject &goal, int colorCount){
 						lowdist = dist;
 					}
 				}
-				s.push((b8)(1+lowID));
+				s.push((uchar)(1+lowID));
 			}
 		}
 		s.compressData(s1, COMP_ZLIB);
@@ -992,7 +888,7 @@ void KoishiExpand::Indexing::deal(IMGobject &goal, int colorCount){
 		goal.PICpush(pi, s1);
 		s.release();
 		s1.release();
-		mat.release();
+		mat.destory();
 		millages = 500+500*i/io.indexCount;
 	}
 	millages = 1000;
@@ -1006,7 +902,9 @@ void KoishiExpand::Indexing::output(const std::string imgName){
 	out.saveFile(imgName);
 }
 
-bool KoishiExpand::SPKobject::load(str fileName){
+/////////////////////////////////////////////////////////////
+using namespace KoishiExpand::KoishiDownloadTool;
+bool SPKobject::load(str fileName){
 	int i,j;
 	unsigned long dw;
 	if(!data.loadFile(fileName)){
@@ -1034,7 +932,7 @@ bool KoishiExpand::SPKobject::load(str fileName){
 	}
 	for(i=0;i<indexCount;i++){
 		SPKblock sb;
-		sb.startPos = data.ptPos();
+		sb.startPos = data.getPtPos();
 		data.read(sb.bzlib);
 		data.read(sb.len);
 		data.read(sb.bzlib_r);
@@ -1042,23 +940,23 @@ bool KoishiExpand::SPKobject::load(str fileName){
 		for(j=0;j<32;j++){
 			data.read(sb.hash[j]);
 		}
-		sb.mainStartPos = data.ptPos();
+		sb.mainStartPos = data.getPtPos();
 		data.ptMove(sb.len);
 		list.push_back(sb);
 	}
 	return true;
 }
 
-void KoishiExpand::SPKobject::release(){
+void SPKobject::release(){
 	data.release();
 }
 
-void KoishiExpand::SPKobject::extract(int pos, stream &s){
+void SPKobject::extract(int pos, stream &s){
 	data.ptMoveTo(list[pos].mainStartPos);
 	data.readStream(s, list[pos].len);
 }
 
-void KoishiExpand::SPKobject::extractTrueStream(stream &s){
+void SPKobject::extractTrueStream(stream &s){
 	s.allocate(decompressed_len*2);
 	s.clear();
 	stream s1,s2;
@@ -1073,13 +971,13 @@ void KoishiExpand::SPKobject::extractTrueStream(stream &s){
 	}
 }
 
-void KoishiExpand::SPKobject::makeNPK(str NPKfileName){
+void SPKobject::makeNPK(str NPKfileName){
 	stream s;
 	extractTrueStream(s);
 	s.makeFile(NPKfileName);
 }
 
-KoishiExpand::LSTfile::LSTfile(){
+LSTfile::LSTfile(){
 	int i = 0;
 	nameLen = 0;
 	for(i=0;i<256;i++){
@@ -1093,7 +991,7 @@ KoishiExpand::LSTfile::LSTfile(){
 	}
 }
 
-KoishiExpand::LSTfolder::LSTfolder(){
+LSTfolder::LSTfolder(){
 	int i = 0;
 	nameLen = 0;
 	for(i=0;i<256;i++){
@@ -1103,9 +1001,8 @@ KoishiExpand::LSTfolder::LSTfolder(){
 	subFolderCount = 0;
 	list.clear();
 }
-void KoishiExpand::LSTobject::load(Koishi::stream &s){
+void LSTobject::load(Koishi::stream &s){
 	int i,j;
-	unsigned long temp;
 	for(i=0;i<32;i++){
 		s.read(hash[i]);
 	}
@@ -1141,7 +1038,7 @@ void KoishiExpand::LSTobject::load(Koishi::stream &s){
 		list.push_back(lf);
 	}
 }
-bool KoishiExpand::LSTobject::load(const str &fileName){
+bool LSTobject::load(const str &fileName){
 	int i,j;
 	stream s;
 	if(!s.loadFile(fileName))
@@ -1186,7 +1083,7 @@ bool KoishiExpand::LSTobject::load(const str &fileName){
 	return true;
 }
 
-bool KoishiExpand::LSTobject::getImagePack2(LSTfolder &lf){
+bool LSTobject::getImagePack2(LSTfolder &lf){
 	int i;
 	for(i=0;i<list.size();i++){
 		str s1((char*)list[i].name);
@@ -1199,7 +1096,7 @@ bool KoishiExpand::LSTobject::getImagePack2(LSTfolder &lf){
 	return false;
 }
 
-bool KoishiExpand::TCTobject::load(Koishi::str fileName){
+bool TCTobject::load(Koishi::str fileName){
 	int i;
 	if(!data.loadFile(fileName)){
 		return false;
@@ -1230,19 +1127,19 @@ bool KoishiExpand::TCTobject::load(Koishi::str fileName){
 			 data.read(ex[i]);
 		 }
 	}
-	dtStartPos = data.ptPos();
+	dtStartPos = data.getPtPos();
 	return true;
 }
-bool KoishiExpand::TCTobject::release(){
+bool TCTobject::release(){
 	data.release();
 	return true;
 }
-bool KoishiExpand::TCTobject::makeNPK(Koishi::str NPKfileName){
+bool TCTobject::makeNPK(Koishi::str NPKfileName){
 	stream s, s1, sHead,sOut;
 	data.ptMoveTo(dtStartPos);
 	data.readStream(s, comSize);
 	sHead.allocate(2);
-	sHead.push((b16)0x9C78);
+	sHead.push((word)0x9C78);
 	s.insertStream(sHead, 2, 0);
 	s.uncompressData(s1, COMP_ZLIB, uncomSize);
 	s1.readStream(sOut, uncomSize);
@@ -1253,7 +1150,7 @@ bool KoishiExpand::TCTobject::makeNPK(Koishi::str NPKfileName){
 	sHead.release();
 	return true;
 }
-KoishiExpand::LSTfile2::LSTfile2(){
+LSTfileGF::LSTfileGF(){
 	int i;
 	for(i=0;i<256;i++){
 		name[i] = 0;		
@@ -1263,11 +1160,11 @@ KoishiExpand::LSTfile2::LSTfile2(){
 		hash[i] = 0;	
 	}
 }
-bool KoishiExpand::LSTobject2::load(const Koishi::str &fileName){
+bool LSTobjectGF::load(const Koishi::str &fileName){
 	int i,j;
 	unsigned char n;
 	stream s,sSplit;
-	lb64 pos, len;
+	queueex pos, len;
 	s.loadFile(fileName);
 	sSplit.allocate(20);
 	sSplit.pushString("ImagePacks2\\");
@@ -1276,14 +1173,14 @@ bool KoishiExpand::LSTobject2::load(const Koishi::str &fileName){
 	list.clear();
 	for(i=1;i<pos.size();i++){
 		s.ptMoveTo(pos[i]);
-		LSTfile2 lf2;
+		LSTfileGF lf;
 		j = 0;
 		while(true){
 			s.read(n);
 			if(n == 0x22){
 				break;
 			}else{
-				lf2.name[j++] = n;
+				lf.name[j++] = n;
 			}
 		}
 		s.read(n);
@@ -1293,7 +1190,7 @@ bool KoishiExpand::LSTobject2::load(const Koishi::str &fileName){
 			if(n == 0x20){
 				break;
 			}else{
-				lf2.hash[j++] = n;
+				lf.hash[j++] = n;
 			}
 		}
 		j = 0;
@@ -1302,22 +1199,22 @@ bool KoishiExpand::LSTobject2::load(const Koishi::str &fileName){
 			if(n == 0x0D){
 				break;
 			}else{
-				lf2.lenStr[j++] = n;
+				lf.lenStr[j++] = n;
 			}
 		}
-		list.push_back(lf2);
+		list.push_back(lf);
 	}
 	return true;
 }
 /////////////旧版本IMG///////////////////
-bool KoishiExpand::OldIMGobject::load(const Koishi::str &fileName){
+bool KoishiExpand::IMGobjectV1::load(const Koishi::str &fileName){
 	stream s;
 	if(!s.loadFile(fileName))
 		return false;
 	return load(s);
 }
 
-bool KoishiExpand::OldIMGobject::load(Koishi::stream &s){
+bool KoishiExpand::IMGobjectV1::load(Koishi::stream &s){
 	data = s;
 	//开始读取
 	int i;
@@ -1330,7 +1227,7 @@ bool KoishiExpand::OldIMGobject::load(Koishi::stream &s){
 		return false;
 	s.read(dwTemp);	//保留位
 	s.read(dwVersion); //版本
-	if(dwVersion != (unsigned long)Koishi::IMGversion::V1){
+	if(dwVersion != (unsigned long)Koishi::V1){
 		return false;
 	}
 	s.read(dwIndexCount);	//INDEX数
@@ -1344,27 +1241,27 @@ bool KoishiExpand::OldIMGobject::load(Koishi::stream &s){
 		s.read(dwTemp);
 		pi.set_comp((Koishi::compressType)dwTemp);
 		s.read(dwTemp);
-		pi.getPtr_picSize()->set_W((long)dwTemp);
+		pi.picSize.W = (long)dwTemp;
 		s.read(dwTemp);
-		pi.getPtr_picSize()->set_H((long)dwTemp);
+		pi.picSize.H = (long)dwTemp;
 		s.read(dwTemp);
 		pi.set_dataSize(dwTemp);
 		s.read(dwTemp);
-		pi.getPtr_basePt()->set_X((long)dwTemp);
+		pi.basePt.X = (long)dwTemp;
 		s.read(dwTemp);
-		pi.getPtr_basePt()->set_Y((long)dwTemp);
+		pi.basePt.Y = (long)dwTemp;
 		s.read(dwTemp);
-		pi.getPtr_frmSize()->set_W((long)dwTemp);
+		pi.frmSize.W = (long)dwTemp;
 		s.read(dwTemp);
-		pi.getPtr_frmSize()->set_H((long)dwTemp);
+		pi.frmSize.H = (long)dwTemp;
 		PICcontent.push_back(pi);
-		posList.push_back(s.ptPos());
+		posList.push_back(s.getPtPos());
 		lenList.push_back(pi.get_dataSize());
 		s.ptMove(pi.get_dataSize());
 	}
 	return true;
 }
-bool KoishiExpand::OldIMGobject::make(Koishi::IMGobject &io){
+bool KoishiExpand::IMGobjectV1::make(Koishi::IMGobject &io){
 	io.create(V2);
 	stream s;
 	int i;
@@ -1376,77 +1273,98 @@ bool KoishiExpand::OldIMGobject::make(Koishi::IMGobject &io){
 	}
 	return true;
 }
-bool KoishiExpand::OldIMGobject::release(){
+bool KoishiExpand::IMGobjectV1::release(){
 	data.release();
 	posList.clear();
 	lenList.clear();
 	return true;
 }
 /////////////图像工具////////////////////
-KoishiExpand::KoishiImageTool::gradient::gradient(unsigned int newRange){
-	range = newRange;
-	keyColorList.clear();
-	keyColorSection.clear();
-}
-void KoishiExpand::KoishiImageTool::gradient::setRange(unsigned int newRange){
-	unsigned int oldRange = range;
-	range = newRange;
-	int i;
-	for(i=0;i<keyColorSection.size();i++){
-		keyColorSection[i] *= newRange;
-		keyColorSection[i] /= oldRange;
+color KoishiExpand::KoishiImageTool::gradient(const color &sourceColor, const colorList &keyColorList, Koishi::colorProperty cp){
+	if(keyColorList.size() == 0){
+		return sourceColor;
 	}
-}
-void KoishiExpand::KoishiImageTool::gradient::addKey(Koishi::color newKeyColor, unsigned int situ){
-	if(situ > range)
-		return;
-	int i;
-	if(keyColorSection.size() == 0){
-		keyColorList.push_back(newKeyColor);
-		keyColorSection.push_back(situ);
-	}else{
-		if(situ < keyColorSection[0]){
-			keyColorList.insert(keyColorList.begin(), newKeyColor);
-			keyColorSection.insert(keyColorSection.begin(), situ);
-		}else if(situ > keyColorSection[keyColorSection.size()-1]){
-			keyColorList.push_back(newKeyColor);
-			keyColorSection.push_back(situ);
-		}else{
-			for(i=0;i<keyColorSection.size()-1;i++){
-				if(situ >= keyColorSection[i] && situ <keyColorSection[i+1]){
-					keyColorList.insert(keyColorList.begin()+i, newKeyColor);
-					keyColorSection.insert(keyColorSection.begin()+i, situ);
-					break;
-				}
-			}
-		}
-	}
-}
-void KoishiExpand::KoishiImageTool::gradient::deleteKey(unsigned int id){
-	if(id >= keyColorSection.size())
-		return;
-	keyColorList.erase(keyColorList.begin()+id);
-	keyColorSection.erase(keyColorSection.begin()+id);
-}
-Koishi::color KoishiExpand::KoishiImageTool::gradient::pick(unsigned int situ) const{
-	if(keyColorSection.size() == 0){
-		return Koishi::color(0);
-	}
-	if(situ <= keyColorSection[0]){
+	if(keyColorList.size() == 1){
 		return keyColorList[0];
-	}else if(situ >= keyColorSection[keyColorSection.size()-1]){
-		return keyColorList[keyColorSection.size()-1];
-	}else{
-		int i;
-		for(i=0;i<keyColorSection.size()-1;i++){
-			if(situ >= keyColorSection[i] && situ <keyColorSection[i+1]){
-				Koishi::color color1 = keyColorList[i];
-				Koishi::color color2 = keyColorList[i+1];
-				Koishi::color colorn;
+	}
+	double theProp = sourceColor.getProperty(cp);
+	double delta = 1.0/(keyColorList.size()-1);		//步长
+	int step = (int)(theProp / delta);
+	if(step >= keyColorList.size() - 1){
+		step = keyColorList.size() - 2;
+	}
+	return color(
+		(uchar)(theProp*keyColorList[step].A) + (uchar)((1-theProp)*keyColorList[step+1].A),
+		(uchar)(theProp*keyColorList[step].R) + (uchar)((1-theProp)*keyColorList[step+1].R),
+		(uchar)(theProp*keyColorList[step].G) + (uchar)((1-theProp)*keyColorList[step+1].G),
+		(uchar)(theProp*keyColorList[step].B) + (uchar)((1-theProp)*keyColorList[step+1].B)
+	);
+}
+////////////////////////////////////////////////
 
-				break;
-			}
+KoishiExpand::exhibit::exhibit(){
+	clear();
+}
+void KoishiExpand::exhibit::clear(){
+	hMaxPerRow = 0;
+	hList.clear();
+	rList.clear();
+	hList.push_back(0);
+	queue zero;
+	zero.push_back(0);
+	rList.push_back(zero);
+	canvas.destory();
+}
+void KoishiExpand::exhibit::create(int width, int height){
+	canvas.create(height, width);
+}
+//放置缩略图的算法
+/*
+1.首先计算新放置缩略图的位置的顶部坐标和左边坐标
+2.根据左边坐标到画布右侧的距离与缩略图宽度做比较，如果不够放，则另起一行（转至3）；否则转至4。
+3.另起一行时，若上一行的最大高度超过了画布下册，则返回失败0；否则转至4。
+4.放置图像，坐标以及最大高度更新，返回成功1。
+*/
+bool KoishiExpand::exhibit::putMatrix(const matrix &newMat, bool expanded){
+	int currentRow = hList.size()-1;	//当前已经达成的行
+	int top = hList[currentRow];		//顶部坐标
+	int current = rList[currentRow].size()-1;	//当前行中已插入的个数
+	int left = rList[currentRow][current];		//左边坐标
+
+	bool needNewLine = false;
+	if(newMat.getWidth() + left > canvas.getWidth()){
+		needNewLine = true;
+	}
+	if(needNewLine){
+		//计算上一栏的最低层
+		currentRow ++;
+		top += hMaxPerRow;
+		current = 0;
+		left = 0;
+		if(top >= canvas.getHeight() && !expanded){
+			return false;
+		}
+		hMaxPerRow = 0;
+		queue zero;
+		zero.push_back(0);
+		rList.push_back(zero);
+		hList.push_back(top);
+	}
+	matrix offset;
+	newMat.expand(offset, top, 0, left, 0);
+	if(expanded){
+		if(canvas.getHeight()<offset.getHeight()){
+			int hDelta = offset.getHeight() - canvas.getHeight();
+			matrix tempCanvas(canvas);
+			canvas.destory();
+			tempCanvas.expand(canvas, 0, hDelta, 0, 0);
+			tempCanvas.destory();
 		}
 	}
-	return Koishi::color(0);
+	canvas.putFore(offset);
+	if(newMat.getHeight()>hMaxPerRow){
+		hMaxPerRow = newMat.getHeight();
+	}
+	rList[currentRow].push_back(left + newMat.getWidth());
+	return true;
 }

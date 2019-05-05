@@ -157,13 +157,11 @@ void CToolSPK::OnBnClickedButton21()
 
 void CToolSPK::loadPackage(){
 	str fileFour[8] = {"(HF)package.lst", "(HFC)package.lst","(RF)package.lst","(MF)package.lst","(WC1)auto.lst","(WC2)auto.lst","(SC)auto.lst","(Custom)package.lst"};
-	KoishiExpand::LSTobject lo;
-	KoishiExpand::LSTobject2 lo2;
-	KoishiExpand::LSTfolder lf;
-	str filePath;
-	CStrToStr(localAddr, filePath);
+	LSTobject lo;
+	LSTobjectGF lo2;
+	LSTfolder lf;
 	if(serverChoose >=4 && serverChoose<=6){
-		if(lo2.load(filePath + fileFour[m_cRec.GetCurSel()])){
+		if(lo2.load(CStrToStr(localAddr) + fileFour[m_cRec.GetCurSel()])){
 			m_lSPK.DeleteAllItems();
 			for(int i = 0;i<lo2.list.size();i++){
 				CString nameStr;
@@ -179,7 +177,7 @@ void CToolSPK::loadPackage(){
 			m_lSPK.EasyInsertItem(L"没有列表或列表文件已损坏，请更新NPK列表。,");
 		}
 	}else{
-		if(lo.load(filePath + fileFour[m_cRec.GetCurSel()])){
+		if(lo.load(CStrToStr(localAddr) + fileFour[m_cRec.GetCurSel()])){
 			if(lo.getImagePack2(lf)){
 				m_lSPK.DeleteAllItems();
 				for(int i = 0;i<lf.list.size();i++){
@@ -187,7 +185,13 @@ void CToolSPK::loadPackage(){
 					CString sizeStr;
 					str name = (char*)lf.list[i].name;
 					nameStr = StrToCStr(name);
-					sizeStr = NumToCStr(lf.list[i].fileLen)+L"字节";
+					if(lf.list[i].fileLen > 1024 * 1024 * 10){
+						sizeStr = NumToCStr(lf.list[i].fileLen / 1024 / 1024)+L" MB";
+					}else if(lf.list[i].fileLen > 1024 * 10){
+						sizeStr = NumToCStr(lf.list[i].fileLen / 1024)+L" KB";
+					}else{
+						sizeStr = NumToCStr(lf.list[i].fileLen)+L" B";
+					}
 					m_lSPK.EasyInsertItem(nameStr+L","+sizeStr);
 				}
 			}else{
@@ -357,7 +361,6 @@ void CToolSPK::OnBnClickedButton17()
 {
 	// TODO: 解析SPK文件
 	CString SPKfileName, NPKfileName, ext;
-	str SPKfn, NPKfn;
 	m_eSPK.GetWindowText(SPKfileName);
 	if(SPKfileName.GetLength() == 0){
 		MessageBox(L"先从列表中下载或在本地中选择一个SPK或TCT文件喵！",L"提示喵");
@@ -365,23 +368,21 @@ void CToolSPK::OnBnClickedButton17()
 	}
 	NPKfileName = SPKfileName.Left(SPKfileName.GetLength()-4);
 	ext = SPKfileName.Right(3);
-	CStrToStr(SPKfileName, SPKfn);
-	CStrToStr(NPKfileName, NPKfn);
-	KoishiExpand::SPKobject so;
-	KoishiExpand::TCTobject to;
+	SPKobject so;
+	TCTobject to;
 	if(ext == L"TCT" || ext == L"tct"){
-		if(!to.load(SPKfn)){
+		if(!to.load(CStrToStr(SPKfileName))){
 			MessageBox(L"无效的TCT文件喵！",L"提示喵");
 			return;
 		}
-		to.makeNPK(NPKfn);
+		to.makeNPK(CStrToStr(NPKfileName));
 		to.release();
 	}else{
-		if(!so.load(SPKfn)){
+		if(!so.load(CStrToStr(SPKfileName))){
 			MessageBox(L"无效的SPK喵！",L"提示喵");
 			return;
 		}
-		so.makeNPK(NPKfn);
+		so.makeNPK(CStrToStr(NPKfileName));
 		so.release();
 	}
 	MessageBox(L"已生成NPK喵！",L"提示喵");
@@ -412,11 +413,9 @@ void CToolSPK::OnBnClickedButton20()
 	// TODO: 使用EX打开
 	CExRabbitDlg *dlg = (CExRabbitDlg*)GetParent();
 	CString NPKfileName;
-	str NPKfn;
 	m_eConvertToNPK.GetWindowText(NPKfileName);
-	CStrToStr(NPKfileName, NPKfn);
 	dlg->no.release();
-	if(!dlg->no.loadFile(NPKfn)){
+	if(!dlg->no.loadFile(CStrToStr(NPKfileName))){
 		MessageBox(L"无效的NPK喵！",L"提示喵");
 		return;
 	}
@@ -424,7 +423,7 @@ void CToolSPK::OnBnClickedButton20()
 	dlg->saveAlert = false;
 	MessageBox(L"已在EX里打开这个NPK喵！",L"提示喵");
 	dlg->updateIMGlist();
-	dlg->updateNPKInfo();
+	dlg->updateInfo();
 }
 
 
@@ -435,13 +434,11 @@ void CToolSPK::OnBnClickedButton22()
 	m_eKeyWord.GetWindowText(keyWord);
 
 	str fileFour[8] = {"(HF)package.lst", "(HFC)package.lst","(RF)package.lst","(MF)package.lst","(WC1)auto.lst","(WC2)auto.lst","(SC)auto.lst","(Custom)package.lst"};
-	KoishiExpand::LSTobject lo;
-	KoishiExpand::LSTobject2 lo2;
-	KoishiExpand::LSTfolder lf;
-	str filePath;
-	CStrToStr(localAddr, filePath);
+	LSTobject lo;
+	LSTobjectGF lo2;
+	LSTfolder lf;
 	if(serverChoose >=4 && serverChoose<=6){
-		if(lo2.load(filePath + fileFour[m_cRec.GetCurSel()])){
+		if(lo2.load(CStrToStr(localAddr) + fileFour[m_cRec.GetCurSel()])){
 			m_lSPK.DeleteAllItems();
 			for(int i = 0;i<lo2.list.size();i++){
 				CString nameStr;
@@ -460,7 +457,7 @@ void CToolSPK::OnBnClickedButton22()
 			m_lSPK.EasyInsertItem(L"没有列表或列表文件已损坏，请更新NPK列表。,");
 		}
 	}else{
-		if(lo.load(filePath + fileFour[m_cRec.GetCurSel()])){
+		if(lo.load(CStrToStr(localAddr) + fileFour[m_cRec.GetCurSel()])){
 			if(lo.getImagePack2(lf)){
 				m_lSPK.DeleteAllItems();
 				for(int i = 0;i<lf.list.size();i++){
@@ -471,7 +468,13 @@ void CToolSPK::OnBnClickedButton22()
 					if(nameStr.Find(keyWord) == -1){
 						continue;
 					}
-					sizeStr = NumToCStr(lf.list[i].fileLen)+L"字节";
+					if(lf.list[i].fileLen > 1024 * 1024 * 10){
+						sizeStr = NumToCStr(lf.list[i].fileLen / 1024 / 1024)+L" MB";
+					}else if(lf.list[i].fileLen > 1024 * 10){
+						sizeStr = NumToCStr(lf.list[i].fileLen / 1024)+L" KB";
+					}else{
+						sizeStr = NumToCStr(lf.list[i].fileLen)+L" B";
+					}
 					m_lSPK.EasyInsertItem(nameStr+L","+sizeStr);
 				}
 			}else{

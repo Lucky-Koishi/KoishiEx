@@ -87,16 +87,15 @@ namespace KoishiDDS{
 		bool compress(const matrix &mat);
 		DDSHeader *getHeader();
 	public:
-		b16 RGB8888TO565(Koishi::color c8888);
-		Koishi::color RGB565TO8888(b16 c565);
-		void DXT1_uncompress(const stream &udata, lcolor &clist);
+		word RGB8888TO565(Koishi::color c8888);
+		Koishi::color RGB565TO8888(word c565);
+		void DXT1_uncompress(const stream &udata, colorList &clist);
 		void DXT1_uncompress(matrix &mat);
-		void DXT3_uncompress(const stream &udata, lcolor &clist);
+		void DXT3_uncompress(const stream &udata, colorList &clist);
 		void DXT3_uncompress(matrix &mat);
-		void DXT5_uncompress(const stream &udata, lcolor &clist);
+		void DXT5_uncompress(const stream &udata, colorList &clist);
 		void DXT5_uncompress(matrix &mat);
-		void DXT5_uncompress2(matrix &mat);	//DXT5 ´ø·Ö¿é
-		void DXT5_compress(const lcolor &clist, stream &dest);
+		void DXT5_compress(const colorList &clist, stream &dest);
 		void DXT5_compress(const matrix &mat);
 	};
 }

@@ -1,11 +1,14 @@
 #pragma once
-
+#include "../KoishiEx/KoishiEx.h"
+#include "Profile.h"
+#include "DictAvatar.h"
+#include "ModalAvatarMap1.h"
+#include "ModalAvatarMap2.h"
 
 // CToolAvatar 对话框
-#define AVATAR_MAX_NPK_COUNT				10			//时装NPK文件数的最大值
-#define AVATAR_MAX_LAYER_COUNT				64			//时装图层（即IMG数）的最大值
 
-
+using namespace Koishi;
+using namespace KoishiAvatar;
 class CToolAvatar : public CDialogEx
 {
 	DECLARE_DYNAMIC(CToolAvatar)
@@ -18,67 +21,117 @@ public:
 	enum { IDD = IDD_TOOL_AVATAR };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
-
 	DECLARE_MESSAGE_MAP()
 public:
-	CComboBox m_cType;
-	CComboBox m_cPart1,m_cPart2,m_cPart3,m_cPart4,m_cPart5;
-	CComboBox m_cPart6,m_cPart7,m_cPart8,m_cPart9,m_cPart10;
-	CComboBox m_cPalette1,m_cPalette2,m_cPalette3,m_cPalette4,m_cPalette5;
-	CComboBox m_cPalette6,m_cPalette7,m_cPalette8,m_cPalette9,m_cPalette10;
-	CComboBox *cbPart		[AVATAR_MAX_NPK_COUNT];		//10个时装ID组合框的指针
-	CComboBox *cbPalette	[AVATAR_MAX_NPK_COUNT];	//10个时装调色板组合框的指针
-	CEdit m_e1;
-	afx_msg void OnBnClickedButton1();
-	afx_msg void OnCbnSelchangeCombo1();
-	virtual BOOL OnInitDialog();
+	CComboBox *cbPart		[APART_MAXCOUNT];		//10个ID组合框的指针
+	CComboBox *cbPalette	[APART_MAXCOUNT];		//10个调色板组合框的指针
 
+	bool loading;					//读取NPK
+	bool moving;					//播放动画
+	long animation[16];				//动画帧
+	long animationLength;
+	void setAnimation(int f1 = 0, int f2 = -1, int f3 = -1, int f4 = -1, int f5 = -1, int f6 = -1, int f7 = -1, int f8 = -1, int f9 = -1, int f10 = -1, int f11 = -1, int f12 = -1, int f13 = -1, int f14 = -1, int f15 = -1, int f16 = -1);
+
+	matrix canvas;
+	
 	void draw();
 	volatile bool drawing;			//正在绘制
-	int frmID;					//当前帧
-	point basePoint;			//基准点
-	NPKobject	noList		[AVATAR_MAX_NPK_COUNT];		//NPK对象·选择角色后确认
-	CString		ioSuffix	[AVATAR_MAX_NPK_COUNT];		//AvatarID的名字（组合框里显示的名字）·选择角色后确认
-	
-	IMGobject	ioList		[AVATAR_MAX_LAYER_COUNT];	//IMG对象·选择部件后更新
-	int			pltID		[AVATAR_MAX_LAYER_COUNT];	//调色板·选择调色板后更新
-	matrix		layer		[AVATAR_MAX_LAYER_COUNT];	//图层矩阵·选择部件和选择帧后更新
-	str			ioName		[AVATAR_MAX_LAYER_COUNT];	//IMG路径名·导出时使用
-	void updateIMG(int cb);								//根据组合框内的内容改变IMG（会变更矩阵并绘制）
-	void updateByPalette(int cb);						//根据调色板内容改变矩阵
-	void updateByFrame(int frame);						//根据帧数改变改变所有矩阵（会绘制）
-	void updateMatrix(int cb);							//根据部件 更新矩阵
-	void getCanvas(matrix &mat);						//根据图层确定画布矩阵
-	static UINT loadNPKThread(PVOID para);
-	static UINT drawThread_av(PVOID para);		//总绘制线程
+	avatarFactory factory;
+	DictAvatar dict;
+	point basePoint;
+	int frame, maxFrame;
 
-	CProgressCtrl m_p1;
-	afx_msg void OnCbnSelchangeCombo3();
-	afx_msg void OnCbnSelchangeCombo4();
-	afx_msg void OnCbnSelchangeCombo5();
-	afx_msg void OnCbnSelchangeCombo6();
-	afx_msg void OnCbnSelchangeCombo7();
-	afx_msg void OnCbnSelchangeCombo8();
-	afx_msg void OnCbnSelchangeCombo9();
-	afx_msg void OnCbnSelchangeCombo10();
-	afx_msg void OnCbnSelchangeCombo11();
-	afx_msg void OnCbnSelchangeCombo12();
-	afx_msg void OnBnClickedButton15();
-	afx_msg void OnBnClickedButton2();
-	afx_msg void OnBnClickedButton3();
-	afx_msg void OnCbnSelchangeCombo14();
-	afx_msg void OnCbnSelchangeCombo15();
-	afx_msg void OnCbnSelchangeCombo16();
-	afx_msg void OnCbnSelchangeCombo17();
-	afx_msg void OnCbnSelchangeCombo18();
-	afx_msg void OnCbnSelchangeCombo19();
-	afx_msg void OnCbnSelchangeCombo20();
-	afx_msg void OnCbnSelchangeCombo21();
-	afx_msg void OnCbnSelchangeCombo22();
-	afx_msg void OnCbnSelchangeCombo23();
-	afx_msg void OnBnClickedButton14();
+	int displayStyle;									//0.展示图模式 1.图标模式(根据装扮ID顺序) 2.图标模式(根据图标ID顺序)
+	void changeDisplayStyle(int newDisplayStyle);
+	Profile profile;									//preference设定
+	avatarPart displayPart;								//当前选择部件
+	int page;											//当前页
+	int selected;										//当前选择部件的选择项
+	//展示图相关数据
+	int thumbnailSize;									//0.小 1.中 2.大 3.巨大 4.图标
+	long thumbnailWidth;								//每个展示图的宽度
+	long thumbnailHeight;								//每个展示图的高度
+	long thumbnailCountPerRow;							//每行包含展示图的个数（总列数）
+	long thumbnailCountRow;								//总行数
+	long thumbnailCountPerPage;							//每页总数
+	void changeThumbnailSize(int tSize);				//更改展示图大小
+	void loadThumbnail(avatarCareer ac, avatarPart ap);	//导入展示图
+	void drawThumbnail(int page);						//绘制展示图
+	//图标相关数据
+	std::vector<long> iconCount;						//图标数
+	void loadIconCount(avatarCareer ac);				//导入图标数
+	void drawIconByAvatar(int page);					//根据装扮编号顺序绘制图标
+	void drawIconByIcon(int page);						//根据图标编号顺序绘制图标（按装扮顺序）
+
+	static UINT loadNPKThread(PVOID para);				//导入NPK线程
+	static UINT drawThread(PVOID para);					//绘制预览图
+	static UINT animationThread(void*para);
+	void makeThumbnailBySingle(int newSelected);
+	void makeThumbnailByPart();
+	void makeThumbnailByAll();//生成浏览图文件
+	static UINT makeThumbnailThread(void*para);
+	static UINT makeAllThumbnailThread(void*para);
+	static UINT makeIconThread(void*para);
+
+	virtual BOOL OnInitDialog();
+	afx_msg void OnCbnSelchangeComboCareer();
+	afx_msg void OnCbnSelchangeComboPart1();
+	afx_msg void OnCbnSelchangeComboPart2();
+	afx_msg void OnCbnSelchangeComboPart3();
+	afx_msg void OnCbnSelchangeComboPart4();
+	afx_msg void OnCbnSelchangeComboPart5();
+	afx_msg void OnCbnSelchangeComboPart6();
+	afx_msg void OnCbnSelchangeComboPart7();
+	afx_msg void OnCbnSelchangeComboPart8();
+	afx_msg void OnCbnSelchangeComboPart9();
+	afx_msg void OnCbnSelchangeComboPalette1();
+	afx_msg void OnCbnSelchangeComboPalette2();
+	afx_msg void OnCbnSelchangeComboPalette3();
+	afx_msg void OnCbnSelchangeComboPalette4();
+	afx_msg void OnCbnSelchangeComboPalette5();
+	afx_msg void OnCbnSelchangeComboPalette6();
+	afx_msg void OnCbnSelchangeComboPalette7();
+	afx_msg void OnCbnSelchangeComboPalette8();
+	afx_msg void OnCbnSelchangeComboPalette9();
+
+	void OnComboPartChange(avatarPart ap);
+	void OnComboPaletteChange(avatarPart ap);
+	void OnButtonSelectThumbnail(avatarPart ap);
+	void InvokeMappingDialog1(long getSelected);
+	void InvokeMappingDialog2(long getSelected);
+
+	afx_msg void OnBnClickedButtonResource();
+	afx_msg void OnBnClickedButtonPrev();
+	afx_msg void OnBnClickedButtonNext();
+	afx_msg void OnBnClickedButtonMakenpk();
 	afx_msg void OnBnClickedCancel();
-	CComboBox m_cPart13;
-	afx_msg void OnCbnSelchangeCombo13();
+	afx_msg void OnCbnSelchangeComboAction();
+	afx_msg void OnBnClickedButtonPart1();
+	afx_msg void OnBnClickedButtonPart2();
+	afx_msg void OnBnClickedButtonPart3();
+	afx_msg void OnBnClickedButtonPart4();
+	afx_msg void OnBnClickedButtonPart5();
+	afx_msg void OnBnClickedButtonPart6();
+	afx_msg void OnBnClickedButtonPart7();
+	afx_msg void OnBnClickedButtonPart8();
+	afx_msg void OnBnClickedButtonPart9();
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+
+	BOOL getMouseClicked(int &checkSelected);
+	CPoint getWinMouseAxis();
+	afx_msg void OnMenuAvatarSetName();
+	afx_msg void OnMenuAvatarSetIcon();
+	afx_msg void OnMenuAvatarSizeSmall();
+	afx_msg void OnMenuAvatarSizeMedium();
+	afx_msg void OnMenuAvatarSizeLarge();
+	afx_msg void OnMenuAvatarSizeHuge();
+	afx_msg void OnMenuAvatarRefresh();
+	afx_msg void OnMenuAvatarRefreshAll();
+	afx_msg void OnBnClickedRadioDisplay1();
+	afx_msg void OnBnClickedRadioDisplay2();
+	afx_msg void OnBnClickedRadioDisplay3();
+	afx_msg void OnMenuAvatarRefreshIcon();
+	afx_msg void OnMenuAvatarSetavatar();
+	afx_msg void OnMenuAvatarSetAvatar2();
 };

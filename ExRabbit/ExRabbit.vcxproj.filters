@@ -80,6 +80,9 @@
     <None Include="res\ico00009.ico">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="res\cursor1.cur">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExRabbit.h">
@@ -100,25 +103,7 @@
     <ClInclude Include="Func.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgRename.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgTrasform.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="DialogNew.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgSetpara.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgSetXY.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgExpand.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgColor.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DlgBar.h">
@@ -133,27 +118,6 @@
     <ClInclude Include="ToolDict.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgSetting.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ToolIndexing.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgInsertIMG.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgInsertPicture.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgInsertColor.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgInsertTexture.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DialogImportFrame.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="DialogAbout.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -163,7 +127,76 @@
     <ClInclude Include="ToolForceEx.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgLoseBlack.h">
+    <ClInclude Include="ToolAvatarES.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AdjustColorDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalInsertPicture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalInsertPicturePatch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalAdjustCanvas.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalPictureParameter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalClearPicture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalLoseBlackPicture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalAdjustColor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalAddMark.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalGradient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyBar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyColorSelect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalInsertTexture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyAddMark.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinySetBrush.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalTransform.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalRename.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalInsertImage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Profile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalPreference.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DictAvatar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalAvatarMap1.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalAvatarMap2.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -180,25 +213,7 @@
     <ClCompile Include="Func.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgRename.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgTrasform.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="DialogNew.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgSetpara.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgSetXY.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgExpand.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgColor.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="DlgBar.cpp">
@@ -213,27 +228,6 @@
     <ClCompile Include="ToolDict.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgSetting.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ToolIndexing.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgInsertIMG.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgInsertPicture.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgInsertColor.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgInserTexture.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DialogImportFrame.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="DialogAbout.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -243,7 +237,76 @@
     <ClCompile Include="ToolForceEx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgLoseBlack.cpp">
+    <ClCompile Include="ToolAvatarES.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AdjustColorDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalInsertPicture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalInsertPicturePatch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalAdjustCanvas.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalPictureParameter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalClearPicture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalLoseBlackPicture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalAdjustColor.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalAddMark.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalGradient.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyBar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyColorSelect.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalInsertTexture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyAddMark.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinySetBrush.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalTransform.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalRename.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalInsertImage.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Profile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalPreference.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DictAvatar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalAvatarMap1.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalAvatarMap2.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

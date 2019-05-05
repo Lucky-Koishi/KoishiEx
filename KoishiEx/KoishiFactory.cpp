@@ -42,8 +42,8 @@ NPKobject::NPKobject(const str &fileName){
 
 bool NPKobject::load(const stream &s){
 	stream data(s);
-	b32 dword;
-	i32 i;
+	dword dword;
+	long i;
 	IMGindex ii;
 	stream sPath;
 	getData(1)->reallocate(24);
@@ -60,13 +60,13 @@ bool NPKobject::load(const stream &s){
 	data.ptMoveTo(20);
 	for(i=0;i<count;i++){
 		data.read(dword);
-		ii.set_imgoffset(dword);
+		ii.imgoffset = dword;
 		data.read(dword);
-		ii.set_imgsize(dword);
+		ii.imgsize = dword;
 		sPath.allocate(256);
 		data.readStream(sPath, 256);
 		sPath.nameMask();
-		ii.set_imgname((str)sPath);
+		ii.imgname = (str)sPath;
 		sPath.release();
 		content.push_back(ii);
 	}
@@ -77,10 +77,10 @@ bool NPKobject::load(const stream &s){
 	return true;
 }
 bool NPKobject::make(stream &s){
-	b32 len1 = getData(1)->getLen();
-	b32 len2 = getData(2)->getLen();
-	b32 len3 = getData(3)->getLen();
-	b32 len4 = getData(4)->getLen();
+	dword len1 = getData(1)->getLen();
+	dword len2 = getData(2)->getLen();
+	dword len3 = getData(3)->getLen();
+	dword len4 = getData(4)->getLen();
 	s.allocate(len1 + len2 + len3 +len4 + 100);
 	s.pushStream(*getData(1), len1);
 	s.pushStream(*getData(2), len2);
@@ -93,8 +93,8 @@ bool NPKobject::create(){
 	content.clear();
 	getData(1)->allocate(64);
 	getData(1)->pushString("NeoplePack_Bill");
-	getData(1)->push((b8)0);
-	getData(1)->push((b32)0);
+	getData(1)->push((uchar)0);
+	getData(1)->push((dword)0);
 	getData(2)->allocate(64);
 	stream s;
 	getData(1)->getSHA256(s,*getData(2));
@@ -135,32 +135,32 @@ bool NPKobject::saveFile(const str &fileName){
 bool NPKobject::IMGpush(IMGobject &io, const str &imgName){
 	stream s;
 	IMGindex ii;
-	b32 _dword;
-	i32 i;
-	ii.set_imgname(imgName);
-	ii.set_imgoffset(getSize());
-	ii.set_imgsize(io.getSize());
+	dword dwTemp;
+	long i;
+	ii.imgname = imgName;
+	ii.imgoffset = getSize();
+	ii.imgsize = io.getSize();
 	content.push_back(ii);
 	for(i=0;i<content.size();i++){
-		_dword = content[i].get_imgoffset();
-		content[i].set_imgoffset(_dword+264);
+		dwTemp = content[i].imgoffset;
+		content[i].imgoffset = dwTemp+264;
 	}
 	//////////////////////////////////////////////
 	count++;
 	getData(1)->clear();
 	getData(1)->pushString("NeoplePack_Bill");
-	getData(1)->push((b8)0);
+	getData(1)->push((uchar)0);
 	getData(1)->push(count);
 	//////////////////////////////////////////////
 	getData(2)->release();
 	getData(2)->allocate(count*400);
 	for(i=0;i<count;i++){
-		getData(2)->push(content[i].get_imgoffset());
-		getData(2)->push(content[i].get_imgsize());
+		getData(2)->push(content[i].imgoffset);
+		getData(2)->push(content[i].imgsize);
 		s.allocate(512);
-		s.pushString(content[i].get_imgname());
+		s.pushString(content[i].imgname);
 		while(s.getLen()<256){
-			s.push((b8)0);
+			s.push((uchar)0);
 		}
 		s.nameMask();
 		getData(2)->pushStream(s, 256);
@@ -176,7 +176,7 @@ bool NPKobject::IMGpush(IMGobject &io, const str &imgName){
 	getData(4)->pushStream(s, s.getLen());
 	return true;
 }
-bool NPKobject::IMGinsert(i32 pos, IMGobject &io, const str &imgName){
+bool NPKobject::IMGinsert(long pos, IMGobject &io, const str &imgName){
 	if(pos<0){
 		pos += (count + 1);
 	}
@@ -189,39 +189,39 @@ bool NPKobject::IMGinsert(i32 pos, IMGobject &io, const str &imgName){
 	if(pos == count){
 		return IMGpush(io, imgName);
 	}
-	i32 i;
+	long i;
 	stream s;
 	IMGindex ii;
-	b32 dword;
-	b64 offset = content[pos].get_imgoffset() - getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen();
-	ii.set_imgname(imgName);
-	ii.set_imgoffset(content[pos].get_imgoffset());
-	ii.set_imgsize(io.getSize());
+	dword dwTemp;
+	longex offset = content[pos].imgoffset - getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen();
+	ii.imgname = imgName;
+	ii.imgoffset = content[pos].imgoffset;
+	ii.imgsize = io.getSize();
 	content.insert(content.begin()+pos, ii);
 	for(i=0;i<content.size();i++){
-		dword = content[i].get_imgoffset();
-		dword += 264;
+		dwTemp = content[i].imgoffset;
+		dwTemp += 264;
 		if(i>pos){
-			dword += io.getSize();
+			dwTemp += io.getSize();
 		}
-		content[i].set_imgoffset(dword);
+		content[i].imgoffset = dwTemp;
 	}
 	//////////////////////////////////////////////
 	count++;
 	getData(1)->clear();
 	getData(1)->pushString("NeoplePack_Bill");
-	getData(1)->push((b8)0);
+	getData(1)->push((uchar)0);
 	getData(1)->push(count);
 	//////////////////////////////////////////////
 	getData(2)->release();
 	getData(2)->allocate(count*400);
 	for(i=0;i<count;i++){
-		getData(2)->push(content[i].get_imgoffset());
-		getData(2)->push(content[i].get_imgsize());
+		getData(2)->push(content[i].imgoffset);
+		getData(2)->push(content[i].imgsize);
 		s.allocate(512);
-		s.pushString(content[i].get_imgname());
+		s.pushString(content[i].imgname);
 		while(s.getLen()<256){
-			s.push((b8)0);
+			s.push((uchar)0);
 		}
 		s.nameMask();
 		getData(2)->pushStream(s, 256);
@@ -237,7 +237,7 @@ bool NPKobject::IMGinsert(i32 pos, IMGobject &io, const str &imgName){
 	getData(4)->insertStream(s, s.getLen(),offset);
 	return true;
 }
-bool NPKobject::IMGremove(i32 pos){
+bool NPKobject::IMGremove(long pos){
 	if(pos<0){
 		pos += count;
 	}
@@ -247,37 +247,37 @@ bool NPKobject::IMGremove(i32 pos){
 	if(pos>count-1){
 		pos = count-1;
 	}
-	i32 i;
+	long i;
 	stream s;
 	IMGindex ii;
-	b32 dword;
+	dword dwTemp;
 	ii = content[pos];
-	b64 offset = content[pos].get_imgoffset() - getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen();
+	longex offset = content[pos].imgoffset - getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen();
 	content.erase(content.begin() + pos);
 	for(i=0;i<content.size();i++){
-		dword = content[i].get_imgoffset();
-		dword -= 264;
+		dwTemp = content[i].imgoffset;
+		dwTemp -= 264;
 		if(i>=pos){
-			dword -= ii.get_imgsize();
+			dwTemp -= ii.imgsize;
 		}
-		content[i].set_imgoffset(dword);
+		content[i].imgoffset = dwTemp;
 	}
 	/////////////////////////////////////////////////////
 	count --;
 	getData(1)->clear();
 	getData(1)->pushString("NeoplePack_Bill");
-	getData(1)->push((b8)0);
+	getData(1)->push((uchar)0);
 	getData(1)->push(count);
 	/////////////////////////////////////////////////////
 	getData(2)->release();
 	getData(2)->allocate(count*400);
 	for(i=0;i<count;i++){
-		getData(2)->push(content[i].get_imgoffset());
-		getData(2)->push(content[i].get_imgsize());
+		getData(2)->push(content[i].imgoffset);
+		getData(2)->push(content[i].imgsize);
 		s.allocate(512);
-		s.pushString(content[i].get_imgname());
+		s.pushString(content[i].imgname);
 		while(s.getLen()<256){
-			s.push((b8)0);
+			s.push((uchar)0);
 		}
 		s.nameMask();
 		getData(2)->pushStream(s, 256);
@@ -289,10 +289,10 @@ bool NPKobject::IMGremove(i32 pos){
 	getData(3)->pushStream(s, 32);
 	s.release();
 	//////////////////////////////////////////////
-	getData(4)->deleteStream(offset, ii.get_imgsize());
+	getData(4)->deleteStream(offset, ii.imgsize);
 	return true;
 }
-bool NPKobject::IMGreplace(i32 pos, IMGobject &io){
+bool NPKobject::IMGreplace(long pos, IMGobject &io){
 	if(pos<0){
 		pos += count;
 	}
@@ -302,31 +302,31 @@ bool NPKobject::IMGreplace(i32 pos, IMGobject &io){
 	if(pos>count){
 		pos = count - 1;
 	}
-	i32 i;
+	long i;
 	stream s;
 	IMGindex ii;
-	b32 dword;
-	b64 offset = content[pos].get_imgoffset() - getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen();
+	dword dwTemp;
+	longex offset = content[pos].imgoffset - getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen();
 	ii = content[pos];
-	content[pos].set_imgsize(io.getSize());
+	content[pos].imgsize = io.getSize();
 	for(i=0;i<content.size();i++){
 		if(i>pos){
-			dword = content[i].get_imgoffset();
-			dword -= ii.get_imgsize();
-			dword += io.getSize();
-			content[i].set_imgoffset(dword);
+			dwTemp = content[i].imgoffset;
+			dwTemp -= ii.imgsize;
+			dwTemp += io.getSize();
+			content[i].imgoffset = dwTemp;
 		}
 	}
 	//////////////////////////////////////////////////
 	getData(2)->release();
 	getData(2)->allocate(count*400);
 	for(i=0;i<count;i++){
-		getData(2)->push(content[i].get_imgoffset());
-		getData(2)->push(content[i].get_imgsize());
+		getData(2)->push(content[i].imgoffset);
+		getData(2)->push(content[i].imgsize);
 		s.allocate(512);
-		s.pushString(content[i].get_imgname());
+		s.pushString(content[i].imgname);
 		while(s.getLen()<256){
-			s.push((b8)0);
+			s.push((uchar)0);
 		}
 		s.nameMask();
 		getData(2)->pushStream(s, 256);
@@ -339,11 +339,11 @@ bool NPKobject::IMGreplace(i32 pos, IMGobject &io){
 	s.release();
 	//////////////////////////////////////////////
 	io.make(s);
-	getData(4)->deleteStream(offset, ii.get_imgsize());
+	getData(4)->deleteStream(offset, ii.imgsize);
 	getData(4)->insertStream(s, s.getLen(), offset);
 	return true;
 }
-bool NPKobject::IMGrename(i32 pos, const str& newName){
+bool NPKobject::IMGrename(long pos, const str& newName){
 	if(pos<0){
 		pos += count;
 	}
@@ -353,18 +353,18 @@ bool NPKobject::IMGrename(i32 pos, const str& newName){
 	if(pos>count){
 		pos = count - 1;
 	}
-	i32 i;
+	long i;
 	stream s;
-	content[pos].set_imgname(newName);
+	content[pos].imgname = newName;
 	///////////////////////////////////////////////////////
 	getData(2)->clear();
 	for(i=0;i<count;i++){
-		getData(2)->push(content[i].get_imgoffset());
-		getData(2)->push(content[i].get_imgsize());
+		getData(2)->push(content[i].imgoffset);
+		getData(2)->push(content[i].imgsize);
 		s.allocate(512);
-		s.pushString(content[i].get_imgname());
+		s.pushString(content[i].imgname);
 		while(s.getLen()<256){
-			s.push((b8)0);
+			s.push((uchar)0);
 		}
 		s.nameMask();
 		getData(2)->pushStream(s, 256);
@@ -378,56 +378,66 @@ bool NPKobject::IMGrename(i32 pos, const str& newName){
 	///////////////////////////////////////////////
 	return true;
 }
-stream *NPKobject::getData(b8 _part){
-	stream *sList[] = {NULL, &data1, &data2, &data3, &data4};
+stream *NPKobject::getData(uchar _part){
+	stream *sList[] = {NULL, &dataHeader, &dataIndex, &dataCheckCode, &dataMain};
 	return sList[_part%5];
 }
-b64 NPKobject::getSize() const{
-	return data1.getLen()+data2.getLen()+data3.getLen()+data4.getLen();
+longex NPKobject::getSize() const{
+	return dataHeader.getLen()+dataIndex.getLen()+dataCheckCode.getLen()+dataMain.getLen();
 }
-bool NPKobject::IMGextract(b32 pos, IMGobject &obj){
+bool NPKobject::IMGextract(dword pos, IMGobject &obj){
 	if(pos<0 || pos>=count){
 		return false;
 	}
 	stream temps;
 	obj.derived = &content[pos];
-	getData(4)->ptMoveTo(content[pos].get_imgoffset()-getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen());
-	getData(4)->readStream(temps, (b64)(content[pos].get_imgsize()));
+	getData(4)->ptMoveTo(content[pos].imgoffset-getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen());
+	getData(4)->readStream(temps, (longex)(content[pos].imgsize));
 	return obj.load(temps);
 }
-bool NPKobject::IMGfind(const str &keyword, b32 &pos){
-	i32 i = 0;
+bool NPKobject::IMGfind(const str &keyword, dword &pos){
+	long i = 0;
 	for(i=0;i<count;i++){
-		if(content[i].get_imgname().find(keyword) != str::npos){
+		if(content[i].imgname.find(keyword) != str::npos){
 			pos = i;
 			return true;
 		}
 	}
 	return false;
 }
-bool NPKobject::IMGfind(const str &keyword, const str &nonkeyword, b32 &pos){
-	i32 i = 0;
+bool NPKobject::IMGfind(const str &keyword, const str &nonkeyword, dword &pos){
+	long i = 0;
 	for(i=0;i<count;i++){
-		if(content[i].get_imgname().find(keyword) != str::npos && content[i].get_imgname().find(nonkeyword) == str::npos){
+		if(content[i].imgname.find(keyword) != str::npos && content[i].imgname.find(nonkeyword) == str::npos){
 			pos = i;
 			return true;
 		}
 	}
 	return false;
 }
-bool NPKobject::extractIMGFile(i32 pos, str fileName){
+bool NPKobject::extractIMGFile(long pos, str fileName){
 	if(pos<0 || pos>=count){
 		return false;
 	}
 	stream temps;
-	getData(4)->ptMoveTo(content[pos].get_imgoffset()-getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen());
-	getData(4)->readStream(temps, (b64)(content[pos].get_imgsize()));
+	getData(4)->ptMoveTo(content[pos].imgoffset-getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen());
+	getData(4)->readStream(temps, (longex)(content[pos].imgsize));
 	return temps.makeFile(fileName);
 }
-i32 NPKobject::getVersion(i32 pos){
-	i32 r;
-	getData(4)->ptMoveTo(content[pos].get_imgoffset()-getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen());
+long NPKobject::getVersion(long pos){
+	long r;
+	getData(4)->ptMoveTo(content[pos].imgoffset-getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen());
 	getData(4)->ptMove(24);
+	getData(4)->read(r);
+	return r;
+}
+long NPKobject::getPaletteCount(long pos){
+	if(getVersion(pos) != 6){
+		return 0;
+	}
+	long r;
+	getData(4)->ptMoveTo(content[pos].imgoffset-getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen());
+	getData(4)->ptMove(32);
 	getData(4)->read(r);
 	return r;
 }
@@ -436,8 +446,8 @@ bool NPKobject::loadIndex(const str &fileName, std::vector<IMGversion> &versionL
 	stream s;
 	if(!data.loadFile(fileName))
 		return false;
-	b32 dword;
-	i32 i;
+	dword dword;
+	long i;
 	IMGindex ii;
 	data.ptMoveTo(0);
 	if(data.readString(16) != "NeoplePack_Bill"){
@@ -448,22 +458,22 @@ bool NPKobject::loadIndex(const str &fileName, std::vector<IMGversion> &versionL
 	content.clear();
 	for(i=0;i<count;i++){
 		data.read(dword);
-		ii.set_imgoffset(dword);
+		ii.imgoffset = dword;
 		data.read(dword);
-		ii.set_imgsize(dword);
+		ii.imgsize = dword;
 		s.allocate(256);
 		data.readStream(s, 256);
 		s.nameMask();
-		ii.set_imgname((str)s);
+		ii.imgname = (str)s;
 		s.release();
 		content.push_back(ii);
 	}
 	versionList.clear();
 	for(i=0;i<count;i++){
-		data.ptMoveTo(content[i].get_imgoffset());
+		data.ptMoveTo(content[i].imgoffset);
 		data.read(dword);
 		if(dword == 0x706f654e){
-			data.ptMoveTo(content[i].get_imgoffset()+24);
+			data.ptMoveTo(content[i].imgoffset+24);
 			data.read(dword);
 			versionList.push_back(IMGversion(dword));
 		}else{
@@ -509,54 +519,45 @@ bool IMGobject::load(stream &s){
 	bool result = true;
 	////////////////////////////////////////////
 	str sz;
-	i32 num1,num2;
-	b32 dword, i, j;
-	b64 ptStart, ptEnd;
+	long num1,num2;
+	dword dwTemp, i, j;
+	longex ptStart, ptEnd;
 	ptStart = 0;
 	s.ptMoveTo(0);
 	sz = s.readString(20);
-	//if(sz == "Neople Image File"){
-	//	KoishiExpand::OldIMGobject oio;
-	//	if(!oio.load(s)){
-	//		return false;
-	//	}
-	//	oio.make(*this);
-	//	oio.release();
-	//	return true;
-	//}
 	if(sz != "Neople Img File")
 		return false;
 	s.ptMoveTo(16);
-	s.read(dword);
-	indexSize = dword;
-	s.read(dword);
-	s.read(dword);
-	version = (IMGversion)dword;
+	s.read(dwTemp);
+	indexSize = dwTemp;
+	s.read(dwTemp);
+	s.read(dwTemp);
+	version = (IMGversion)dwTemp;
 	if(version != V2 && version != V4 && version != V5 && version != V6)
 		return false;
-	s.read(dword);
-	indexCount = dword;
+	s.read(dwTemp);
+	indexCount = dwTemp;
 	if(version == V5){
-		s.read(dword);
-		V5_TEXCount = dword;
-		s.read(dword);
-		V5_totalLength = dword;
+		s.read(dwTemp);
+		V5_TEXCount = dwTemp;
+		s.read(dwTemp);
+		V5_totalLength = dwTemp;
 	}
-	ptEnd = s.ptPos();
+	ptEnd = s.getPtPos();
 	s.ptMoveTo(ptStart);
 	getData(1)->allocate(100 + ptEnd - ptStart);
 	s.readStream(*getData(1), ptEnd - ptStart);
 	s.ptMoveTo(ptStart = ptEnd);
 	//////////////////////////////////////////
-	b32 clrCount = 0;
-	b32 pleCount = 0;
-	lcolor clrList;
+	dword clrCount = 0;
+	dword pleCount = 0;
+	colorList clrList;
 	if(version == V4 || version == V5){
 		s.read(clrCount);
 		clrList.clear();
 		for(i=0;i<clrCount;i++){
-			s.read(dword);
-			clrList.push_back(color(dword,INDEX_FMT_PALETTE));
+			s.read(dwTemp);
+			clrList.push_back(color(dwTemp,INDEX_FMT_PALETTE));
 		}
 		paletteData.clear();
 		paletteData.push(clrList);
@@ -567,13 +568,13 @@ bool IMGobject::load(stream &s){
 			s.read(clrCount);
 			clrList.clear();
 			for(j=0;j<clrCount;j++){
-				s.read(dword);
-				clrList.push_back(color(dword, INDEX_FMT_PALETTE));
+				s.read(dwTemp);
+				clrList.push_back(color(dwTemp, INDEX_FMT_PALETTE));
 			}
 			paletteData.push(clrList);
 		}
 	}
-	ptEnd = s.ptPos();
+	ptEnd = s.getPtPos();
 	s.ptMoveTo(ptStart);
 	getData(2)->allocate(1000 + ptEnd - ptStart);
 	s.readStream(*getData(2), ptEnd - ptStart);
@@ -583,24 +584,24 @@ bool IMGobject::load(stream &s){
 	TEXcontent.clear();
 	if(version == V5){
 		for(i=0;i<V5_TEXCount;i++){
-			s.read(dword);
-			di.set_reserved(dword);
-			s.read(dword);
-			di.set_format((colorFormat)dword);
-			s.read(dword);
-			di.set_ID(dword);
-			s.read(dword);
-			di.set_compressedLength(dword);
-			s.read(dword);
-			di.set_dataLength(dword);
-			s.read(dword);
-			di.set_width(dword & 0xFFFF);
-			s.read(dword);
-			di.set_height(dword & 0xFFFF);
+			s.read(dwTemp);
+			di.set_reserved(dwTemp);
+			s.read(dwTemp);
+			di.set_format((colorFormat)dwTemp);
+			s.read(dwTemp);
+			di.set_ID(dwTemp);
+			s.read(dwTemp);
+			di.set_compressedLength(dwTemp);
+			s.read(dwTemp);
+			di.set_dataLength(dwTemp);
+			s.read(dwTemp);
+			di.set_width(dwTemp & 0xFFFF);
+			s.read(dwTemp);
+			di.set_height(dwTemp & 0xFFFF);
 			TEXcontent.push_back(di);
 		}
 	}
-	ptEnd = s.ptPos();
+	ptEnd = s.getPtPos();
 	s.ptMoveTo(ptStart);
 	getData(3)->allocate(100 + ptEnd - ptStart);
 	s.readStream(*getData(3), ptEnd - ptStart);
@@ -610,9 +611,9 @@ bool IMGobject::load(stream &s){
 	PICcontent.clear();
 	if(version != V1){
 		for(i=0;i<indexCount;i++){
-			s.read(dword);
-			pi.set_format((colorFormat)dword);
-			if(dword == LINK){
+			s.read(dwTemp);
+			pi.set_format((colorFormat)dwTemp);
+			if(dwTemp == LINK){
 				s.read(num1);
 				pi.set_linkTo(num1);
 
@@ -627,46 +628,46 @@ bool IMGobject::load(stream &s){
 				pi.set_TEXpointRB(point(0,0));
 			}else{
 				pi.set_linkTo(-1);
-				s.read(dword);
-				pi.set_comp((compressType)dword);
-				if(dword == 0x05 || dword == 0x06){
+				s.read(dwTemp);
+				pi.set_comp((compressType)dwTemp);
+				if(dwTemp == 0x05 || dwTemp == 0x06){
 					s.read(num1);
 					s.read(num2);
 					pi.set_picSize(size(num1 & 0xFFFF, num2 & 0xFFFF));
-					s.read(dword);
-					pi.set_dataSize(dword);
+					s.read(dwTemp);
+					pi.set_dataSize(dwTemp);
 					s.read(num1);
 					s.read(num2);
-					pi.set_basePt(point(num1 & 0xFFFF, num2 & 0xFFFF));
+					pi.set_basePt(point(num1, num2));
 					s.read(num1);
 					s.read(num2);
-					pi.set_frmSize(size(num1 & 0xFFFF, num2 & 0xFFFF));
+					pi.set_frmSize(size(num1, num2));
 
 					pi.set_TEXusing(0);
 					pi.set_TEXpointLT(point(0,0));
 					pi.set_TEXpointRB(point(0,0));
-				}else if(dword == 0x07){
+				}else if(dwTemp == 0x07){
 					s.read(num1);
 					s.read(num2);
 					pi.set_picSize(size(num1 & 0xFFFF, num2 & 0xFFFF));
-					s.read(dword);
-					pi.set_dataSize(dword);
+					s.read(dwTemp);
+					pi.set_dataSize(dwTemp);
 					s.read(num1);
 					s.read(num2);
-					pi.set_basePt(point(num1 & 0xFFFF, num2 & 0xFFFF));
+					pi.set_basePt(point(num1, num2));
 					s.read(num1);
 					s.read(num2);
-					pi.set_frmSize(size(num1 & 0xFFFF, num2 & 0xFFFF));
-					s.read(dword);
-					s.read(dword);
-					pi.set_TEXusing(dword);
+					pi.set_frmSize(size(num1, num2));
+					s.read(dwTemp);
+					s.read(dwTemp);
+					pi.set_TEXusing(dwTemp);
 					s.read(num1);
 					s.read(num2);
 					pi.set_TEXpointLT(point(num1 & 0xFFFF,num2 & 0xFFFF));
 					s.read(num1);
 					s.read(num2);
 					pi.set_TEXpointRB(point(num1 & 0xFFFF,num2 & 0xFFFF));
-					s.read(dword);
+					s.read(dwTemp);
 				}else{
 					//NODEF
 				}
@@ -674,7 +675,7 @@ bool IMGobject::load(stream &s){
 			PICcontent.push_back(pi);
 		}
 	}
-	ptEnd = s.ptPos();
+	ptEnd = s.getPtPos();
 	s.ptMoveTo(ptStart);
 	getData(4)->allocate(100 + ptEnd - ptStart);
 	s.readStream(*getData(4), ptEnd - ptStart);
@@ -686,7 +687,7 @@ bool IMGobject::load(stream &s){
 		s.ptMoveTo(ptStart = ptStart + indexSize);
 	}
 	///////////////////////////////////////
-	b64 fsize = 0;
+	longex fsize = 0;
 	for(i=0;i<TEXcontent.size();i++){
 		fsize += TEXcontent[i].get_compressedLength();
 	}
@@ -698,12 +699,12 @@ bool IMGobject::load(stream &s){
 	return result;
 }
 bool IMGobject::make(stream &s){
-	b64 len1 = getData(1)->getLen();
-	b64 len2 = getData(2)->getLen();
-	b64 len3 = getData(3)->getLen();
-	b64 len4 = getData(4)->getLen();
-	b64 len5 = getData(5)->getLen();
-	b64 len6 = getData(6)->getLen();
+	longex len1 = getData(1)->getLen();
+	longex len2 = getData(2)->getLen();
+	longex len3 = getData(3)->getLen();
+	longex len4 = getData(4)->getLen();
+	longex len5 = getData(5)->getLen();
+	longex len6 = getData(6)->getLen();
 	s.allocate(len1 + len2 + len3 + len4 + len5 + len6 + 1000);
 	s.pushStream(*getData(1), len1);
 	s.pushStream(*getData(2), len2);
@@ -719,17 +720,17 @@ bool IMGobject::create(IMGversion ver){
 	release();
 	version = ver;
 	if(ver == V4 || ver == V5 || ver == V6){
-		lcolor clrList;
+		colorList clrList;
 		clrList.clear();
 		paletteData.push(clrList);
 	}
 	getData(1)->allocate(1024);
 	getData(1)->pushString("Neople Img File");
-	getData(1)->push((b8)0);
-	getData(1)->push((b32)(indexSize));
-	getData(1)->push((b32)0);
-	getData(1)->push((b32)(ver));
-	getData(1)->push((b32)(indexCount));
+	getData(1)->push((uchar)0);
+	getData(1)->push((dword)(indexSize));
+	getData(1)->push((dword)0);
+	getData(1)->push((dword)(ver));
+	getData(1)->push((dword)(indexCount));
 	if(ver == V5){
 		V5_totalLength = 44;
 		getData(1)->push(V5_TEXCount);
@@ -738,10 +739,10 @@ bool IMGobject::create(IMGversion ver){
 	//调色板数据
 	getData(2)->allocate(1024);
 	if(ver == V6){
-		getData(2)->push((b32)1);
+		getData(2)->push((dword)1);
 	}
 	if(ver == V4 || ver == V5 || ver == V6){
-		getData(2)->push((b32)0);
+		getData(2)->push((dword)0);
 	}
 	getData(3)->allocate(1024);
 	getData(4)->allocate(1024);
@@ -750,12 +751,12 @@ bool IMGobject::create(IMGversion ver){
 	return true;
 }
 bool IMGobject::release(){
-	data1.release();
-	data2.release();
-	data3.release();
-	data4.release();
-	data5.release();
-	data6.release();
+	dataHeader.release();
+	dataPalette.release();
+	dataIndexTexture.release();
+	dataIndexPicture.release();
+	dataTexture.release();
+	dataPicture.release();
 	derived = NULL;
 	version = VUDEF;
 	indexCount = 0;
@@ -767,7 +768,7 @@ bool IMGobject::release(){
 	PICcontent.clear();
 	return true;
 }
-bool IMGobject::PICgetInfo(i32 pos, PICinfo &info){
+bool IMGobject::PICgetInfo(long pos, PICinfo &info){
 	if(pos<0)
 		return false;
 	if(pos>=indexCount)
@@ -775,16 +776,63 @@ bool IMGobject::PICgetInfo(i32 pos, PICinfo &info){
 	info = PICcontent[pos];
 	return true;
 }
-bool IMGobject::PICgetInfoOffset(i32 pos, b64 &off){
+bool IMGobject::PICgetBound(long pos, long &left, long &right, long &top, long &bottom){
+	if(pos<0)
+		return false;
+	if(pos>=indexCount)
+		return false;
+	PICinfo info = PICcontent[pos];
+	left = info.basePt.X;
+	right = left + info.picSize.W - 1;
+	top = info.basePt.Y;
+	bottom = top + info.picSize.H - 1;
+	return true;
+}
+bool IMGobject::PICgetTotalBound(long &left, long &right, long &top, long &bottom){
+	left = 0;
+	right = 0;
+	top = 0;
+	bottom = 0;
+	bool origin = true;
+	for(long i = 0;i<indexCount;i++){
+		PICinfo pi;
+		PICgetInfo(i, pi);
+		if(pi.format != LINK && pi.picSize.area() != 1){
+			if(origin){
+				left = pi.basePt.X;
+				right = left + pi.picSize.W-1;
+				top = pi.basePt.Y;
+				bottom = top + pi.picSize.H-1;
+				origin = false;
+			}else{
+				if(pi.basePt.X < left){
+					left = pi.basePt.X;
+				}
+				if(pi.basePt.X + pi.picSize.W - 1 > right){
+					right = pi.basePt.X + pi.picSize.W - 1;
+				}
+				if(pi.basePt.Y < top){
+					top = pi.basePt.Y;
+				}
+				if(pi.basePt.Y + pi.picSize.H - 1 > bottom){
+					bottom = pi.basePt.Y + pi.picSize.H - 1;
+				}
+			}
+			
+		}
+	}
+	return !origin;
+}
+bool IMGobject::PICgetInfoOffset(long pos, longex &off){
 	if(pos<0)
 		return false;
 	if(pos>=indexCount)
 		return false;
 	off = 0;
-	for(i32 i=0;i<pos;i++){
-		if(PICcontent[i].get_format() == LINK){
+	for(long i=0;i<pos;i++){
+		if(PICcontent[i].format == LINK){
 			off += 8;
-		}else if(PICcontent[i].get_comp() <= COMP_ZLIB){
+		}else if(PICcontent[i].comp <= COMP_ZLIB){
 			//单索引模式
 			off += 36;
 		}else{
@@ -794,36 +842,36 @@ bool IMGobject::PICgetInfoOffset(i32 pos, b64 &off){
 	}
 	return true;
 }
-bool IMGobject::PICgetData(i32 pos, stream &s){
+bool IMGobject::PICgetData(long pos, stream &s){
 	if(pos<0)
 		return false;
 	if(pos>=indexCount)
 		return false;
-	b64 size = (b64)PICcontent[pos].get_dataSize();
-	b64 offset;
+	longex size = (longex)PICcontent[pos].dataSize;
+	longex offset;
 	if(size == 0)
 		return false;
 	if(!PICgetDataOffset(pos, offset))
 		return false;
-	data6.ptMoveTo(offset);
-	data6.readStream(s, size);
+	dataPicture.ptMoveTo(offset);
+	dataPicture.readStream(s, size);
 	return true;
 }
-bool IMGobject::PICgetDataOffset(i32 pos, b64 &off){
+bool IMGobject::PICgetDataOffset(long pos, longex &off){
 	if(pos<0)
 		return false;
 	if(pos>=indexCount)
 		return false;
-	i32 i;
+	long i;
 	off = 0;
 	for(i=0;i<pos;i++){
-		if(PICcontent[i].get_format() != LINK && PICcontent[i].get_comp() <= COMP_ZLIB){
-			off += (b64)PICcontent[i].get_dataSize();
+		if(PICcontent[i].format != LINK && PICcontent[i].comp <= COMP_ZLIB){
+			off += (longex)PICcontent[i].dataSize;
 		}
 	}
 	return true;
 }
-bool IMGobject::TEXgetInfo(i32 pos, TEXinfo &info){
+bool IMGobject::TEXgetInfo(long pos, TEXinfo &info){
 	if(pos<0)
 		return false;
 	if(pos>=V5_TEXCount)
@@ -831,24 +879,24 @@ bool IMGobject::TEXgetInfo(i32 pos, TEXinfo &info){
 	info = TEXcontent[pos];
 	return true;
 }
-bool IMGobject::TEXgetInfoOffset(i32 pos, b64 &off){
+bool IMGobject::TEXgetInfoOffset(long pos, longex &off){
 	if(pos<0)
 		return false;
 	if(pos>=V5_TEXCount)
 		return false;
 	off = 0;
-	for(i32 i=0;i<pos;i++){
+	for(long i=0;i<pos;i++){
 		off += 28;
 	}
 	return true;
 }
-bool IMGobject::TEXgetData(i32 pos, stream &s){
+bool IMGobject::TEXgetData(long pos, stream &s){
 	if(pos<0)
 		return false;
 	if(pos>=V5_TEXCount)
 		return false;
-	b64 offset;
-	b64 size = (b64)TEXcontent[pos].get_compressedLength();
+	longex offset;
+	longex size = (longex)TEXcontent[pos].compressedLength;
 	if(size == 0)
 		return false;
 	if(!TEXgetDataOffset(pos, offset))
@@ -857,30 +905,30 @@ bool IMGobject::TEXgetData(i32 pos, stream &s){
 	getData(5)->readStream(s, size);
 	return true;
 }
-bool IMGobject::TEXgetDataOffset(i32 pos, b64 &off){
+bool IMGobject::TEXgetDataOffset(long pos, longex &off){
 	if(pos<0)
 		return false;
 	if(pos>=V5_TEXCount)
 		return false;
-	i32 i;
+	long i;
 	off = 0;
 	for(i=0;i<pos;i++){
-		off += (b64)TEXcontent[i].get_compressedLength();
+		off += (longex)TEXcontent[i].get_compressedLength();
 	}
 	return true;
 }
-bool IMGobject::PICsetInfoPara(i32 pos, i32 term, void *pval){
+bool IMGobject::PICsetInfoPara(long pos, long term, void *pval){
 	//Term: 0. linkTo 1. basePoint 2.frameSize 3.DDSID 4.pointLT, 5.pointRB
 	if(pos<0)
 		return false;
 	if(pos>=indexCount)
 		return false;
-	i32 i = *(i32*)pval;
+	long i = *(long*)pval;
 	size sz = *(size*)pval;
 	point pt = *(point*)pval;
 	PICinfo pi;
 	TEXinfo di;
-	b64 off;
+	longex off;
 	PICgetInfo(pos, pi);
 	PICgetInfoOffset(pos, off);
 	if(pi.get_format() == LINK){
@@ -900,13 +948,13 @@ bool IMGobject::PICsetInfoPara(i32 pos, i32 term, void *pval){
 		switch(term){
 		case 1:
 			PICcontent[pos].set_basePt(pt);
-			getData(4)->modify(off+20, pt.get_X());
-			getData(4)->modify(off+24, pt.get_Y());
+			getData(4)->modify(off+20, pt.X);
+			getData(4)->modify(off+24, pt.Y);
 			return true;
 		case 2:
 			PICcontent[pos].set_frmSize(sz);
-			getData(4)->modify(off+28, sz.get_W());
-			getData(4)->modify(off+32, sz.get_H());
+			getData(4)->modify(off+28, sz.W);
+			getData(4)->modify(off+32, sz.H);
 			return true;
 		default:
 			return false;
@@ -916,13 +964,13 @@ bool IMGobject::PICsetInfoPara(i32 pos, i32 term, void *pval){
 		switch(term){
 		case 1:
 			PICcontent[pos].set_basePt(pt);
-			getData(4)->modify(off+20, pt.get_X());
-			getData(4)->modify(off+24, pt.get_Y());
+			getData(4)->modify(off+20, pt.X);
+			getData(4)->modify(off+24, pt.Y);
 			return true;
 		case 2:
 			PICcontent[pos].set_frmSize(sz);
-			getData(4)->modify(off+28, sz.get_W());
-			getData(4)->modify(off+32, sz.get_H());
+			getData(4)->modify(off+28, sz.W);
+			getData(4)->modify(off+32, sz.H);
 			return true;
 		case 3:
 			if(i<0 || i>=TEXcontent.size())
@@ -931,36 +979,36 @@ bool IMGobject::PICsetInfoPara(i32 pos, i32 term, void *pval){
 			getData(4)->modify(off+40, i);
 			return true;
 		case 4:
-			if(pt.get_X()<0 || pt.get_X()>pi.get_TEXpointLT().get_X()){
+			if(pt.X<0 || pt.X>pi.get_TEXpointLT().X){
 				return false;
 			}
-			if(pt.get_Y()<0 || pt.get_Y()>pi.get_TEXpointRB().get_Y()){
+			if(pt.Y<0 || pt.Y>pi.get_TEXpointRB().Y){
 				return false;
 			}
-			sz = size(pi.get_TEXpointRB().get_X()-pt.get_X(),
-				pi.get_TEXpointRB().get_Y()-pt.get_Y());
+			sz = size(pi.get_TEXpointRB().X-pt.X,
+				pi.get_TEXpointRB().Y-pt.Y);
 			PICcontent[pos].set_TEXpointLT(pt);
 			PICcontent[pos].set_picSize(sz);
-			getData(4)->modify(off+8,  sz.get_W());
-			getData(4)->modify(off+12, sz.get_H());
-			getData(4)->modify(off+44, pt.get_X());
-			getData(4)->modify(off+48, pt.get_Y());
+			getData(4)->modify(off+8,  sz.W);
+			getData(4)->modify(off+12, sz.H);
+			getData(4)->modify(off+44, pt.X);
+			getData(4)->modify(off+48, pt.Y);
 			return true;
 		case 5:
-			if(pt.get_X()>di.get_width()-1 || pt.get_X()<pi.get_TEXpointLT().get_X()){
+			if(pt.X>di.get_width()-1 || pt.X<pi.get_TEXpointLT().X){
 				return false;
 			}
-			if(pt.get_Y()>di.get_height()-1 || pt.get_Y()<pi.get_TEXpointLT().get_Y()){
+			if(pt.Y>di.get_height()-1 || pt.Y<pi.get_TEXpointLT().Y){
 				return false;
 			}
-			sz = size(pt.get_X()-pi.get_TEXpointLT().get_X(),
-				pt.get_Y()-pi.get_TEXpointLT().get_Y());
+			sz = size(pt.X-pi.get_TEXpointLT().X,
+				pt.Y-pi.get_TEXpointLT().Y);
 			PICcontent[pos].set_TEXpointRB(pt);
 			PICcontent[pos].set_picSize(sz);
-			getData(4)->modify(off+8, sz.get_W());
-			getData(4)->modify(off+12,sz.get_H());
-			getData(4)->modify(off+52, pt.get_X());
-			getData(4)->modify(off+56, pt.get_Y());
+			getData(4)->modify(off+8, sz.W);
+			getData(4)->modify(off+12,sz.H);
+			getData(4)->modify(off+52, pt.X);
+			getData(4)->modify(off+56, pt.Y);
 			return true;
 		default:
 			return false;
@@ -972,52 +1020,52 @@ bool IMGobject::PICpush(const PICinfo &info, const stream &s){
 	PICcontent.push_back(info);
 	stream sTemp;
 	sTemp.allocate(100);
-	sTemp.push((b32)info.get_format());
+	sTemp.push((dword)info.get_format());
 	if(info.get_format() == LINK){
 		sTemp.push(info.get_linkTo());
 		getData(4)->pushStream(sTemp, 8);
 	}else if(info.get_comp() <= COMP_ZLIB){
-		sTemp.push((b32)info.get_comp());
-		sTemp.push(info.get_picSize().get_W());
-		sTemp.push(info.get_picSize().get_H());
+		sTemp.push((dword)info.get_comp());
+		sTemp.push(info.get_picSize().W);
+		sTemp.push(info.get_picSize().H);
 		sTemp.push(info.get_dataSize());
-		sTemp.push(info.get_basePt().get_X());
-		sTemp.push(info.get_basePt().get_Y());
-		sTemp.push(info.get_frmSize().get_W());
-		sTemp.push(info.get_frmSize().get_H());
+		sTemp.push(info.get_basePt().X);
+		sTemp.push(info.get_basePt().Y);
+		sTemp.push(info.get_frmSize().W);
+		sTemp.push(info.get_frmSize().H);
 		getData(4)->pushStream(sTemp, 36);
 		getData(6)->pushStream(s, info.get_dataSize());
 	}else{
-		sTemp.push((b32)info.get_comp());
-		sTemp.push(info.get_picSize().get_W());
-		sTemp.push(info.get_picSize().get_H());
-		sTemp.push((b32)0);
-		sTemp.push(info.get_basePt().get_X());
-		sTemp.push(info.get_basePt().get_Y());
-		sTemp.push(info.get_frmSize().get_W());
-		sTemp.push(info.get_frmSize().get_H());
-		sTemp.push((b32)0);
+		sTemp.push((dword)info.get_comp());
+		sTemp.push(info.get_picSize().W);
+		sTemp.push(info.get_picSize().H);
+		sTemp.push((dword)0);
+		sTemp.push(info.get_basePt().X);
+		sTemp.push(info.get_basePt().Y);
+		sTemp.push(info.get_frmSize().W);
+		sTemp.push(info.get_frmSize().H);
+		sTemp.push((dword)0);
 		sTemp.push(info.get_TEXusing());
-		sTemp.push(info.get_TEXpointLT().get_X());
-		sTemp.push(info.get_TEXpointLT().get_Y());
-		sTemp.push(info.get_TEXpointRB().get_X());
-		sTemp.push(info.get_TEXpointRB().get_Y());
-		sTemp.push((b32)0);
+		sTemp.push(info.get_TEXpointLT().X);
+		sTemp.push(info.get_TEXpointLT().Y);
+		sTemp.push(info.get_TEXpointRB().X);
+		sTemp.push(info.get_TEXpointRB().Y);
+		sTemp.push((dword)0);
 		getData(4)->pushStream(sTemp, 64);
 	}
 	//////////////////////////////////////////////////////////////////
 	indexCount ++;
 	indexSize = getData(4)->getLen();
 	V5_totalLength = getSize();
-	getData(1)->modify(16, (i32)indexSize);
-	getData(1)->modify(28, (i32)indexCount);
+	getData(1)->modify(16, (long)indexSize);
+	getData(1)->modify(28, (long)indexCount);
 	if(version == V5){
 		V5_totalLength = getSize();
-		getData(1)->modify(36, (i32)V5_totalLength);
+		getData(1)->modify(36, (long)V5_totalLength);
 	}
 	return true;
 }
-bool IMGobject::PICinsert(i32 pos, const PICinfo &info, const stream &s){
+bool IMGobject::PICinsert(long pos, const PICinfo &info, const stream &s){
 	if(pos<0)
 		pos += (indexCount + 1);
 	if(pos<0)
@@ -1026,58 +1074,58 @@ bool IMGobject::PICinsert(i32 pos, const PICinfo &info, const stream &s){
 		return false;
 	if(pos == indexCount)
 		return PICpush(info, s);
-	b64 off1, off2;
+	longex off1, off2;
 	PICgetInfoOffset(pos, off1);
 	PICgetDataOffset(pos, off2);
 	PICcontent.insert(PICcontent.begin()+pos, info);
 	stream sTemp;
 	sTemp.allocate(100);
-	sTemp.push((b32)info.get_format());
+	sTemp.push((dword)info.get_format());
 	if(info.get_format() == LINK){
 		sTemp.push(info.get_linkTo());
 		getData(4)->insertStream(sTemp, 8, off1);
 	}else if(info.get_comp() <= COMP_ZLIB){
-		sTemp.push((b32)info.get_comp());
-		sTemp.push(info.get_picSize().get_W());
-		sTemp.push(info.get_picSize().get_H());
+		sTemp.push((dword)info.get_comp());
+		sTemp.push(info.get_picSize().W);
+		sTemp.push(info.get_picSize().H);
 		sTemp.push(info.get_dataSize());
-		sTemp.push(info.get_basePt().get_X());
-		sTemp.push(info.get_basePt().get_Y());
-		sTemp.push(info.get_frmSize().get_W());
-		sTemp.push(info.get_frmSize().get_H());
+		sTemp.push(info.get_basePt().X);
+		sTemp.push(info.get_basePt().Y);
+		sTemp.push(info.get_frmSize().W);
+		sTemp.push(info.get_frmSize().H);
 		getData(4)->insertStream(sTemp, 36, off1);
 		getData(6)->insertStream(s, info.get_dataSize(), off2);
 	}else{
-		sTemp.push((b32)info.get_comp());
-		sTemp.push(info.get_picSize().get_W());
-		sTemp.push(info.get_picSize().get_H());
-		sTemp.push((b32)0);
-		sTemp.push(info.get_basePt().get_X());
-		sTemp.push(info.get_basePt().get_Y());
-		sTemp.push(info.get_frmSize().get_W());
-		sTemp.push(info.get_frmSize().get_H());
-		sTemp.push((b32)0);
+		sTemp.push((dword)info.get_comp());
+		sTemp.push(info.get_picSize().W);
+		sTemp.push(info.get_picSize().H);
+		sTemp.push((dword)0);
+		sTemp.push(info.get_basePt().X);
+		sTemp.push(info.get_basePt().Y);
+		sTemp.push(info.get_frmSize().W);
+		sTemp.push(info.get_frmSize().H);
+		sTemp.push((dword)0);
 		sTemp.push(info.get_TEXusing());
-		sTemp.push(info.get_TEXpointLT().get_X());
-		sTemp.push(info.get_TEXpointLT().get_Y());
-		sTemp.push(info.get_TEXpointRB().get_X());
-		sTemp.push(info.get_TEXpointRB().get_Y());
-		sTemp.push((b32)0);
+		sTemp.push(info.get_TEXpointLT().X);
+		sTemp.push(info.get_TEXpointLT().Y);
+		sTemp.push(info.get_TEXpointRB().X);
+		sTemp.push(info.get_TEXpointRB().Y);
+		sTemp.push((dword)0);
 		getData(4)->insertStream(sTemp, 64, off1);
 	}
 	//////////////////////////////////////////////////////////////////
 	indexCount ++;
 	indexSize = getData(4)->getLen();
 	V5_totalLength = getSize();
-	getData(1)->modify(16, (i32)indexSize);
-	getData(1)->modify(28, (i32)indexCount);
+	getData(1)->modify(16, (long)indexSize);
+	getData(1)->modify(28, (long)indexCount);
 	if(version == V5){
 		V5_totalLength = getSize();
-		getData(1)->modify(36, (i32)V5_totalLength);
+		getData(1)->modify(36, (long)V5_totalLength);
 	}
 	return true;
 }
-bool IMGobject::PICremove(i32 pos){
+bool IMGobject::PICremove(long pos){
 	if(pos<0)
 		pos += indexCount;
 	if(pos<0)
@@ -1085,7 +1133,7 @@ bool IMGobject::PICremove(i32 pos){
 	if(pos>indexCount - 1)
 		return false;
 	PICinfo pi;
-	b64 off1,off2;
+	longex off1,off2;
 	PICgetInfo(pos, pi);
 	PICgetInfoOffset(pos, off1);
 	PICgetDataOffset(pos, off2);
@@ -1102,15 +1150,15 @@ bool IMGobject::PICremove(i32 pos){
 	indexCount --;
 	indexSize = getData(4)->getLen();
 	V5_totalLength = getSize();
-	getData(1)->modify(16, (i32)indexSize);
-	getData(1)->modify(28, (i32)indexCount);
+	getData(1)->modify(16, (long)indexSize);
+	getData(1)->modify(28, (long)indexCount);
 	if(version == V5){
 		V5_totalLength = getSize();
-		getData(1)->modify(36, (i32)V5_totalLength);
+		getData(1)->modify(36, (long)V5_totalLength);
 	}
 	return true;
 }
-bool IMGobject::PICreplace(i32 pos, const PICinfo &info, const stream &s){
+bool IMGobject::PICreplace(long pos, const PICinfo &info, const stream &s){
 	if(pos<0)
 		pos += indexCount;
 	if(pos<0)
@@ -1118,7 +1166,7 @@ bool IMGobject::PICreplace(i32 pos, const PICinfo &info, const stream &s){
 	if(pos>indexCount - 1)
 		return false;
 	PICinfo pi;			//旧PICinfo
-	b64 off1,off2;
+	longex off1,off2;
 	PICgetInfo(pos, pi);
 	PICgetInfoOffset(pos, off1);
 	PICgetDataOffset(pos, off2);
@@ -1135,50 +1183,50 @@ bool IMGobject::PICreplace(i32 pos, const PICinfo &info, const stream &s){
 	///////////////////////
 	stream sTemp;
 	sTemp.allocate(100);
-	sTemp.push((b32)info.get_format());
+	sTemp.push((dword)info.get_format());
 	if(info.get_format() == LINK){
 		sTemp.push(info.get_linkTo());
 		getData(4)->insertStream(sTemp, 8, off1);
 	}else if(info.get_comp() <= COMP_ZLIB){
-		sTemp.push((b32)info.get_comp());
-		sTemp.push(info.get_picSize().get_W());
-		sTemp.push(info.get_picSize().get_H());
+		sTemp.push((dword)info.get_comp());
+		sTemp.push(info.get_picSize().W);
+		sTemp.push(info.get_picSize().H);
 		sTemp.push(info.get_dataSize());
-		sTemp.push(info.get_basePt().get_X());
-		sTemp.push(info.get_basePt().get_Y());
-		sTemp.push(info.get_frmSize().get_W());
-		sTemp.push(info.get_frmSize().get_H());
+		sTemp.push(info.get_basePt().X);
+		sTemp.push(info.get_basePt().Y);
+		sTemp.push(info.get_frmSize().W);
+		sTemp.push(info.get_frmSize().H);
 		getData(4)->insertStream(sTemp, 36, off1);
 		getData(6)->insertStream(s, info.get_dataSize(), off2);
 	}else{
-		sTemp.push((b32)info.get_comp());
-		sTemp.push(info.get_picSize().get_W());
-		sTemp.push(info.get_picSize().get_H());
-		sTemp.push((b32)0);
-		sTemp.push(info.get_basePt().get_X());
-		sTemp.push(info.get_basePt().get_Y());
-		sTemp.push(info.get_frmSize().get_W());
-		sTemp.push(info.get_frmSize().get_H());
-		sTemp.push((b32)0);
+		sTemp.push((dword)info.get_comp());
+		sTemp.push(info.get_picSize().W);
+		sTemp.push(info.get_picSize().H);
+		sTemp.push((dword)0);
+		sTemp.push(info.get_basePt().X);
+		sTemp.push(info.get_basePt().Y);
+		sTemp.push(info.get_frmSize().W);
+		sTemp.push(info.get_frmSize().H);
+		sTemp.push((dword)0);
 		sTemp.push(info.get_TEXusing());
-		sTemp.push(info.get_TEXpointLT().get_X());
-		sTemp.push(info.get_TEXpointLT().get_Y());
-		sTemp.push(info.get_TEXpointRB().get_X());
-		sTemp.push(info.get_TEXpointRB().get_Y());
-		sTemp.push((b32)0);
+		sTemp.push(info.get_TEXpointLT().X);
+		sTemp.push(info.get_TEXpointLT().Y);
+		sTemp.push(info.get_TEXpointRB().X);
+		sTemp.push(info.get_TEXpointRB().Y);
+		sTemp.push((dword)0);
 		getData(4)->insertStream(sTemp, 64, off1);
 	}
 	///////////////////////////////////////////
 	indexSize = getData(4)->getLen();
 	V5_totalLength = getSize();
-	getData(1)->modify(16, (i32)indexSize);
+	getData(1)->modify(16, (long)indexSize);
 	if(version == V5){
 		V5_totalLength = getSize();
-		getData(1)->modify(36, (i32)V5_totalLength);
+		getData(1)->modify(36, (long)V5_totalLength);
 	}
 	return true;
 }
-bool IMGobject::PICextract(i32 pos, matrix &mat, i32 paletteID){
+bool IMGobject::PICextract(long pos, matrix &mat, long paletteID){
 	if(pos<0)
 		pos += indexCount;
 	if(pos<0)
@@ -1189,7 +1237,7 @@ bool IMGobject::PICextract(i32 pos, matrix &mat, i32 paletteID){
 		return false;
 	if(version == V6 && (paletteID < 0 || paletteID >= paletteData.getCount()))
 		return false;
-	i32 i;
+	long i;
 	PICinfo pi;
 	TEXinfo di;
 	stream sMid, sPic;
@@ -1204,11 +1252,11 @@ bool IMGobject::PICextract(i32 pos, matrix &mat, i32 paletteID){
 			sMid.uncompressData(sPic, pi.get_comp());
 			switch(version){
 			case V2:
-				mat.allocate(pi.get_picSize());
+				mat.create(pi.get_picSize());
 				mat.push(sPic, pi.get_format());
 				break;
 			case V4:
-				mat.allocate(pi.get_picSize());
+				mat.create(pi.get_picSize());
 				for(i=0;i<sPic.getLen();i++){
 					if(sPic[i]>=paletteData[0].size())
 						sPic[i] = 0;
@@ -1218,7 +1266,7 @@ bool IMGobject::PICextract(i32 pos, matrix &mat, i32 paletteID){
 			case V5:
 				if(sPic.getLen() == pi.get_picSize().area()){
 					//索引形式
-					mat.allocate(pi.get_picSize());
+					mat.create(pi.get_picSize());
 					for(i=0;i<sPic.getLen();i++){
 						if(sPic[i]>=paletteData[0].size())
 							sPic[i] = 0;
@@ -1226,12 +1274,12 @@ bool IMGobject::PICextract(i32 pos, matrix &mat, i32 paletteID){
 					}
 				}else{
 					//非索引形式
-					mat.allocate(pi.get_picSize());
+					mat.create(pi.get_picSize());
 					mat.push(sPic, pi.get_format());
 				}
 				break;
 			case V6:
-				mat.allocate(pi.get_picSize());
+				mat.create(pi.get_picSize());
 				for(i=0;i<sPic.getLen();i++){
 					if(sPic[i]>=paletteData[paletteID].size()){
 						sPic[i] = 0;
@@ -1250,203 +1298,109 @@ bool IMGobject::PICextract(i32 pos, matrix &mat, i32 paletteID){
 			}
 			matrix mTemp;
 			TEXextract(pi.get_TEXusing(),mTemp);
-			/*
-			TEXgetInfo(pi.get_TEXusing(), di);
-			TEXgetData(pi.get_TEXusing(), sMid);
-			sMid.uncompressData(sPic, pi.get_comp());
-			
-			if(di.get_format() > LINK){
-				KoishiDDS::DDS d(sPic);
-				d.uncompress(mTemp);
-			}else{
-				mTemp.allocate(di.get_height(), di.get_width());
-				mTemp.push(sPic, di.get_format());
-			}*/
-			mTemp.getSubMatrix(mat,
-				pi.get_TEXpointLT().get_Y(),
-				pi.get_TEXpointRB().get_Y(),
-				pi.get_TEXpointLT().get_X(),
-				pi.get_TEXpointRB().get_X()
+			mTemp.clip(mat,
+				pi.get_TEXpointLT().Y,
+				pi.get_TEXpointRB().Y,
+				pi.get_TEXpointLT().X,
+				pi.get_TEXpointRB().X
 			);
 		}
 	}
 	return true;
 }
 ///////////////////////////////////////////
-//
-//
-//		大改！！！！！！！！！
-//
-//
-///////////////////////////////////////////
-bool IMGobject::PICpreprocess(const matrix &mat, stream &s, PICinfo &info, colorFormat cf){
-	//依然不支持V6
-	if(version == V2){
-		if(cf == COLOR_UDEF){
+bool IMGobject::PICpreprocess(const matrix &mat, stream &s, PICinfo &info, colorFormat cf, long paletteID){
+	if(cf == COLOR_UDEF){
+		if(version == V2 || version == V5){
 			cf = ARGB8888;
 		}
-		if(cf == ARGB8888){
-			stream sTemp;
-			mat.make(sTemp, ARGB8888);
-			sTemp.compressData(s, COMP_ZLIB);
-			sTemp.release();
-			info.set_comp(COMP_ZLIB);
-			info.set_format(ARGB8888);
-			info.set_dataSize(s.getLen());
-			info.set_linkTo(-1);
-			info.set_picSize(size(mat.getColumnCount(), mat.getRowCount()));
-			return true;
-		}
-		if(cf == ARGB4444){
-			stream sTemp;
-			mat.make(sTemp, ARGB4444);
-			sTemp.compressData(s, COMP_ZLIB);
-			sTemp.release();
-			info.set_comp(COMP_ZLIB);
-			info.set_format(ARGB4444);
-			info.set_dataSize(s.getLen());
-			info.set_linkTo(-1);
-			info.set_picSize(size(mat.getColumnCount(), mat.getRowCount()));
-			return true;
-		}
-		if(cf == ARGB1555){
-			stream sTemp;
-			mat.make(sTemp, ARGB1555);
-			sTemp.compressData(s, COMP_ZLIB);
-			sTemp.release();
-			info.set_comp(COMP_ZLIB);
-			info.set_format(ARGB1555);
-			info.set_dataSize(s.getLen());
-			info.set_linkTo(-1);
-			info.set_picSize(size(mat.getColumnCount(), mat.getRowCount()));
-			return true;
-		}
-		return false;
-	}
-	if(version == V4){
-		if(cf == COLOR_UDEF){
+		if(version == V4 || version == V6){
 			cf = INDEX_FMT_PALETTE;
 		}
-		if(cf == INDEX_FMT_PALETTE){
-			i32 i;
-			lcolor clrList;
-			stream sTemp;
-			mat.getElemCountList(clrList);
-			if(!paletteData.joinWith(clrList)){
-				//调色板溢出
-				return false;
-			}
-			getData(2)->release();
-			paletteData.tinyMake(*getData(2));
-			sTemp.allocate(mat.getElemCount());
-			for(i=0;i<mat.getElemCount();i++){
-				sTemp.push((b8)paletteData.findColor(mat.getElem(i)));
-			}
-			sTemp.compressData(s, COMP_ZLIB);
-			sTemp.release();
-			info.set_comp(COMP_ZLIB);
-			info.set_format(ARGB1555);
-			info.set_dataSize(s.getLen());
-			info.set_linkTo(-1);
-			info.set_picSize(size(mat.getColumnCount(), mat.getRowCount()));
-			return true;
-		}
-		return false;
 	}
-	if(version == V5){
-		if(cf == COLOR_UDEF){
-			cf = ARGB8888;
-		}
-		if(cf == ARGB8888){
-			stream sTemp;
-			mat.make(sTemp, ARGB8888);
-			sTemp.compressData(s, COMP_ZLIB);
-			sTemp.release();
-			info.set_comp(COMP_ZLIB);
-			info.set_format(ARGB8888);
-			info.set_dataSize(s.getLen());
-			info.set_linkTo(-1);
-			info.set_picSize(size(mat.getColumnCount(), mat.getRowCount()));
-			return true;
-		}
-		if(cf == ARGB4444){
-			stream sTemp;
-			mat.make(sTemp, ARGB4444);
-			sTemp.compressData(s, COMP_ZLIB);
-			sTemp.release();
-			info.set_comp(COMP_ZLIB);
-			info.set_format(ARGB4444);
-			info.set_dataSize(s.getLen());
-			info.set_linkTo(-1);
-			info.set_picSize(size(mat.getColumnCount(), mat.getRowCount()));
-			return true;
-		}
-		if(cf == ARGB1555){
-			stream sTemp;
-			mat.make(sTemp, ARGB1555);
-			sTemp.compressData(s, COMP_ZLIB);
-			sTemp.release();
-			info.set_comp(COMP_ZLIB);
-			info.set_format(ARGB1555);
-			info.set_dataSize(s.getLen());
-			info.set_linkTo(-1);
-			info.set_picSize(size(mat.getColumnCount(), mat.getRowCount()));
-			return true;
-		}
-		if(cf == INDEX_FMT_PALETTE){
-			i32 i;
-			lcolor clrList;
-			stream sTemp;
-			mat.getElemCountList(clrList);
-			if(!paletteData.joinWith(clrList)){
-				//调色板溢出
-				return false;
+	if(cf == ARGB8888){
+		stream sTemp;
+		mat.make(sTemp, ARGB8888);
+		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.release();
+		info.set_comp(COMP_ZLIB);
+		info.set_format(ARGB8888);
+		info.set_dataSize(s.getLen());
+		info.set_linkTo(-1);
+		info.set_picSize(size(mat.getWidth(), mat.getHeight()));
+		return true;
+	}
+	if(cf == ARGB4444){
+		stream sTemp;
+		mat.make(sTemp, ARGB4444);
+		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.release();
+		info.set_comp(COMP_ZLIB);
+		info.set_format(ARGB4444);
+		info.set_dataSize(s.getLen());
+		info.set_linkTo(-1);
+		info.set_picSize(size(mat.getWidth(), mat.getHeight()));
+		return true;
+	}
+	if(cf == ARGB1555){
+		stream sTemp;
+		mat.make(sTemp, ARGB1555);
+		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.release();
+		info.set_comp(COMP_ZLIB);
+		info.set_format(ARGB1555);
+		info.set_dataSize(s.getLen());
+		info.set_linkTo(-1);
+		info.set_picSize(size(mat.getWidth(), mat.getHeight()));
+		return true;
+	}
+	if(cf == INDEX_FMT_PALETTE){
+		stream sTemp;
+		sTemp.allocate(mat.getElemCount());
+		for(long i = 0;i<mat.getElemCount();i++){
+			if(paletteID >= paletteData.getCount() || paletteData[paletteID].size() == 0){
+				sTemp.push((uchar)0);
+				continue;
 			}
-			getData(2)->release();
-			paletteData.tinyMake(*getData(2));
-			sTemp.allocate(mat.getElemCount());
-			for(i=0;i<mat.getElemCount();i++){
-				sTemp.push((b8)paletteData.findColor(mat.getElem(i)));
-			}
-			sTemp.compressData(s, COMP_ZLIB);
-			sTemp.release();
-			info.set_comp(COMP_ZLIB);
-			info.set_format(ARGB1555);
-			info.set_dataSize(s.getLen());
-			info.set_linkTo(-1);
-			info.set_picSize(size(mat.getColumnCount(), mat.getRowCount()));
-			return true;
+			sTemp.push((uchar)paletteData.matchColor(mat.getElem(i)));
 		}
-		if(cf == DDS_DXT5){
-			//效果很差
-			stream sTemp;
-			KoishiDDS::DDS d;
-			d.compress(mat);
-			d.make(sTemp);
-			sTemp.compressData(s, COMP_ZLIB);
-			sTemp.release();
-			info.set_format(DDS_DXT5);
-			info.set_comp(COMP_ZLIB);
-			info.set_dataSize(s.getLen());
-			info.set_linkTo(-1);
-			info.set_picSize(size(d.getHeader()->width,d.getHeader()->height));
-			sTemp.release();
-			return true;
-		}
-		return false;
+		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.release();
+		info.set_comp(COMP_ZLIB);
+		info.set_format(ARGB1555);
+		info.set_dataSize(s.getLen());
+		info.set_linkTo(-1);
+		info.set_picSize(size(mat.getWidth(), mat.getHeight()));
+		return true;
+	}
+	if(cf == DDS_DXT5){
+		//效果很差
+		stream sTemp;
+		KoishiDDS::DDS d;
+		d.compress(mat);
+		d.make(sTemp);
+		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.release();
+		info.set_format(DDS_DXT5);
+		info.set_comp(COMP_ZLIB);
+		info.set_dataSize(s.getLen());
+		info.set_linkTo(-1);
+		info.set_picSize(size(d.getHeader()->width,d.getHeader()->height));
+		sTemp.release();
+		return true;
 	}
 	return false;
 }
-bool IMGobject::PICextractIndexMatrix(i32 pos, matrix &mat){
+bool IMGobject::PICextractIndexMatrix(long pos, matrix &mat){
 	if(pos<0)
 		pos += indexCount;
 	if(pos<0)
 		return false;
 	if(pos>indexCount - 1)
 		return false;
-	if(version == V2)
+	if(version != V4 && version != V5 && version != V6)
 		return false;
-	i32 i;
+	long i;
 	PICinfo pi;
 	stream sMid, sPic;
 	PICgetInfo(pos, pi);
@@ -1459,7 +1413,7 @@ bool IMGobject::PICextractIndexMatrix(i32 pos, matrix &mat){
 		sMid.uncompressData(sPic, pi.get_comp());
 		//解压后索引矩阵的长度与宽×高必须一致
 		if(sPic.getLen() == pi.get_picSize().area()){
-			mat.allocate(pi.get_picSize());
+			mat.create(pi.get_picSize());
 			for(i=0;i<sPic.getLen();i++){
 				mat.push(color(sPic[i],0,0,0));
 			}
@@ -1477,11 +1431,11 @@ bool IMGobject::PICextractIndexMatrix(i32 pos, matrix &mat){
 	return true;
 }
 bool IMGobject::PICpreprocessIndexMatrix(const matrix &mat, stream &s, PICinfo &info){
-	i32 i;
+	long i;
 	stream sTemp;
 	sTemp.allocate(mat.getElemCount());
 	for(i=0;i<mat.getElemCount();i++){
-		sTemp.push(mat.getElem(i).get_A());
+		sTemp.push(mat.getElem(i).A);
 	}
 	sTemp.compressData(s, COMP_ZLIB);
 	sTemp.release();
@@ -1489,14 +1443,14 @@ bool IMGobject::PICpreprocessIndexMatrix(const matrix &mat, stream &s, PICinfo &
 	info.set_format(ARGB1555);
 	info.set_dataSize(s.getLen());
 	info.set_linkTo(-1);
-	info.set_picSize(size(mat.getColumnCount(), mat.getRowCount()));
+	info.set_picSize(size(mat.getWidth(), mat.getHeight()));
 	return true;
 }
 bool IMGobject::PICempty(stream &s, PICinfo &info){
 	switch(version){
 	case V2:
 		s.allocate(4);
-		s.push((b32)0);
+		s.push((dword)0);
 		info.set_comp(COMP_NONE);
 		info.set_format(ARGB8888);
 		info.set_dataSize(s.getLen());
@@ -1505,7 +1459,7 @@ bool IMGobject::PICempty(stream &s, PICinfo &info){
 		return true;
 	case V4:
 		s.allocate(1);
-		s.push((b8)0);
+		s.push((uchar)0);
 		info.set_comp(COMP_NONE);
 		info.set_format(ARGB1555);
 		info.set_dataSize(s.getLen());
@@ -1514,7 +1468,7 @@ bool IMGobject::PICempty(stream &s, PICinfo &info){
 		return true;
 	case V5:
 		s.allocate(4);
-		s.push((b32)0);
+		s.push((dword)0);
 		info.set_comp(COMP_NONE);
 		info.set_format(ARGB8888);
 		info.set_dataSize(s.getLen());
@@ -1523,7 +1477,7 @@ bool IMGobject::PICempty(stream &s, PICinfo &info){
 		return true;
 	case V6:
 		s.allocate(1);
-		s.push((b8)0);
+		s.push((uchar)0);
 		info.set_comp(COMP_NONE);
 		info.set_format(ARGB1555);
 		info.set_dataSize(s.getLen());
@@ -1540,7 +1494,7 @@ bool IMGobject::TEXpush(const TEXinfo &info, const stream &s){
 	stream sTemp;
 	sTemp.allocate(100);
 	sTemp.push(info.get_reserved());
-	sTemp.push((b32)info.get_format());
+	sTemp.push((dword)info.get_format());
 	sTemp.push(info.get_ID());
 	sTemp.push(info.get_compressedLength());
 	sTemp.push(info.get_dataLength());
@@ -1551,11 +1505,11 @@ bool IMGobject::TEXpush(const TEXinfo &info, const stream &s){
 	//////////////////////////////////////////////////////////////////
 	V5_TEXCount ++;
 	V5_totalLength = getSize();
-	getData(1)->modify(32, (i32)V5_TEXCount);
-	getData(1)->modify(36, (i32)V5_totalLength);
+	getData(1)->modify(32, (long)V5_TEXCount);
+	getData(1)->modify(36, (long)V5_totalLength);
 	return true;
 }
-bool IMGobject::TEXinsert(i32 pos, const TEXinfo &info, const stream &s){
+bool IMGobject::TEXinsert(long pos, const TEXinfo &info, const stream &s){
 	if(version != V5)
 		return false;
 	if(pos<0)
@@ -1566,14 +1520,14 @@ bool IMGobject::TEXinsert(i32 pos, const TEXinfo &info, const stream &s){
 		return false;
 	if(pos == V5_TEXCount)
 		return TEXpush(info, s);
-	b64 off1, off2;
+	longex off1, off2;
 	TEXgetInfoOffset(pos, off1);
 	TEXgetDataOffset(pos, off2);
 	TEXcontent.insert(TEXcontent.begin()+pos, info);
 	stream sTemp;
 	sTemp.allocate(100);
 	sTemp.push(info.get_reserved());
-	sTemp.push((b32)info.get_format());
+	sTemp.push((dword)info.get_format());
 	sTemp.push(info.get_ID());
 	sTemp.push(info.get_compressedLength());
 	sTemp.push(info.get_dataLength());
@@ -1584,11 +1538,11 @@ bool IMGobject::TEXinsert(i32 pos, const TEXinfo &info, const stream &s){
 	//////////////////////////////////////////////////////////////////
 	V5_TEXCount ++;
 	V5_totalLength = getSize();
-	getData(1)->modify(32, (i32)V5_TEXCount);
-	getData(1)->modify(36, (i32)V5_totalLength);
+	getData(1)->modify(32, (long)V5_TEXCount);
+	getData(1)->modify(36, (long)V5_totalLength);
 	return true;
 }
-bool IMGobject::TEXremove(i32 pos){
+bool IMGobject::TEXremove(long pos){
 	if(version != V5)
 		return false;
 	if(pos<0)
@@ -1598,7 +1552,7 @@ bool IMGobject::TEXremove(i32 pos){
 	if(pos>V5_TEXCount-1)
 		return false;
 	TEXinfo di;
-	b64 off1,off2;
+	longex off1,off2;
 	TEXgetInfo(pos, di);
 	TEXgetInfoOffset(pos, off1);
 	TEXgetDataOffset(pos, off2);
@@ -1608,11 +1562,11 @@ bool IMGobject::TEXremove(i32 pos){
 	//////////////////////////////////////////////////////////////////
 	V5_TEXCount --;
 	V5_totalLength = getSize();
-	getData(1)->modify(32, (i32)V5_TEXCount);
-	getData(1)->modify(36, (i32)V5_totalLength);
+	getData(1)->modify(32, (long)V5_TEXCount);
+	getData(1)->modify(36, (long)V5_totalLength);
 	return true;
 }
-bool IMGobject::TEXreplace(i32 pos, const TEXinfo &info, const stream &s){
+bool IMGobject::TEXreplace(long pos, const TEXinfo &info, const stream &s){
 	if(version != V5)
 		return false;
 	if(pos<0)
@@ -1622,7 +1576,7 @@ bool IMGobject::TEXreplace(i32 pos, const TEXinfo &info, const stream &s){
 	if(pos>V5_TEXCount-1)
 		return false;
 	TEXinfo di;
-	b64 off1,off2;
+	longex off1,off2;
 	TEXgetInfo(pos, di);
 	TEXgetInfoOffset(pos, off1);
 	TEXgetDataOffset(pos, off2);
@@ -1632,7 +1586,7 @@ bool IMGobject::TEXreplace(i32 pos, const TEXinfo &info, const stream &s){
 	stream sTemp;
 	sTemp.allocate(100);
 	sTemp.push(info.get_reserved());
-	sTemp.push((b32)info.get_format());
+	sTemp.push((dword)info.get_format());
 	sTemp.push(info.get_ID());
 	sTemp.push(info.get_compressedLength());
 	sTemp.push(info.get_dataLength());
@@ -1642,11 +1596,11 @@ bool IMGobject::TEXreplace(i32 pos, const TEXinfo &info, const stream &s){
 	getData(5)->insertStream(s, info.get_compressedLength(), off2);
 	////////////////////////////////////////
 	V5_totalLength = getSize();
-	getData(1)->modify(32, (i32)V5_TEXCount);
-	getData(1)->modify(36, (i32)V5_totalLength);
+	getData(1)->modify(32, (long)V5_TEXCount);
+	getData(1)->modify(36, (long)V5_totalLength);
 	return true;
 }
-bool IMGobject::TEXextract(i32 pos, matrix &mat){
+bool IMGobject::TEXextract(long pos, matrix &mat){
 	if(version != V5)
 		return false;
 	if(pos<0)
@@ -1666,7 +1620,7 @@ bool IMGobject::TEXextract(i32 pos, matrix &mat){
 	}else{
 		if(sPic.getLen() == di.get_height()*di.get_width()){
 			//索引形式
-			mat.allocate(di.get_height(), di.get_width());
+			mat.create(di.get_height(), di.get_width());
 			for(int i=0;i<sPic.getLen();i++){
 				if(sPic[i]>=paletteData[0].size()){
 					sPic[i] = 0;
@@ -1674,7 +1628,7 @@ bool IMGobject::TEXextract(i32 pos, matrix &mat){
 				mat.push(paletteData[0][sPic[i]]);
 			}
 		}else{
-			mat.allocate(di.get_height(), di.get_width());
+			mat.create(di.get_height(), di.get_width());
 			mat.push(sPic, di.get_format());
 		}
 	}
@@ -1708,8 +1662,8 @@ bool IMGobject::TEXpreprocess(const matrix &mat, stream &s, TEXinfo &info, color
 		info.set_format(ARGB8888);
 		info.set_dataLength(sTemp.getLen());
 		info.set_compressedLength(s.getLen());
-		info.set_width(mat.getColumnCount());
-		info.set_height(mat.getRowCount());
+		info.set_width(mat.getWidth());
+		info.set_height(mat.getHeight());
 		info.set_ID(V5_TEXCount);
 		sTemp.release();
 		return true;
@@ -1722,8 +1676,8 @@ bool IMGobject::TEXpreprocess(const matrix &mat, stream &s, TEXinfo &info, color
 		info.set_format(ARGB4444);
 		info.set_dataLength(sTemp.getLen());
 		info.set_compressedLength(s.getLen());
-		info.set_width(mat.getColumnCount());
-		info.set_height(mat.getRowCount());
+		info.set_width(mat.getWidth());
+		info.set_height(mat.getHeight());
 		info.set_ID(V5_TEXCount);
 		sTemp.release();
 		return true;
@@ -1732,45 +1686,40 @@ bool IMGobject::TEXpreprocess(const matrix &mat, stream &s, TEXinfo &info, color
 		stream sTemp;
 		mat.make(sTemp, ARGB1555);
 		sTemp.compressData(s, COMP_ZLIB);
-		info.set_reserved(1);
-		info.set_format(ARGB1555);
-		info.set_dataLength(sTemp.getLen());
-		info.set_compressedLength(s.getLen());
-		info.set_width(mat.getColumnCount());
-		info.set_height(mat.getRowCount());
+		info.reserved = 1;
+		info.format = ARGB1555;
+		info.dataLength = sTemp.getLen();
+		info.compressedLength = s.getLen();
+		info.set_width(mat.getWidth());
+		info.set_height(mat.getHeight());
 		info.set_ID(V5_TEXCount);
 		sTemp.release();
 		return true;
 	}
 	if(cf == INDEX_FMT_PALETTE){
-		i32 i;
-		lcolor clrList;
 		stream sTemp;
-		mat.getElemCountList(clrList);
-		if(!paletteData.joinWith(clrList)){
-			//调色板溢出
-			return false;
-		}
-		getData(2)->release();
-		paletteData.tinyMake(*getData(2));
 		sTemp.allocate(mat.getElemCount());
-		for(i=0;i<mat.getElemCount();i++){
-			sTemp.push((b8)paletteData.findColor(mat.getElem(i)));
+		for(long i = 0;i<mat.getElemCount();i++){
+			if(paletteData.getCount() == 0 || paletteData[0].size() == 0){
+				sTemp.push((uchar)0);
+				continue;
+			}
+			sTemp.push((uchar)paletteData.matchColor(mat.getElem(i)));
 		}
 		sTemp.compressData(s, COMP_ZLIB);
-		info.set_reserved(1);
-		info.set_format(ARGB1555);
-		info.set_dataLength(sTemp.getLen());
-		info.set_compressedLength(s.getLen());
-		info.set_width(mat.getColumnCount());
-		info.set_height(mat.getRowCount());
-		info.set_ID(V5_TEXCount);
+		info.reserved = 1;
+		info.format = ARGB1555;
+		info.dataLength = sTemp.getLen();
+		info.compressedLength = s.getLen();
+		info.width = mat.getWidth();
+		info.height = mat.getHeight();
+		info.ID = V5_TEXCount;
 		sTemp.release();
 		return true;
 	}
 	return false;
 }
-bool IMGobject::CLRpush(const color &clr, i32 paletteID){
+bool IMGobject::CLRpush(const color &clr, long paletteID){
 	if(version != V4 && version != V5 && version != V6)
 		return false;
 	if(version == V6 && (paletteID < 0 || paletteID >= paletteData.getCount()))
@@ -1785,7 +1734,7 @@ bool IMGobject::CLRpush(const color &clr, i32 paletteID){
 		paletteData.bigMake(*getData(2));
 	return true;
 }
-bool IMGobject::CLRinsert(i32 pos, const color &clr, i32 paletteID){
+bool IMGobject::CLRinsert(long pos, const color &clr, long paletteID){
 	if(version != V4 && version != V5 && version != V6)
 		return false;
 	if(version == V6 && (paletteID < 0 || paletteID >= paletteData.getCount()))
@@ -1808,7 +1757,7 @@ bool IMGobject::CLRinsert(i32 pos, const color &clr, i32 paletteID){
 		paletteData.bigMake(*getData(2));
 	return true;
 }
-bool IMGobject::CLRremove(i32 pos, i32 paletteID){
+bool IMGobject::CLRremove(long pos, long paletteID){
 	if(version != V4 && version != V5 && version != V6)
 		return false;
 	if(version == V6 && (paletteID < 0 || paletteID >= paletteData.getCount()))
@@ -1821,6 +1770,8 @@ bool IMGobject::CLRremove(i32 pos, i32 paletteID){
 		return false;
 	if(pos>paletteData[paletteID].size() - 1)
 		return false;
+	if(paletteData[paletteID].size() == 0)
+		return false;
 	paletteData[paletteID].erase(paletteData[paletteID].begin()+pos);
 	getData(2)->release();
 	if(version != V6)
@@ -1829,7 +1780,7 @@ bool IMGobject::CLRremove(i32 pos, i32 paletteID){
 		paletteData.bigMake(*getData(2));
 	return true;
 }
-bool IMGobject::CLRreplace(i32 pos, const color &clr, i32 paletteID){
+bool IMGobject::CLRreplace(long pos, const color &clr, long paletteID){
 	if(version != V4 && version != V5 && version != V6)
 		return false;
 	if(version == V6 && (paletteID < 0 || paletteID >= paletteData.getCount()))
@@ -1848,114 +1799,244 @@ bool IMGobject::CLRnewPalette(){
 	if(version != V6){
 		return false;
 	}
-	lcolor clrList;
+	colorList clrList;
 	clrList.clear();
 	paletteData.push(clrList);
 	getData(2)->release();
 	paletteData.bigMake(*getData(2));
 	return true;
 }
-//newIO: 新IO的引用
-//newVersion: 新版本
-//cf: 新格式
-//paletteID: 原IO为V6时，转换为哪个调色板
-//indexPara: 量化参数，最高位为1时采用位量化，否则采用平均量化，低7位为量化级别，为0时不采用量化
-bool IMGobject::convertTo(IMGobject &newIO, IMGversion newVersion, colorFormat cf, i32 paletteID, b8 indexPara, bool makeTexture){
-	i32 i;
-	PICinfo pi;
-	TEXinfo di;
-	bool result = true;
-	matrix mat;
-	stream s;
-	newIO.create(newVersion);
-	if(version == newVersion){
-		newIO = *this;
-		return true;
-	}else if(version == V4 && newVersion == V6){
-		for(i=0;i<indexCount;i++){
-			PICgetInfo(i,pi);
-			if(pi.get_format() == LINK){
-				result &= newIO.PICpush(pi,NULL);
+bool IMGobject::CLRdeletePalette(long paletteID){
+	if(version != V6){
+		return false;
+	}
+	if(paletteID >= paletteData.getCount() || paletteID < 0){
+		return false;
+	}
+	paletteData.remove(paletteID);
+	getData(2)->release();
+	paletteData.bigMake(*getData(2));
+	return true;
+}
+//转版本2方案
+//将既定贴图完全提取出矩阵，然后转成ARGB1555/4444/8888形式
+//若原版本为6，则分拆成若干，存入newIOList
+bool IMGobject::convertToV2(std::vector<IMGobject> &newIOList, colorFormat cf){
+	newIOList.clear();
+	long paletteCount = 1;
+	if(version == V6)
+		paletteCount = paletteData.getCount();
+	for(long paletteID = 0;paletteID < paletteCount; paletteID ++){
+		IMGobject newIO;
+		newIO.create(V2);
+		for(long i = 0;i<indexCount;i++){
+			PICinfo pi;
+			PICgetInfo(i, pi);
+			if(pi.format == LINK){
+				newIO.PICpush(pi, NULL);
 			}else{
-				result &= PICgetData(i, s);
-				result &= newIO.PICpush(pi, s);
-				s.release();
+				matrix mPic;
+				stream sPic;
+				PICextract(i, mPic, paletteID);
+				newIO.PICpreprocess(mPic, sPic, pi, cf);
+				newIO.PICpush(pi, sPic);
+				mPic.destory();
+				sPic.release();
 			}
 		}
+		newIOList.push_back(newIO);
+		newIO.release();
+	}
+	return true;
+}
+//转版本4方案
+//若原版本为4或6，则输入调色板无效(除非设置useOriginPalette为false)
+//若原版本为4，则无视输入调色板直接将原IMG存入newIOList
+//若原版本为6，则无视输入调色板，并将原版本调色板分拆后，保留贴图数据，存入newIOList
+//若原版本为其他版本，则提取出矩阵，然后与输入颜色版匹配，存入newIOList
+bool IMGobject::convertToV4(std::vector<IMGobject> &newIOList, colorList useColorPalette, bool useOriginPalette){
+	newIOList.clear();
+	long paletteCount = 1;
+	if(version == V6)
+		paletteCount = paletteData.getCount();
+	for(long paletteID = 0;paletteID < paletteCount; paletteID ++){
+		IMGobject newIO;
+		if(useOriginPalette && version == V4){
+			newIO =*this;
+		}else if(useOriginPalette && version == V6){
+			newIO.create(V4);
+			newIO.paletteData.clear();
+			newIO.paletteData.push(paletteData[paletteID]);
+			newIO.getData(2)->release();
+			newIO.paletteData.tinyMake(*(newIO.getData(2)));
+			//复制贴图内容
+			for(long i = 0;i<indexCount;i++){
+				PICinfo pi;
+				PICgetInfo(i, pi);
+				if(pi.format == LINK){
+					newIO.PICpush(pi, NULL);
+				}else{
+					stream sPic;
+					PICgetData(i, sPic);
+					newIO.PICpush(pi, sPic);
+					sPic.release();
+				}
+			}
+		}else{
+			//非索引转V4，使用既定调色板
+			newIO.create(V4);
+			newIO.paletteData.clear();
+			newIO.paletteData.push(useColorPalette);
+			newIO.getData(2)->release();
+			newIO.paletteData.tinyMake(*(newIO.getData(2)));
+			//将贴图内容与调色板比较匹配
+			for(long i = 0;i<indexCount;i++){
+				PICinfo pi;
+				PICgetInfo(i, pi);
+				if(pi.format == LINK){
+					newIO.PICpush(pi, NULL);
+				}else{
+					matrix mPic;
+					stream sPic;
+					PICextract(i, mPic, paletteID);
+					newIO.PICpreprocess(mPic, sPic, pi);
+					newIO.PICpush(pi, sPic);
+					mPic.destory();
+					sPic.release();
+				}
+			}
+		}
+		newIOList.push_back(newIO);
+		newIO.release();
+	}
+	return true;
+}
+//转版本5方案
+//将输入调色板作为新的V5调色板
+bool IMGobject::convertToV5(std::vector<IMGobject> &newIOList, colorFormat cf, colorList useColorPalette, bool makeTexture){
+	newIOList.clear();
+	long paletteCount = 1;
+	if(version == V6)
+		paletteCount = paletteData.getCount();
+	for(long paletteID = 0;paletteID < paletteCount; paletteID ++){
+		IMGobject newIO;
+		newIO.create(V5);
+		for(long i = 0;i<indexCount;i++){
+			PICinfo pi;
+			PICgetInfo(i, pi);
+			if(pi.format == LINK){
+				newIO.PICpush(pi, NULL);
+			}else{
+				//V5的调色板，使用既定调色板
+				newIO.paletteData.clear();
+				newIO.paletteData.push(useColorPalette);
+				newIO.getData(2)->release();
+				newIO.paletteData.tinyMake(*(newIO.getData(2)));
+				//贴图处理
+				if(makeTexture){
+					//制作纹理集
+					TEXinfo ti;
+					matrix mPic;
+					stream sPic;
+					PICextract(i, mPic, paletteID);
+					newIO.TEXpreprocess(mPic, sPic, ti, cf);
+					newIO.TEXpush(ti, sPic);
+					mPic.destory();
+					sPic.release();
+					pi.format = ti.format;
+					pi.comp = COMP_ZLIB2;
+					pi.dataSize = 0;
+					pi.picSize = size(ti.width, ti.height);
+					pi.TEXusing = newIO.V5_TEXCount - 1;
+					pi.TEXpointLT = point(0, 0);
+					pi.TEXpointRB = point(ti.width, ti.height);
+					newIO.PICpush(pi, NULL);
+				}else{
+					matrix mPic;
+					stream sPic;
+					PICextract(i, mPic, paletteID);
+					newIO.PICpreprocess(mPic, sPic, pi, cf);
+					newIO.PICpush(pi, sPic);
+					mPic.destory();
+					sPic.release();
+				}
+			}
+		}
+		newIOList.push_back(newIO);
+		newIO.release();
+	}
+	return true;
+}
+//
+bool IMGobject::convertToV6(std::vector<IMGobject> &newIOList, colorTable useColorPaletteList, bool useOriginPalette){
+	newIOList.clear();
+	//原版本V6 & 保留原调色板：不变
+	if(version == V6 && useOriginPalette){
+		IMGobject newIO;
+		newIO = *this;
+		newIOList.push_back(newIO);
+		return true;
+	}
+	//原版本V4 & 保留原调色板 ：直接变成V6
+	if(version == V4 && useOriginPalette){
+		IMGobject newIO;
+		newIO.create(V6);
 		newIO.paletteData.clear();
 		newIO.paletteData.push(paletteData[0]);
 		newIO.getData(2)->release();
 		newIO.paletteData.bigMake(*(newIO.getData(2)));
-		return result;
-	}else if(version == V6 && newVersion == V4){
-		for(i=0;i<indexCount;i++){
-			PICgetInfo(i,pi);
-			if(pi.get_format() == LINK){
-				result &= newIO.PICpush(pi,NULL);
-			}else{
-				result &= PICgetData(i, s);
-				result &= newIO.PICpush(pi, s);
-				s.release();
-			}
-		}
-		newIO.paletteData.clear();
-		newIO.paletteData.push(paletteData[paletteID]);
-		newIO.getData(2)->release();
-		newIO.paletteData.tinyMake(*(newIO.getData(2)));
-		return result;
-	}else if(newVersion == V6){
-		IMGobject midIO;
-		result &= convertTo(midIO, V4, cf);
-		if(!result)
-			return false;
-		result &= midIO.convertTo(newIO, V6, cf);
-		return result;
-	}else{
-		for(i=0;i<indexCount;i++){
+		for(long i = 0;i<indexCount;i++){
+			PICinfo pi;
 			PICgetInfo(i, pi);
-			if(pi.get_format() == LINK){
-				result &= newIO.PICpush(pi, NULL);
+			if(pi.format == LINK){
+				newIO.PICpush(pi, NULL);
 			}else{
-				result &= PICextract(i, mat, paletteID);
-				if(indexPara != 0){
-					if(indexPara > 0x7f){
-						mat.loseBit(indexPara & 0x07);
-					}else{
-						mat.lose(indexPara & 0x7f);
-					}
-				}
-				if(!makeTexture || newVersion != V5){
-					//对非V5也是不能使用纹理集
-					result &= newIO.PICpreprocess(mat, s, pi, cf);
-					if(!result)
-						return false;
-					result &= newIO.PICpush(pi, s);
-					mat.release();
-					s.release();
-				}else{
-					result &= newIO.TEXpreprocess(mat, s, di, cf);
-					if(!result)
-						return false;
-					result &= newIO.TEXpush(di, s);
-					mat.release();
-					s.release();
-					pi.set_format(di.get_format());
-					pi.set_comp(COMP_ZLIB2);
-					pi.set_dataSize(0);
-					pi.set_picSize(size(di.get_width(),di.get_height()));
-					pi.set_TEXusing(newIO.V5_TEXCount-1);
-					pi.set_TEXpointLT(point(0,0));
-					pi.set_TEXpointRB(point(di.get_width(),di.get_height()));
-					result &= newIO.PICpush(pi,NULL);
-				}
+				stream sPic;
+				PICgetData(i, sPic);
+				newIO.PICpush(pi, sPic);
+				sPic.release();
 			}
 		}
+		newIOList.push_back(newIO);
 		return true;
 	}
-	return false;
+	//不保留调色板：使用既定调色板，并按第一个调色板进行颜色匹配，原版本为V6则拆成若干
+	long paletteCount = 1;
+	if(version == V6)
+		paletteCount = paletteData.getCount();
+	for(long paletteID = 0;paletteID < paletteCount; paletteID ++){
+		IMGobject newIO;
+		//非索引转V6，使用既定调色板
+		newIO.create(V6);
+		newIO.paletteData.clear();
+		for(long i = 0;i<useColorPaletteList.size();i++){
+			newIO.paletteData.push(useColorPaletteList[i]);
+		}
+		newIO.getData(2)->release();
+		newIO.paletteData.bigMake(*(newIO.getData(2)));
+		//将贴图内容与调色板比较匹配
+		for(long i = 0;i<indexCount;i++){
+			PICinfo pi;
+			PICgetInfo(i, pi);
+			if(pi.format == LINK){
+				newIO.PICpush(pi, NULL);
+			}else{
+				matrix mPic;
+				stream sPic;
+				PICextract(i, mPic, paletteID);
+				newIO.PICpreprocess(mPic, sPic, pi);
+				newIO.PICpush(pi, sPic);
+				mPic.destory();
+				sPic.release();
+			}
+		}
+		newIOList.push_back(newIO);
+		newIO.release();
+	}
+	return true;
 }
 
-i32 IMGobject::linkFind(b32 pos, b32 depth){
+long IMGobject::linkFind(dword pos, dword depth){
 	PICinfo pi;
 	PICgetInfo(pos, pi);
 	if(depth == 0){
@@ -1966,10 +2047,28 @@ i32 IMGobject::linkFind(b32 pos, b32 depth){
 		return pos;
 	}
 }
-stream *IMGobject::getData(b8 _part){
-	stream *sList[] = {NULL, &data1, &data2, &data3, &data4, &data5, &data6};
+bool IMGobject::empty(){
+	long count = indexCount;
+	IMGversion iv = version;
+	release();
+	create(iv);
+	////////////////////////
+	PICinfo pi;
+	stream s;
+	PICempty(s, pi);
+	PICpush(pi, s);
+	for(long i = 1;i<count;i++){
+		pi.set_format(LINK);
+		pi.set_linkTo(0);
+		PICpush(pi, s);
+	}
+	s.release();
+	return true;
+}
+stream *IMGobject::getData(uchar _part){
+	stream *sList[] = {NULL, &dataHeader, &dataPalette, &dataIndexTexture, &dataIndexPicture, &dataTexture, &dataPicture};
 	return sList[_part%7];
 }
-b64 IMGobject::getSize() const{
-	return data1.getLen()+data2.getLen()+data3.getLen()+data4.getLen()+data5.getLen()+data6.getLen();
+longex IMGobject::getSize() const{
+	return dataHeader.getLen()+dataPalette.getLen()+dataIndexTexture.getLen()+dataIndexPicture.getLen()+dataTexture.getLen()+dataPicture.getLen();
 }

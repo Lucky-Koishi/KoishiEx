@@ -71,7 +71,6 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="avatar.h" />
     <ClInclude Include="DDS.h" />
     <ClInclude Include="KoishiEx.h" />
     <ClInclude Include="resource.h" />

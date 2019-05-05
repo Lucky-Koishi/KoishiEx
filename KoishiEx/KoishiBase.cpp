@@ -7,29 +7,21 @@
 
 using namespace Koishi;
 
-
-str Koishi::NPKheaderStr = "NeoplePack_Bill";
-str Koishi::IMGheaderStr = "Neople Img File";
-str Koishi::IMGheaderStr2 = "Neople Image File";
-str Koishi::NPKext = ".npk";
-str Koishi::IMGext = ".img";
-str Koishi::IMGnameMask = "puchikon@neople dungeon and fighter DNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNF";
-
 //////////////////////////////////////////////////////////////
 //color
 color::color(){
 	set(0);
 }
-color::color(b32 colorDt, colorFormat clrFmt){
+color::color(dword colorDt, colorFormat clrFmt){
 	set(colorDt, clrFmt);
 }
-color::color(b8 r, b8 g, b8 b){
+color::color(uchar r, uchar g, uchar b){
 	set(0xff000000|(r<<16)|(g<<8)|b);
 }
-color::color(b8 a, b8 r, b8 g, b8 b){
+color::color(uchar a, uchar r, uchar g, uchar b){
 	set((a<<24)|(r<<16)|(g<<8)|b);
 }
-void color::set(b32 colorDt, colorFormat clrFmt){
+void color::set(dword colorDt, colorFormat clrFmt){
 	switch(clrFmt){
 		//////////////////////////////////////////////////////////////////////////
 		/////////////////////////////////ARGB8888/////////////////////////////////
@@ -37,10 +29,10 @@ void color::set(b32 colorDt, colorFormat clrFmt){
 		//|      A      |   |      R      |   |      G      |   |      B      | //
 		//////////////////////////////////////////////////////////////////////////
 	case ARGB8888:
-		set_A((colorDt & 0xff000000) >> 24);
-		set_R((colorDt & 0x00ff0000) >> 16);
-		set_G((colorDt & 0x0000ff00) >> 8);
-		set_B((colorDt & 0x000000ff) >> 0);
+		A = ((colorDt & 0xff000000) >> 24);
+		R = ((colorDt & 0x00ff0000) >> 16);
+		G = ((colorDt & 0x0000ff00) >> 8);
+		B = ((colorDt & 0x000000ff) >> 0);
 		break;
 		//////////////////////////////////////
 		///////////////ARGB4444///////////////
@@ -48,10 +40,10 @@ void color::set(b32 colorDt, colorFormat clrFmt){
 		//|  A  | |  R  |   |  G  | |  B  | //
 		//////////////////////////////////////
 	case ARGB4444:
-		set_A(((colorDt & 0xf000) >> 12) * 0x11);
-		set_R((colorDt & 0x0f00) >> 8 << 4);
-		set_G((colorDt & 0x00f0) >> 4 << 4);
-		set_B((colorDt & 0x000f) >> 0 << 4);
+		A = (((colorDt & 0xf000) >> 12) * 0x11);
+		R = ((colorDt & 0x0f00) >> 8 << 4);
+		G = ((colorDt & 0x00f0) >> 4 << 4);
+		B = ((colorDt & 0x000f) >> 0 << 4);
 		break;
 		//////////////////////////////////////
 		///////////////ARGB1555///////////////
@@ -59,20 +51,20 @@ void color::set(b32 colorDt, colorFormat clrFmt){
 		//A |   R   | |     G   | |   B   | //
 		//////////////////////////////////////
 	case ARGB1555:
-		set_A(((colorDt & 0x8000) >> 15) * 0xff);
-		set_R((colorDt & 0x7c00) >> 10 << 3);
-		set_G((colorDt & 0x03e0) >> 5 << 3);
-		set_B((colorDt & 0x001f) >> 0 << 3);
+		A = (((colorDt & 0x8000) >> 15) * 0xff);
+		R = ((colorDt & 0x7c00) >> 10 << 3);
+		G = ((colorDt & 0x03e0) >> 5 << 3);
+		B = ((colorDt & 0x001f) >> 0 << 3);
 		break;
 		//////////////////
 		//索引颜色调色板//
 		/////ABGR8888/////
 		//////////////////
 	case INDEX_FMT_PALETTE:
-		set_A((colorDt & 0xff000000) >> 24);
-		set_R((colorDt & 0x000000ff) >> 0);
-		set_G((colorDt & 0x0000ff00) >> 8);
-		set_B((colorDt & 0x00ff0000) >> 16);
+		A = ((colorDt & 0xff000000) >> 24);
+		R = ((colorDt & 0x000000ff) >> 0);
+		G = ((colorDt & 0x0000ff00) >> 8);
+		B = ((colorDt & 0x00ff0000) >> 16);
 		break;
 	case RGB565:
 		//////////////////////////////////////
@@ -80,17 +72,17 @@ void color::set(b32 colorDt, colorFormat clrFmt){
 		//1 1 1 1 1 1 1 1 //1 1 1 1 1 1 1 1 //
 		//|   R   | |     G     | |   B   | //
 		//////////////////////////////////////
-		set_A(0xff);
-		set_R((colorDt & 0xf800) >> 11 << 3);
-		set_G((colorDt & 0x07e0) >> 5 << 2);
-		set_B((colorDt & 0x001f) >> 0 << 3);
+		A = (0xff);
+		R = ((colorDt & 0xf800) >> 11 << 3);
+		G = ((colorDt & 0x07e0) >> 5 << 2);
+		B = ((colorDt & 0x001f) >> 0 << 3);
 		break;
 	default:
 		set(colorDt, ARGB8888);
 		break;
 	}
 }
-void color::make(b32 &colorDt, colorFormat clrFmt){
+void color::make(dword &colorDt, colorFormat clrFmt){
 	switch(clrFmt){
 	case ARGB8888:
 		colorDt = (A<<24)|(R<<16)|(G<<8)|B;
@@ -112,24 +104,42 @@ void color::make(b32 &colorDt, colorFormat clrFmt){
 		break;
 	}
 }
-color color::getChannel(b8 _chn) const{
-	color _clr;
-	if((_chn & FA) != 0)
-		_clr.set_A(A);
-	if((_chn & FR) != 0)
-		_clr.set_R(R);
-	if((_chn & FG) != 0)
-		_clr.set_G(G);
-	if((_chn & FB) != 0)
-		_clr.set_B(B);
-	return _clr;
+color color::gray() const{
+	 uchar gray = ((word)R*38 + (word)G*75 + (word)B*15) >> 7;
+	 return color(0xFF, gray, gray, gray);
 }
-color::operator b32() const{
-	return (b32)(A<<24)|(R<<16)|(G<<8)|B;
+double color::getProperty(colorProperty theProperty) const{
+	colorHSV theHSV;
+	switch(theProperty){
+	case COLOR_ALPHA:
+		return (double)A/255;
+	case COLOR_CHANNEL_BLUE:
+		return (double)B/255;
+	case COLOR_CHANNEL_GREEN:
+		return (double)G/255;
+	case COLOR_CHANNEL_RED:
+		return (double)R/255;
+	case COLOR_GRAYSCALE:
+		return (double)(((word)R*38 + (word)G*75 + (word)B*15) >> 7 )/255;
+	case COLOR_HUE:
+		getHSV(theHSV);
+		return (double)theHSV.H/360;
+	case COLOR_SATURATION:
+		getHSV(theHSV);
+		return theHSV.S;
+	case COLOR_VALUE:
+		getHSV(theHSV);
+		return theHSV.V;
+	default:
+		return 0;
+	}
 }
-fl2 color::mixMethod(fl2 a, fl2 b, colorMethod _method){
-	fl2 c;
-	switch(_method){
+color::operator dword() const{
+	return (dword)(A<<24)|(R<<16)|(G<<8)|B;
+}
+double color::mixMethod(double a, double b, colorMethod method){
+	double c;
+	switch(method){
 	case LAY://覆盖
 		c = a;
 		break;
@@ -196,11 +206,11 @@ fl2 color::mixMethod(fl2 a, fl2 b, colorMethod _method){
 	}
 	return c;
 }
-b8 color::mixMethod(b8 a, b8 b, colorMethod _method){
-	i32 C,B,A;
+uchar color::mixMethod(uchar a, uchar b, colorMethod method){
+	long C,B,A;
 	B = b;
 	A = a;
-	switch(_method){
+	switch(method){
 	case LAY://覆盖
 		C = A;
 		break;
@@ -265,44 +275,44 @@ b8 color::mixMethod(b8 a, b8 b, colorMethod _method){
 	if(C<0){
 		C = 0;
 	}
-	return (b16)C;
+	return (word)C;
 }
-void color::mixWith(const color &_clr2, colorMethod _method){
-	fl2 a1 = (fl2)get_A()/255;
-	fl2 r1 = (fl2)get_R()/255;
-	fl2 g1 = (fl2)get_G()/255;
-	fl2 b1 = (fl2)get_B()/255;
-	fl2 a2 = (fl2)_clr2.get_A()/255;
-	fl2 r2 = (fl2)_clr2.get_R()/255;
-	fl2 g2 = (fl2)_clr2.get_G()/255;
-	fl2 b2 = (fl2)_clr2.get_B()/255;
-	fl2 a = a1 + a2 - a1*a2;
-	fl2 r,g,b;
-	if(_method == LAY){
+void color::mixWith(const color &clr2, colorMethod method){
+	double a1 = (double)A/255;
+	double r1 = (double)R/255;
+	double g1 = (double)G/255;
+	double b1 = (double)B/255;
+	double a2 = (double)clr2.A/255;
+	double r2 = (double)clr2.R/255;
+	double g2 = (double)clr2.G/255;
+	double b2 = (double)clr2.B/255;
+	double a = a1 + a2 - a1*a2;
+	double r,g,b;
+	if(method == LAY){
 		r = r1*a1+r2*(1-a1);
 		g = g1*a1+g2*(1-a1);
 		b = b1*a1+b2*(1-a1);
 	}else{
-		r = mixMethod(r1,r2,_method);
-		g = mixMethod(g1,g2,_method);
-		b = mixMethod(b1,b2,_method);
+		r = mixMethod(r1,r2,method);
+		g = mixMethod(g1,g2,method);
+		b = mixMethod(b1,b2,method);
 	}
-	set_A(a*255);
-	set_R(r*255);
-	set_G(g*255);
-	set_B(b*255);
+	A = a*255;
+	R = r*255;
+	G = g*255;
+	B = b*255;
 }
-color color::mix(const color &_clr1, const color &_clr2, colorMethod _method){
-	color _clr3 = _clr1;
-	_clr3.mixWith(_clr2, _method);
-	return _clr3;
+color color::mix(const color &clr1, const color &clr2, colorMethod method){
+	color clr3 = clr1;
+	clr3.mixWith(clr2, method);
+	return clr3;
 }
 
 void color::getHSV(colorHSV &hsv) const{
-	fl2 r = (fl2)R/255;
-	fl2 g = (fl2)G/255;
-	fl2 b = (fl2)B/255;
-	fl2 maxclr, minclr;
+	double r = (double)R/255;
+	double g = (double)G/255;
+	double b = (double)B/255;
+	double maxclr, minclr;
 	if(r>=g && r>=b)
 		maxclr = r;
 	if(b>=g && b>=r)
@@ -335,12 +345,12 @@ void color::getHSV(colorHSV &hsv) const{
 	}
 }
 void color::useHSV(const colorHSV &hsv){
-	i32 h = hsv.H/60;
-	fl2 f = (fl2)hsv.H/60 - h;
-	fl2 v = hsv.V;
-	fl2 p = hsv.V*(1-hsv.S);
-	fl2 q = hsv.V*(1-f*hsv.S);
-	fl2 t = hsv.V*(1-(1-f)*hsv.S);
+	long h = hsv.H/60;
+	double f = (double)hsv.H/60 - h;
+	double v = hsv.V;
+	double p = hsv.V*(1-hsv.S);
+	double q = hsv.V*(1-f*hsv.S);
+	double t = hsv.V*(1-(1-f)*hsv.S);
 	switch(h){
 	case 0:
 		R = v*255;
@@ -374,14 +384,14 @@ void color::useHSV(const colorHSV &hsv){
 		break;
 	}
 }
-void color::moveHto(i32 newH){
+void color::moveHto(long newH){
 	colorHSV hsv;
 	getHSV(hsv);
 	hsv.H = newH;
 	hsv.H %= 360;
 	useHSV(hsv);
 }
-void color::moveSto(fl2 newS){
+void color::moveSto(double newS){
 	colorHSV hsv;
 	getHSV(hsv);
 	hsv.S = newS;
@@ -391,7 +401,7 @@ void color::moveSto(fl2 newS){
 		hsv.S = 0;
 	useHSV(hsv);
 }
-void color::moveVto(fl2 newV){
+void color::moveVto(double newV){
 	colorHSV hsv;
 	getHSV(hsv);
 	hsv.V = newV;
@@ -401,14 +411,14 @@ void color::moveVto(fl2 newV){
 		hsv.V = 0;
 	useHSV(hsv);
 }
-void color::moveH(i32 delta){
+void color::moveH(long delta){
 	colorHSV hsv;
 	getHSV(hsv);
 	hsv.H += 360 + delta;
 	hsv.H %= 360;
 	useHSV(hsv);
 }
-void color::moveS(fl2 delta){
+void color::moveS(double delta){
 	colorHSV hsv;
 	getHSV(hsv);
 	hsv.S += delta;
@@ -418,7 +428,7 @@ void color::moveS(fl2 delta){
 		hsv.S = 0;
 	useHSV(hsv);
 }
-void color::moveV(fl2 delta){
+void color::moveV(double delta){
 	colorHSV hsv;
 	getHSV(hsv);
 	hsv.V += delta;
@@ -428,16 +438,16 @@ void color::moveV(fl2 delta){
 		hsv.V = 0;
 	useHSV(hsv);
 }
-void color::moveRto(b8 newR){
+void color::moveRto(uchar newR){
 	R = newR;
 }
-void color::moveGto(b8 newG){
+void color::moveGto(uchar newG){
 	G = newG;
 }
-void color::moveBto(b8 newB){
+void color::moveBto(uchar newB){
 	B = newB;
 }
-void color::moveR(i16 delta){
+void color::moveR(short delta){
 	if(R + delta>255){
 		R = 255;
 	}else if(R + delta<0){
@@ -446,7 +456,7 @@ void color::moveR(i16 delta){
 		R += delta;
 	}
 }
-void color::moveG(i16 delta){
+void color::moveG(short delta){
 	if(G + delta>255){
 		G = 255;
 	}else if(G + delta<0){
@@ -455,7 +465,7 @@ void color::moveG(i16 delta){
 		G += delta;
 	}
 }
-void color::moveB(i16 delta){
+void color::moveB(short delta){
 	if(B + delta>255){
 		B = 255;
 	}else if(B + delta<0){
@@ -464,7 +474,7 @@ void color::moveB(i16 delta){
 		B += delta;
 	}
 }
-void color::moveA(i16 delta){
+void color::moveA(short delta){
 	if(A + delta>255){
 		A = 255;
 	}else if(A + delta<0){
@@ -476,62 +486,87 @@ void color::moveA(i16 delta){
 int color::EuclideanDistanceSquareOf(const color &a, const color &b){
 	return (int)(a.R-b.R)*(a.R-b.R)+(a.G-b.G)*(a.G-b.G)+(a.B-b.B)*(a.B-b.B);
 }
-color color::lose(const color &c, b8 part){
-	return color(c.get_A(), c.get_R()/part*part, c.get_G()/part*part, c.get_B()/part*part);
+color color::lose(const color &c, uchar part){
+	return color(c.A, c.R/part*part, c.G/part*part, c.B/part*part);
 }
-color color::loseBit(const color &c, b8 bit){
-	return color(c.get_A(), c.get_R()>>bit<<bit, c.get_G()>>bit<<bit, c.get_B()>>bit<<bit);
+color color::loseBit(const color &c, uchar bit){
+	return color(c.A, c.R>>bit<<bit, c.G>>bit<<bit, c.B>>bit<<bit);
 }
-color color::loseBlack(const color &c, b8 gamma){
-	b8 newR = c.get_R();
-	b8 newG = c.get_G();
-	b8 newB = c.get_B();
-	b8 newA = 255 - (255 - newR)  * (255 - newG)  * (255 - newB)/ 255/ 255;
+color color::loseBlack(const color &c, uchar gamma){
+	uchar newR = c.R;
+	uchar newG = c.G;
+	uchar newB = c.B;
+	uchar newA = 255 - (255 - newR)  * (255 - newG)  * (255 - newB)/ 255/ 255;
 	double gm = pow((double)newA/255, gamma);
-	//while(gamma--){
-		//printf("%d ",newA);
-		//newA = (newA * newA / 255);
-	//}
 	newA = gm*255;
-	//printf("%d (RGB %d %d %d)\n",newA, newR, newG, newB);
-	return color(c.get_A()*newA/255, newR, newG, newB);
+	return color(c.A*newA/255, newR, newG, newB);
 }
 ///////////////////////////////////////////////////////////////
 //point & size
 point::point(){
 	set(0,0);
 }
-point::point(i32 x, i32 y){
+point::point(long x, long y){
 	set(x,y);
 }
-void point::set(i32 x, i32 y){
-	set_X(x);
-	set_Y(y);
+void point::set(long x, long y){
+	X = x;
+	Y = y;
 }
-void point::moveHonz(i32 dist){
-	set_X(X+dist);
+void point::moveHonz(long dist){
+	X += dist;
 }
-void point::moveVert(i32 dist){
-	set_Y(Y+dist);
+void point::moveVert(long dist){
+	Y += dist;
 }
-void point::move(i32 honzDist, i32 vertDist){
+void point::move(long honzDist, long vertDist){
 	set(X+honzDist, Y+vertDist);
 }
 void point::move(size sz){
-	set(X+sz.get_W(), Y+sz.get_H());
+	set(X+sz.W, Y+sz.H);
+}
+point point::oppo() const{
+	return point(-X, -Y);
+}
+point point::operator + (const point &delta) const{
+	return point(X + delta.X, Y + delta.Y);
+}
+point point::operator - (const point &delta) const{
+	return point(X - delta.X, Y - delta.Y);
+}
+point point::operator + (const size &sz) const{
+	return point(X + sz.W, Y + sz.H);
+}
+point point::operator - (const size &sz) const{
+	return point(X - sz.W, Y - sz.H);
+}
+point point::operator + () const{
+	return point(X, Y);
+}
+point point::operator - () const{
+	return point(-X, -Y);
+}
+point point::operator * (const double mult) const{
+	return point(X*mult, Y*mult);
+}
+point point::operator / (const double mult) const{
+	return point(X/mult, Y/mult);
+}
+point point::operator ~ () const{
+	return point(Y, X);
 }
 size::size(){
 	set(0,0);
 }
-size::size(i32 w, i32 h){
+size::size(long w, long h){
 	set(w,h);
 }
-void size::set(i32 w, i32 h){
-	set_W(w);
-	set_H(h);
+void size::set(long w, long h){
+	W = w;
+	H = h;
 }
-i32 size::area() const{
-	return get_W()*get_H();
+long size::area() const{
+	return W*H;
 }
 matrix::matrix(){
 	column = 0;
@@ -539,7 +574,7 @@ matrix::matrix(){
 	pt = 0;
 	data = NULL;
 }
-matrix::matrix(b32 _row, b32 _column){
+matrix::matrix(dword _row, dword _column){
 	column = _column;
 	row = _row;
 	pt = 0;
@@ -547,8 +582,8 @@ matrix::matrix(b32 _row, b32 _column){
 	fill(0);
 }
 matrix::matrix(const size &_sz){
-	column = _sz.get_W();
-	row = _sz.get_H();
+	column = _sz.W;
+	row = _sz.H;
 	pt = 0;
 	data = new color[column*row+1000];
 	fill(0);
@@ -562,7 +597,7 @@ matrix::matrix(const matrix &_mat){
 		memcpy(data, _mat.data, 4*column*row+1000);
 }
 matrix::~matrix(){
-	release();
+	destory();
 }
 matrix& matrix::operator = (const matrix &_mat){
 	if(this == &_mat)
@@ -581,7 +616,7 @@ matrix& matrix::operator = (const matrix &_mat){
 bool matrix::valid(){
 	return !(data == NULL);
 }
-void matrix::allocate(b32 _row, b32 _column){
+void matrix::create(dword _row, dword _column){
 	if(!data){
 		row  = _row;
 		column = _column;
@@ -590,16 +625,16 @@ void matrix::allocate(b32 _row, b32 _column){
 		fill(0);
 	}
 }
-void matrix::allocate(const size &_sz){
+void matrix::create(const size &_sz){
 	if(!data){
-		row  = _sz.get_H();
-		column = _sz.get_W();
+		row  = _sz.H;
+		column = _sz.W;
 		data = new color[row*column+1000];
 		pt = 0;
 		fill(0);
 	}
 }
-void matrix::release(){
+void matrix::destory(){
 	if(data){
 		delete[] data;
 		data = NULL;
@@ -610,7 +645,7 @@ void matrix::release(){
 }
 
 void matrix::fill(color _clr){
-	for(b32 i = 0; i< column*row ; i++)
+	for(dword i = 0; i< column*row ; i++)
 		data[i] = _clr;
 }
 
@@ -620,9 +655,9 @@ void matrix::push(color _clr){
 		pt++;
 }
 
-b64 matrix::push(const stream &s, colorFormat cf){
-	b32 len = s.getLen();
-	b32 i = 0;
+longex matrix::push(const stream &s, colorFormat cf){
+	dword len = s.getLen();
+	dword i = 0;
 	switch(cf){
 	case ARGB8888:
 		while(i+3<len){
@@ -661,9 +696,9 @@ b64 matrix::push(const stream &s, colorFormat cf){
 	return i;
 }
 
-b64 matrix::make(stream &s, colorFormat cf) const{
-	b32 i = 0;
-	b32 colorData;
+longex matrix::make(stream &s, colorFormat cf) const{
+	dword i = 0;
+	dword colorData;
 	switch(cf){
 	case ARGB8888:
 		s.allocate(4*column*row);
@@ -676,48 +711,47 @@ b64 matrix::make(stream &s, colorFormat cf) const{
 		s.allocate(2*column*row);
 		for(i = 0; i< column*row; i++){
 			data[i].make(colorData,ARGB4444);
-			s.push((b16)(colorData & 0xFFFF));
+			s.push((word)(colorData & 0xFFFF));
 		}
 		break;
 	case ARGB1555:
 		s.allocate(2*column*row);
 		for(i = 0; i< column*row; i++){
 			data[i].make(colorData,ARGB1555);
-			s.push((b16)(colorData & 0xFFFF));
+			s.push((word)(colorData & 0xFFFF));
 		}
 		break;
 	case RGB565:
 		s.allocate(2*column*row);
 		for(i = 0; i< column*row; i++){
 			data[i].make(colorData,RGB565);
-			s.push((b16)(colorData & 0xFFFF));
+			s.push((word)(colorData & 0xFFFF));
 		}
 		break;
 	case INDEX_FMT_PALETTE:
 		s.allocate(column*row);
 		for(i = 0; i< column*row; i++){
-			s.push((b8)data[i].get_A());
+			s.push((uchar)data[i].A);
 		}
 		break;
 	}
-	return s.ptPos();
+	return s.getPtPos();
 }
 
-pcolor matrix::operator[] (b32 _i) const{
+color *matrix::operator[] (dword _i) const{
 	return data + _i*column;
 }
-
-b32 matrix::getRowCount() const{
+long matrix::getHeight() const{
 	return row;
 }
-b32 matrix::getColumnCount() const{
+long matrix::getWidth() const{
 	return column;
 }
-b32 matrix::getElemCount() const{
+long matrix::getElemCount() const{
 	return row*column;
 }	
 //取子阵
-void matrix::getSubMatrix(matrix &dest, b32 rowStart, b32 rowEnd, b32 columnStart, b32 columnEnd) const{
+void matrix::clip(matrix &dest, dword rowStart, dword rowEnd, dword columnStart, dword columnEnd) const{
 	if(rowEnd>row)
 		rowEnd = row;
 	if(rowStart>rowEnd)
@@ -726,64 +760,106 @@ void matrix::getSubMatrix(matrix &dest, b32 rowStart, b32 rowEnd, b32 columnStar
 		columnEnd = column;
 	if(columnStart>columnEnd)
 		columnStart = columnEnd;
-	dest.allocate(rowEnd-rowStart, columnEnd-columnStart);
-	b32 i,j;
+	dest.create(rowEnd-rowStart, columnEnd-columnStart);
+	dword i,j;
 	for(i=0;i<rowEnd-rowStart;i++){
 		for(j=0;j<columnEnd-columnStart;j++){
 			dest.push(data[columnStart+j+(rowStart+i)*column]);
 		}
 	}
 }
-void matrix::getChannelMatrix(matrix &dest, b8 _chn) const{
-	dest.allocate(row, column);
-	for(b32 i = 0;i<getElemCount();i++){
-		dest.push(data[i].getChannel(_chn));
-	}
-}
-void matrix::expandMatrix(matrix &dest, b32 toTop, b32 toBottom, b32 toLeft, b32 toRight) const{
-	dest.allocate(row+toTop+toBottom, column+toLeft+toRight);
-	b32 i,j;
+void matrix::expand(matrix &dest, dword toTop, dword toBottom, dword toLeft, dword toRight) const{
+	dest.create(row+toTop+toBottom, column+toLeft+toRight);
+	dword i,j;
 	for(i=0;i<row;i++){
 		for(j=0;j<column;j++){
 			dest.setElem(i+toTop, j+toLeft, getElem(i,j));
 		}
 	}
 }
+void matrix::zoom(matrix &dest, double ratio) const{
+	dest.create(row*ratio, column*ratio);
+	dword i,j;
+	for(i=0;i<row*ratio;i++){
+		for(j=0;j<column*ratio;j++){
+			dest.setElem(i, j, getElem(i/ratio,j/ratio));
+		}
+	}
+}
+void matrix::zoom(matrix &dest, double honzRatio, double vertRatio) const{
+	dest.create(row*vertRatio, column*honzRatio);
+	dword i,j;
+	for(i=0;i<row*vertRatio;i++){
+		for(j=0;j<column*honzRatio;j++){
+			dest.setElem(i, j, getElem(i/vertRatio,j/honzRatio));
+		}
+	}
+}
+void matrix::clip(dword rowStart, dword rowEnd, dword columnStart, dword columnEnd){
+	matrix dest;
+	clip(dest, rowStart, rowEnd, columnStart, columnEnd);
+	destory();
+	*this = dest;
+	dest.destory();
+}
+void matrix::expand(dword toTop, dword toBottom, dword toLeft, dword toRight){
+	matrix dest;
+	expand(dest, toTop, toBottom, toLeft, toRight);
+	destory();
+	*this = dest;
+	dest.destory();
+}
+void matrix::zoom(double ratio){
+	matrix dest;
+	zoom(dest, ratio);
+	*this = dest;
+	dest.destory();
+}
+void matrix::zoom(double honzRatio, double vertRatio){
+	matrix dest;
+	zoom(dest, honzRatio, vertRatio);
+	destory();
+	*this = dest;
+	dest.destory();
+}
 //元素统计
-void matrix::setElem(b32 _id, const color &_clr){
+void matrix::setElem(dword _id, const color &_clr){
 	data[_id] = _clr;
 }
-void matrix::setElem(b32 _row, b32 _column, const color &_clr){
+void matrix::setElem(dword _row, dword _column, const color &_clr){
+	if(_row > row - 1 || _column > column - 1){
+		return;
+	}
 	data[_row*column+_column] = _clr;
 }
-color matrix::getElem(b32 _id) const{
+color matrix::getElem(dword _id) const{
 	return data[_id];
 }
-color matrix::getElem(b32 _row, b32 _column) const{
+color matrix::getElem(dword _row, dword _column) const{
 	return data[_row*column+_column];
 }
-b32 matrix::getElemCountNzero() const{
-	b32 total = 0;
-	for(b32 i = 0;i<getElemCount();i++){
+long matrix::getElemCountNzero() const{
+	dword total = 0;
+	for(dword i = 0;i<getElemCount();i++){
 		if(data[i] != (color)0){
 			total ++;
 		}
 	}
 	return total;
 }
-b32 matrix::getElemCountWhos(const color &whos) const{
-	b32 total = 0;
-	for(b32 i = 0;i<getElemCount();i++){
+long matrix::getElemCountWhos(const color &whos) const{
+	dword total = 0;
+	for(dword i = 0;i<getElemCount();i++){
 		if(data[i] == whos){
 			total ++;
 		}
 	}
 	return total;
 }
-void matrix::getElemCountList(lcolor &colorList) const{
+void matrix::getElemCountList(colorList &colorList) const{
 	colorList.clear();
 	color temp;
-	b32 i,j,k;
+	dword i,j,k;
 	bool flag;
 	for(i=0;i<row;i++){
 		for(j=0;j<column;j++){
@@ -801,13 +877,13 @@ void matrix::getElemCountList(lcolor &colorList) const{
 		}
 	}
 }
-void matrix::getElemHonzBound(b32 &lower, b32 &upper) const{
+void matrix::getElemHonzBound(dword &lower, dword &upper) const{
 	lower = column - 1;
 	upper = 0;
-	b32 i,j;
+	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
-			if(getElem(i, j).get_A() != 0){
+			if(getElem(i, j).A != 0){
 				if(lower>j){
 					lower = j;
 				}
@@ -818,13 +894,13 @@ void matrix::getElemHonzBound(b32 &lower, b32 &upper) const{
 		}
 	}
 }
-void matrix::getElemVertBound(b32 &lower, b32 &upper) const{
+void matrix::getElemVertBound(dword &lower, dword &upper) const{
 	lower = row - 1;
 	upper = 0;
-	b32 i,j;
+	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
-			if(getElem(i, j).get_A() != 0){
+			if(getElem(i, j).A != 0){
 				if(lower>i){
 					lower = i;
 				}
@@ -836,8 +912,8 @@ void matrix::getElemVertBound(b32 &lower, b32 &upper) const{
 	}
 }
 //操作矩阵
-i32 matrix::elemMoveHonz(i32 dist){
-	i32 i,j;
+long matrix::moveHonz(long dist, const color &surplus){
+	long i,j;
 	color _clr;
 	for(i = 0;i<row;i++){
 		if(dist>0){
@@ -846,7 +922,7 @@ i32 matrix::elemMoveHonz(i32 dist){
 					_clr = getElem(i, j-dist);
 					setElem(i, j, _clr);
 				}else{
-					setElem(i, j, (color)0);
+					setElem(i, j, surplus);
 				}
 			}
 		}else{
@@ -855,15 +931,15 @@ i32 matrix::elemMoveHonz(i32 dist){
 					_clr = getElem(i, j-dist);
 					setElem(i,j,_clr);
 				}else{
-					setElem(i,j,(color)0);
+					setElem(i,j, surplus);
 				}
 			}
 		}
 	}
 	return 1;
 }
-i32 matrix::elemMoveVert(i32 dist){
-	i32 i,j;
+long matrix::moveVert(long dist, const color &surplus){
+	long i,j;
 	color _clr;
 	for(j = 0;j<column;j++){
 		if(dist>0){
@@ -872,7 +948,7 @@ i32 matrix::elemMoveVert(i32 dist){
 					_clr = getElem(i-dist, j);
 					setElem(i, j, _clr);
 				}else{
-					setElem(i, j, (color)0);
+					setElem(i, j, surplus);
 				}
 			}
 		}else{
@@ -881,15 +957,15 @@ i32 matrix::elemMoveVert(i32 dist){
 					_clr = getElem(i-dist, j);
 					setElem(i,j,_clr);
 				}else{
-					setElem(i,j,(color)0);
+					setElem(i,j,surplus);
 				}
 			}
 		}
 	}
 	return 1;
 }
-i32 matrix::elemReplace(const color &whos, const color &to){
-	b32 i,j;
+long matrix::replace(const color &whos, const color &to){
+	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
 			if(getElem(i, j) == whos){
@@ -901,50 +977,127 @@ i32 matrix::elemReplace(const color &whos, const color &to){
 }
 
 
-void matrix::putFore(const matrix &layer, colorMethod _met){
-	b32 i,j;
-	color _clr;
-	for(i=0;i<MIN(row, layer.row);i++){
-		for(j=0;j<MIN(column, layer.column);j++){
-			_clr = layer[i][j];
-			_clr.mixWith(getElem(i,j), _met);
-			setElem(i,j,_clr);
+void matrix::putFore(const matrix &layer, colorMethod met, point basePoint){
+	dword i,j, tx, ty;
+	color clr;
+	for(i=0;i<layer.getWidth();i++){
+		for(j=0;j<layer.getHeight();j++){
+			tx = i + basePoint.X;
+			ty = j + basePoint.Y;
+			if(tx >= 0 && tx < getWidth() && ty >= 0 && ty < getHeight()){
+				clr = layer[j][i];
+				clr.mixWith(getElem(ty,tx), met);
+				setElem(ty,tx,clr);
+			}
 		}
 	}
 }
-void matrix::putBack(const matrix &layer, colorMethod _met){
-	b32 i,j;
-	color _clr;
-	for(i=0;i<MIN(row, layer.row);i++){
-		for(j=0;j<MIN(column, layer.column);j++){
-			_clr = getElem(i,j);
-			_clr.mixWith(layer[i][j], _met);
-			setElem(i,j,_clr);
+void matrix::putBack(const matrix &layer, colorMethod met, point basePoint){
+	dword i,j, tx, ty;
+	color clr;
+	for(i=0;i<layer.getWidth();i++){
+		for(j=0;j<layer.getHeight();j++){
+			tx = i + basePoint.X;
+			ty = j + basePoint.Y;
+			if(tx >= 0 && tx < getWidth() && ty >= 0 && ty < getHeight()){
+				clr = getElem(ty,tx);
+				clr.mixWith(layer[j][i], met);
+				setElem(ty,tx,clr);
+			}
 		}
 	}
 }
 
-void matrix::lose(b8 fine){
-	b32 i,j;
+void matrix::lose(uchar fine){
+	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
 			setElem(i, j ,Koishi::color::lose(getElem(i,j),fine));
 		}
 	}
 }
-void matrix::loseBit(b8 bit){
-	b32 i,j;
+void matrix::loseBit(uchar bit){
+	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
 			setElem(i, j ,Koishi::color::loseBit(getElem(i,j),bit));
 		}
 	}
 }
-void matrix::loseBlack(b8 gamma){
-	b32 i,j;
+void matrix::loseBlack(uchar gamma){
+	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
 			setElem(i, j ,Koishi::color::loseBlack(getElem(i,j),gamma));
+		}
+	}
+}
+void matrix::turnShield(){
+	dword i,j;
+	for(i = 0;i<row;i++){
+		for(j = 0;j<column;j++){
+			color clr = getElem(i, j);
+			clr.R = 0xFF;
+			clr.G = 0xFF;
+			clr.B = 0xFF;
+			clr.A /= 2;
+			setElem(i, j ,clr);
+		}
+	}
+}
+void matrix::line(point p1, point p2, const color &clr){
+	//数值微分法画线
+	long dx = p2.X - p1.X;
+	long dy = p2.Y - p1.Y;
+	long n = MAX(abs(dx), abs(dy));
+	double xdelta = (double)dx/n;
+	double ydelta = (double)dy/n;
+	double x = p1.X;
+	double y = p1.Y;
+	for(long i=0;i<=n;i++){
+		setElem((long)(y+0.5), (long)(x+0.5), clr);
+		x += xdelta;
+		y += ydelta;
+	}
+}
+void matrix::rectangle(point p1, point p2, const color &clr){
+	//画矩形
+	long x1 = MIN(p1.X, p2.X);
+	long x2 = MAX(p1.X, p2.X);
+	long y1 = MIN(p1.Y, p2.Y);
+	long y2 = MAX(p1.Y, p2.Y);
+	for(long i = x1;i<=x2;i++){
+		setElem(y1,i,clr);
+		setElem(y2,i,clr);
+	}
+	for(long i = y1;i<=y2;i++){
+		setElem(i,x1,clr);
+		setElem(i,x2,clr);
+	}
+}
+void matrix::filledRectangle(point p1, point p2, const color &clr){
+	long x1 = MIN(p1.X, p2.X);
+	long x2 = MAX(p1.X, p2.X);
+	long y1 = MIN(p1.Y, p2.Y);
+	long y2 = MAX(p1.Y, p2.Y);
+	for(long i = x1;i<=x2;i++){
+		for(long j = y1;j<=y2;j++){
+			setElem(j,i,clr);
+		}
+	}
+}
+void matrix::filledLattice(point p1, point p2, const color &clr1, const color &clr2, long size){
+	long x1 = MIN(p1.X, p2.X);
+	long x2 = MAX(p1.X, p2.X);
+	long y1 = MIN(p1.Y, p2.Y);
+	long y2 = MAX(p1.Y, p2.Y);
+	for(long i = x1;i<=x2;i++){
+		for(long j = y1;j<=y2;j++){
+			if(i % size < size/2 && j % size < size/2 || i % size >= size/2 && j % size >= size/2){
+				setElem(j,i,clr1);
+			}else{
+				setElem(j,i,clr2);
+			}
 		}
 	}
 }
@@ -954,8 +1107,8 @@ bool matrix::loadPNG(str fileName){
 	png_structp png_ptr;  
 	png_infop info_ptr;  
 	png_bytep* row_pointers;  
-	b8 buf[4];  
-	i32 w, h, x, y, temp, color_type;
+	uchar buf[4];  
+	long w, h, x, y, temp, color_type;
 	fp = fopen( fileName.c_str(), "rb" );  
 	if(!fp) {
 		return false;  
@@ -991,10 +1144,10 @@ bool matrix::loadPNG(str fileName){
 		for( y=0; y<h; ++y ) {  
 			for( x=0; x<w*4; ) {  
 				/* 以下是RGBA数据，需要自己补充代码，保存RGBA数据 */  
-				data[temp].set_R(row_pointers[y][x++]); // red  
-				data[temp].set_G(row_pointers[y][x++]); // green  
-				data[temp].set_B(row_pointers[y][x++]); // blue
-				data[temp].set_A(row_pointers[y][x++]);   
+				data[temp].R = (row_pointers[y][x++]); // red  
+				data[temp].G = (row_pointers[y][x++]); // green  
+				data[temp].B = (row_pointers[y][x++]); // blue
+				data[temp].A = (row_pointers[y][x++]);   
 				temp ++;
 			}  
 		}  
@@ -1004,10 +1157,10 @@ bool matrix::loadPNG(str fileName){
 		temp = 0;
 		for(y=0; y<h; ++y) {  
 			for(x=0; x<w*3;) {  
-				data[temp].set_A(0XFF); // alpha  
-				data[temp].set_R(row_pointers[y][x++]); // red  
-				data[temp].set_G(row_pointers[y][x++]); // green  
-				data[temp].set_B(row_pointers[y][x++]); // blue  
+				data[temp].A = (0XFF); // alpha  
+				data[temp].R = (row_pointers[y][x++]); // red  
+				data[temp].G = (row_pointers[y][x++]); // green  
+				data[temp].B = (row_pointers[y][x++]); // blue  
 				temp ++;
 			}  
 		}  
@@ -1016,14 +1169,15 @@ bool matrix::loadPNG(str fileName){
 		fclose(fp);  
 		png_destroy_read_struct( &png_ptr, &info_ptr, 0);  
 		return false;  
-	}  
+	}
+	fclose(fp);
 	png_destroy_read_struct( &png_ptr, &info_ptr, 0);
 	column = w;
 	row = h;
 	return true;
 }
 bool  matrix::makePNG(str fileName){
-	i32 j, i, temp, pos,pos1;    
+	long j, i, temp, pos,pos1;    
 	png_structp png_ptr;  
 	png_infop info_ptr;   
 	png_bytep * row_pointers;  
@@ -1046,10 +1200,10 @@ bool  matrix::makePNG(str fileName){
 		row_pointers[i] = new unsigned char[temp];
 		for(j = 0; j < temp; j += 4)  
 		{  
-			row_pointers[i][j]   = data[pos1].get_R(); // red  
-			row_pointers[i][j+1] = data[pos1].get_G(); // green  
-			row_pointers[i][j+2] = data[pos1].get_B(); // blue  
-			row_pointers[i][j+3] = data[pos1].get_A(); // alpha
+			row_pointers[i][j]   = data[pos1].R; // red  
+			row_pointers[i][j+1] = data[pos1].G; // green  
+			row_pointers[i][j+2] = data[pos1].B; // blue  
+			row_pointers[i][j+3] = data[pos1].A; // alpha
 			pos1++;
 			++pos;  
 		}  
@@ -1063,146 +1217,293 @@ bool  matrix::makePNG(str fileName){
 	fclose(fp);  
 	return true;
 }
-
 palette::palette(){
 	clear();
 }
-
 palette::~palette(){
 }
-lcolor& palette::operator[] (i32 i){
+colorList& palette::operator[] (long i){
 	return table[i];
 }
 void palette::clear(){
 	table.clear();
 }
-void palette::push(lcolor colorList){
-	table.push_back(colorList);
+void palette::push(const colorList &list){
+	table.push_back(list);
 }
-i32 palette::getCount() const{
+void palette::remove(long paletteID){
+	table.erase(table.begin() + paletteID);
+}
+long palette::getCount() const{
 	return table.size();
 }
-i32 palette::getTotalColorCount() const{
-	i32 total = 0;
-	for(i32 i = 0;i<table.size();i++){
+long palette::getTotalColorCount() const{
+	long total = 0;
+	for(long i = 0;i<table.size();i++){
 		total += table[i].size();
 	}
 	return total;
 }
-i32 palette::getColorCount(i32 paletteID) const{
+long palette::getColorCount(long paletteID) const{
 	if(paletteID >= getCount()){
 		return -1;
 	}
 	return table[paletteID].size();
 }
-i32 palette::findColor(color goalColor, i32 paletteID) const{
+long palette::findColor(color goalColor, long paletteID) const{
 	if(paletteID >= getCount()){
 		return -2;
 	}
-	lcolor colorList = table[paletteID];
-	for(i32 i = 0;i<colorList.size();i++){
+	colorList colorList = table[paletteID];
+	for(long i = 0;i<colorList.size();i++){
 		if(colorList[i] == goalColor){
 			return i;
 		}
 	}
 	return -1;
 }
-bool palette::joinWith(const lcolor &colorList, i32 paletteID){
+long palette::matchColor(color goalColor, long paletteID) const{
+	long nearest;
+	return matchColor(goalColor, paletteID, nearest);
+}
+//匹配规则：
+//首先如果同为透明颜色则直接为匹配透明颜色·匹配距离为零
+//如果本身不是透明颜色，则按RGB最短欧氏距离匹配
+//如果本身不是透明颜色，但第一次匹配到的颜色是透明颜色，也以此匹配，等后续更新；若无更新则匹配距离依然为MAX
+long palette::matchColor(color goalColor, long paletteID, long &nearestDistance) const{
+	if(paletteID >= getCount())
+		return -2;
+	colorList colorList = table[paletteID];
+	if(colorList.size() == 0)
+		return 0;
+	long nearestID = -1;
+	nearestDistance = 3 * 0x100 * 0x100;
+	for(long i = 0;i<colorList.size();i++){
+		if(colorList[i].A == 0 && goalColor.A <= 0x7F){
+			//匹配透明颜色
+			nearestDistance = 0;
+			return i;
+		}else if(colorList[i].A == 0){
+			//加此步是为了防止非透明颜色与透明颜色进行匹配
+			continue;
+		}else{
+			//匹配普通颜色
+			long newNearest = color::EuclideanDistanceSquareOf(colorList[i], goalColor);
+			if(newNearest < nearestDistance){
+				nearestDistance = newNearest;
+				nearestID = i;
+			}
+		}
+	}
+	if(nearestID == -1){
+		//找不到的话返回0
+		nearestID = 0;
+	}
+	return nearestID;
+}
+bool palette::joinWith(const colorList &list, long paletteID){
 	if(paletteID >= getCount()){
 		return false;
 	}
-	lcolor colorList2;
-	colorList2.clear();
-	i32 i;
-	for(i = 0;i<colorList.size();i++){
-		if(findColor(colorList[i], paletteID) < 0){
-			colorList2.push_back(colorList[i]);
+	colorList list2;
+	list2.clear();
+	long i;
+	for(i = 0;i<list.size();i++){
+		if(findColor(list[i], paletteID) < 0){
+			list2.push_back(list[i]);
 		}
 	}
-	if(getColorCount(paletteID)+colorList2.size() > 256){
+	if(getColorCount(paletteID)+list2.size() > 256){
 		return false;
 	}
-	for(i = 0;i<colorList2.size();i++){
-		table[paletteID].push_back(colorList2[i]);
+	for(i = 0;i<list2.size();i++){
+		table[paletteID].push_back(list2[i]);
 	}
 	return true;
 }
-bool palette::tinyMake(stream &s, i32 paletteID){
+bool palette::tinyMake(stream &s, long paletteID){
 	if(paletteID >= getCount()){
 		return false;
 	}
-	i32 i;
-	lcolor colorList = table[paletteID];
-	s.allocate(sizeof(color)*(10+colorList.size()));
-	s.push((i32)colorList.size());
-	for(i = 0;i<colorList.size();i++){
-		s.push((b8)colorList[i].get_R());
-		s.push((b8)colorList[i].get_G());
-		s.push((b8)colorList[i].get_B());
-		s.push((b8)colorList[i].get_A());
+	long i;
+	colorList list = table[paletteID];
+	s.allocate(sizeof(color)*(10+list.size()));
+	s.push((long)list.size());
+	for(i = 0;i<list.size();i++){
+		s.push((uchar)list[i].R);
+		s.push((uchar)list[i].G);
+		s.push((uchar)list[i].B);
+		s.push((uchar)list[i].A);
 	}
 	return false;
 }
 bool palette::bigMake(stream &s){
-	i32 i,j;
-	lcolor colorList;
+	long i,j;
+	colorList list;
 	s.allocate(sizeof(color)*(1000+getCount()+getTotalColorCount()));
-	s.push((i32)getCount());
+	s.push((long)getCount());
 	for(j=0;j<getCount();j++){
-		colorList = table[j];
-		s.push((i32)colorList.size());
-		for(i = 0;i<colorList.size();i++){
-			s.push((b8)colorList[i].get_R());
-			s.push((b8)colorList[i].get_G());
-			s.push((b8)colorList[i].get_B());
-			s.push((b8)colorList[i].get_A());
+		list = table[j];
+		s.push((long)list.size());
+		for(i = 0;i<list.size();i++){
+			s.push((uchar)list[i].R);
+			s.push((uchar)list[i].G);
+			s.push((uchar)list[i].B);
+			s.push((uchar)list[i].A);
 		}
 	}
 	return false;
 }
 
-bool palette::makeACT(str fileName, const lcolor &lc){
+bool palette::makeACT(str fileName, const colorList &lc){
 	stream s;
 	s.allocate(772);
-	i32 alIndex = 0;
-	for(i32 i = 0;i<256;i++){
+	long alphaIndex = 0;
+	for(long i = 0;i<256;i++){
 		if(i<lc.size()){
-			if(lc[i].get_A() == 0){
-				alIndex = i;
+			if(lc[i].A == 0){
+				alphaIndex = i;
 			}
-			s.push(lc[i].get_R());
-			s.push(lc[i].get_G());
-			s.push(lc[i].get_B());
+			s.push(lc[i].R);
+			s.push(lc[i].G);
+			s.push(lc[i].B);
 		}else{
-			s.push((b8)0);
-			s.push((b8)0);
-			s.push((b8)0);
+			s.push((uchar)0);
+			s.push((uchar)0);
+			s.push((uchar)0);
 		}
 	}
-	s.push((b8)(lc.size() >> 8));
-	s.push((b8)(lc.size() & 0xff));
-	s.push((b8)0);
-	s.push((b8)(alIndex & 0xff));
+	s.push((uchar)(lc.size() >> 8));
+	s.push((uchar)(lc.size() & 0xff));
+	s.push((uchar)0);
+	s.push((uchar)(alphaIndex & 0xff));
 	s.makeFile(fileName);
 	s.release();
 	return true;
 }
-bool palette::loadACT(str fileName, lcolor &lc){
+bool palette::loadACT(str fileName, colorList &lc){
 	stream s;
 	s.loadFile(fileName);
-	if(s.getLen() != 772)
-		return false;
-	i32 clrCount = s[768]*256+s[769];
-	if(clrCount >= 256)
-		return false;
-	i32 alIndex = s[771];
-	if(alIndex >= clrCount)
-		return false;
-	lc.clear();
-	for(i32 i = 0;i<clrCount;i++){
-		lc.push_back(color(0xFF, s[3*i], s[3*i+1], s[3*i+2]));
+	long len = s.getLen();
+	if(len == 768){
+		lc.clear();
+		for(long i = 0;i<256;i++){
+			lc.push_back(color(0xFF, s[3*i], s[3*i+1], s[3*i+2]));
+		}
+		return true;
+	}else if(len == 772){
+		long alphaIndex = s[771] | s[770] << 8;
+		long clrCount = s[768] << 8 | s[769];
+		if(clrCount >= 256){
+			clrCount = 256;
+		}
+		lc.clear();
+		for(long i = 0;i<clrCount;i++){
+			lc.push_back(color(0xFF, s[3*i], s[3*i+1], s[3*i+2]));
+		}
+		if(alphaIndex < 256){
+			lc[alphaIndex] = color(0, 0, 0, 0);
+		}
+		return true;
 	}
-	lc[alIndex].set(0);
+	s.release();
+	return false;
+}
+bool palette::makeCID(str fileName, const colorList &lc){
+	stream s;
+	s.allocate(lc.size()*4 + 100);
+	s.pushString("KoishiColor");
+	s.push((uchar)0);
+	s.push((dword)lc.size());
+	for(int i = 0;i<lc.size();i++){
+		s.push((uchar)lc[i].A);
+		s.push((uchar)lc[i].R);
+		s.push((uchar)lc[i].G);
+		s.push((uchar)lc[i].B);
+	}
+	s.makeFile(fileName);
 	s.release();
 	return true;
+}
+bool palette::loadCID(str fileName, colorList &lc){
+	stream s;
+	s.loadFile(fileName);
+	s.ptMoveTo(12);
+	dword clrCount;
+	s.read(clrCount);
+	for(int i = 0;i<clrCount;i++){
+		uchar p;
+		color clr;
+		s.read(p);
+		clr.A = p;
+		s.read(p);
+		clr.R = p;
+		s.read(p);
+		clr.G = p;
+		s.read(p);
+		clr.B = p;
+	}
+	s.release();
+	return true;
+}
+colorList palette::palette2(){
+	colorList cl;
+	cl.push_back(color(0,0,0,0));
+	cl.push_back(color(0xFF, 0xFF, 0xFF, 0xFF));
+	cl.push_back(color(0xFF, 0x00, 0x00, 0x00));
+	return cl;
+}
+colorList palette::palette16(){
+	colorList cl;
+	cl.push_back(color(0,0,0,0));
+	cl.push_back(color(0xFF, 0xFF, 0xFF, 0xFF));
+	cl.push_back(color(0xFF, 0xC0, 0xC0, 0xC0));
+	cl.push_back(color(0xFF, 0xFF, 0x00, 0x00));
+	cl.push_back(color(0xFF, 0xFF, 0xFF, 0x00));
+	cl.push_back(color(0xFF, 0x00, 0xFF, 0x00));
+	cl.push_back(color(0xFF, 0x00, 0xFF, 0xFF));
+	cl.push_back(color(0xFF, 0x00, 0x00, 0xFF));
+	cl.push_back(color(0xFF, 0xFF, 0x00, 0xFF));
+	cl.push_back(color(0xFF, 0x00, 0x00, 0x00));
+	cl.push_back(color(0xFF, 0x80, 0x80, 0x80));
+	cl.push_back(color(0xFF, 0x80, 0x00, 0x00));
+	cl.push_back(color(0xFF, 0x80, 0x80, 0x00));
+	cl.push_back(color(0xFF, 0x00, 0x80, 0x00));
+	cl.push_back(color(0xFF, 0x00, 0x80, 0x80));
+	cl.push_back(color(0xFF, 0x00, 0x00, 0x80));
+	cl.push_back(color(0xFF, 0x80, 0x00, 0x80));
+	return cl;
+}
+colorList palette::palette64(){
+	//rgb222
+	colorList cl;
+	uchar p[4] = {0, 0x55, 0xAA, 0xFF};
+	cl.push_back(color(0,0,0,0));
+	for(int i = 0;i<4;i++){
+		for(int j = 0;j<4;j++){
+			for(int k = 0;k<4;k++){
+				if(i == 0 && j == 0 && k == 1)
+					continue;
+				cl.push_back(color(0xFF, p[i], p[j], p[k]));
+			}
+		}
+	}
+	return cl;
+}
+colorList palette::palette256(){
+	//rgb332
+	colorList cl;
+	uchar rg3[8]  = {0, 0x24, 0x48, 0x6D, 0x91, 0xB5, 0xDA, 0xFF};
+	uchar b2[4]  = {0, 0x55, 0xAA, 0xFF};
+	cl.push_back(color(0,0,0,0));
+	for(long i = 0;i<8;i++){
+		for(long j = 0;j<8;j++){
+			for(long k = 0;k<4;k++){
+				if(i == 0 && j == 0 && k == 1)
+					continue;
+				cl.push_back(color(0xFF, rg3[i], rg3[j], b2[k]));
+			}
+		}
+	}
+	return cl;
 }

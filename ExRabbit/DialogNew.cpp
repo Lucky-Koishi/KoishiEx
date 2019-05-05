@@ -133,7 +133,6 @@ void CDialogNew::OnBnClickedOk()
 		dlg->no.create();
 		dlg->fileNPKname = L"newNPK.npk";
 		dlg->updateIMGlist();
-		dlg->writeLog(L"新建",L"NPK");
 	}else if(m_ch3.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
@@ -145,11 +144,9 @@ void CDialogNew::OnBnClickedOk()
 		dlg->switchIMGver(dlg->io.version);
 		dlg->updateIMGlist();
 		dlg->updatePIClist();
-		dlg->updateCLRlist();
 		dlg->updateTEXlist();
-		dlg->updateNPKInfo();
-		dlg->updatePICInfo();
-		dlg->writeLog(L"新建",L"IMGV2");
+		dlg->updateColorTable();
+		dlg->updateInfo();
 	}else if(m_ch4.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
@@ -161,11 +158,9 @@ void CDialogNew::OnBnClickedOk()
 		dlg->switchIMGver(dlg->io.version);
 		dlg->updateIMGlist();
 		dlg->updatePIClist();
-		dlg->updateCLRlist();
+		dlg->updateColorTable();
 		dlg->updateTEXlist();
-		dlg->updateNPKInfo();
-		dlg->updatePICInfo();
-		dlg->writeLog(L"新建",L"IMGV4");
+		dlg->updateInfo();
 	}else if(m_ch5.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
@@ -177,11 +172,9 @@ void CDialogNew::OnBnClickedOk()
 		dlg->switchIMGver(dlg->io.version);
 		dlg->updateIMGlist();
 		dlg->updatePIClist();
-		dlg->updateCLRlist();
+		dlg->updateColorTable();
 		dlg->updateTEXlist();
-		dlg->updateNPKInfo();
-		dlg->updatePICInfo();
-		dlg->writeLog(L"新建",L"IMGV5");
+		dlg->updateInfo();
 	}else if(m_ch6.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
@@ -192,18 +185,16 @@ void CDialogNew::OnBnClickedOk()
 		dlg->no.IMGpush(dlg->io, "new.img");
 		dlg->io.CLRnewPalette();
 		dlg->switchIMGver(dlg->io.version);
-		dlg->m_cbPro.ResetContent();
-		dlg->m_cbPro.AddString(L"调色板方案0");
-		dlg->m_cbPro.SetCurSel(0);
+		GET_DLG_CTRL(CComboBox, IDC_COMBO_PRO)->ResetContent();
+		GET_DLG_CTRL(CComboBox, IDC_COMBO_PRO)->AddString(L"0");
+		GET_DLG_CTRL(CComboBox, IDC_COMBO_PRO)->SetCurSel(0);
 		dlg->updateIMGlist();
 		dlg->updatePIClist();
-		dlg->updateCLRlist();
+		dlg->updateColorTable();
 		dlg->updateTEXlist();
-		dlg->updateNPKInfo();
-		dlg->updatePICInfo();
-		dlg->writeLog(L"新建",L"IMGV6");
+		dlg->updateInfo();
 	}
-	dlg->m_lIMG.SetSelectionMark(0);
+	GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(0);
 	dlg->crtIMGid = 0;
 	ShowWindow(SW_HIDE);
 }
