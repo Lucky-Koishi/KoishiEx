@@ -66,6 +66,8 @@ BOOL ModalTransform::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
+	CREATEW(bar, IDD_TINY_PROGRESSBAR);
+
 	out.target = 1;
 	out.version = V2;
 	out.outputFormat = ARGB8888;
@@ -283,7 +285,7 @@ void ModalTransform::OnLbnSelchangeListPalette(){
 	updatePalette();
 }
 void ModalTransform::OnBnClickedOk(){
-	out.makeTexture = GET_CTRL(CButton, IDC_CHECK_USE_TEXTURE)->GetCheck();
+	out.makeTexture = GET_CTRL(CButton, IDC_CHECK_USE_TEXTURE)->GetCheck() == 1;
 	if(out.version == V4){
 		//V4采用当前选择的色表
 		colorList cl = out.useColorPalette[currentPaletteID];
@@ -332,16 +334,118 @@ void ModalTransform::OnMenuIndexing256(){
 
 void ModalTransform::OnMenuIndexingBaseOnFrame(){
 	// TODO: 在此添加命令处理程序代码
-	MessageBox(L"施工中");
+	if(in.currentFrame < 0){
+		MessageBox(L"并没有选择任何帧喵！",L"提示喵");
+		return;
+	}
+	AfxBeginThread(pickColorFrame, this);
 }
 
 
 void ModalTransform::OnMenuIndexingBaseOnImage(){
-	// TODO: 在此添加命令处理程序代码
-	MessageBox(L"施工中");
+	AfxBeginThread(pickColorImage, this);
 }
 
-
+UINT ModalTransform::pickColorFrame(void*context){
+	ModalTransform*dlg = (ModalTransform*)context;
+	IMGobject *ptrIO = dlg->in.contextIO;
+	matrix mat;
+	palette pal;
+	colorList clrList;
+	queue clrCount;
+	pal.push(clrList);
+	if(!ptrIO->PICextract(dlg->in.currentFrame, mat, dlg->in.currentPalette)){
+		dlg->MessageBox(L"解析当前图片失败喵！",L"提示喵");
+		return 0U;
+	}
+	dlg->bar.show(100);
+	dlg->bar.setInfo(L"正在提取颜色喵……", 0);
+	for(int i = 0;i<mat.getElemCount();i++){
+		color clr = mat.getElem(i);
+		long clrPos = pal.findColor(clr,0);
+		if(clrPos == -1){
+			pal[0].push_back(clr);
+			clrCount.push_back(1);
+		}else{
+			clrCount[clrPos] ++;
+		}
+	}
+	clrList = pal[0];
+	long finalColorCount = MIN(0xFF, pal.getColorCount(0));
+	colorList finalColorList;
+	dlg->bar.show(finalColorCount);
+	for(int i = 0;i<finalColorCount; i++){
+		dlg->bar.setInfo(L"正在分析颜色喵……", i);
+		long maxCount = 0;
+		long maxID = -1;
+		for(int j = 0;j<clrCount.size();j++){
+			if(clrCount[j] > maxCount){
+				maxCount =clrCount[j];
+				maxID = j;
+			}
+		}
+		finalColorList.push_back(clrList[maxID]);
+		clrList.erase(clrList.begin() + maxID);
+		clrCount.erase(clrCount.begin() + maxID);
+	}
+	dlg->bar.setInfo(L"正在生成调色板喵……", finalColorCount);
+	dlg->out.useColorPalette[dlg->currentPaletteID] = KoishiExpand::KoishiImageTool::nearbySort(finalColorList);
+	dlg->bar.hide();
+	dlg->updatePaletteList();
+	dlg->updatePalette();
+	return 0U;
+}
+UINT ModalTransform::pickColorImage(void*context){
+	ModalTransform*dlg = (ModalTransform*)context;
+	IMGobject *ptrIO = dlg->in.contextIO;
+	palette pal;
+	colorList clrList;
+	queue clrCount;
+	pal.push(clrList);
+	dlg->bar.show(ptrIO->indexCount);
+	for(long getFrame = 0;getFrame<ptrIO->indexCount;getFrame ++){
+		dlg->bar.setInfo(L"正在提取第"+NumToCStr(getFrame+1)+L"帧的颜色喵……", getFrame);
+		matrix mat;
+		if(!ptrIO->PICextract(getFrame, mat, dlg->in.currentPalette)){
+			continue;
+		}
+		for(int i = 0;i<mat.getElemCount();i++){
+			color clr = mat.getElem(i);
+			long clrPos = pal.findColor(clr,0);
+			if(clrPos == -1){
+				pal[0].push_back(clr);
+				clrCount.push_back(1);
+			}else{
+				clrCount[clrPos] ++;
+			}
+		}
+		mat.destory();
+	}
+	clrList = pal[0];
+	long finalColorCount = MIN(0xFF, pal.getColorCount(0));
+	colorList finalColorList;
+	dlg->bar.show(finalColorCount);
+	for(int i = 0;i<finalColorCount; i++){
+		dlg->bar.setInfo(L"正在分析颜色喵……", i);
+		long maxCount = 0;
+		long maxID = -1;
+		for(int j = 0;j<clrCount.size();j++){
+			if(clrCount[j] > maxCount){
+				maxCount =clrCount[j];
+				maxID = j;
+			}
+		}
+		finalColorList.push_back(clrList[maxID]);
+		clrList.erase(clrList.begin() + maxID);
+		clrCount.erase(clrCount.begin() + maxID);
+	}
+	dlg->bar.setInfo(L"正在生成调色板喵……", finalColorCount);
+	dlg->out.useColorPalette[dlg->currentPaletteID] = KoishiExpand::KoishiImageTool::nearbySort(finalColorList);
+	dlg->bar.hide();
+	dlg->updatePaletteList();
+	dlg->updatePalette();
+	return 0U;
+}
 void ModalTransform::OnMenuIndexingImportPhotoshop(){
 	// TODO: 在此添加命令处理程序代码
 	colorList cl;

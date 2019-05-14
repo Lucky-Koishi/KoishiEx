@@ -47,6 +47,4 @@ public:
 	afx_msg void OnBnClickedButton20();
 	afx_msg void OnBnClickedButton22();
 	CEdit m_eKeyWord;
-
-	str stringInfo[7];
 };

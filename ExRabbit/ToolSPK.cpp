@@ -73,17 +73,6 @@ BOOL CToolSPK::OnInitDialog()
 	m_lSPK.EasyInsertColumn(L"NPK文件名,320,大小,80");
 	serverChoose = 0;
 
-	stringInfo[0] = "jvvr<11f/hkijvgt0fp0pgzqpefp0eq0mt1ucouwpifph1pgqrng1fphaji1";
-	stringInfo[1] = "jvvr<11f/hkijvgt0fp0pgzqpefp0eq0mt1ucouwpifph1pgqrng1fphaqrgp1";
-	stringInfo[2] = "jvvr<11ygdfqyp40pgzqp0eq0lr1ctcf1tgcn1";
-	stringInfo[1] = "jvvr<11fqypnqcf0fhqpgqrng0eqo1Rcvej1";
-	stringInfo[1] = "jvvr<11fqyp/wrfcvg0ss0eqo1fph1cwvqrcvej1fphagzr1fph0gzr30hwnn0vev1";
-	stringInfo[1] = "jvvr<11fqyp/wrfcvg0ss0eqo1fph1cwvqrcvej1fphagzr1fph0gzr40hwnn0vev1";
-	stringInfo[1] = "jvvr<11fqyp/wrfcvg0ss0eqo1fph1cwvqrcvej1fphagzr1fph0gzr70hwnn0vev1";
-
-	stringInfo[1] = "rcemcig0nuv";
-	stringInfo[2] = "cwvq0nuv";
-
 	URLaddr = L"http://d-fighter.dn.nexoncdn.co.kr/samsungdnf/neople/dnf_hg/";
 #endif
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -169,7 +158,15 @@ void CToolSPK::loadPackage(){
 				str name = (char*)lo2.list[i].name;
 				nameStr = StrToCStr(name);
 				str size = (char*)lo2.list[i].lenStr;
-				sizeStr = StrToCStr(size)+L"字节";
+				sizeStr = StrToCStr(size);
+				int len = _ttoi(sizeStr);
+				if(len > 1024 * 1024 * 10){
+					sizeStr = NumToCStr(len / 1024 / 1024)+L" MB";
+				}else if(len > 1024 * 10){
+					sizeStr = NumToCStr(len / 1024)+L" KB";
+				}else{
+					sizeStr = NumToCStr(len)+L" B";
+				}
 				m_lSPK.EasyInsertItem(nameStr+L","+sizeStr);
 			}
 		}else{
@@ -315,7 +312,7 @@ UINT CToolSPK::threadDownloadPackageList(PVOID para){
 		dlg->loadPackage();
 		dlg->m_eDownloadSPK.SetWindowText(L"更新完毕喵，选择一个喵。");
 	}else{
-		dlg->MessageBox(L"404 NOT FOUND喵！",L"提示喵");
+		dlg->MessageBox(L"下载失败喵！",L"提示喵");
 		dlg->m_eSPK.SetWindowText(L"下载列表失败喵。");
 	}
 	return 0;
@@ -330,21 +327,19 @@ UINT CToolSPK::threadDownloadSPK(PVOID para){
 		dlg->MessageBox(L"下载完毕喵！",L"提示喵");
 		dlg->m_eSPK.SetWindowText(dlg->localAddrFileName);
 	}else{
-		dlg->MessageBox(L"404 NOT FOUND喵！",L"提示喵");
+		dlg->MessageBox(L"下载失败喵！",L"提示喵");
 		dlg->m_eSPK.SetWindowText(L"下载失败喵。");
 	}
 	return 0;
 }
 
-void CToolSPK::OnBnClickedButton16()
-{
+void CToolSPK::OnBnClickedButton16(){
 	// TODO: 在此添加控件通知处理程序代码
 	AfxBeginThread(threadDownloadSPK, (PVOID)this);
 }
 
 
-void CToolSPK::OnBnClickedButton19()
-{
+void CToolSPK::OnBnClickedButton19(){
 	// TODO: 打开其他SPK文件
 	CString defExt = _T("SPK文件(*.SPK)|*.SPK");
 	CString extFilter = _T("SPK文件(*.SPK)|*.SPK|TCT文件(*.TCT)|*.TCT||");
@@ -448,8 +443,16 @@ void CToolSPK::OnBnClickedButton22()
 				if(nameStr.Find(keyWord) == -1){
 					continue;
 				}
-				str size = (char*)lo2.list[i].lenStr;
-				sizeStr = StrToCStr(size)+L"字节";
+				str size= (char*)lo2.list[i].lenStr;
+				sizeStr = StrToCStr(size);
+				int len = _ttoi(sizeStr);
+				if(len > 1024 * 1024 * 10){
+					sizeStr = NumToCStr(len / 1024 / 1024)+L" MB";
+				}else if(len > 1024 * 10){
+					sizeStr = NumToCStr(len / 1024)+L" KB";
+				}else{
+					sizeStr = NumToCStr(len)+L" B";
+				}
 				m_lSPK.EasyInsertItem(nameStr+L","+sizeStr);
 			}
 		}else{

@@ -25,6 +25,7 @@
 #include "ModalAddMark.h"
 #include "ModalGradient.h"
 #include "ModalInsertTexture.h"
+#include "ModalImageHide.h"
 #include "ModalTransform.h"
 #include "ModalRename.h"
 #include "ModalInsertImage.h"
@@ -81,7 +82,7 @@ public:
 	int barHeight, barPart1, barPart2;		//状态栏高，状态栏部分1宽度，部分2宽度
 	
 	//其他量
-	//bool useColorTable;			//使用颜色表(同时禁止使用颜色列表)
+	//bool NPKsaveAlert;
 	bool saveAlert;				//保存了IMG
 	int crtIMGid;				//IMG列表当前高亮
 	int fndIMGid;				//IMG列表当前寻找位置
@@ -173,12 +174,10 @@ public:
 	CPoint getWinMouseAxis();				//获得鼠标的窗口内坐标
 public:
 	CDialogNew dNewFile;
-	CDialogAbout dAbout;
-	CDlgBar dProcessBar;
-
 	TinyBar bar;
 
 	CBitmap m_logoPic;
+	CBitmap m_buttonPic[25];
 	CImageList i_lIMG,i_lPIC,i_lTEX;
 	void draw(bool isTex = false);
 public:
@@ -232,17 +231,6 @@ public:
 	afx_msg void OnMain08();
 	afx_msg void OnModify01();
 	afx_msg void OnModify02();
-	afx_msg void OnTool01();
-	afx_msg void OnTool02();
-	afx_msg void OnTool03();
-	afx_msg void OnTool04();
-	afx_msg void OnTool05();
-
-	static UINT threadImportNPK(PVOID para);
-	struct structImportNPKPara{
-		str fileName;		//文件名
-		int conflictPara;	//冲突检测
-	}importNPKPara;
 
 	static UINT threadMix(PVOID para);
 
@@ -254,6 +242,9 @@ public:
 		double zoomRate;		//缩放比例
 		double oldZoomRate;		//旧缩放比例
 		bool showPalette;		//是否显示色表
+		bool showAxis;			
+		bool showCanvas;
+		bool showBound;
 		bool indexMode;			//索引模式
 		bool entireTextureMode;	//纹理集引用模式
 		bool compareMode;		//IMG比较模式
@@ -264,9 +255,6 @@ public:
 
 	static UINT lazyThread(PVOID para);
 
-	afx_msg void OnTool06();
-	afx_msg void OnTool07();
-	afx_msg void OnTool08();
 	afx_msg void OnBnClickedToolButton1();
 	afx_msg void OnBnClickedToolButton2();
 	afx_msg void OnBnClickedToolButton3();
@@ -373,6 +361,11 @@ public:
 	static UINT ThreadImageDelete(void*context);
 	int ParaImageDelete;
 	afx_msg void OnMenuImageRename();
+
+	afx_msg void OnMenuImageHide();
+	static UINT ThreadImageHide(void*context);
+	ModalImageHide::OUTPUT ParaImageHide;
+
 	afx_msg void OnMenuImageTransform();
 	static UINT ThreadImageTransform(void*context);
 	ModalTransform::OUTPUT ParaImageTransform;
@@ -393,4 +386,18 @@ public:
 	afx_msg void OnMenuColorPaletteCopy();
 	afx_msg void OnMenuColorPaletteImport();
 	afx_msg void OnMenuColorPaletteDelete();
+	afx_msg void OnToolAvatar();
+	afx_msg void OnToolNpkDict();
+	afx_msg void OnToolImgSearch();
+	afx_msg void OnToolDownload();
+	afx_msg void OnToolForceExtract();
+	afx_msg void OnToolOpenOutputFolder();
+	afx_msg void OnDrawColorTable();
+	afx_msg void OnDrawCanvas();
+	afx_msg void OnDrawAxis();
+	afx_msg void OnDrawBound();
+	afx_msg void OnDrawSetCompare1();
+	afx_msg void OnDrawSetCompare2();
+	afx_msg void OnDrawCompareEnabled();
+	afx_msg void OnDrawCompareDisabled();
 };

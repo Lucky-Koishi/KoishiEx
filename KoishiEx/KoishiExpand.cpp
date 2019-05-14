@@ -5,28 +5,49 @@
 using namespace Koishi;
 using namespace KoishiAvatar;
 using namespace KoishiExpand::KoishiMarkTool;
+using namespace KoishiExpand::KoishiImageTool;
+using namespace KoishiExpand::KoishiDownloadTool;
 void KoishiExpand::KoishiMarkTool::CharMat(char p, matrix &mat, color clr){
 	if(p>='a'&& p <= 'z'){
 		p = p-'a'+'A';
 	}
+	unsigned long charCode[0xFF];
+	charCode['0'] = 0x0E9D72E;
+	charCode['1'] = 0x0E210C4;
+	charCode['2'] = 0x1F1322E;
+	charCode['3'] = 0x0E8B22E;
+	charCode['4'] = 0x08FA54C;
+	charCode['5'] = 0x0F83C3F;
+	charCode['6'] = 0x0E8BC3E;
+	charCode['7'] = 0x022221F;
+	charCode['8'] = 0x0E8BA2E;
+	charCode['9'] = 0x0C87A2E;
+	charCode['A'] = 0x118FE2E;
+	charCode['B'] = 0xF8BE2F;
+	charCode['C'] = 0x1E0843E;
+	charCode['D'] = 0xF8C62F;
+	charCode['E'] = 0x1F0BC3F;
+	charCode['F'] = 0x10BC3F;
+	charCode['G'] = 0x1E8F43E;
+
 	int b[43][25]={
 		{0,1,1,1,0,1,0,0,1,1,1,0,1,0,1,1,1,0,0,1,0,1,1,1,0},
 		{0,0,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,1,1,0},
 		{0,1,1,1,0,1,0,0,0,1,0,0,1,1,0,0,1,0,0,0,1,1,1,1,1},
 		{0,1,1,1,0,1,0,0,0,1,0,0,1,1,0,1,0,0,0,1,0,1,1,1,0},
-		{0,0,1,1,0,0,1,0,1,0,1,0,0,1,0,1,1,1,1,1,0,0,0,1,0},
+		{0,0,1,1,0,0,1,0,1,0,1,0,0,1,0,1,1,1,1,1,0,0,0,1,0},//4
 		{1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0},
 		{0,1,1,1,1,1,0,0,0,0,1,1,1,1,0,1,0,0,0,1,0,1,1,1,0},
-		{1,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0},
+		{1,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0},//7
 		{0,1,1,1,0,1,0,0,0,1,0,1,1,1,0,1,0,0,0,1,0,1,1,1,0},
 		{0,1,1,1,0,1,0,0,0,1,0,1,1,1,1,0,0,0,0,1,0,0,1,1,0},
-		{0,1,1,1,0,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1},
+		{0,1,1,1,0,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1},//A
 		{1,1,1,1,0,1,0,0,0,1,1,1,1,1,0,1,0,0,0,1,1,1,1,1,0},
 		{0,1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,1,1,1},
 		{1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0},
-		{1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,1,0,0,0,0,1,1,1,1,1},
+		{1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,1,0,0,0,0,1,1,1,1,1},//E
 		{1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0},
-		{0,1,1,1,1,1,0,0,0,0,1,0,1,1,1,1,0,0,0,1,0,1,1,1,1},
+		{0,1,1,1,1,1,0,0,0,0,1,0,1,1,1,1,0,0,0,1,0,1,1,1,1},//G
 		{1,0,0,0,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1},
 		{0,1,1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,1,1,0},
 		{0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,1,0,0,0,1,0,1,1,1,0},
@@ -490,204 +511,6 @@ void KoishiExpand::KoishiMarkTool::StrMatLarge(str s, Koishi::matrix &mat, Koish
 		subMat.destory();
 	}
 }
-
-bool KoishiExpand::KoishiMarkTool::AvatarMarking(std::string avatarNPKfileName){
-	int i, j, k;
-	NPKobject inputNo;
-	NPKobject outputNo;
-	IMGobject io;
-
-
-	if(!inputNo.loadFile(avatarNPKfileName)){
-		printf("No good npk files...\n");
-		return false;
-	}
-	outputNo.create();
-	////////////////////////////////////////////////////////////////////
-	//第一步：寻找需要打标的IMG文件
-	std::vector<int> imgSitList;
-	std::vector<int> imgIDList;
-	std::vector<int> imgPartList;
-	//avatarName av;
-
-	imgSitList.clear();
-	imgIDList.clear();
-	imgPartList.clear();
-	printf("Calculating marking imgs...\n");
-	for(i=0;i<inputNo.count;i++){
-		//av.parse(KoishiAvatar::shorten(inputNo.content[i].get_imgname()));
-		/*if(imgIDList.size() == 0 || imgIDList[imgIDList.size()-1] != av.ID){
-			inputNo.IMGextract(i, io);
-			if(io.PICcontent[0].get_dataSize()>2){
-				imgIDList.push_back(av.ID);
-				imgSitList.push_back(i);
-				imgPartList.push_back((int)av.part);
-			}
-			io.release();
-		}*/
-	}
-	////////////////////////////////////////////////////////////////////
-	//第二步：打标
-	int situ;
-	str imgName;
-	IMGobject ioTemp;
-	point allPt1, allPt2;	//画布左上、右下点
-	matrix mat;				//原图像矩阵
-	matrix markMat,orginMat;
-	matrix markMoved,orginedMoved;
-	stream s;
-	PICinfo pi;
-	for(i=0;i<imgSitList.size();i++){
-		situ = imgSitList[i];
-		inputNo.IMGextract(situ, io);
-		inputNo.IMGextract(situ, ioTemp);
-		imgName = inputNo.content[situ].imgname;
-		printf("Marking ");
-		printf(KoishiAvatar::shorten(imgName).c_str());
-		printf("(%d/%d):\n",1+i, imgSitList.size());
-		if(io.version == V6 && io.paletteData.getCount()<=0){
-			io.release();
-			printf("No palettes...\n");
-			continue;
-		}
-		if(io.version != V2 && io.paletteData[0].size()<=1){
-			io.release();
-			printf("Palette color lacking...\n");
-			continue;
-		}
-		if(io.version == V2){
-			for(k=0;k<io.indexCount;k++){
-				io.PICgetInfo(k, pi);
-				if(pi.get_format() != LINK){
-					if(pi.get_dataSize() <= 2){
-						//continue;
-					}
-					int x1,y1,x2,y2;
-					int alphaIndex = 0;
-					x1 = MIN(20, pi.get_basePt().X);
-					y1 = MIN(180, pi.get_basePt().Y);
-					x2 = pi.get_basePt().X+pi.get_picSize().W;
-					y2 = pi.get_basePt().Y+pi.get_picSize().H;
-					mat.create(y2-y1, x2-x1);
-					io.PICextract(k, orginMat);
-					mat.putFore(orginMat);
-					mat.moveHonz(pi.get_basePt().X-x1);
-					mat.moveVert(pi.get_basePt().Y-y1);
-					StrMatLarge(KoishiAvatar::shorten(imgName), markMat);
-					markMoved.create((markMat.getHeight()+1)*13, markMat.getWidth()+100);
-					markMoved.putFore(markMat);
-					markMoved.moveHonz(20-x1);
-					markMoved.moveVert(180-y1+(markMat.getHeight()+1)*imgPartList[i]);
-					mat.putFore(markMoved);
-					io.PICpreprocess(mat, s, pi);
-					pi.set_basePt(point(x1,y1));
-					ioTemp.PICreplace(k, pi, s);
-					mat.destory();
-					markMat.destory();
-					markMoved.destory();
-					orginMat.destory();
-					s.release();
-				}
-			}
-		}else{
-			for(k=0;k<io.indexCount;k++){
-				io.PICgetInfo(k, pi);
-				if(pi.get_format() != LINK){
-					if(pi.get_dataSize() <= 2){
-						//continue;
-					}
-					int m1,m2;
-					int x1,y1,x2,y2;
-					int alphaIndex = 0;
-					for(j=0;j<io.paletteData[0].size();j++){
-						if(io.paletteData[0][j].A == 0){
-							alphaIndex = j;
-							break;
-						}
-					}
-					x1 = MIN(20, pi.get_basePt().X);
-					y1 = MIN(180, pi.get_basePt().Y);
-					x2 = pi.get_basePt().X+pi.get_picSize().W;
-					y2 = pi.get_basePt().Y+pi.get_picSize().H;
-
-					mat.create(y2-y1, x2-x1);
-					io.PICextractIndexMatrix(k, orginMat);
-					mat.putFore(orginMat);
-					mat.moveHonz(pi.get_basePt().X-x1);
-					mat.moveVert(pi.get_basePt().Y-y1);
-					StrMatLarge(KoishiAvatar::shorten(imgName), markMat, color((alphaIndex==1)?2:1,0,0,0));
-					markMoved.create((markMat.getHeight()+1)*13, markMat.getWidth()+100);
-					markMoved.putFore(markMat);
-					markMoved.moveHonz(20-x1);
-					markMoved.moveVert(180-y1+(markMat.getHeight()+1)*imgPartList[i]);
-					mat.putFore(markMoved);
-
-					for(m1=0;m1<mat.getHeight();m1++){
-						for(m2=0;m2<mat.getWidth();m2++){
-							if((m1<pi.get_basePt().Y-y1 || m2<pi.get_basePt().X-x1) && mat[m1][m2] == color(0,0,0,0)){
-								mat.setElem(m1,m2,color(alphaIndex,0,0,0));
-							}
-						}
-					}
-					io.PICpreprocessIndexMatrix(mat, s, pi);
-					pi.set_basePt(point(x1,y1));
-					ioTemp.PICreplace(k, pi, s);
-					mat.destory();
-					markMat.destory();
-					markMoved.destory();
-					orginMat.destory();
-					s.release();
-				}
-			}
-		}
-		outputNo.IMGpush(ioTemp, imgName);
-		io.release();
-		ioTemp.release();
-		printf("Done.\n");
-	}
-	outputNo.saveFile("(marked)"+avatarNPKfileName);
-	inputNo.release();
-	outputNo.release();
-	return true;
-}
-bool KoishiExpand::KoishiMarkTool::AvatarBatchMarking(std::string avatarNPKfileListName){
-	std::ifstream myfile(avatarNPKfileListName); 
-	if(!myfile.is_open()){
-		printf("No NPK list file exists");
-		system("pause");
-		return false;
-	}
-	str temp;
-	while(getline(myfile,temp)){
-		printf("Now dealing ");
-		printf(temp.c_str());
-		printf("...\n");
-		AvatarMarking(temp);
-	}
-	return true;
-}
-bool KoishiExpand::KoishiMarkTool::MatrixMarking(const matrix &sourceMatrix, matrix &destMatrix, str codeString, int situ){
-	matrix strMatrix;
-	StrMatLarge(codeString, strMatrix);
-	switch(situ){
-	case 1:
-		//上方外侧
-		strMatrix.expand(0,sourceMatrix.getHeight()+1, 0, 0);
-		sourceMatrix.expand(destMatrix, strMatrix.getHeight()+1, 0, 0, sourceMatrix.getWidth() > strMatrix.getWidth() ? 0 : strMatrix.getWidth());
-		destMatrix.putBack(strMatrix);
-		break;
-	case 2:
-		//右方外侧
-		strMatrix.expand(0, 0, sourceMatrix.getWidth()+1, 0);
-		sourceMatrix.expand(destMatrix, 0, sourceMatrix.getHeight() > strMatrix.getHeight() ? 0 : strMatrix.getHeight(), 0, strMatrix.getWidth()+1);
-		destMatrix.putBack(strMatrix);
-		break;
-	default:
-		return false;
-		break;
-	}
-	return true;
-}
 bool KoishiExpand::KoishiMarkTool::MatrixMarking(const matrix &sourceMatrix, matrix &destMatrix, str codeString, point deltaPoint, color textColor){
 	matrix strMatrix;
 	StrMatLarge(codeString, strMatrix, textColor);
@@ -713,54 +536,6 @@ bool KoishiExpand::KoishiMarkTool::MatrixMarking(const matrix &sourceMatrix, mat
 	return true;
 
 }
-bool KoishiExpand::KoishiMarkTool::MatrixShowcasing(const matrix &sourceMatrix, matrix &destMatrix, int num, int size){
-	matrix strMatrix, showcaseMatrix;
-	matrix cutMatrix;
-	if(size<8){
-		size = 8;
-	}
-	destMatrix.create(size+20, size);
-	//绘制框架
-	showcaseMatrix.create(size+20, size);
-	color cList[4] = {color(0,0,0), color(0xFF, 0x33, 0x00),color(0xFF, 0x66, 0x33),color(0xFF, 0x99, 0x66)};
-	showcaseMatrix.fill(cList[2]);
-	showcaseMatrix.rectangle(point(0,0), point(size-1,size+19), cList[0]);
-	showcaseMatrix.rectangle(point(1,1), point(size-2,size+18), cList[0]);
-	showcaseMatrix.line(point(2,2), point(2,size+17), cList[3]);
-	showcaseMatrix.line(point(2,2), point(size-3,2), cList[3]);
-	showcaseMatrix.line(point(3,3), point(3,size+16), cList[3]);
-	showcaseMatrix.line(point(3,3), point(size-4,3), cList[3]);
-	showcaseMatrix.line(point(size-3,size+17), point(3,size+17), cList[1]);
-	showcaseMatrix.line(point(size-3,size+17), point(size-3,3), cList[1]);
-	showcaseMatrix.line(point(size-4,size+16), point(4,size+16), cList[1]);
-	showcaseMatrix.line(point(size-4,size+16), point(size-4,4), cList[1]);
-	showcaseMatrix.line(point(5,5), point(size-6,5), cList[1]);
-	showcaseMatrix.line(point(5,5), point(5,size-6), cList[1]);
-	showcaseMatrix.line(point(size-6,5), point(size-6,size-6), cList[3]);
-	showcaseMatrix.line(point(5,size-6), point(size-6,size-6), cList[3]);
-	//绘制数字
-	StrMatLarge(KoishiAvatar::getAvatarIDString(num), strMatrix);
-	strMatrix.expand(size + 8 - strMatrix.getHeight()/2, 0, size / 2 - strMatrix.getWidth()/2, 0);
-	//裁切Matrix
-	long left = 0;
-	long right = sourceMatrix.getWidth();
-	long top = 0;
-	long bottom = sourceMatrix.getHeight();
-	if(sourceMatrix.getWidth() > size - 12){
-		left = (sourceMatrix.getWidth() - size + 12) / 2;
-		right -= left;
-	}if(sourceMatrix.getHeight() > size - 12){
-		top = (sourceMatrix.getHeight() - size + 12) / 2;
-		bottom -= top;
-	}
-	sourceMatrix.clip(cutMatrix, top, bottom, left, right);
-	cutMatrix.expand( size/2 - cutMatrix.getHeight()/2, 0, size/2 - cutMatrix.getWidth()/2, 0);
-	destMatrix.putFore(showcaseMatrix);
-	destMatrix.putFore(strMatrix);
-	destMatrix.putFore(cutMatrix);
-	return true;
-}
-
 bool KoishiExpand::KoishiMarkTool::MatrixPSstyle(const matrix &sourceMatrix, matrix &destMatrix, color clrBound, color clrBG1, color clrBG2){
 	long i, j;
 	destMatrix.create(sourceMatrix.getHeight(), sourceMatrix.getWidth());
@@ -775,135 +550,8 @@ bool KoishiExpand::KoishiMarkTool::MatrixPSstyle(const matrix &sourceMatrix, mat
 	destMatrix.putFore(sourceMatrix);
 	return true;
 }
-KoishiExpand::Indexing::Indexing(){
-	millages = 0;
-}
-void KoishiExpand::Indexing::input(const IMGobject &in){
-	io = in;
-}
-void KoishiExpand::Indexing::input(const std::string imgName){
-	io.release();
-	io.loadFile(imgName);
-}
-void KoishiExpand::Indexing::deal(IMGobject &goal, int colorCount){
-	millages = 0;
-	if(colorCount>0xff){
-		colorCount = 0xff;
-	}
-	PICinfo pi;
-	matrix mat;
-	stream s,s1;
-	palette pl;
-	colorList lc;
-	queue li;
-	int i,j,k;
-	lc.clear();
-	li.clear();
-	pl.push(lc);
-	//统计颜色
-	for(i=0;i<io.indexCount;i++){
-		io.PICextract(i, mat);
-		//提取矩阵
-		for(j=0;j<mat.getElemCount();j++){
-			color c = mat.getElem(j);
-			if(c.A<=0x7F)
-				continue;
-			c.A = 0xFF;
-			int count = pl.findColor(c,0);
-			if(count==-1){
-				pl[0].push_back(c);
-				li.push_back(1);
-			}else{
-				li[count]++;
-			}
-			if(j % 10000 == 0){
-				int aabb = 0;
-			}
-		}
-		mat.destory();
-		millages = 500*i/io.indexCount;
-	}
-	lc = pl[0];
-	//取出数目最多的若干个颜色
-	colorList lc2; //这个就是新的色表
-	queue li2;
-	lc2.clear();
-	li2.clear();
-	if(colorCount>lc.size()){
-		colorCount = lc.size();
-	}
-	for(i=0;i<colorCount;i++){
-		int maximum = 0;
-		int maximumId = -1;
-		for(j=0;j<lc.size();j++){
-			if(li[j]>maximum){
-				maximum = li[j];
-				maximumId = j;
-			}
-		}
-		lc2.push_back(lc[maximumId]);
-		li2.push_back(li[maximumId]);
-		li.erase(li.begin()+maximumId);
-		lc.erase(lc.begin()+maximumId);
-	}
-	//开始转换
-	millages = 500;
-	goal.create(V4);
-	//导入色表
-	goal.CLRpush(color(0,0,0,0));
-	for(i=0;i<lc2.size();i++){
-		goal.CLRpush(lc2[i]);
-	}
-	//插入索引数据
-	for(i=0;i<io.indexCount;i++){
-		io.PICgetInfo(i,pi);
-		if(pi.get_format() == LINK){
-			goal.PICpush(pi, NULL);
-			continue;
-		}
-		io.PICextract(i, mat);
-		s.allocate(pi.get_picSize().area()+100);		//直接分配内存
-		for(j=0;j<mat.getElemCount();j++){
-			color c = mat.getElem(j);
-			if(c.A <= 0x7F){
-				s.push((Koishi::uchar)0);
-			}else{
-				c.A = 0xFF;
-				int lowdist = 0x7FFFFFFF;
-				int lowID = -1;
-				for(k=0;k<lc2.size();k++){
-					int dist = Koishi::color::EuclideanDistanceSquareOf(c,lc2[k]);
-					if(dist<=lowdist){
-						lowID = k;						//最短颜色欧氏距离匹配
-						lowdist = dist;
-					}
-				}
-				s.push((uchar)(1+lowID));
-			}
-		}
-		s.compressData(s1, COMP_ZLIB);
-		pi.set_format(ARGB1555);
-		pi.set_comp(COMP_ZLIB);
-		pi.set_dataSize(s1.getLen());
-		goal.PICpush(pi, s1);
-		s.release();
-		s1.release();
-		mat.destory();
-		millages = 500+500*i/io.indexCount;
-	}
-	millages = 1000;
-}
-void KoishiExpand::Indexing::output(IMGobject &out){
-	deal(out);
-}
-void KoishiExpand::Indexing::output(const std::string imgName){
-	IMGobject out;
-	deal(out);
-	out.saveFile(imgName);
-}
 
 /////////////////////////////////////////////////////////////
-using namespace KoishiExpand::KoishiDownloadTool;
 bool SPKobject::load(str fileName){
 	int i,j;
 	unsigned long dw;
@@ -1300,7 +948,210 @@ color KoishiExpand::KoishiImageTool::gradient(const color &sourceColor, const co
 		(uchar)(theProp*keyColorList[step].B) + (uchar)((1-theProp)*keyColorList[step+1].B)
 	);
 }
-////////////////////////////////////////////////
+colorList KoishiExpand::KoishiImageTool::rainbowSort(const colorList &originList){
+	colorList oldColorList = originList;
+	colorList newColorList;
+	for(int i = 0;i<originList.size();i++){
+		int minValue = 36100;
+		int minID = -1;
+		for(int j = 0;j<oldColorList.size();j++){
+			colorHSV hsv;
+			oldColorList[j].getHSV(hsv);
+			int value = 100*hsv.H + 100 * hsv.V+ 10 * hsv.S;
+			if(value < minValue){
+				minID = j;
+				minValue = value;
+			}
+		}
+		newColorList.push_back(oldColorList[minID]);
+		oldColorList.erase(oldColorList.begin() + minID);
+	}
+	return newColorList;
+}
+colorList KoishiExpand::KoishiImageTool::nearbySort(const colorList &originList){
+	colorList oldColorList = originList;
+	colorList newColorList;
+	for(int i = 0;i<originList.size();i++){
+		if(i == 0){
+			newColorList.push_back(oldColorList[0]);
+			oldColorList.erase(oldColorList.begin());
+			continue;
+		}
+		int minDist = 196608;
+		int minID = -1;
+		for(int j = 0;j<oldColorList.size();j++){
+			int dist = color::EuclideanDistanceSquareOf(newColorList[i-1], oldColorList[j]);
+			if(dist < minDist){
+				minID = j;
+				minDist = dist;
+			}
+		}
+		newColorList.push_back(oldColorList[minID]);
+		oldColorList.erase(oldColorList.begin() + minID);
+	}
+	return newColorList;
+}
+///////////BMP//////////////////
+void KoishiExpand::KoishiImageTool::makeBMP(const matrix &mat, str fileName){
+	BMPobject bo;
+	bo.input(mat);
+	bo.makeFile(fileName);
+}
+bool KoishiExpand::KoishiImageTool::loadBMP(matrix &mat, str fileName){
+	BMPobject bo;
+	if(bo.loadFile(fileName)){
+		bo.output(mat);
+		return true;
+	}
+	return false;
+}
+bool BMPobject::load(stream s){
+	s.ptMoveTo(0);
+	s.read(header.magic);
+	if(header.magic != 0x4D42)
+		return false;
+	s.read(header.fileSize);
+	s.read(header.reserved);
+	s.read(header.dataOffset);
+	s.read(info.infoSize);
+	s.read(info.width);
+	s.read(info.height);
+	s.read(info.planes);
+	s.read(info.bitCount);
+	s.read(info.compression);
+	s.read(info.dataSize);
+	s.read(info.xPixelsPerMeter);
+	s.read(info.yPixelsPerMeter);
+	s.read(info.colorUsed);
+	s.read(info.colorImportant);
+	quads.clear();
+	if(info.bitCount <= 8){
+		for(int i = 0;i<(1<<info.bitCount);i++){
+			color clr;
+			s.read(clr.B);
+			s.read(clr.G);
+			s.read(clr.R);
+			s.read(clr.A);
+			clr.A = 0xFF;
+			quads.push_back(clr);
+		}
+	}
+	s.readStream(data, header.fileSize - header.dataOffset);
+	return true;
+}
+bool BMPobject::loadFile(str fileName){
+	stream s;
+	s.loadFile(fileName);
+	return load(s);
+}
+void BMPobject::make(stream &s){
+	s.release();
+	s.allocate(header.dataOffset + data.len);
+	s.push(header.magic);
+	s.push(header.fileSize);
+	s.push(header.reserved);
+	s.push(header.dataOffset);
+	s.push(info.infoSize);
+	s.push(info.width);
+	s.push(info.height);
+	s.push(info.planes);
+	s.push(info.bitCount);
+	s.push(info.compression);
+	s.push(info.dataSize);
+	s.push(info.xPixelsPerMeter);
+	s.push(info.yPixelsPerMeter);
+	s.push(info.colorUsed);
+	s.push(info.colorImportant);
+	for(long i = 0;i<quads.size();i++){
+		s.push(quads[i].B);
+		s.push(quads[i].G);
+		s.push(quads[i].R);
+		s.push((uchar)0);
+	}
+	s.pushStream(data, data.len);
+}
+void BMPobject::makeFile(str fileName){
+	stream s;
+	make(s);
+	s.makeFile(fileName);
+}
+void BMPobject::output(matrix &mat){
+	long bitPerRow = info.width * info.bitCount;
+	long dwPerRow = bitPerRow / 32;
+	if(bitPerRow & 0x1F){
+		dwPerRow ++;	//补零
+	}
+	data.ptMoveTo(0);
+	stream lineStream;
+	mat.create(size(info.width, info.height));
+	for(long i = 0;i<info.height;i++){
+		data.readStream(lineStream, 4 * dwPerRow);
+		for(long id = 0;id < info.width ;id++){
+			if(info.bitCount <= 8){
+				//一个字节里对应好几个像素值
+				uchar currentByte = lineStream[id * info.bitCount / 8];				//当前字节
+				uchar bitOffset = 8 / info.bitCount - id % (8 / info.bitCount) - 1;	//取第几位
+				uchar mask = (1 << info.bitCount) - 1;								//掩膜
+				uchar value = currentByte >> (bitOffset * info.bitCount) & mask;	//最终索引
+				mat[info.height - i - 1][id] = quads[value];
+			}else if(info.bitCount == 16){
+				//采用RGB555格式
+				word currentWord = lineStream[2*id] | lineStream[2*id + 1] << 8;
+				uchar mask = 0x1F;
+				uchar bValue = currentWord & mask;
+				uchar gValue = currentWord >> 5 & mask;
+				uchar rValue = currentWord >> 10 & mask;
+				mat[info.height - i - 1][id] = color(rValue, gValue, bValue);
+			}else if(info.bitCount == 24){
+				uchar bValue = lineStream[3*id];
+				uchar gValue = lineStream[3*id+1];
+				uchar rValue = lineStream[3*id+2];
+				mat[info.height - i - 1][id] = color(rValue, gValue, bValue);
+			}else if(info.bitCount == 32){
+				uchar bValue = lineStream[4*id];
+				uchar gValue = lineStream[4*id+1];
+				uchar rValue = lineStream[4*id+2];
+				mat[info.height - i - 1][id] = color(rValue, gValue, bValue);
+			}else{
+				return;
+			}
+		}
+	}
+}
+void BMPobject::input(const matrix &mat){
+	quads.clear();
+	data.release();
+	data.allocate(mat.getElemCount() * 3 + mat.getHeight() * 3 + 1000); //加上高度×3是为补齐4字节预留
+	for(long i = mat.getHeight() - 1;i >= 0;i--){
+		for(long j = 0;j<mat.getWidth();j++){
+			data.push(mat[i][j].B);
+			data.push(mat[i][j].G);
+			data.push(mat[i][j].R);
+		}
+		long addZeroCount = data.len % 4;
+		for(long j = 0;j<addZeroCount;j++){
+			data.push((uchar)0);
+		}
+	}
+	header.magic = 0x4D42;
+	header.fileSize = 54 + data.len;
+	header.reserved = 0;
+	header.dataOffset = 54;
+	info.infoSize = 40;
+	info.width = mat.getWidth();
+	info.height = mat.getHeight();
+	info.planes = 1;
+	info.bitCount = 24;
+	info.compression = 0;
+	info.dataSize = data.len;
+	info.xPixelsPerMeter = 0;
+	info.yPixelsPerMeter = 0;
+	info.colorUsed = 0;
+	info.colorImportant = 0;
+}
+
+
+///////////全帧展示////////////////////////
 
 KoishiExpand::exhibit::exhibit(){
 	clear();
@@ -1318,13 +1169,12 @@ void KoishiExpand::exhibit::clear(){
 void KoishiExpand::exhibit::create(int width, int height){
 	canvas.create(height, width);
 }
-//放置缩略图的算法
-/*
-1.首先计算新放置缩略图的位置的顶部坐标和左边坐标
-2.根据左边坐标到画布右侧的距离与缩略图宽度做比较，如果不够放，则另起一行（转至3）；否则转至4。
-3.另起一行时，若上一行的最大高度超过了画布下册，则返回失败0；否则转至4。
-4.放置图像，坐标以及最大高度更新，返回成功1。
-*/
+//全帧显示
+//1.首先计算新放置缩略图的位置的顶部坐标和左边坐标
+//2.根据左边坐标到画布右侧的距离与缩略图宽度做比较，如果不够放，则另起一行（转至3）；否则转至4。
+//3.另起一行时，若上一行的最大高度超过了画布下册，则返回失败0；否则转至4。
+//4.放置图像，坐标以及最大高度更新，返回成功1。
+
 bool KoishiExpand::exhibit::putMatrix(const matrix &newMat, bool expanded){
 	int currentRow = hList.size()-1;	//当前已经达成的行
 	int top = hList[currentRow];		//顶部坐标

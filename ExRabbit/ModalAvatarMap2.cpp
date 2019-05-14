@@ -68,16 +68,18 @@ BOOL ModalAvatarMap2::OnInitDialog()
 		long selected = in.ptrFactory->partAlbum[in.part].findPosByID(dac[0].ID, dac[0].isTN);
 		GET_CTRL(CComboBox, IDC_COMBO_AVATAR)->SetCurSel(selected + 1);
 		if(in.ptrFactory->partAlbum[in.part].avatarList[selected].v6palette == 0){
+			GET_CTRL(CComboBox, IDC_COMBO_PALETTE)->ResetContent();
 			GET_CTRL(CComboBox, IDC_COMBO_PALETTE)->AddString(L"NA");
 			GET_CTRL(CComboBox, IDC_COMBO_PALETTE)->SetCurSel(0);
 		}else{
+			GET_CTRL(CComboBox, IDC_COMBO_PALETTE)->ResetContent();
 			for(int i = 0 ; i<in.ptrFactory->partAlbum[in.part].avatarList[selected].v6palette; i++){
 				GET_CTRL(CComboBox, IDC_COMBO_PALETTE)->AddString(L"P" + NumToCStr(i));
 			}
 			GET_CTRL(CComboBox, IDC_COMBO_PALETTE)->SetCurSel(dac[0].paletteID);
 		}
 	}
-	OnCbnSelchangeComboAvatar();
+	draw();
 	return TRUE;  // return TRUE unless you set the focus to a control
 }
 
@@ -85,9 +87,11 @@ BOOL ModalAvatarMap2::OnInitDialog()
 void ModalAvatarMap2::OnCbnSelchangeComboAvatar(){
 	long selected = GET_CTRL(CComboBox, IDC_COMBO_AVATAR)->GetCurSel() - 1;
 	if(selected == -1 || in.ptrFactory->partAlbum[in.part].avatarList[selected].v6palette == 0){
+		GET_CTRL(CComboBox, IDC_COMBO_PALETTE)->ResetContent();
 		GET_CTRL(CComboBox, IDC_COMBO_PALETTE)->AddString(L"NA");
 		GET_CTRL(CComboBox, IDC_COMBO_PALETTE)->SetCurSel(0);
 	}else{
+		GET_CTRL(CComboBox, IDC_COMBO_PALETTE)->ResetContent();
 		for(int i = 0 ; i<in.ptrFactory->partAlbum[in.part].avatarList[selected].v6palette; i++){
 			GET_CTRL(CComboBox, IDC_COMBO_PALETTE)->AddString(L"P" + NumToCStr(i));
 		}
@@ -191,8 +195,8 @@ void ModalAvatarMap2::draw(){
 }
 void ModalAvatarMap2::drawIcon(){
 	matrix mat;
-	str fileName = CStrToStr(in.ptrProfile->getIconPath(in.ptrFactory->career)) + getAvatarPartIMGName(in.part)+"_"+CStrToStr(NumToCStr(in.iconID))+".PNG";
-	if(!mat.loadPNG(fileName)){
+	str fileName = CStrToStr(in.ptrProfile->getIconPath(in.ptrFactory->career)) + getAvatarPartIMGName(in.part)+"_"+CStrToStr(NumToCStr(in.iconID));
+	if(!loadImage(fileName, mat)){
 		//Î´¶Á³öÇøÓò
 		in.ptrFactory->makeButton(mat, in.ptrProfile->getAvatarColor(0), size(28, 28), 3);
 	}
@@ -217,4 +221,16 @@ void ModalAvatarMap2::OnPaint()
 	CPaintDC dc(this); // device context for painting
 	drawIcon();
 	draw();
+}
+
+bool ModalAvatarMap2::loadImage(str fileNameWithoutExp, matrix &mat){
+	str fileName = fileNameWithoutExp + ".png";
+	if(mat.loadPNG(fileName)){
+		return true;
+	}
+	fileName = fileNameWithoutExp + ".bmp";
+	if(KoishiExpand::KoishiImageTool::loadBMP(mat, fileName)){
+		return true;
+	}
+	return false;
 }

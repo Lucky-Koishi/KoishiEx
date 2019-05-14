@@ -16,11 +16,10 @@
 
 #define MAX_UNCOMPRESSED_DATA_LENGTH	0x1000000
 
-#define MIN(a,b) ((a)>(b)?b:a)
-#define MAX(a,b) ((a)>(b)?a:b)
+#define MIN(a,b) ((a)>(b)?(b):(a))
+#define MAX(a,b) ((a)>(b)?(a):(b))
 
 #define DEF_GETSET(_type, _member) public:_type _member;public:inline _type get_##_member() const{return _member;}inline _type*getPtr_##_member(){return &_member;}inline void set_##_member(_type val){_member=val;}
-
 
 namespace Koishi{
 	//定义基础数据
@@ -44,8 +43,6 @@ namespace Koishi{
 	enum picChangablePara{LINKTO, BASEX, BASEY, FRAMEW, FRAMEH};
 	//颜色属性 透明度·红色·绿色·蓝色·灰度·色调·饱和度·明度
 	enum colorProperty{COLOR_ALPHA, COLOR_CHANNEL_RED, COLOR_CHANNEL_GREEN, COLOR_CHANNEL_BLUE, COLOR_GRAYSCALE, COLOR_HUE, COLOR_SATURATION, COLOR_VALUE};
-	//图层叠放方式
-	enum layerMethod{UPPER, LOWER};
 
 	class stream;
 	class color;
@@ -118,24 +115,16 @@ namespace Koishi{
 		//读取文件到数据流
 		bool loadFile(str fileName);
 	public:
-		//NPK名字文件掩码
 		void nameMask();
-		//对数据流进行type所示压缩，并存储到dest中
 		int compressData(stream &dest, compressType type);
-		//对数据流进行type所示解压，并存储到dest中，成功返回0，数据错误返回-3，tryLength不够返回-5
 		int uncompressData(stream &dest, compressType type, longex tryLength = MAX_UNCOMPRESSED_DATA_LENGTH);
-		//对数据流进行SHA256加密，并将32字节数存储到dest中
 		void getSHA256(stream &dest);
-		//对数据流追加另一段数据流后修正为17的整数倍，并进行SHA256加密（为NPK准备）
 		void getSHA256(stream &dest, const stream &added);
 	public:
 		//查找相连的一串数据流
 		longex findStream(const stream &s, longex startPos = 0);
-		//获取被指定数据流分割的字符串的起始位置和长度，返回分割数（空流也算）
 		longex splitStream(const stream &s, queueex &posList, queueex &lenList);
-		//进行BZ2压缩
 		int BZcompress(stream &dest);
-		//进行BZ2解压
 		int BZdecompress(stream &dest);
 
 	public:
@@ -416,7 +405,14 @@ namespace Koishi{
 		bool IMGextract(dword pos, IMGobject &obj);
 		bool IMGfind(const str &keyword, dword &pos);
 		bool IMGfind(const str &keyword, const str &nonkeyword, dword &pos);
-		bool extractIMGFile(long pos, str fileName);
+		bool randomExtract(long pos, str fileName);
+		bool randomPush(stream s, const str &imgName);
+		bool randomExtract(dword pos, stream &s);
+	public:
+		bool IMGpushLink(long linkPos, const str &otherName);
+		bool IMGremoveLink(long pos);
+		bool IMGmodifyLink(long pos, long newLinkPos);
+		long IMGcheckLink(long pos);
 	public:
 		dword count;
 		IMGcontent content;
@@ -486,6 +482,8 @@ namespace Koishi{
 		long linkFind(dword pos, dword depth = 5);		//查找索引帧最终指向（depth为深度）
 		longex getSize() const;
 		bool empty();
+		static void makeEmpty(IMGobject &newIO, int frameCount);
+		static bool checkIsOld(stream &s);
 	public:
 		IMGindex *derived;
 
@@ -512,18 +510,12 @@ namespace KoishiExpand{
 	using namespace Koishi;
 	//扩展功能
 	namespace KoishiMarkTool{
-		//字体点阵
+		//图片内字体工具
 		extern void CharMat(char p, matrix &mat, color clr = color(0xff,0,0,0));
 		extern void StrMat(str s, matrix &mat, color clr = color(0xff,0,0,0));
 		extern void CharMatLarge(char p, matrix &mat, color clr = color(0xff,0,0,0));
 		extern void StrMatLarge(str s, matrix &mat, color clr = color(0xff,0,0,0));
-		//旧时装打标器·会自动选择打标地点
-		extern bool AvatarMarking(str avatarNPKfileName);
-		extern bool AvatarBatchMarking(str avatarNPKfileListName);
-		//对任意图片打标，situ = 1 上方外侧；situ = 2 右方外侧
-		extern bool MatrixMarking(const matrix &sourceMatrix, matrix &destMatrix, str codeString, int situ);
 		extern bool MatrixMarking(const matrix &sourceMatrix, matrix &destMatrix, str codeString, point deltaPoint, color textColor);
-		extern bool MatrixShowcasing(const matrix &sourceMatrix, matrix &destMatrix, int num, int size = 100);
 		//PS画布风格
 		extern bool MatrixPSstyle(const matrix &sourceMatrix, matrix &destMatrix, color clrBound = color(0xFF, 0, 0, 0), color clrBG1 = color(0xFF, 0xFF, 0xFF, 0xFF), color clrBG2 = color(0xFF, 0xDD, 0xDD, 0xDD));
 	}
@@ -625,19 +617,6 @@ namespace KoishiExpand{
 			bool load(const Koishi::str &fileName);
 		};
 	}
-	class Indexing{
-	//索引化
-	public:
-		Indexing();
-		void input(const Koishi::IMGobject &in);
-		void input(const str imgName);
-		void output(Koishi::IMGobject &out);
-		void output(const str imgName);
-		volatile int millages;		//千分之……
-	private:
-		void deal(Koishi::IMGobject &goal, int colorCount = 0xFF);
-		Koishi::IMGobject io;
-	};
 	class IMGobjectV1{
 	//旧版本IMGV1
 	protected:
@@ -668,12 +647,44 @@ namespace KoishiExpand{
 		int hMaxPerRow;				//当前放入行的图的最大高度，用于计算另起一行时的新y坐标
 	};
 	namespace KoishiImageTool{
-		//extern colorList pickColor(const matrix &mat);				//提取颜色
-		//extern colorList joinColor(const colorList &otherList);		//融合颜色
-		//extern colorList sortColor(const colorList &otherList);		//排序算法
-		//extern int EuclideanDistance(const color &clr1, const color &clr2);	//欧氏距离
-		//extern void indexing(const matrix &source, matrix &indexed, const colorList &paletteColor);	//匹配算法
-		extern color gradient(const color &sourceColor, const colorList &keyColorList, Koishi::colorProperty cp);			//根据颜色性质
+		extern color gradient(const color &sourceColor, const colorList &keyColorList, Koishi::colorProperty cp);
+		extern colorList rainbowSort(const colorList &originList);
+		extern colorList nearbySort(const colorList &originList);
+		extern void makeBMP(const matrix &mat, str fileName);
+		extern bool loadBMP(matrix &mat, str fileName);
+		typedef struct BMPheader{
+			word magic;
+			dword fileSize;
+			dword reserved;
+			dword dataOffset;
+		}BMPheader;
+		typedef struct BMPinfo{
+			dword infoSize;
+			dword width;
+			dword height;
+			word planes;
+			word bitCount;
+			dword compression;
+			dword dataSize;
+			dword xPixelsPerMeter;
+			dword yPixelsPerMeter;
+			dword colorUsed;
+			dword colorImportant;
+		}BMPinfo;
+		class BMPobject{
+			stream data;
+		public:
+			BMPheader header;
+			BMPinfo info;
+			colorList quads;
+		public:
+			bool load(stream s);
+			bool loadFile(str fileName);
+			void make(stream &s);
+			void makeFile(str fileName);
+			void output(matrix &mat);
+			void input(const matrix &mat);
+		};
 	}
 }
 
@@ -681,8 +692,8 @@ namespace KoishiAvatar{
 	using namespace Koishi;
 	enum avatarCareer{ACAREER_UD, ACAREER_SM, ACAREER_SG, ACAREER_FT, ACAREER_FM, ACAREER_GN, ACAREER_GG, ACAREER_MG, ACAREER_MM, ACAREER_PR, ACAREER_PG, ACAREER_TH, ACAREER_KN, ACAREER_DL, ACAREER_GB, ACAREER_MAXCOUNT};
 	enum avatarPart{APART_UD, APART_CAP, APART_HAIR, APART_FACE, APART_NECK, APART_COAT, APART_PANTS, APART_BELT, APART_SHOES, APART_BODY, APART_MAXCOUNT, APART_WEAPON};
-	enum avatarLayer{ALAYER_UD, ALAYER_A, ALAYER_A1, ALAYER_A2, ALAYER_B, ALAYER_B1, ALAYER_B2, ALAYER_C, ALAYER_C1, ALAYER_C2, ALAYER_D, ALAYER_D1, ALAYER_D2,	ALAYER_E, ALAYER_E1, ALAYER_E2,	ALAYER_F, ALAYER_F1, ALAYER_F2,	ALAYER_G, ALAYER_G1, ALAYER_G2,	ALAYER_H, ALAYER_H1, ALAYER_H2, ALAYER_X, ALAYER_X1, ALAYER_X2, ALAYER_MAXCOUNT};
-	enum {TOTAL_LAYER_COUNT = 63};
+	enum avatarLayer{ALAYER_UD, ALAYER_A, ALAYER_A1, ALAYER_A2, ALAYER_B, ALAYER_B1, ALAYER_B2, ALAYER_C, ALAYER_C1, ALAYER_C2, ALAYER_D, ALAYER_D1, ALAYER_D2,	ALAYER_E, ALAYER_E1, ALAYER_E2,	ALAYER_F, ALAYER_F1, ALAYER_F2,	ALAYER_G, ALAYER_G1, ALAYER_G2,	ALAYER_H, ALAYER_H1, ALAYER_H2, ALAYER_K, ALAYER_K1, ALAYER_K2, ALAYER_X, ALAYER_X1, ALAYER_X2, ALAYER_MAXCOUNT};
+	enum {TOTAL_LAYER_COUNT = 64};
 	extern bool isnum(uchar chars);
 	extern str shorten(const str &path);					//缩短路径名至最后一个节点
 	extern str imgAddV4Num(const str &imgName, long num);	//V6变成V4时使用
@@ -729,9 +740,9 @@ namespace KoishiAvatar{
 	class avatarAlbum{
 	public:
 		bool valid;
-		str resoucePath;
 		avatarCareer career;
 		avatarPart part;
+		str resoucePath;
 		NPKobject sourceNPK;
 		std::vector<avatar> avatarList;						 //存储装扮信息
 		std::vector<std::vector<long>> avatarPos;			 //存储装扮对应的图层IMG在NPK中的位置

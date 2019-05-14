@@ -1,5 +1,5 @@
 #pragma once
-
+#include "TinyBar.h"
 
 // ModalTransform ¶Ô»°¿ò
 
@@ -23,7 +23,10 @@ public:
 	struct INPUT{
 		IMGobject *contextIO;
 		colorList contextColorList;
+		long currentFrame;
+		long currentPalette;
 	}in;
+	TinyBar bar;
 	struct OUTPUT{
 		int target;
 		IMGversion version;
@@ -66,4 +69,7 @@ public:
 	afx_msg void OnMenuIndexingBaseOnImage();
 	afx_msg void OnMenuIndexingImportPhotoshop();
 	afx_msg void OnMenuIndexingImportRabbit();
+
+	static UINT pickColorFrame(void*context);
+	static UINT pickColorImage(void*context);
 };

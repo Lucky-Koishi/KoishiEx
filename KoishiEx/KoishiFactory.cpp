@@ -176,6 +176,190 @@ bool NPKobject::IMGpush(IMGobject &io, const str &imgName){
 	getData(4)->pushStream(s, s.getLen());
 	return true;
 }
+bool NPKobject::IMGpushLink(long linkPos, const str &otherName){
+	if(linkPos<0 || linkPos>=count){
+		return false;
+	}
+	stream s;
+	IMGindex ii;
+	dword dwTemp;
+	long i;
+	ii.imgname = otherName;
+	ii.imgoffset = content[linkPos].imgoffset;
+	ii.imgsize = content[linkPos].imgsize;
+	content.push_back(ii);
+	for(i=0;i<content.size();i++){
+		dwTemp = content[i].imgoffset;
+		content[i].imgoffset = dwTemp+264;
+	}
+	//////////////////////////////////////////////
+	count++;
+	getData(1)->clear();
+	getData(1)->pushString("NeoplePack_Bill");
+	getData(1)->push((uchar)0);
+	getData(1)->push(count);
+	//////////////////////////////////////////////
+	getData(2)->release();
+	getData(2)->allocate(count*400);
+	for(i=0;i<count;i++){
+		getData(2)->push(content[i].imgoffset);
+		getData(2)->push(content[i].imgsize);
+		s.allocate(512);
+		s.pushString(content[i].imgname);
+		while(s.getLen()<256){
+			s.push((uchar)0);
+		}
+		s.nameMask();
+		getData(2)->pushStream(s, 256);
+		s.release();
+	}
+	//////////////////////////////////////////////
+	getData(1)->getSHA256(s,*getData(2));
+	getData(3)->clear();
+	getData(3)->pushStream(s, 32);
+	s.release();
+	//////////////////////////////////////////////
+	return true;
+}
+bool NPKobject::IMGremoveLink(long pos){
+	if(IMGcheckLink(pos) < 0){
+		return false;
+	}
+	long i;
+	stream s;
+	dword dwTemp;
+	content.erase(content.begin() + pos);
+	for(i=0;i<content.size();i++){
+		dwTemp = content[i].imgoffset - 264;
+		content[i].imgoffset = dwTemp;
+	}
+	/////////////////////////////////////////////////////
+	count --;
+	getData(1)->clear();
+	getData(1)->pushString("NeoplePack_Bill");
+	getData(1)->push((uchar)0);
+	getData(1)->push(count);
+	/////////////////////////////////////////////////////
+	getData(2)->release();
+	getData(2)->allocate(count*400);
+	for(i=0;i<count;i++){
+		getData(2)->push(content[i].imgoffset);
+		getData(2)->push(content[i].imgsize);
+		s.allocate(512);
+		s.pushString(content[i].imgname);
+		while(s.getLen()<256){
+			s.push((uchar)0);
+		}
+		s.nameMask();
+		getData(2)->pushStream(s, 256);
+		s.release();
+	}
+	//////////////////////////////////////////////
+	getData(1)->getSHA256(s,*getData(2));
+	getData(3)->clear();
+	getData(3)->pushStream(s, 32);
+	s.release();
+	//////////////////////////////////////////////
+	return true;
+}
+bool NPKobject::IMGmodifyLink(long pos, long newLinkPos){
+	if(IMGcheckLink(pos) < 0){
+		return false;
+	}
+	if(newLinkPos < 0 && newLinkPos >= pos){
+		return false;
+	}
+	long i;
+	stream s;
+	content[pos].imgoffset = content[newLinkPos].imgoffset;
+	content[pos].imgsize = content[newLinkPos].imgsize;
+	/////////////////////////////////////////////////////
+	getData(2)->release();
+	getData(2)->allocate(count*400);
+	for(i=0;i<count;i++){
+		getData(2)->push(content[i].imgoffset);
+		getData(2)->push(content[i].imgsize);
+		s.allocate(512);
+		s.pushString(content[i].imgname);
+		while(s.getLen()<256){
+			s.push((uchar)0);
+		}
+		s.nameMask();
+		getData(2)->pushStream(s, 256);
+		s.release();
+	}
+	//////////////////////////////////////////////
+	getData(1)->getSHA256(s,*getData(2));
+	getData(3)->clear();
+	getData(3)->pushStream(s, 32);
+	s.release();
+	//////////////////////////////////////////////
+	return true;
+}
+
+long NPKobject::IMGcheckLink(long pos){
+	if(pos<0 || pos>=count){
+		return -2;
+	}
+	for(int i = 0;i<pos;i++){
+		if(content[i].imgoffset == content[pos].imgoffset){
+			return i;
+		}
+	}
+	return -1;
+}
+bool NPKobject::randomExtract(dword pos, stream &s){
+	if(pos<0 || pos>=count){
+		return false;
+	}
+	stream temps;
+	getData(4)->ptMoveTo(content[pos].imgoffset-getData(1)->getLen() - getData(2)->getLen() - getData(3) -> getLen());
+	getData(4)->readStream(s, (longex)(content[pos].imgsize));
+	return true;
+}
+bool NPKobject::randomPush(stream randomStream, const str &imgName){
+	stream s;
+	IMGindex ii;
+	dword dwTemp;
+	long i;
+	ii.imgname = imgName;
+	ii.imgoffset = getSize();
+	ii.imgsize = randomStream.getLen();
+	content.push_back(ii);
+	for(i=0;i<content.size();i++){
+		dwTemp = content[i].imgoffset;
+		content[i].imgoffset = dwTemp+264;
+	}
+	//////////////////////////////////////////////
+	count++;
+	getData(1)->clear();
+	getData(1)->pushString("NeoplePack_Bill");
+	getData(1)->push((uchar)0);
+	getData(1)->push(count);
+	//////////////////////////////////////////////
+	getData(2)->release();
+	getData(2)->allocate(count*400);
+	for(i=0;i<count;i++){
+		getData(2)->push(content[i].imgoffset);
+		getData(2)->push(content[i].imgsize);
+		s.allocate(512);
+		s.pushString(content[i].imgname);
+		while(s.getLen()<256){
+			s.push((uchar)0);
+		}
+		s.nameMask();
+		getData(2)->pushStream(s, 256);
+		s.release();
+	}
+	//////////////////////////////////////////////
+	getData(1)->getSHA256(s,*getData(2));
+	getData(3)->clear();
+	getData(3)->pushStream(s, 32);
+	s.release();
+	//////////////////////////////////////////////
+	getData(4)->pushStream(randomStream, randomStream.getLen());
+	return true;
+}
 bool NPKobject::IMGinsert(long pos, IMGobject &io, const str &imgName){
 	if(pos<0){
 		pos += (count + 1);
@@ -248,6 +432,15 @@ bool NPKobject::IMGremove(long pos){
 		pos = count-1;
 	}
 	long i;
+	//////////////////////////////////////////////
+	//先确定是否有其他东西指向它
+	//////////////////////////////////////////////
+	for(i = count - 1;i>pos;i--){
+		if(IMGcheckLink(i) == pos){
+			IMGremoveLink(i);
+		}
+	}
+	//////////////////////////////////////////////
 	stream s;
 	IMGindex ii;
 	dword dwTemp;
@@ -415,7 +608,7 @@ bool NPKobject::IMGfind(const str &keyword, const str &nonkeyword, dword &pos){
 	}
 	return false;
 }
-bool NPKobject::extractIMGFile(long pos, str fileName){
+bool NPKobject::randomExtract(long pos, str fileName){
 	if(pos<0 || pos>=count){
 		return false;
 	}
@@ -1256,11 +1449,24 @@ bool IMGobject::PICextract(long pos, matrix &mat, long paletteID){
 				mat.push(sPic, pi.get_format());
 				break;
 			case V4:
-				mat.create(pi.get_picSize());
+				/*mat.create(pi.get_picSize());
 				for(i=0;i<sPic.getLen();i++){
 					if(sPic[i]>=paletteData[0].size())
 						sPic[i] = 0;
 					mat.push(paletteData[0][sPic[i]]);
+				}*/
+				if(sPic.getLen() == pi.get_picSize().area()){
+					//索引形式
+					mat.create(pi.get_picSize());
+					for(i=0;i<sPic.getLen();i++){
+						if(sPic[i]>=paletteData[0].size())
+							sPic[i] = 0;
+						mat.push(paletteData[0][sPic[i]]);
+					}
+				}else{
+					//非索引形式
+					mat.create(pi.get_picSize());
+					mat.push(sPic, pi.get_format());
 				}
 				break;
 			case V5:
@@ -2063,6 +2269,38 @@ bool IMGobject::empty(){
 		PICpush(pi, s);
 	}
 	s.release();
+	return true;
+}
+void IMGobject::makeEmpty(IMGobject &newIO, int frameCount){
+	newIO.create(V2);
+	PICinfo pi;
+	pi.basePt = point(0,0);
+	pi.comp = COMP_NONE;
+	pi.dataSize = 2;
+	pi.format = ARGB4444;
+	pi.frmSize = size(1, 1);
+	pi.picSize = size(1, 1);
+	stream s;
+	s.allocate(2);
+	s.push((word)0);
+	newIO.PICpush(pi, s);
+	pi.format = LINK;
+	pi.linkTo = 0;
+	for(int i = 0;i<frameCount;i++){
+		newIO.PICpush(pi, s);
+	}
+	s.release();
+}
+bool IMGobject::checkIsOld(stream &s){
+	s.ptMoveTo(0);
+	str sz = s.readString(20);
+	if(sz != "Neople Image File")
+		return false;
+	dword dwTemp, dwVersion;
+	s.read(dwTemp);	//保留位
+	s.read(dwVersion); //版本
+	if(dwVersion != V1)
+		return false;
 	return true;
 }
 stream *IMGobject::getData(uchar _part){

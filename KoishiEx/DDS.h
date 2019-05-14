@@ -77,13 +77,14 @@ namespace KoishiDDS{
 		~DDS(void);
 	protected:
 		DDSHeader header;
-		stream data1, data2;
+		stream data;
 	public:
 		bool load(const stream &s);
 		bool loadFile(const str &DDSfileName);
 		bool make(stream &s);
 		bool makeFile(const str &DDSfileName);
 		bool uncompress(matrix &mat);
+		bool uncompressMipmap(std::vector<matrix> &matList);
 		bool compress(const matrix &mat);
 		DDSHeader *getHeader();
 	public:

@@ -52,7 +52,7 @@ str KoishiAvatar::getAvatarIDString(int i){
 	return s;
 }
 void KoishiAvatar::getMQData(int order, avatarPart &part, avatarLayer &layer){
-	int mixSeqList[63][2] = {
+	int mixSeqList[TOTAL_LAYER_COUNT][2] = {
 		{APART_SHOES,	ALAYER_F},{APART_BELT,	ALAYER_F},{APART_PANTS,	ALAYER_F},{APART_COAT,	ALAYER_F},
 		{APART_NECK,	ALAYER_F},{APART_FACE,	ALAYER_F},{APART_CAP,	ALAYER_F},{APART_FACE,	ALAYER_G},
 		{APART_FACE,	ALAYER_A},{APART_WEAPON,ALAYER_C2},{APART_WEAPON,ALAYER_C1},{APART_WEAPON,	ALAYER_C},
@@ -68,10 +68,10 @@ void KoishiAvatar::getMQData(int order, avatarPart &part, avatarLayer &layer){
 		{APART_CAP,		ALAYER_H},{APART_CAP,	ALAYER_B},{APART_WEAPON,	ALAYER_B2},{APART_WEAPON,	ALAYER_B1},
 		{APART_WEAPON,	ALAYER_B},{APART_NECK,	ALAYER_D},{APART_NECK,	ALAYER_H},{APART_COAT,	ALAYER_D},
 		{APART_HAIR,	ALAYER_D},{APART_CAP,	ALAYER_D},{APART_WEAPON,	ALAYER_D2},{APART_WEAPON,	ALAYER_D1},
-		{APART_WEAPON,	ALAYER_D},{APART_FACE,	ALAYER_B},{APART_BODY,	ALAYER_UD}
+		{APART_WEAPON,	ALAYER_D},{APART_FACE,	ALAYER_B},{APART_NECK,	ALAYER_K},{APART_BODY,	ALAYER_UD}
 	};
-	if(order>62)
-		order = 62;
+	if(order>TOTAL_LAYER_COUNT-1)
+		order = TOTAL_LAYER_COUNT-1;
 	part = (avatarPart)mixSeqList[order][0];
 	layer = (avatarLayer)mixSeqList[order][1];
 }
@@ -221,40 +221,48 @@ extern bool KoishiAvatar::parseAvatarName(const str &avatarName, avatar &av, ava
 		al = ALAYER_H;
 		i --;
 	}
+	if(q == 'k'){
+		al = ALAYER_K;
+		i --;
+	}
 	if(q == 'x'){
 		al = ALAYER_X;
 		i --;
 	}
 	if(p == 'a' && q == '1'){
-		al = ALAYER_A2;
+		al = ALAYER_A1;
 		i -= 2;
 	}
 	if(p == 'b' && q == '1'){
-		al = ALAYER_B2;
+		al = ALAYER_B1;
 		i -= 2;
 	}
 	if(p == 'c' && q == '1'){
-		al = ALAYER_C2;
+		al = ALAYER_C1;
 		i -= 2;
 	}
 	if(p == 'd' && q == '1'){
-		al = ALAYER_D2;
+		al = ALAYER_D1;
 		i -= 2;
 	}
 	if(p == 'e' && q == '1'){
-		al = ALAYER_E2;
+		al = ALAYER_E1;
 		i -= 2;
 	}
 	if(p == 'f' && q == '1'){
-		al = ALAYER_F2;
+		al = ALAYER_F1;
 		i -= 2;
 	}
 	if(p == 'g' && q == '1'){
-		al = ALAYER_G2;
+		al = ALAYER_G1;
 		i -= 2;
 	}
 	if(p == 'h' && q == '1'){
-		al = ALAYER_H2;
+		al = ALAYER_H1;
+		i -= 2;
+	}
+	if(p == 'k' && q == '1'){
+		al = ALAYER_K1;
 		i -= 2;
 	}
 	if(p == 'x' && q == '1'){
@@ -291,6 +299,10 @@ extern bool KoishiAvatar::parseAvatarName(const str &avatarName, avatar &av, ava
 	}
 	if(p == 'h' && q == '2'){
 		al = ALAYER_H2;
+		i -= 2;
+	}
+	if(p == 'k' && q == '2'){
+		al = ALAYER_K2;
 		i -= 2;
 	}
 	if(p == 'x' && q == '2'){
@@ -389,6 +401,8 @@ void avatarAlbum::clear(){
 	avatarList.clear();
 	avatarPos.clear();
 	sourceNPK.release();
+	avatarPosAtBigramList.clear();
+	bigramList.clear();
 	for(int i=0;i<ALAYER_MAXCOUNT;i++){
 		layerIMG[i].release();
 		layerIMGpath[i] = "";
@@ -438,7 +452,7 @@ bool avatarAlbum::loadNPK(){
 			bigram.isTN = av.isTN;
 			bigram.originPos = avatarList.size() - 1;
 			if(av.v6palette == 0){
-				bigram.paletteID = -1;
+				bigram.paletteID = 0;
 				bigramList.push_back(bigram);
 				newAvatarPosByBigram.push_back(bigramList.size() - 1);
 			}else{
@@ -475,7 +489,7 @@ bool avatarAlbum::changeIMG(long newSelect){
 			layerIMGpath[i] = "";
 			if(avatarPos[selected][i] != -1){
 				sourceNPK.IMGextract(avatarPos[selected][i], layerIMG[i]);
-				layerIMGpath[i] = sourceNPK.content[i].imgname;
+				layerIMGpath[i] = sourceNPK.content[avatarPos[selected][i]].imgname;
 			}
 		}
 	}
@@ -661,9 +675,12 @@ void avatarFactory::makeModel(matrix &outputMat, color baseColor, size modelSize
 	for(int i = 0;i<partAlbum[ap].avatarPos[selected].size();i++){
 		if(partAlbum[ap].avatarPos[selected][i] == -1)
 			continue;
-		partAlbum[ap].sourceNPK.IMGextract(partAlbum[ap].avatarPos[selected][i], dispIO);
-		dispIO.PICgetInfo(dispIO.linkFind(frame), dispPI);
-		dispIO.PICextract(frame, dispMat, paletteID);
+		if(!partAlbum[ap].sourceNPK.IMGextract(partAlbum[ap].avatarPos[selected][i], dispIO))
+			continue;
+		if(!dispIO.PICgetInfo(dispIO.linkFind(frame), dispPI))
+			continue;
+		if(!dispIO.PICextract(frame, dispMat, paletteID))
+			continue;
 		dispMat1.putFore(dispMat, LAY, bodyDeltaPoint-bodyBasePoint+dispPI.basePt);
 		dispIO.release();
 		dispMat.destory();

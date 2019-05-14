@@ -40,13 +40,16 @@ clock_t start, end;
 CExRabbitDlg::CExRabbitDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CExRabbitDlg::IDD, pParent)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_hIcon = AfxGetApp()->LoadIcon(IDI_ICON_MAIN);
 
 	profile.loadProfile();
-	width = 1200;
+	width = 1210;
 	height = 650;
 	drawPara.texture = false;
 	drawPara.showPalette = true;
+	drawPara.showAxis = true;		
+	drawPara.showCanvas = true;
+	drawPara.showBound = true;
 	drawPara.indexMode = false;
 	drawPara.entireTextureMode = false;
 	drawPara.compareMode = false;
@@ -127,15 +130,6 @@ BEGIN_MESSAGE_MAP(CExRabbitDlg, CDialogEx)
 	ON_COMMAND(IDM_MAIN_08, &CExRabbitDlg::OnMain08)
 	ON_COMMAND(IDM_MODIFY_01, &CExRabbitDlg::OnModify01)
 	ON_COMMAND(IDM_MODIFY_02, &CExRabbitDlg::OnModify02)
-	ON_COMMAND(IDM_TOOL_01, &CExRabbitDlg::OnTool01)
-	ON_COMMAND(IDM_TOOL_02, &CExRabbitDlg::OnTool02)
-	ON_COMMAND(IDM_TOOL_03, &CExRabbitDlg::OnTool03)
-	ON_COMMAND(IDM_TOOL_04, &CExRabbitDlg::OnTool04)
-	
-	ON_COMMAND(IDM_TOOL_05, &CExRabbitDlg::OnTool05)
-	ON_COMMAND(IDM_TOOL_06, &CExRabbitDlg::OnTool06)
-	ON_COMMAND(IDM_TOOL_07, &CExRabbitDlg::OnTool07)
-	ON_COMMAND(IDM_TOOL_08, &CExRabbitDlg::OnTool08)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONDOWN()
@@ -216,13 +210,27 @@ BEGIN_MESSAGE_MAP(CExRabbitDlg, CDialogEx)
 	ON_COMMAND(ID_MENU_COLOR_PALETTE_COPY, &CExRabbitDlg::OnMenuColorPaletteCopy)
 	ON_COMMAND(ID_MENU_COLOR_PALETTE_IMPORT, &CExRabbitDlg::OnMenuColorPaletteImport)
 	ON_COMMAND(ID_MENU_COLOR_PALETTE_DELETE, &CExRabbitDlg::OnMenuColorPaletteDelete)
+	ON_COMMAND(IDM_TOOL_AVATAR, &CExRabbitDlg::OnToolAvatar)
+	ON_COMMAND(IDM_TOOL_NPK_DICT, &CExRabbitDlg::OnToolNpkDict)
+	ON_COMMAND(IDM_TOOL_IMG_SEARCH, &CExRabbitDlg::OnToolImgSearch)
+	ON_COMMAND(IDM_TOOL_DOWNLOAD, &CExRabbitDlg::OnToolDownload)
+	ON_COMMAND(IDM_TOOL_FORCE_EXTRACT, &CExRabbitDlg::OnToolForceExtract)
+	ON_COMMAND(IDM_TOOL_OPEN_OUTPUT_FOLDER, &CExRabbitDlg::OnToolOpenOutputFolder)
+	ON_COMMAND(IDM_DRAW_COLORTABLE, &CExRabbitDlg::OnDrawColorTable)
+	ON_COMMAND(IDM_DRAW_CANVAS, &CExRabbitDlg::OnDrawCanvas)
+	ON_COMMAND(IDM_DRAW_AXIS, &CExRabbitDlg::OnDrawAxis)
+	ON_COMMAND(IDM_DRAW_BOUND, &CExRabbitDlg::OnDrawBound)
+	ON_COMMAND(IDM_DRAW_SET_COMPARE1, &CExRabbitDlg::OnDrawSetCompare1)
+	ON_COMMAND(IDM_DRAW_SET_COMPARE2, &CExRabbitDlg::OnDrawSetCompare2)
+	ON_COMMAND(IDM_DRAW_COMPARE_ENABLED, &CExRabbitDlg::OnDrawCompareEnabled)
+	ON_COMMAND(IDM_DRAW_COMPARE_DISABLED, &CExRabbitDlg::OnDrawCompareDisabled)
+	ON_COMMAND(ID_MENU_IMAGE_HIDE, &CExRabbitDlg::OnMenuImageHide)
 	END_MESSAGE_MAP()
 /////////
 
 // CExRabbitDlg 消息处理程序
 
-BOOL CExRabbitDlg::OnInitDialog()
-{
+BOOL CExRabbitDlg::OnInitDialog(){
 	CDialogEx::OnInitDialog();
 
 	//设置此对话框的图标。当应用程序主窗口不是对话框时，框架将自动
@@ -238,12 +246,8 @@ BOOL CExRabbitDlg::OnInitDialog()
 	adjustWindow(rc.Width(), rc.Height());
 	// 控件大小调整
 	CREATEW(dNewFile,IDD_NEW_DIALOG);
-	CREATEW(dAbout, IDD_ABOUT_DIALOG);
-	CREATEW(dProcessBar,IDD_BAR_DIALOG);
 
 	CREATEW(bar, IDD_TINY_PROGRESSBAR);
-
-	dProcessBar.SetWindowPos(NULL, GetSystemMetrics(SM_CXSCREEN)/2-100, GetSystemMetrics(SM_CYSCREEN)/2-100,0,0,SWP_NOZORDER|SWP_NOSIZE);
 	CREATEW(toolIMGSearch,IDD_TOOL_IMGSEARCH);
 	toolAvatar.profile = profile;
 	CREATEW(toolAvatar,IDD_TOOL_AVATAR);
@@ -260,17 +264,19 @@ BOOL CExRabbitDlg::OnInitDialog()
 	GET_CTRL(CEdit, IDC_EDIT_IMGINFO)->SetWindowText(L"这里显示IMG文件的信息");
 	switchIMGver(V2);
 	
-	AfxBeginThread(lazyThread, (PVOID)this);
+	AfxBeginThread(lazyThread, this);
+	AfxBeginThread(playThread, this);
 
 	ioComp.create(V2);
 
-	i_lIMG.Create(16,16, TRUE|ILC_COLOR24, 6, 1);
-	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON7));
+	i_lIMG.Create(16,16, TRUE|ILC_COLOR24, 7, 1);
+	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON_NUL));		//0号资源·无效
+	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON_LINK));		//1号资源·LINK
+	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON1));
 	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON2));
 	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON4));
 	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON5));
 	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON6));
-	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON1));
 	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetImageList(&i_lIMG, LVSIL_SMALL);
 
 	i_lPIC.Create(16,16, TRUE|ILC_COLOR24, 9, 1);
@@ -286,13 +292,45 @@ BOOL CExRabbitDlg::OnInitDialog()
 	GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetImageList(&i_lPIC, LVSIL_SMALL);
 	GET_CTRL(CGoodListCtrl, IDC_LIST_DDS)->SetImageList(&i_lPIC, LVSIL_SMALL);
 
+	
 #if UGLY
-	m_logoPic.LoadBitmap(IDB_BITMAP1);
+	m_buttonPic[0].LoadBitmap(IDB_TOOL_1);
+	m_buttonPic[1].LoadBitmap(IDB_TOOL_2);
+	m_buttonPic[2].LoadBitmap(IDB_TOOL_3);
+	m_buttonPic[3].LoadBitmap(IDB_TOOL_4);
+	m_buttonPic[4].LoadBitmap(IDB_TOOL_5);
+	m_buttonPic[5].LoadBitmap(IDB_TOOL_6);
+	m_buttonPic[6].LoadBitmap(IDB_TOOL_7);
+	m_buttonPic[7].LoadBitmap(IDB_TOOL_8);
+	m_buttonPic[8].LoadBitmap(IDB_TOOL_9);
+	m_buttonPic[9].LoadBitmap(IDB_TOOL_10);
+	m_buttonPic[10].LoadBitmap(IDB_TOOL_11);
+	m_buttonPic[11].LoadBitmap(IDB_TOOL_12);
+	m_buttonPic[12].LoadBitmap(IDB_TOOL_13);
+	m_buttonPic[13].LoadBitmap(IDB_TOOL_14);
+	m_buttonPic[14].LoadBitmap(IDB_TOOL_15);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON1)->SetBitmap(m_buttonPic[0]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON2)->SetBitmap(m_buttonPic[1]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON3)->SetBitmap(m_buttonPic[2]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON4)->SetBitmap(m_buttonPic[3]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON5)->SetBitmap(m_buttonPic[4]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON6)->SetBitmap(m_buttonPic[5]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON7)->SetBitmap(m_buttonPic[6]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON8)->SetBitmap(m_buttonPic[7]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON9)->SetBitmap(m_buttonPic[8]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON10)->SetBitmap(m_buttonPic[9]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON11)->SetBitmap(m_buttonPic[10]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON12)->SetBitmap(m_buttonPic[11]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON13)->SetBitmap(m_buttonPic[12]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON14)->SetBitmap(m_buttonPic[13]);
+	GET_CTRL(CButton, IDC_TOOL_BUTTON15)->SetBitmap(m_buttonPic[14]);
+	m_logoPic.LoadBitmap(IDB_BITMAP4);
 	GET_CTRL(CStatic, IDC_LOGO)->SetBitmap(m_logoPic);
 #endif
 
 	no.create();
 	fileNPKname = L"newNPK.npk";
+	updateIMGlist();
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -452,7 +490,12 @@ void CExRabbitDlg::updateIMGlist(){
 	updateInfo();
 	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->DeleteAllItems();
 	for(int i = 0;i<no.count;i++){
-		GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->EasyInsertItem(GetTail(StrToCStr(no.content[i].imgname)), getIconIMG((IMGversion)no.getVersion(i)));
+		long linkPos = no.IMGcheckLink(i);
+		if(linkPos == -1){
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->EasyInsertItem(GetTail(StrToCStr(no.content[i].imgname)), getIconIMG((IMGversion)no.getVersion(i)));
+		}else{
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->EasyInsertItem(GetTail(StrToCStr(no.content[i].imgname) + L"[#"+NumToCStr(linkPos)+L"]"), 1);
+		}
 	}
 }
 
@@ -694,28 +737,28 @@ void CExRabbitDlg::updateInfo(){
 	//NPK 
 	CString cstr;
 	cstr = L"文件名："+GetTail(fileNPKname)+L"\r\n";
-	cstr += L"大小："+NumToCStr(no.getSize())+L"\r\n";
-	cstr += L"IMG数："+NumToCStr(no.count)+L"\r\n";
-	cstr += (crtIMGid  == -1) ? L"当前IMG编号：未选" : ( L"当前IMG编号："  + NumToCStr(crtIMGid));
+	cstr += L"大小："+NumToCStr(no.getSize())+L"字节\r\n";
+	cstr += L"IMG数："+NumToCStr(no.count);
+	cstr += (crtIMGid  == -1) ? L"" : ( L"/"  + NumToCStr(crtIMGid));
 	GET_CTRL(CEdit, IDC_EDIT_NPK)->SetWindowText(cstr);
 
 	cstr = saveAlert ? L"IMG状态：已变动\r\n" : L"IMG状态：未变动\r\n";
 	cstr += L"版本:"+NumToCStr(io.version)+L"\r\n";
-	cstr += L"帧数:"+NumToCStr(io.indexCount)+L"\r\n";
-	cstr += (crtPICid == -1) ? L"当前帧：未选择\r\n": (  L"当前帧：" + NumToCStr(crtPICid)+L"\r\n");
+	cstr += L"帧数:"+NumToCStr(io.indexCount);
+	cstr += (crtPICid == -1) ? L"\r\n": (  L"/" + NumToCStr(crtPICid)+L"\r\n");
 	switch(io.version){
 	case V4:
 		cstr += L"调色板颜色项:"+NumToCStr(io.paletteData[0].size())+L"\r\n";
 		break;
 	case V5:
-		cstr += L"纹理集数:"+NumToCStr(io.TEXcontent.size())+L"\r\n";
-		cstr += (crtTEXid == -1) ? L"当前纹理集：未选择\r\n": (  L"当前纹理集：" + NumToCStr(crtTEXid)+L"\r\n");
+		cstr += L"纹理集数:"+NumToCStr(io.TEXcontent.size());
+		cstr += (crtTEXid == -1) ? L"\r\n": (  L"/" + NumToCStr(crtTEXid)+L"\r\n");
 		cstr += L"调色板颜色项:"+NumToCStr(io.paletteData[0].size())+L"\r\n";
 		break;
 	case V6:
-		cstr += L"调色板方案数:"+NumToCStr(io.paletteData.getCount())+L"\r\n";
+		cstr += L"调色板方案数:"+NumToCStr(io.paletteData.getCount());
 		if(GET_CTRL(CComboBox, IDC_COMBO_PRO)->GetCurSel() >= 0){
-			cstr += L"当前方案颜色项:"+NumToCStr(io.paletteData[GET_CTRL(CComboBox, IDC_COMBO_PRO)->GetCurSel()].size())+L"\r\n";
+			cstr += L"/"+NumToCStr(io.paletteData[GET_CTRL(CComboBox, IDC_COMBO_PRO)->GetCurSel()].size())+L"\r\n";
 		}
 		break;
 	}
@@ -812,7 +855,7 @@ void CExRabbitDlg::OnBnClickedButtonMenu3()
 	// TODO: IMG改动
 	CMenu menu, *pPopup;  
     menu.LoadMenu(IDR_MENU);  
-    pPopup = menu.GetSubMenu(9);  
+    pPopup = menu.GetSubMenu(1);  
     CPoint myPoint;  
     ClientToScreen(&myPoint);  
     GetCursorPos(&myPoint); //鼠标位置  
@@ -828,6 +871,7 @@ void CExRabbitDlg::OnNMClickListImg(NMHDR *pNMHDR, LRESULT *pResult)
 	// TODO: 左键点击IMG列表
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	int row = pNMListView->iItem;
+	playing = 0;
 	////////////////////////////
 	//切换IMG时提示保存
 	if(saveAlert){
@@ -846,8 +890,29 @@ void CExRabbitDlg::OnNMClickListImg(NMHDR *pNMHDR, LRESULT *pResult)
 	if(row>=0){
 		crtIMGid = row;
 		fndIMGid = row;
-		io.release();
-		no.IMGextract(row, io);
+		long linkCheckIMG = no.IMGcheckLink(row);
+		if(linkCheckIMG >= 0){
+			crtIMGid = linkCheckIMG;
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(crtIMGid);
+		}
+		if(no.getVersion(row) == V1 && IDYES == MessageBox(L"这个IMG是V1喵，需要转化为V2喵？", L"提示喵", MB_YESNO)){
+			KoishiExpand::IMGobjectV1 io1;
+			stream s;
+			no.randomExtract(row, s);
+			if(!io1.load(s)){
+				MessageBox(L"转换失败喵！", L"提示喵");
+				return;
+			}
+			if(!io1.make(io)){
+				MessageBox(L"转换失败喵！", L"提示喵");
+				return;
+			}
+			no.IMGreplace(row, io);
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(row, 0, LVIF_IMAGE, NULL, getIconIMG(V2),0,0,0);
+		}else{
+			io.release();
+			no.IMGextract(row, io);
+		}
 		fileIMGname = StrToCStr(no.content[row].imgname);
 		switchIMGver(io.version);
 		updatePIClist();
@@ -879,6 +944,7 @@ void CExRabbitDlg::OnNMClickListTex(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 	// TODO: 左键点击纹理集列表
+	playing = 0;
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	CHECK_VALID(pNMListView->iItem >= 0);
 	crtTEXid = pNMListView->iItem;
@@ -907,6 +973,7 @@ void CExRabbitDlg::OnNMClickListPic(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 	// TODO: 左键点击帧列表
+	playing = 0;
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	CHECK_VALID(pNMListView->iItem >= 0);
 	crtPICid = pNMListView->iItem;
@@ -920,6 +987,10 @@ void CExRabbitDlg::OnNMRClickListPic(NMHDR *pNMHDR, LRESULT *pResult){
 	// TODO: 右键点击帧列表呼出菜单
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	OnNMClickListPic(pNMHDR, pResult);
+	if(crtIMGid == -1){
+		MessageBox(L"还没有选择IMG对象喵。",L"提示喵");
+		return;
+	}
 	//////////////////////////////////
 	CPoint myPoint;  
 	ClientToScreen(&myPoint);  
@@ -968,6 +1039,7 @@ void CExRabbitDlg::OnLvnKeydownListImg(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLVKEYDOWN pLVKeyDow = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
+	playing = 0;
 	int row = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetSelectionMark();
 	if(pLVKeyDow->wVKey != VK_UP && pLVKeyDow->wVKey != VK_DOWN){
 		//无关按键不响应
@@ -1026,6 +1098,7 @@ void CExRabbitDlg::OnLvnKeydownListPic(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLVKEYDOWN pLVKeyDow = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
+	playing = 0;
 	int row = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->GetSelectionMark();
 	if(pLVKeyDow->wVKey != VK_UP && pLVKeyDow->wVKey != VK_DOWN){
 		//无关按键不响应
@@ -1063,6 +1136,7 @@ void CExRabbitDlg::OnLvnKeydownListTex(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLVKEYDOWN pLVKeyDow = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
+	playing = 0;
 	int row = GET_CTRL(CGoodListCtrl, IDC_LIST_DDS)->GetSelectionMark();
 	if(pLVKeyDow->wVKey != VK_UP && pLVKeyDow->wVKey != VK_DOWN){
 		//无关按键不响应
@@ -1224,16 +1298,18 @@ void CExRabbitDlg::OnStnClickedLogo()
 }
 
 int CExRabbitDlg::getIconIMG(IMGversion iv){
-	int iconList[10] = {0, 5, 1, 0, 2, 3, 4, 0, 0, 0};
+	int iconList[10] = {0, 2, 3, 0, 4, 5, 6, 0, 0, 0};
 	return iconList[iv];
 }
 int CExRabbitDlg::getIconPIC(colorFormat cf){
-	int iconList[21] = {0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0, 0, 4, 3, 2, 1, 6, 7, 8};
+	int iconList[21] = {0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0, 0, 3, 2, 1, 4, 6, 7, 8};
+	if(io.version == V4 || io.version == V5 ||io.version == V6){
+		if(cf == ARGB1555){
+			return 5;
+		}
+	}
 	return iconList[cf];
 }
-//int CExRabbitDlg::getIconCLR(Koishi::color clr){
-//	return clr.A <= 0x7f ? 0 : 1;
-//}
 void CExRabbitDlg::getSelected(CGoodListCtrl *listCtrl, int highLine, int targetPara, std::vector<int> &selected){
 	selected.clear();
 	int k;
@@ -1358,8 +1434,18 @@ void CExRabbitDlg::OnMain02()
 			if(io.loadFile(fn)){
 				//MessageBox(L"读取完毕喵！");
 			}else{
-				MessageBox(L"读取失败喵！");
-				return;
+				KoishiExpand::IMGobjectV1 io1;
+				if(!io1.load(fn)){
+					MessageBox(L"读取失败喵！", L"提示喵");
+					return;
+				}
+				if(!io1.make(io)){
+					MessageBox(L"读取失败喵！", L"提示喵");
+					return;
+				}
+				if(IDNO== MessageBox(L"该IMG为旧版本(V1)，需要将其转化为V2才能打开。要这样做嘛？", L"提示喵", MB_YESNO)){
+					return;
+				}
 			}
 			no.release();
 			no.create();
@@ -1435,8 +1521,8 @@ void CExRabbitDlg::OnMain05(){
 void CExRabbitDlg::OnMain06()
 {
 	// TODO: 关于
-	MOVEW(dAbout);
-	dAbout.ShowWindow(SW_SHOW);
+	CDialogAbout dlg;
+	dlg.DoModal();
 }
 void CExRabbitDlg::OnMain07()
 {
@@ -1479,7 +1565,7 @@ void CExRabbitDlg::OnModify02()
 	CString fileName1;
 	if(dlg.DoModal() == IDOK){
 		fileName1 = dlg.GetPathName();
-		if(no.extractIMGFile(crtIMGid, CStrToStr(fileName1))){
+		if(no.randomExtract(crtIMGid, CStrToStr(fileName1))){
 			MessageBox(_T("保存完毕喵！"));
 		}else{
 			MessageBox(_T("保存失败喵！"));
@@ -1487,176 +1573,6 @@ void CExRabbitDlg::OnModify02()
 	}
 }
 
-//////////////////////////////////////////////
-/**********特殊工具菜单处理事件**************/
-//////////////////////////////////////////////
-
-void CExRabbitDlg::OnTool01()
-{
-	// TODO: IMG定位器
-	MOVEW(toolIMGSearch);
-	toolIMGSearch.ShowWindow(SW_SHOW);
-}
-void CExRabbitDlg::OnTool02()
-{
-	// TODO: 试衣间
-	MOVEW(toolAvatar);
-	toolAvatar.ShowWindow(SW_SHOW);
-	toolAvatar.changeThumbnailSize(profile.avatarThumbSize);
-}
-void CExRabbitDlg::OnTool03()
-{
-	// TODO: NPK辞典
-	MOVEW(toolDict);
-	toolDict.ShowWindow(SW_SHOW);
-	toolDict.contentDir = profile.getSupportPath();
-	toolDict.resourceDir = profile.getNPKdictPath();
-}
-void CExRabbitDlg::OnTool04()
-{
-	// TODO: 转化为索引IMG
-	MessageBox(L"施工中");
-	//MOVEW(toolIndexing);
-	//toolIndexing.ShowWindow(SW_SHOW);
-}
-void CExRabbitDlg::OnTool05()
-{
-	// TODO: 在此添加命令处理程序代码
-	MOVEW(toolSPK);
-	toolSPK.localAddr = profile.getDownloadPath();
-	toolSPK.OnCbnSelchangeCombo2();
-	toolSPK.ShowWindow(SW_SHOW);
-}
-void CExRabbitDlg::OnTool06()
-{
-	// TODO: 在此添加命令处理程序代码
-	MOVEW(toolForceEx);
-	toolForceEx.ShowWindow(SW_SHOW);
-	toolForceEx.m_pProc.SetRange32(0,100);
-}
-void CExRabbitDlg::OnTool07()
-{
-	// TODO: 在此添加命令处理程序代码
-	//V1转换V2
-	CString defExt = _T("V1资源文件(*.IMG)|*.IMG");
-	CString extFilter = _T("V1资源文件(*.IMG)|*.IMG||");
-	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
-	str fn;
-	CString fileName,fmt;
-	if(dlg.DoModal() == IDOK){
-		fileName = dlg.GetPathName();
-		fmt = fileName.Right(1);
-		CStrToStr(fileName, fn);
-		if(fmt == L"G" || fmt == L"g"){
-			io.release();
-			KoishiExpand::IMGobjectV1 io1;
-			if(!io1.load(fn)){
-				MessageBox(L"不是有效的IMGV1文件喵！");
-				return;
-			}
-			if(!io1.make(io)){
-				MessageBox(L"该IMGV1文件无法转化喵！");
-				return;
-			}
-			no.release();
-			no.create();
-			fileIMGname = fileName;
-			fileNPKname = L"newNPK.npk";
-			saveAlert = false;
-			fileName = GetTail(fileName);
-			CStrToStr(Slashing(fileName), fn);
-			no.IMGpush(io, fn);
-			switchIMGver(io.version);
-			updateIMGlist();
-			updatePIClist();
-			updateTEXlist();
-			updateColorTable();
-			updateInfo();
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(0);
-			crtIMGid = 0;
-		}
-	}
-}
-
-UINT CExRabbitDlg::threadImportNPK(PVOID para){
-	CExRabbitDlg *dlg = (CExRabbitDlg *)para;
-	structImportNPKPara INP = dlg->importNPKPara;	//转换参数
-	NPKobject noTemp;
-	if(!noTemp.loadFile(INP.fileName)){
-		dlg->MessageBox(L"读取NPK失败",L"提示");
-		return 0;
-	}
-	//叫出等待条
-	dlg->dProcessBar.ShowWindow(SW_SHOW);
-	dlg->dProcessBar.setTitle(L"导入IMG中");
-
-	int i,j;
-	int total = noTemp.count;		//统计总数
-	int fail = 0;					//统计失败数
-	int conflict = 0;				//统计冲突数
-	str fn1, fn2;
-	int posConflict = 0;			//冲突位置
-	bool isConflict = false;		//是否冲突
-	IMGobject ioTemp;
-	for(i=0;i<noTemp.count;i++){
-		if(!noTemp.IMGextract(i, ioTemp)){
-			ioTemp.release();
-			fail ++;
-			continue;
-		}
-		for(j=0;j<dlg->no.count;j++){
-			fn1 = dlg->no.content[j].imgname;	//源NPK内各IMG路径名
-			fn2 = noTemp.content[i].imgname; //待导入NPK内IMG的路径名
-			if(GetTail(StrToCStr(fn1)) == GetTail(StrToCStr(fn2))){
-				isConflict = true;
-				posConflict = j;
-				break;
-			}
-		}
-		if(isConflict){
-			switch(INP.conflictPara){
-			case 0:
-				//不检测冲突
-				fn2 = noTemp.content[i].imgname;
-				dlg->no.IMGpush(ioTemp, fn2);
-				GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_IMG)->EasyInsertItem(GetTail(StrToCStr(fn2)),dlg->getIconIMG(ioTemp.version));
-				break;
-			case 1:
-				conflict ++;
-				break;
-			case 2:
-				dlg->no.IMGreplace(posConflict, ioTemp);
-				GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(posConflict, 0, LVIF_IMAGE, NULL, dlg->getIconIMG(ioTemp.version),0,0,0);
-				conflict ++;
-				break;
-			default:
-				fail ++;
-				break;
-			}
-		}else{
-			fn2 = noTemp.content[i].imgname;
-			dlg->no.IMGpush(ioTemp, fn2);
-			GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_IMG)->EasyInsertItem(GetTail(StrToCStr(fn2)),dlg->getIconIMG(ioTemp.version));
-		}
-		ioTemp.release();
-		dlg->dProcessBar.setPosi((i+1)*1000/noTemp.count);
-	}
-	noTemp.release();
-	switch(INP.conflictPara){
-	case 1:
-		dlg->MessageBox(L"导入完毕喵！\r\n总"+NumToCStr(total)+L"个,跳过"+NumToCStr(conflict)+L"个喵,失败"+NumToCStr(fail)+L"个喵。",L"提示喵");
-		break;
-	case 2:
-		dlg->MessageBox(L"导入完毕喵！\r\n总"+NumToCStr(total)+L"个,替换"+NumToCStr(conflict)+L"个喵,失败"+NumToCStr(fail)+L"个喵。",L"提示喵");
-		break;
-	case 0:
-		dlg->MessageBox(L"导入完毕喵！\r\n总"+NumToCStr(total)+L"个,失败"+NumToCStr(fail)+L"个喵。",L"提示喵");
-		break;
-	}
-	dlg->dProcessBar.ShowWindow(SW_HIDE);
-	dlg->updateInfo();
-	return 0;
-}
 UINT CExRabbitDlg::threadMix(PVOID para){
 	CExRabbitDlg *dlg =  (CExRabbitDlg *)para;
 	NPKobject *nop = &(dlg->no);
@@ -1668,8 +1584,8 @@ UINT CExRabbitDlg::threadMix(PVOID para){
 	imgCount = mixLayer.size();
 	if(imgCount == 0)
 		return 0;
-	dlg->dProcessBar.ShowWindow(SW_SHOW);
-	dlg->dProcessBar.setTitle(L"拼合中");
+	dlg->bar.show(100);
+	dlg->bar.setInfo(L"准备拼合喵……", 0);
 	IMGobject *ioList = new IMGobject[imgCount];
 	IMGobject newIO;
 	newIO.create(V2);
@@ -1686,8 +1602,9 @@ UINT CExRabbitDlg::threadMix(PVOID para){
 	PICinfo pi;
 	point ptLT, ptRB, ptLTtemp, ptRBtemp;//左上角右下角的点，右下角的点包含在图片内
 	std::vector<int> mLeft, mTop, mRight, mBottom;
+	dlg->bar.setMax(maxFrameCount);
 	for(k=0;k<maxFrameCount;k++){
-		dlg->dProcessBar.setInfo(L"正在拼合第"+NumToCStr(k+1)+L"帧,总"+NumToCStr(maxFrameCount)+L"帧");
+		dlg->bar.setInfo(L"正在拼合第"+NumToCStr(k+1)+L"帧喵(总"+NumToCStr(maxFrameCount)+L"帧)……", k);
 		mLeft.clear();
 		mTop.clear();
 		mRight.clear();
@@ -1766,14 +1683,13 @@ UINT CExRabbitDlg::threadMix(PVOID para){
 		newIO.PICpush(pi, s);
 		matf.destory();
 		s.release();
-		dlg->dProcessBar.setPosi((k+1)*1000/maxFrameCount);
 	}
 	nop->IMGpush(newIO,"mixed.img");
 	GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_IMG)->InsertItem(imgCount, L"mixed.img",dlg->getIconIMG(newIO.version));
+	dlg->bar.hide();
 	dlg->updateInfo();
 	dlg->updateIMGlist();
 	delete[] ioList;
-	dlg->dProcessBar.ShowWindow(SW_HIDE);
 	return 0;
 }
 
@@ -1861,40 +1777,20 @@ UINT CExRabbitDlg::threadDraw(PVOID para){
 		KoishiExpand::KoishiMarkTool::MatrixPSstyle(tempMat, content, clrCanvasBound, clrCanvasBack1,clrCanvasBack2);
 		tempMat.destory();
 		canvas.putFore(content, SDP.mixMode, SDP.basePoint);
-	}else if(SDP.entireTextureMode/* && io->version == V5*/){
-		//V5状态下的全纹理集引用模式
-		if(io->version == V5){
-			if(picRow < 0){
-				dlg->drawing = 0;
-				return 0;
-			}
-			io->PICgetInfo(picRow, po);
-			if(po.comp != COMP_ZLIB2){
-				dlg->MessageBox(L"选定帧不属于任何纹理集喵！",L"提示喵");
-				dlg->drawPara.entireTextureMode = false;
-				dlg->drawing = 0;
-				return 0;
-			}
-			io->TEXgetInfo(po.TEXusing, di);
-			io->TEXextract(po.TEXusing, tempMat);
-			tempMat.zoom(SDP.zoomRate);
-			KoishiExpand::KoishiMarkTool::MatrixPSstyle(tempMat, content, clrCanvasBound, clrCanvasBack1,clrCanvasBack2);
-			tempMat.destory();
-			canvas.putFore(content, SDP.mixMode, SDP.basePoint);
-		}else{
-			KoishiExpand::exhibit kex;
-			kex.create(canvas.getWidth(), canvas.getHeight());
-			dlg->bar.show(io->indexCount-1-picRow);
-			for(i = picRow;i<io->indexCount;i++){
-				dlg->bar.setInfo(L"提取第"+NumToCStr(i)+L"帧喵……", i-picRow);
-				io->PICextract(i, content, cbpro);
-				kex.putMatrix(content);
-				content.destory();
-			}
-			dlg->bar.hide();
-			canvas.putFore(kex.canvas);
-			dlg->drawPara.entireTextureMode = false;
+	}else if(SDP.entireTextureMode){
+		//全帧显示
+		KoishiExpand::exhibit kex;
+		kex.create(canvas.getWidth(), canvas.getHeight());
+		dlg->bar.show(io->indexCount-1-picRow);
+		for(i = picRow;i<io->indexCount;i++){
+			dlg->bar.setInfo(L"提取第"+NumToCStr(i)+L"帧喵……", i-picRow);
+			io->PICextract(i, content, cbpro);
+			kex.putMatrix(content);
+			content.destory();
 		}
+		dlg->bar.hide();
+		canvas.putFore(kex.canvas);
+		dlg->drawPara.entireTextureMode = false;
 	}else{
 		//其他模式
 		if(picRow < 0){
@@ -1923,28 +1819,32 @@ UINT CExRabbitDlg::threadDraw(PVOID para){
 			}
 		}
 		//绘制网格线
-		if(SDP.basePoint.X < 0){
-			canvas.line(point(0,0),point(0,canh-1), clrZeroNoAxis);
-		}else if(SDP.basePoint.X >= canw){
-			canvas.line(point(canw-1,0),point(canw-1,canh-1), clrZeroNoAxis);
-		}else{
-			canvas.line(point(SDP.basePoint.X,0),point(SDP.basePoint.X,canh-1), clrZeroAxis);
-		}
-		if(SDP.basePoint.Y < 0){
-			canvas.line(point(0,0),point(canw-1,0), clrZeroNoAxis);
-		}else if(SDP.basePoint.Y >= canh){
-			canvas.line(point(0,canh-1),point(canw-1,canh-1), clrZeroNoAxis);
-		}else{
-			canvas.line(point(0,SDP.basePoint.Y),point(canw-1,SDP.basePoint.Y), clrZeroAxis);
+		if(SDP.showAxis){
+			if(SDP.basePoint.X < 0){
+				canvas.line(point(0,0),point(0,canh-1), clrZeroNoAxis);
+			}else if(SDP.basePoint.X >= canw){
+				canvas.line(point(canw-1,0),point(canw-1,canh-1), clrZeroNoAxis);
+			}else{
+				canvas.line(point(SDP.basePoint.X,0),point(SDP.basePoint.X,canh-1), clrZeroAxis);
+			}
+			if(SDP.basePoint.Y < 0){
+				canvas.line(point(0,0),point(canw-1,0), clrZeroNoAxis);
+			}else if(SDP.basePoint.Y >= canh){
+				canvas.line(point(0,canh-1),point(canw-1,canh-1), clrZeroNoAxis);
+			}else{
+				canvas.line(point(0,SDP.basePoint.Y),point(canw-1,SDP.basePoint.Y), clrZeroAxis);
+			}
 		}
 		//绘制IMG矩形
-		long x1,x2,y1,y2;
-		if(io->PICgetTotalBound(x1,x2,y1,y2)){
-			x1 = SDP.basePoint.X+x1*SDP.zoomRate;
-			x2 = SDP.basePoint.X+x2*SDP.zoomRate;
-			y1 = SDP.basePoint.Y+(y1+1)*SDP.zoomRate-1;
-			y2 = SDP.basePoint.Y+(y2+1)*SDP.zoomRate-1;
-			canvas.rectangle(point(x1,y1),point(x2,y2),clrEnclosingBound);
+		if(SDP.showBound){
+			long x1,x2,y1,y2;
+			if(io->PICgetTotalBound(x1,x2,y1,y2)){
+				x1 = SDP.basePoint.X+x1*SDP.zoomRate;
+				x2 = SDP.basePoint.X+x2*SDP.zoomRate;
+				y1 = SDP.basePoint.Y+(y1+1)*SDP.zoomRate-1;
+				y2 = SDP.basePoint.Y+(y2+1)*SDP.zoomRate-1;
+				canvas.rectangle(point(x1,y1),point(x2,y2),clrEnclosingBound);
+			}
 		}
 		//正常图
 		io->PICgetInfo(picRow, po);
@@ -1988,7 +1888,7 @@ UINT CExRabbitDlg::threadDraw(PVOID para){
 		//缩放到屏幕
 		tempMat.zoom(SDP.zoomRate);
 		//非对比模式 & 播放模式 不绘制画布
-		if(SDP.compareMode || dlg->playing == 1){
+		if(SDP.compareMode || dlg->playing == 1 || !SDP.showCanvas){
 			content = tempMat;
 		}else{
 			KoishiExpand::KoishiMarkTool::MatrixPSstyle(tempMat, content, clrCanvasBound, clrCanvasBack1,clrCanvasBack2);
@@ -2019,43 +1919,46 @@ UINT CExRabbitDlg::threadDraw(PVOID para){
 
 UINT CExRabbitDlg::playThread(PVOID para){
 	CExRabbitDlg* dlg = (CExRabbitDlg*)para;
-	if(dlg->playing){
-		return 0;
-	}
-	int row = GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_PIC)->GetSelectionMark();
-	if(row<0)
-		return 0;
-	dlg->playing = 1;
-	while(row<GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_PIC)->GetItemCount()){
-		if(row>0){
-			GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemState(row-1, 0, LVIS_FOCUSED | LVIS_SELECTED);
+	int localFrame = 0;
+	while(true){
+		if(dlg->playing){
+			std::vector<int> frameList;
+			dlg->getSelected(GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_PIC), 0, MULTI_SELECT, frameList);
+			if(frameList.size() == 0){
+				dlg->getSelected(GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_PIC), 0, ALL_SELECT, frameList);
+			}
+			for(localFrame = 0;localFrame<frameList.size();localFrame++){
+				int row = frameList[localFrame];
+				if(row >= dlg->io.indexCount)
+					break;
+				GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemState(row-1, 0, LVIS_FOCUSED | LVIS_SELECTED);
+				GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemState(row, LVIS_FOCUSED | LVIS_SELECTED,LVIS_FOCUSED | LVIS_SELECTED);
+				GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetSelectionMark(row);
+				dlg->crtPICid = row;
+				dlg->updateInfo();
+				dlg->draw();
+				Sleep(100);
+				if(dlg->playing == 0){
+					break;
+				}
+			}
 		}
-		GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemState(row, LVIS_FOCUSED | LVIS_SELECTED,LVIS_FOCUSED | LVIS_SELECTED);
-		GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetSelectionMark(row);
-		dlg->crtPICid = row;
-		dlg->updateInfo();
-		dlg->draw();
-		row ++;
-		Sleep(100);
-		if(dlg->playing == 0){
-			break;
-		}
+		Sleep(10);
 	}
-	dlg->playing = 0;
 	return 0;
 }
 
-void CExRabbitDlg::OnTool08(){
-	// TODO: 在此添加命令处理程序代码
-	MessageBox(L"施工中");
-}
 /////////////////////////////////////////////////////////////
 //工具栏按钮
 //////////////////////////////////////////////////////////////
 void CExRabbitDlg::OnBnClickedToolButton1(){
-	// TODO: 移动到中心
-	drawPara.showPalette = !drawPara.showPalette;
-	draw();
+	CMenu menu, *pPopup;  
+    menu.LoadMenu(IDR_MENU_DRAW);  
+    pPopup = menu.GetSubMenu(0); 
+    CPoint myPoint;  
+    ClientToScreen(&myPoint);  
+    GetCursorPos(&myPoint); //鼠标位置  
+    pPopup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, myPoint.x, myPoint.y, this); 
 }
 void CExRabbitDlg::OnBnClickedToolButton2(){
 	// TODO: 在此添加控件通知处理程序代码
@@ -2065,32 +1968,22 @@ void CExRabbitDlg::OnBnClickedToolButton2(){
 void CExRabbitDlg::OnBnClickedToolButton3(){
 	// TODO: 在此添加控件通知处理程序代码
 	drawPara.entireTextureMode = !drawPara.entireTextureMode;
+	canvasOperatePara.canvasOperation = CANVAS_SHOW;
 	draw();
 }
 void CExRabbitDlg::OnBnClickedToolButton4(){
-	//TODO: 对比
-	if(IDOK == MessageBox(L"要与外部的IMG文件进行对比喵？\r\n若要与当前NPK内其他的IMG文件进行比对请点“否”喵！", L"提示",MB_YESNO)){
-		CString defExt = _T("IMG文件(*.IMG)|*.IMG");
-		CString extFilter = _T("IMG文件(*.IMG)|*.IMG||");
-		CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
-		CString fileName;
-		if(dlg.DoModal() == IDOK){
-			fileName = dlg.GetPathName();
-			ioComp.release();
-			if(ioComp.loadFile(CStrToStr(fileName))){
-				MessageBox(L"设置完毕喵！");
-			}else{
-				MessageBox(L"读取失败喵！");
-				return;
-			}
-		}
-	}
-	drawPara.compareMode = !drawPara.compareMode;
-	draw();
+	CMenu menu, *pPopup;  
+    menu.LoadMenu(IDR_MENU_DRAW);  
+    pPopup = menu.GetSubMenu(1);  
+    CPoint myPoint;  
+    ClientToScreen(&myPoint);  
+    GetCursorPos(&myPoint); //鼠标位置  
+    pPopup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, myPoint.x, myPoint.y, this); 
 }
 void CExRabbitDlg::OnBnClickedToolButton5(){
 	//TODO: 播放
-	AfxBeginThread(playThread, (LPVOID)this);
+	canvasOperatePara.canvasOperation = CANVAS_SHOW;
+	playing = !playing;
 }
 void CExRabbitDlg::OnBnClickedToolButton6(){
 	// TODO: 拖动
@@ -2102,10 +1995,18 @@ void CExRabbitDlg::OnBnClickedToolButton7()
 }
 void CExRabbitDlg::OnBnClickedToolButton8(){
 	// TODO: 移动
+	if(playing){
+		MessageBox(L"请先暂停播放喵！", L"提示喵");
+		return;
+	}
 	canvasOperatePara.canvasOperation = CANVAS_MOVE;
 }
 void CExRabbitDlg::OnBnClickedToolButton9(){
 	// TODO: 裁切
+	if(playing){
+		MessageBox(L"请先暂停播放喵！", L"提示喵");
+		return;
+	}
 	if(io.version == V5){
 		MessageBox(L"不能对V5版本的IMG贴图进行扩充/裁切喵！",L"提示喵");
 		return;
@@ -2114,6 +2015,10 @@ void CExRabbitDlg::OnBnClickedToolButton9(){
 }
 void CExRabbitDlg::OnBnClickedToolButton10(){
 	// TODO: 在此添加控件通知处理程序代码
+	if(playing){
+		MessageBox(L"请先暂停播放喵！", L"提示喵");
+		return;
+	}
 	if(io.version == V5){
 		MessageBox(L"不能对V5版本的IMG贴图进行画刷喵！",L"提示喵");
 		return;
@@ -2132,6 +2037,10 @@ void CExRabbitDlg::OnBnClickedToolButton10(){
 }
 void CExRabbitDlg::OnBnClickedToolButton11(){
 	// TODO: 在此添加控件通知处理程序代码
+	if(playing){
+		MessageBox(L"请先暂停播放喵！", L"提示喵");
+		return;
+	}
 	if(io.version == V5){
 		MessageBox(L"不能对V5版本的IMG贴图进行画线条喵！",L"提示喵");
 		return;
@@ -2140,6 +2049,10 @@ void CExRabbitDlg::OnBnClickedToolButton11(){
 }
 void CExRabbitDlg::OnBnClickedToolButton12(){
 	// TODO: 在此添加控件通知处理程序代码
+	if(playing){
+		MessageBox(L"请先暂停播放喵！", L"提示喵");
+		return;
+	}
 	if(io.version == V5){
 		MessageBox(L"不能对V5版本的IMG贴图进行画矩形喵！",L"提示喵");
 		return;
@@ -2148,6 +2061,10 @@ void CExRabbitDlg::OnBnClickedToolButton12(){
 }
 void CExRabbitDlg::OnBnClickedToolButton13(){
 	// TODO: 在此添加控件通知处理程序代码
+	if(playing){
+		MessageBox(L"请先暂停播放喵！", L"提示喵");
+		return;
+	}
 	if(io.version == V5){
 		MessageBox(L"不能对V5版本的IMG贴图进行擦除喵！",L"提示喵");
 		return;
@@ -2167,12 +2084,20 @@ void CExRabbitDlg::OnBnClickedToolButton13(){
 
 void CExRabbitDlg::OnBnClickedToolButton14(){
 	// TODO: 在此添加控件通知处理程序代码
+	if(playing){
+		MessageBox(L"请先暂停播放喵！", L"提示喵");
+		return;
+	}
 	canvasOperatePara.canvasOperation = CANVAS_PICK;
 }
 
 
 void CExRabbitDlg::OnBnClickedToolButton15(){
 	// TODO: 在此添加控件通知处理程序代码
+	if(playing){
+		MessageBox(L"请先暂停播放喵！", L"提示喵");
+		return;
+	}
 	if(io.version == V5){
 		MessageBox(L"不能对V5版本的IMG贴图进行打标喵！",L"提示喵");
 		return;
@@ -2558,6 +2483,9 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 	case CANVAS_PICK:
 		//取色
 		switch(mouseOperation){
+		case CANVAS_MOUSE_MOVE:
+			canvasOperatePara.currentCursor = 10;
+			break;
 		case CANVAS_MOUSE_LEFT_PRESS:
 			if(true){
 				CPoint myPoint  = getWinMouseAxis();   
@@ -2601,7 +2529,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 		//画刷
 		switch(mouseOperation){
 		case CANVAS_MOUSE_MOVE:
-			canvasOperatePara.currentCursor = 2;
+			canvasOperatePara.currentCursor = 8;
 			getMouseTrueAxis(truePt);
 			canvasOperatePara.drawnPoint.clear();
 			{
@@ -2635,7 +2563,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			draw();
 			break;
 		case CANVAS_MOUSE_LEFT_DRAG:
-			canvasOperatePara.currentCursor = 2;
+			canvasOperatePara.currentCursor = 8;
 			getMouseTrueAxis(truePt);
 			{
 				int size = canvasOperatePara.brushSize;
@@ -2709,7 +2637,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 		//擦除
 		switch(mouseOperation){
 		case CANVAS_MOUSE_MOVE:
-			canvasOperatePara.currentCursor = 2;
+			canvasOperatePara.currentCursor = 9;
 			getMouseTrueAxis(truePt);
 			canvasOperatePara.drawnPoint.clear();
 			{
@@ -2743,7 +2671,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			draw();
 			break;
 		case CANVAS_MOUSE_LEFT_DRAG:
-			canvasOperatePara.currentCursor = 2;
+			canvasOperatePara.currentCursor = 9;
 			getMouseTrueAxis(truePt);
 			{
 				int size = canvasOperatePara.brushSize;
@@ -2961,6 +2889,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 		//打标
 		switch(mouseOperation){
 		case CANVAS_MOUSE_MOVE:
+			canvasOperatePara.currentCursor = 2;
 			break;
 		case CANVAS_MOUSE_LEFT_PRESS:
 			{
@@ -3042,7 +2971,7 @@ BOOL CExRabbitDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message){
 			SetCursor(LoadCursor(NULL, IDC_ARROW));
 			break;
 		case 1:
-			SetCursor(LoadCursor(NULL, IDC_HAND));
+			SetCursor(LoadCursor(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDC_CURSOR2)));
 			break;
 		case 2:
 			SetCursor(LoadCursor(NULL, IDC_CROSS));
@@ -3061,6 +2990,15 @@ BOOL CExRabbitDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message){
 			break;
 		case 7:
 			SetCursor(LoadCursor(NULL, IDC_SIZENESW));
+			break;
+		case 8:
+			SetCursor(LoadCursor(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDC_CURSOR3)));
+			break;
+		case 9:
+			SetCursor(LoadCursor(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDC_CURSOR4)));
+			break;
+		case 10:
+			SetCursor(LoadCursor(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDC_CURSOR5)));
 			break;
 		default:
 			SetCursor(LoadCursor(NULL, IDC_ARROW));
@@ -4303,7 +4241,6 @@ void CExRabbitDlg::OnMenuTextureChooseInverse(){
 	// TODO: 在此添加命令处理程序代码
 	for(int i=0;i<GET_CTRL(CGoodListCtrl, IDC_LIST_DDS)->GetItemCount();i++)
 		GET_CTRL(CGoodListCtrl, IDC_LIST_DDS)->SetCheck(i, 1-GET_CTRL(CGoodListCtrl, IDC_LIST_DDS)->GetCheck(i));
-
 }
 void CExRabbitDlg::OnMenuTextureChooseHighline(){
 	// TODO: 在此添加命令处理程序代码
@@ -4499,11 +4436,13 @@ UINT CExRabbitDlg::ThreadTextureGetOrigin(void*context){
 	for(int i=0;i<targetList.size();i++){
 		dlg->bar.setInfo(L"正在提取第"+NumToCStr(targetList[i])+L"纹理集喵……",i);
 		CString fileName;
-		stream sDDS;
+		stream sCompressed, sDDS;
 		fileName = dlg->profile.getOutputPath(dlg->fileNPKname,dlg->fileIMGname)+L"Texture-"+NumToCStr(targetList[i])+L".dds";
-		dlg->io.TEXgetData(targetList[i], sDDS);
+		dlg->io.TEXgetData(targetList[i], sCompressed);
+		sCompressed.uncompressData(sDDS, COMP_ZLIB);
 		sDDS.makeFile(CStrToStr(fileName));
 		sDDS.release();
+		sCompressed.release();
 	}
 	dlg->processing = 0;
 	dlg->bar.hide();
@@ -4536,7 +4475,7 @@ UINT CExRabbitDlg::ThreadImageExtract(void*context){
 		int id = targetList[i];
 		dlg->bar.setInfo(L"正在提取"+GetTail(StrToCStr(dlg->no.content[id].imgname))+L"喵……", i);
 		fileName = filePath+Underlining(StrToCStr(dlg->no.content[id].imgname));
-		dlg->no.extractIMGFile(id, CStrToStr(fileName));
+		dlg->no.randomExtract(id, CStrToStr(fileName));
 	}
 	dlg->MessageBox(L"全部提取完毕喵！已保存到"+dlg->profile.getOutputPath(dlg->fileNPKname)+L"了喵！",L"提示喵");
 	dlg->bar.hide();
@@ -4551,7 +4490,7 @@ void CExRabbitDlg::OnMenuImageSave(){
 	CString extFilter = _T("IMG文件(*.IMG)|*.IMG||");
 	CFileDialog dlg(false, defExt, Underlining(StrToCStr(no.content[crtIMGid].imgname)), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	if(dlg.DoModal() == IDOK){
-		no.extractIMGFile(crtIMGid, CStrToStr(dlg.GetPathName()));
+		no.randomExtract(crtIMGid, CStrToStr(dlg.GetPathName()));
 		MessageBox(_T("保存完毕喵！"));
 	}
 }
@@ -4835,12 +4774,46 @@ void CExRabbitDlg::OnMenuImageRename(){
 	}
 }
 
+void CExRabbitDlg::OnMenuImageHide(){
+	// TODO: 在此添加命令处理程序代码
+	ModalImageHide dlg;
+	if(IDOK == dlg.DoModal()){
+		ParaImageHide = dlg.out;
+		AfxBeginThread(ThreadImageHide, this);
+	}
+}
+
+UINT CExRabbitDlg::ThreadImageHide(void*context){
+	CExRabbitDlg*dlg=(CExRabbitDlg*)context;
+	ModalImageHide::OUTPUT para = dlg->ParaImageHide;
+	dlg->processing = 1;
+	std::vector<int> targetList;
+	dlg->getSelected(GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_IMG), dlg->crtIMGid, para.operate-1, targetList);
+	dlg->bar.show(targetList.size()-1);
+	for(int i = 0; i<targetList.size();i++){
+		int id = targetList[targetList.size() - 1 - i];
+		dlg->bar.setInfo(L"正在隐藏"+GetTail(StrToCStr(dlg->no.content[id].imgname))+L"喵……", i);
+		IMGobject oldIO, newIO;
+		if(!dlg->no.IMGextract(id, oldIO)){
+			continue;
+		}
+		IMGobject::makeEmpty(newIO, oldIO.indexCount);
+		dlg->no.IMGreplace(id, newIO);
+	}
+	dlg->bar.hide();
+	dlg->updateIMGlist();
+	dlg->updateInfo();
+	dlg->processing = 0;
+	return 0U;
+}
 
 void CExRabbitDlg::OnMenuImageTransform(){
 	// TODO: 点击转换版本
 	ModalTransform dlg;
 	dlg.in.contextIO = &io;
 	dlg.in.contextColorList = cl;
+	dlg.in.currentFrame = crtPICid;
+	dlg.in.currentPalette = GET_CTRL(CComboBox, IDC_COMBO_PRO)->GetCurSel();
 	if(IDOK == dlg.DoModal()){
 		ParaImageTransform = dlg.out;
 		AfxBeginThread(ThreadImageTransform, this);
@@ -5022,5 +4995,122 @@ void CExRabbitDlg::OnMenuImageSetCompare(){
 	ioComp.release();
 	no.IMGextract(crtIMGid, ioComp);
 	MessageBox(L"已设定对比IMG。",L"提示喵");
+	drawPara.compareMode = true;
+}
+
+
+
+void CExRabbitDlg::OnToolAvatar(){
+	MOVEW(toolAvatar);
+	toolAvatar.ShowWindow(SW_SHOW);
+	toolAvatar.changeThumbnailSize(profile.avatarThumbSize);
+}
+
+
+void CExRabbitDlg::OnToolNpkDict(){
+	MOVEW(toolDict);
+	toolDict.ShowWindow(SW_SHOW);
+	toolDict.contentDir = profile.getSupportPath();
+	toolDict.resourceDir = profile.getNPKdictPath();
+}
+
+
+void CExRabbitDlg::OnToolImgSearch(){
+	MOVEW(toolIMGSearch);
+	toolIMGSearch.ShowWindow(SW_SHOW);
+}
+
+
+void CExRabbitDlg::OnToolDownload(){
+	MOVEW(toolSPK);
+	toolSPK.localAddr = profile.getDownloadPath();
+	toolSPK.OnCbnSelchangeCombo2();
+	toolSPK.ShowWindow(SW_SHOW);
+}
+
+
+void CExRabbitDlg::OnToolForceExtract(){
+	MOVEW(toolForceEx);
+	toolForceEx.ShowWindow(SW_SHOW);
+	toolForceEx.m_pProc.SetRange32(0,100);
+}
+
+void CExRabbitDlg::OnToolOpenOutputFolder(){
+	ShellExecute(NULL, L"open", profile.getOutputPath(), NULL, NULL, SW_SHOWNORMAL);
+}
+
+
+void CExRabbitDlg::OnDrawColorTable(){
+	drawPara.showPalette = !drawPara.showPalette;
+	if(!playing)
+		draw();
+}
+
+
+void CExRabbitDlg::OnDrawCanvas(){
+	drawPara.showCanvas = !drawPara.showCanvas;
+	if(!playing)
+		draw();
+}
+
+
+void CExRabbitDlg::OnDrawAxis(){
+	drawPara.showAxis = !drawPara.showAxis;
+	if(!playing)
+		draw();
+}
+
+
+void CExRabbitDlg::OnDrawBound(){
+	drawPara.showBound = !drawPara.showBound;
+	if(!playing)
+		draw();
+}
+
+
+void CExRabbitDlg::OnDrawSetCompare1(){
+	MessageBox(L"请右键点击IMG列表中的一个IMG，然后选择“设置为对比IMG对象”来进行设置喵！", L"提示喵");
+}
+
+
+void CExRabbitDlg::OnDrawSetCompare2(){
+	// TODO: 在此添加命令处理程序代码
+	CString defExt = _T("IMG文件(*.IMG)|*.IMG");
+	CString extFilter = _T("IMG文件(*.IMG)|*.IMG||");
+	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
+	CString fileName;
+	if(dlg.DoModal() == IDOK){
+		fileName = dlg.GetPathName();
+		ioComp.release();
+		if(ioComp.loadFile(CStrToStr(fileName))){
+			MessageBox(L"设置完毕喵！");
+		}else{
+			MessageBox(L"读取失败喵！");
+			return;
+		}
+	}
+	drawPara.compareMode = true;
+	if(!playing)
+		draw();
+}
+
+
+void CExRabbitDlg::OnDrawCompareEnabled(){
+	if(ioComp.version == 0){
+		if(IDYES == MessageBox(L"还没有设置对比IMG，要设置喵？",L"提示喵", MB_YESNO)){
+			OnDrawSetCompare2();
+		}
+		return;
+	}
+	drawPara.compareMode = true;
+	if(!playing)
+		draw();
+}
+
+
+void CExRabbitDlg::OnDrawCompareDisabled(){
+	drawPara.compareMode = false;
+	if(!playing)
+		draw();
 }
 

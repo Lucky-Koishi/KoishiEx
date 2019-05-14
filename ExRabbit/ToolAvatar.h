@@ -4,7 +4,7 @@
 #include "DictAvatar.h"
 #include "ModalAvatarMap1.h"
 #include "ModalAvatarMap2.h"
-
+#include "ModalAvatarUpdate.h"
 // CToolAvatar 对话框
 
 using namespace Koishi;
@@ -25,7 +25,7 @@ protected:
 public:
 	CComboBox *cbPart		[APART_MAXCOUNT];		//10个ID组合框的指针
 	CComboBox *cbPalette	[APART_MAXCOUNT];		//10个调色板组合框的指针
-
+	void *context;
 	bool loading;					//读取NPK
 	bool moving;					//播放动画
 	long animation[16];				//动画帧
@@ -43,10 +43,14 @@ public:
 
 	int displayStyle;									//0.展示图模式 1.图标模式(根据装扮ID顺序) 2.图标模式(根据图标ID顺序)
 	void changeDisplayStyle(int newDisplayStyle);
+	void selectionTransform(
+		avatarPart ap, int oldDisplayStyle, int newDisplayStyle, 
+		long oldSelected, long oldSelectedPalette,
+		long &newSelected, long &newSelectedPalette);		//计算切换模式后新的
 	Profile profile;									//preference设定
 	avatarPart displayPart;								//当前选择部件
-	int page;											//当前页
-	int selected;										//当前选择部件的选择项
+	long page;											//当前页
+	long selected;										//当前选择部件的选择项
 	//展示图相关数据
 	int thumbnailSize;									//0.小 1.中 2.大 3.巨大 4.图标
 	long thumbnailWidth;								//每个展示图的宽度
@@ -59,6 +63,7 @@ public:
 	void drawThumbnail(int page);						//绘制展示图
 	//图标相关数据
 	std::vector<long> iconCount;						//图标数
+	bool loadImage(str fileNameWithoutExp, matrix &mat);//导入图像，无视扩展名
 	void loadIconCount(avatarCareer ac);				//导入图标数
 	void drawIconByAvatar(int page);					//根据装扮编号顺序绘制图标
 	void drawIconByIcon(int page);						//根据图标编号顺序绘制图标（按装扮顺序）
@@ -103,7 +108,6 @@ public:
 	afx_msg void OnBnClickedButtonResource();
 	afx_msg void OnBnClickedButtonPrev();
 	afx_msg void OnBnClickedButtonNext();
-	afx_msg void OnBnClickedButtonMakenpk();
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnCbnSelchangeComboAction();
 	afx_msg void OnBnClickedButtonPart1();
@@ -134,4 +138,12 @@ public:
 	afx_msg void OnMenuAvatarRefreshIcon();
 	afx_msg void OnMenuAvatarSetavatar();
 	afx_msg void OnMenuAvatarSetAvatar2();
+	afx_msg void OnBnClickedButtonOneKey();
+
+	afx_msg void OnMenuOneKeyLocalize();
+	afx_msg void OnMenuOneKeyPatch();
+
+	void makeOneKeyPatch();
+	static UINT makeOneKeyPatchThread(void*para);
+	afx_msg void OnMenuOneKeyNPK();
 };

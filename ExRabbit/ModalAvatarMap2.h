@@ -38,4 +38,6 @@ public:
 	void draw();
 	void drawIcon();
 	afx_msg void OnPaint();
+
+	bool loadImage(str fileNameWithoutExp, matrix &mat);
 };

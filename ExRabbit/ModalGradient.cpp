@@ -144,7 +144,7 @@ void ModalGradient::OnBnClickedCheck1(){
 
 void ModalGradient::OnBnClickedCheck2(){
 	// TODO: 在此添加控件通知处理程序代码
-	out.remainAlpha = GET_CTRL(CButton, IDC_CHECK2)->GetCheck();
+	out.remainAlpha = GET_CTRL(CButton, IDC_CHECK2)->GetCheck() == 1;
 }
 
 
@@ -178,7 +178,7 @@ void ModalGradient::OnBnClickedOk()
 		out.keyColor1 = out.keyColor2;
 		out.keyColor2 = middle;
 	}
-	out.remainAlpha = GET_CTRL(CButton, IDC_CHECK2)->GetCheck();
+	out.remainAlpha = GET_CTRL(CButton, IDC_CHECK2)->GetCheck() == 1;
 	CDialogEx::OnOK();
 }
 

@@ -19,68 +19,122 @@
     <None Include="res\ExRabbit.rc2">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\ExRabbit.ico">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="res\LOGO.bmp">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\icon2.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\icon4.ico">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="..\BUGtrace.txt" />
-    <None Include="res\icon5.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\icon6.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\iconud.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\icon8.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\pic_icon.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\ico00001.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\ico00002.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\ico00003.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\ico00004.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\ico00005.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\ico00006.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\ico00007.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\clr_icon.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\ico00008.ico">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="res\QRCODE.bmp">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\ico00009.ico">
+    <None Include="res\cursor1.cur">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\cursor1.cur">
+    <None Include="res\icon_format_ARGB1555.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_ARGB4444.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_ARGB8888.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_DXT1.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_DXT3.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_DXT5.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_LINK.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_PALETTE.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_main.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_2.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_4.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_5.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_6.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_NUL.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_1.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_2.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_3.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_4.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_5.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_6.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_7.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_8.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_9.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_10.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_11.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_12.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_13.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_14.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_15.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\cursor2.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\cursor3.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\cursor4.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\cursor5.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\LOGO2.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_1.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_link.ico">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
@@ -199,6 +253,15 @@
     <ClInclude Include="ModalAvatarMap2.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ModalAvatarUpdate.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalImageHide.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalImageRemove.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExRabbit.cpp">
@@ -307,6 +370,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ModalAvatarMap2.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalAvatarUpdate.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalImageHide.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalImageRemove.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

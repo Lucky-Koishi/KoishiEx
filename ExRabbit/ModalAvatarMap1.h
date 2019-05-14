@@ -26,6 +26,7 @@ public:
 		avatarPart part;
 		long selected;
 		long selectedPalette;
+		long maxIconCount;
 		DictAvatar *ptrDict;
 		Profile *ptrProfile;
 	}in;
@@ -35,9 +36,13 @@ public:
 	void draw();
 	void drawIcon();
 	virtual BOOL OnInitDialog();
+	int page;
+	int selectedIcon;
 	afx_msg void OnPaint();
 	afx_msg void OnBnClickedButtonErase();
 	afx_msg void OnBnClickedButtonConfirm();
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+
+	bool loadImage(str fileNameWithoutExp, matrix &mat);
 };

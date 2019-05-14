@@ -54,7 +54,6 @@ BEGIN_MESSAGE_MAP(CToolAvatar, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_RESOURCE, &CToolAvatar::OnBnClickedButtonResource)
 	ON_BN_CLICKED(IDC_BUTTON_PREV, &CToolAvatar::OnBnClickedButtonPrev)
 	ON_BN_CLICKED(IDC_BUTTON_NEXT, &CToolAvatar::OnBnClickedButtonNext)
-	ON_BN_CLICKED(IDC_BUTTON_MAKENPK, &CToolAvatar::OnBnClickedButtonMakenpk)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
 	ON_COMMAND(ID_MENU_AVATAR_SETNAME, &CToolAvatar::OnMenuAvatarSetName)
@@ -71,6 +70,10 @@ BEGIN_MESSAGE_MAP(CToolAvatar, CDialogEx)
 	ON_COMMAND(ID_MENU_AVATAR_REFRESH_ICON, &CToolAvatar::OnMenuAvatarRefreshIcon)
 	ON_COMMAND(ID_MENU_AVATAR_SETAVATAR, &CToolAvatar::OnMenuAvatarSetavatar)
 	ON_COMMAND(ID_MENU_AVATAR_SETAVATAR2, &CToolAvatar::OnMenuAvatarSetAvatar2)
+	ON_BN_CLICKED(IDC_BUTTON_ONE_KEY, &CToolAvatar::OnBnClickedButtonOneKey)
+	ON_COMMAND(ID_MENU_ONE_KEY_LOCALIZE, &CToolAvatar::OnMenuOneKeyLocalize)
+	ON_COMMAND(ID_MENU_ONE_KEY_PATCH, &CToolAvatar::OnMenuOneKeyPatch)
+	ON_COMMAND(ID_MENU_ONE_KEY_NPK, &CToolAvatar::OnMenuOneKeyNPK)
 END_MESSAGE_MAP()
 
 
@@ -80,52 +83,51 @@ BOOL CToolAvatar::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
-	SetWindowPos(NULL,0,0,1000,630,SWP_NOZORDER|SWP_NOMOVE);
+	SetWindowPos(NULL,0,0,950,630,SWP_NOZORDER|SWP_NOMOVE);
 
 	SET_CTRL(CButton, IDC_BUTTON_RESOURCE, 10, 10, 70, 30);
 	SET_CTRL(CEdit, IDC_EDIT_FOLDER, 80, 10, 200, 30);
 	SET_CTRL(CComboBox, IDC_COMBO_CAREER, 10, 40, 200, 60);
 
-	SET_CTRL(CButton, IDC_BUTTON_PART1, 10, 70, 50, 90);
+	SET_CTRL(CButton, IDC_BUTTON_PART1, 10, 70, 50, 94);
 	SET_CTRL(CComboBox, IDC_COMBO_PART1, 60, 70, 150, 90);
 	SET_CTRL(CComboBox, IDC_COMBO_PALETTE1, 160, 70, 200, 90);
-	SET_CTRL(CButton, IDC_BUTTON_PART2, 10, 100, 50, 120);
+	SET_CTRL(CButton, IDC_BUTTON_PART2, 10, 100, 50, 124);
 	SET_CTRL(CComboBox, IDC_COMBO_PART2, 60, 100, 150, 120);
 	SET_CTRL(CComboBox, IDC_COMBO_PALETTE2, 160, 100, 200, 120);
-	SET_CTRL(CButton, IDC_BUTTON_PART3, 10, 130, 50, 150);
+	SET_CTRL(CButton, IDC_BUTTON_PART3, 10, 130, 50, 154);
 	SET_CTRL(CComboBox, IDC_COMBO_PART3, 60, 130, 150, 150);
 	SET_CTRL(CComboBox, IDC_COMBO_PALETTE3, 160, 130, 200, 150);
-	SET_CTRL(CButton, IDC_BUTTON_PART4, 10, 160, 50, 180);
+	SET_CTRL(CButton, IDC_BUTTON_PART4, 10, 160, 50, 184);
 	SET_CTRL(CComboBox, IDC_COMBO_PART4, 60, 160, 150, 180);
 	SET_CTRL(CComboBox, IDC_COMBO_PALETTE4, 160, 160, 200, 180);
-	SET_CTRL(CButton, IDC_BUTTON_PART5, 10, 190, 50, 210);
+	SET_CTRL(CButton, IDC_BUTTON_PART5, 10, 190, 50, 214);
 	SET_CTRL(CComboBox, IDC_COMBO_PART5, 60, 190, 150, 210);
 	SET_CTRL(CComboBox, IDC_COMBO_PALETTE5, 160, 190, 200, 210);
-	SET_CTRL(CButton, IDC_BUTTON_PART6, 10, 220, 50, 240);
+	SET_CTRL(CButton, IDC_BUTTON_PART6, 10, 220, 50, 244);
 	SET_CTRL(CComboBox, IDC_COMBO_PART6, 60, 220, 150, 240);
 	SET_CTRL(CComboBox, IDC_COMBO_PALETTE6, 160, 220, 200, 240);
-	SET_CTRL(CButton, IDC_BUTTON_PART7, 10, 250, 50, 270);
+	SET_CTRL(CButton, IDC_BUTTON_PART7, 10, 250, 50, 274);
 	SET_CTRL(CComboBox, IDC_COMBO_PART7, 60, 250, 150, 270);
 	SET_CTRL(CComboBox, IDC_COMBO_PALETTE7, 160, 250, 200, 270);
-	SET_CTRL(CButton, IDC_BUTTON_PART8, 10, 280, 50, 300);
+	SET_CTRL(CButton, IDC_BUTTON_PART8, 10, 280, 50, 304);
 	SET_CTRL(CComboBox, IDC_COMBO_PART8, 60, 280, 150, 300);
 	SET_CTRL(CComboBox, IDC_COMBO_PALETTE8, 160, 280, 200, 300);
-	SET_CTRL(CButton, IDC_BUTTON_PART9, 10, 310, 50, 330);
+	SET_CTRL(CButton, IDC_BUTTON_PART9, 10, 310, 50, 334);
 	SET_CTRL(CComboBox, IDC_COMBO_PART9, 60, 310, 150, 330);
 	SET_CTRL(CComboBox, IDC_COMBO_PALETTE9, 160, 310, 200, 330);
 	//画布位置(10, 340, 200, 530)
-	SET_CTRL(CButton, IDC_BUTTON_PREV, 10, 540, 50, 560);
-	SET_CTRL(CButton, IDC_BUTTON_NEXT, 60, 540, 100, 560);
+	SET_CTRL(CButton, IDC_BUTTON_PREV, 10, 540, 55, 564);
+	SET_CTRL(CButton, IDC_BUTTON_NEXT, 60, 540, 105, 564);
 	SET_CTRL(CComboBox, IDC_COMBO_ACTION, 110, 540, 200, 560);
-	SET_CTRL(CButton, IDC_BUTTON_MAKENPK, 10, 570, 100, 590);
-	SET_CTRL(CButton, IDCANCEL, 110, 570, 200, 590);
+	SET_CTRL(CButton, IDCANCEL, 10, 570, 200, 594);
 	//缩略图位置(210, 70, 930, 550)
 	SET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING, 210, 10, 710, 30);
 	SET_CTRL(CEdit, IDC_EDIT_LOADING_INFO, 720, 10, 930, 30);
 	SET_CTRL(CButton, IDC_RADIO_DISPLAY1, 210, 40, 300, 60);
 	SET_CTRL(CButton, IDC_RADIO_DISPLAY2, 310, 40, 500, 60);
 	SET_CTRL(CButton, IDC_RADIO_DISPLAY3, 510, 40, 700, 60);
-
+	SET_CTRL(CButton, IDC_BUTTON_ONE_KEY, 720, 40, 930, 64);
 	GET_CTRL(CComboBox, IDC_COMBO_CAREER)->ResetContent();
 	GET_CTRL(CComboBox, IDC_COMBO_CAREER)->AddString(L"未选择");
 	GET_CTRL(CComboBox, IDC_COMBO_CAREER)->AddString(L"鬼剑士");
@@ -180,7 +182,8 @@ BOOL CToolAvatar::OnInitDialog()
 	GET_CTRL(CComboBox, IDC_COMBO_ACTION)->AddString(L"倒地");
 	GET_CTRL(CComboBox, IDC_COMBO_ACTION)->SetCurSel(0);
 
-	CExRabbitDlg *dlg = (CExRabbitDlg*)GetParent();
+	context = GetParent();
+	CExRabbitDlg *dlg = (CExRabbitDlg*)context;
 	GET_CTRL(CEdit, IDC_EDIT_FOLDER)->SetWindowText(dlg->profile.getAvatarPath());
 
 	
@@ -330,17 +333,6 @@ void CToolAvatar::OnBnClickedButtonNext(){
 	factory.changeFrame(frame);
 	draw();
 }
-void CToolAvatar::OnBnClickedButtonMakenpk(){
-	CExRabbitDlg *dlg = (CExRabbitDlg*)GetParent();
-	dlg->no.release();
-	dlg->no.create();
-	dlg->fileNPKname = L"newNPK.npk";
-	dlg->saveAlert = false;
-	factory.makeNPK(dlg->no);
-	MessageBox(L"已经将有效IMG都弄到EX里了喵！",L"提示喵");
-	dlg->updateIMGlist();
-	dlg->updateInfo();
-}
 void CToolAvatar::OnBnClickedCancel(){
 	ShowWindow(SW_HIDE);
 }
@@ -348,7 +340,7 @@ void CToolAvatar::setAnimation(int f1, int f2, int f3, int f4, int f5, int f6, i
 	animation[0] = f1;
 	animationLength = 1;
 #define BAT_SET_ANIMATION(x) if(f##x != -1){animation[x-1] = f##x; animationLength = x;}
-#define SET_ANIMATION(__sel,__di,__list) if(selected==__sel){setAnimation##__list;}
+#define SET_ANIMATION(__sel,__di,__list) if(tempSelected==__sel){setAnimation##__list;}
 	BAT_SET_ANIMATION(2);
 	BAT_SET_ANIMATION(3);
 	BAT_SET_ANIMATION(4);
@@ -366,8 +358,8 @@ void CToolAvatar::setAnimation(int f1, int f2, int f3, int f4, int f5, int f6, i
 	BAT_SET_ANIMATION(16);
 }
 void CToolAvatar::OnCbnSelchangeComboAction(){
-	int selected = GET_CTRL(CComboBox, IDC_COMBO_ACTION)->GetCurSel();
-	if(selected == 0){
+	int tempSelected = GET_CTRL(CComboBox, IDC_COMBO_ACTION)->GetCurSel();
+	if(tempSelected == 0){
 		frame = 0;
 		moving = false;
 		draw();
@@ -386,55 +378,55 @@ void CToolAvatar::OnCbnSelchangeComboAction(){
 		SET_ANIMATION(8,"被攻击",(96,96,96,99,99,99));
 		SET_ANIMATION(9,"倒地",(101,102,102,102,102,102,102,102));
 	}else if(factory.career == ACAREER_SG){
-		SET_ANIMATION(1,"普通",(0));
-		SET_ANIMATION(2,"战时",(0));
-		SET_ANIMATION(3,"走动",(0));
-		SET_ANIMATION(4,"跑动",(0));
-		SET_ANIMATION(5,"攻击",(0));
-		SET_ANIMATION(6,"Z键",(0));
-		SET_ANIMATION(7,"释放",(0));
-		SET_ANIMATION(8,"被攻击",(0));
-		SET_ANIMATION(9,"倒地",(0));
+		SET_ANIMATION(1,"普通",(0,1,2,3,4,5,6,7,8));
+		SET_ANIMATION(2,"战时",(9,10,11,12));
+		SET_ANIMATION(3,"走动",(13,14,15,16,17,18,19,20,21,22));
+		SET_ANIMATION(4,"跑动",(151,152,153,154,155,156,157,158));
+		SET_ANIMATION(5,"攻击",(48,49,50,51,52));
+		SET_ANIMATION(6,"Z键",(48,49,50,51,52));
+		SET_ANIMATION(7,"释放",(121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136));
+		SET_ANIMATION(8,"被攻击",(139, 140));
+		SET_ANIMATION(9,"倒地",(141, 142, 143));
 	}else if(factory.career == ACAREER_GN){
-		SET_ANIMATION(1,"普通",(0));
-		SET_ANIMATION(2,"战时",(0));
-		SET_ANIMATION(3,"走动",(0));
-		SET_ANIMATION(4,"跑动",(0));
-		SET_ANIMATION(5,"攻击",(0));
-		SET_ANIMATION(6,"Z键",(0));
-		SET_ANIMATION(7,"释放",(0));
-		SET_ANIMATION(8,"被攻击",(0));
-		SET_ANIMATION(9,"倒地",(0));
+		SET_ANIMATION(1,"普通",(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
+		SET_ANIMATION(2,"战时",(13, 14, 15, 16, 17, 18, 19, 20, 21, 22));
+		SET_ANIMATION(3,"走动",(55, 56, 57, 58, 59, 60, 61, 62));
+		SET_ANIMATION(4,"跑动",(103, 104, 105, 106, 107, 108, 109, 110));
+		SET_ANIMATION(5,"攻击",(25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38));
+		SET_ANIMATION(6,"Z键",(155, 156, 157, 158));
+		SET_ANIMATION(7,"释放",(193, 194, 195, 196, 197));
+		SET_ANIMATION(8,"被攻击",(121, 122, 123, 124));
+		SET_ANIMATION(9,"倒地",(125, 126, 127));
 	}else if(factory.career == ACAREER_GG){
-		SET_ANIMATION(1,"普通",(0));
-		SET_ANIMATION(2,"战时",(0));
-		SET_ANIMATION(3,"走动",(0));
-		SET_ANIMATION(4,"跑动",(0));
-		SET_ANIMATION(5,"攻击",(0));
-		SET_ANIMATION(6,"Z键",(0));
-		SET_ANIMATION(7,"释放",(0));
-		SET_ANIMATION(8,"被攻击",(0));
-		SET_ANIMATION(9,"倒地",(0));
+		SET_ANIMATION(1,"普通",(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+		SET_ANIMATION(2,"战时",(14, 15, 16, 17, 18, 19, 20));
+		SET_ANIMATION(3,"走动",(68, 69, 70, 71, 72, 73, 74, 75));
+		SET_ANIMATION(4,"跑动",(76, 77, 78, 79, 80, 71));
+		SET_ANIMATION(5,"攻击",(22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35));
+		SET_ANIMATION(6,"Z键",(111, 112, 113, 114, 115));
+		SET_ANIMATION(7,"释放",(10, 11, 12, 13));
+		SET_ANIMATION(8,"被攻击",(89, 90));
+		SET_ANIMATION(9,"倒地",(91));
 	}else if(factory.career == ACAREER_FT){
-		SET_ANIMATION(1,"普通",(0));
-		SET_ANIMATION(2,"战时",(0));
-		SET_ANIMATION(3,"走动",(0));
-		SET_ANIMATION(4,"跑动",(0));
-		SET_ANIMATION(5,"攻击",(0));
-		SET_ANIMATION(6,"Z键",(0));
-		SET_ANIMATION(7,"释放",(0));
-		SET_ANIMATION(8,"被攻击",(0));
-		SET_ANIMATION(9,"倒地",(0));
+		SET_ANIMATION(1,"普通",(113, 114, 115, 116));
+		SET_ANIMATION(2,"战时",(132, 133, 134, 135));
+		SET_ANIMATION(3,"走动",(136, 137, 138, 139, 140, 141, 142, 143));
+		SET_ANIMATION(4,"跑动",(39, 40, 41, 42, 43, 44, 45, 46));
+		SET_ANIMATION(5,"攻击",(5, 6, 7, 8, 9));
+		SET_ANIMATION(6,"Z键",(30, 31, 32, 33, 34, 35));
+		SET_ANIMATION(7,"释放",(92, 93, 94, 95));
+		SET_ANIMATION(8,"被攻击",(77, 78, 84, 85));
+		SET_ANIMATION(9,"倒地",(79, 80, 81, 82, 83));
 	}else if(factory.career == ACAREER_FM){
-		SET_ANIMATION(1,"普通",(0));
-		SET_ANIMATION(2,"战时",(0));
-		SET_ANIMATION(3,"走动",(0));
-		SET_ANIMATION(4,"跑动",(0));
-		SET_ANIMATION(5,"攻击",(0));
-		SET_ANIMATION(6,"Z键",(0));
-		SET_ANIMATION(7,"释放",(0));
-		SET_ANIMATION(8,"被攻击",(0));
-		SET_ANIMATION(9,"倒地",(0));
+		SET_ANIMATION(1,"普通",(0, 1, 2, 3));
+		SET_ANIMATION(2,"战时",(12, 13, 14, 15));
+		SET_ANIMATION(3,"走动",(4, 5, 6, 7, 8, 9, 10, 11));
+		SET_ANIMATION(4,"跑动",(136, 137, 138, 139, 140, 141, 142, 143));
+		SET_ANIMATION(5,"攻击",(28, 29, 30, 31, 32));
+		SET_ANIMATION(6,"Z键",(64, 65, 66, 67, 68));
+		SET_ANIMATION(7,"释放",(79, 80, 81, 82, 83, 84, 85));
+		SET_ANIMATION(8,"被攻击",(74, 75));
+		SET_ANIMATION(9,"倒地",(76, 77, 78));
 	}else if(factory.career == ACAREER_MG){
 		SET_ANIMATION(1,"普通",(10,11,12,13));
 		SET_ANIMATION(2,"战时",(14,15,16,17));
@@ -446,75 +438,75 @@ void CToolAvatar::OnCbnSelchangeComboAction(){
 		SET_ANIMATION(8,"被攻击",(128,128,129,129));
 		SET_ANIMATION(9,"倒地",(133,134,134,134,134,134));
 	}else if(factory.career == ACAREER_MM){
-		SET_ANIMATION(1,"普通",(0));
-		SET_ANIMATION(2,"战时",(0));
-		SET_ANIMATION(3,"走动",(0));
-		SET_ANIMATION(4,"跑动",(0));
-		SET_ANIMATION(5,"攻击",(0));
-		SET_ANIMATION(6,"Z键",(0));
-		SET_ANIMATION(7,"释放",(0));
-		SET_ANIMATION(8,"被攻击",(0));
-		SET_ANIMATION(9,"倒地",(0));
+		SET_ANIMATION(1,"普通",(0, 1, 2, 3, 4, 5, 6, 7));
+		SET_ANIMATION(2,"战时",(8, 9, 10, 11, 12, 13, 14, 15, 16, 17));
+		SET_ANIMATION(3,"走动",(18, 19, 20, 21, 22, 23, 24, 25, 26, 27));
+		SET_ANIMATION(4,"跑动",(28, 29, 30, 31, 32, 33, 34, 35));
+		SET_ANIMATION(5,"攻击",(60, 61, 62, 63, 64));
+		SET_ANIMATION(6,"Z键",(60, 61, 62, 63, 64));
+		SET_ANIMATION(7,"释放",(142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153));
+		SET_ANIMATION(8,"被攻击",(175, 176));
+		SET_ANIMATION(9,"倒地",(177, 178, 179));
 	}else if(factory.career == ACAREER_PR){
-		SET_ANIMATION(1,"普通",(0));
-		SET_ANIMATION(2,"战时",(0));
-		SET_ANIMATION(3,"走动",(0));
-		SET_ANIMATION(4,"跑动",(0));
-		SET_ANIMATION(5,"攻击",(0));
-		SET_ANIMATION(6,"Z键",(0));
-		SET_ANIMATION(7,"释放",(0));
-		SET_ANIMATION(8,"被攻击",(0));
-		SET_ANIMATION(9,"倒地",(0));
+		SET_ANIMATION(1,"普通",(0, 1, 2, 3));
+		SET_ANIMATION(2,"战时",(4, 5, 6, 7));
+		SET_ANIMATION(3,"走动",(65, 66, 67, 68, 69, 70, 71, 72));
+		SET_ANIMATION(4,"跑动",(73, 74, 75, 76, 77, 78));
+		SET_ANIMATION(5,"攻击",(8, 9, 10, 11, 12, 13, 14, 15));
+		SET_ANIMATION(6,"Z键",(31, 32, 33, 34, 35, 36, 37, 38, 39));
+		SET_ANIMATION(7,"释放",(146, 147, 148, 149, 150, 151, 152, 153));
+		SET_ANIMATION(8,"被攻击",(122, 123));
+		SET_ANIMATION(9,"倒地",(124, 126, 126, 126));
 	}else if(factory.career == ACAREER_PG){
-		SET_ANIMATION(1,"普通",(0));
-		SET_ANIMATION(2,"战时",(0));
-		SET_ANIMATION(3,"走动",(0));
-		SET_ANIMATION(4,"跑动",(0));
-		SET_ANIMATION(5,"攻击",(0));
-		SET_ANIMATION(6,"Z键",(0));
-		SET_ANIMATION(7,"释放",(0));
-		SET_ANIMATION(8,"被攻击",(0));
-		SET_ANIMATION(9,"倒地",(0));
+		SET_ANIMATION(1,"普通",(0, 1, 2, 3, 4, 5, 6, 7, 8));
+		SET_ANIMATION(2,"战时",(9, 10, 11, 12));
+		SET_ANIMATION(3,"走动",(13, 14, 15, 16, 17, 18, 19, 20));
+		SET_ANIMATION(4,"跑动",(21, 22, 23, 24, 25, 26, 27, 28));
+		SET_ANIMATION(5,"攻击",(23, 30, 31, 32));
+		SET_ANIMATION(6,"Z键",(70, 71, 72, 73));
+		SET_ANIMATION(7,"释放",(108, 109, 110, 111, 112));
+		SET_ANIMATION(8,"被攻击",(51, 52));
+		SET_ANIMATION(9,"倒地",(53, 54, 55));
 	}else if(factory.career == ACAREER_TH){
-		SET_ANIMATION(1,"普通",(0));
-		SET_ANIMATION(2,"战时",(0));
-		SET_ANIMATION(3,"走动",(0));
-		SET_ANIMATION(4,"跑动",(0));
-		SET_ANIMATION(5,"攻击",(0));
-		SET_ANIMATION(6,"Z键",(0));
-		SET_ANIMATION(7,"释放",(0));
-		SET_ANIMATION(8,"被攻击",(0));
-		SET_ANIMATION(9,"倒地",(0));
+		SET_ANIMATION(1,"普通",(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11));
+		SET_ANIMATION(2,"战时",(12, 13, 14, 15, 16, 17));
+		SET_ANIMATION(3,"走动",(18, 19, 20, 21, 22, 23, 24, 25, 26));
+		SET_ANIMATION(4,"跑动",(61, 62, 63, 64, 65, 66));
+		SET_ANIMATION(5,"攻击",(67, 68, 69, 70, 71, 72));
+		SET_ANIMATION(6,"Z键",(96, 97, 98, 99, 100));
+		SET_ANIMATION(7,"释放",(32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45));
+		SET_ANIMATION(8,"被攻击",(91, 92));
+		SET_ANIMATION(9,"倒地",(93, 94, 95));
 	}else if(factory.career == ACAREER_KN){
-		SET_ANIMATION(1,"普通",(0));
-		SET_ANIMATION(2,"战时",(0));
-		SET_ANIMATION(3,"走动",(0));
-		SET_ANIMATION(4,"跑动",(0));
-		SET_ANIMATION(5,"攻击",(0));
-		SET_ANIMATION(6,"Z键",(0));
-		SET_ANIMATION(7,"释放",(0));
-		SET_ANIMATION(8,"被攻击",(0));
-		SET_ANIMATION(9,"倒地",(0));
+		SET_ANIMATION(1,"普通",(0, 1, 2, 3, 4, 5));
+		SET_ANIMATION(2,"战时",(6, 7, 8, 9, 10, 11));
+		SET_ANIMATION(3,"走动",(12, 13, 14, 15, 16, 17, 18, 19, 20, 21));
+		SET_ANIMATION(4,"跑动",(22, 23, 24, 25, 26, 27, 28, 29));
+		SET_ANIMATION(5,"攻击",(51, 52, 53, 54, 55, 56, 57, 58, 59));
+		SET_ANIMATION(6,"Z键",(182, 183, 184, 185, 186));
+		SET_ANIMATION(7,"释放",(170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 171));
+		SET_ANIMATION(8,"被攻击",(195, 196));
+		SET_ANIMATION(9,"倒地",(197, 198, 199));
 	}else if(factory.career == ACAREER_DL){
-		SET_ANIMATION(1,"普通",(0));
-		SET_ANIMATION(2,"战时",(0));
-		SET_ANIMATION(3,"走动",(0));
-		SET_ANIMATION(4,"跑动",(0));
-		SET_ANIMATION(5,"攻击",(0));
-		SET_ANIMATION(6,"Z键",(0));
-		SET_ANIMATION(7,"释放",(0));
-		SET_ANIMATION(8,"被攻击",(0));
-		SET_ANIMATION(9,"倒地",(0));
+		SET_ANIMATION(1,"普通",(0, 1, 2, 3));
+		SET_ANIMATION(2,"战时",(4, 5, 6, 7));
+		SET_ANIMATION(3,"走动",(8, 9, 10, 11, 12, 13, 14, 15, 16));
+		SET_ANIMATION(4,"跑动",(17, 18, 19, 20, 21, 22, 23, 24));
+		SET_ANIMATION(5,"攻击",(62, 63, 64, 65, 66));
+		SET_ANIMATION(6,"Z键",(143, 144, 145, 146, 147, 148, 149));
+		SET_ANIMATION(7,"释放",(158, 159, 160));
+		SET_ANIMATION(8,"被攻击",(175, 176));
+		SET_ANIMATION(9,"倒地",(177, 178, 179));
 	}else if(factory.career == ACAREER_GB){
-		SET_ANIMATION(1,"普通",(0));
-		SET_ANIMATION(2,"战时",(0));
-		SET_ANIMATION(3,"走动",(0));
-		SET_ANIMATION(4,"跑动",(0));
-		SET_ANIMATION(5,"攻击",(0));
-		SET_ANIMATION(6,"Z键",(0));
-		SET_ANIMATION(7,"释放",(0));
-		SET_ANIMATION(8,"被攻击",(0));
-		SET_ANIMATION(9,"倒地",(0));
+		SET_ANIMATION(1,"普通",(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+		SET_ANIMATION(2,"战时",(10, 11, 12, 13, 14));
+		SET_ANIMATION(3,"走动",(15, 16, 17, 18, 19, 20, 21, 22));
+		SET_ANIMATION(4,"跑动",(23, 24, 25, 26, 27, 28, 29, 30));
+		SET_ANIMATION(5,"攻击",(76, 77, 78, 79));
+		SET_ANIMATION(6,"Z键",(56, 57, 58, 59, 60, 61, 62));
+		SET_ANIMATION(7,"释放",(141, 142, 143, 144));
+		SET_ANIMATION(8,"被攻击",(145, 146));
+		SET_ANIMATION(9,"倒地",(147, 148, 149));
 	}
 }
 ////////////
@@ -589,8 +581,8 @@ void CToolAvatar::makeThumbnailBySingle(int newSelected){
 		changeThumbnailSize(tempSize);
 		matrix mat;
 		factory.makeModel(mat, getCareerColor(factory.career), size(thumbnailWidth, thumbnailHeight), part, newSelected, 0, getAvatarModelOffset(factory.career, part), getCareerRepresentativeFrame(factory.career), &bodyPI, &bodyMat);
-		fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, part) + "_" + CStrToStr(NumToCStr(factory.partAlbum[part].avatarList[newSelected].ID)) + ".png";
-		mat.makePNG(fileName);
+		fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, part) + "_" + CStrToStr(NumToCStr(factory.partAlbum[part].avatarList[newSelected].ID)) + ".bmp";
+		KoishiExpand::KoishiImageTool::makeBMP(mat, fileName);
 	}
 	changeThumbnailSize(oldSize);
 }
@@ -603,17 +595,17 @@ void CToolAvatar::makeThumbnailByPart(){
 	bodyIO.PICextract(getCareerRepresentativeFrame(factory.career), bodyMat);
 	bodyMat.turnShield();
 	str fileName;
-	int tempSize,selected,oldSize = thumbnailSize;
+	int tempSize,tempSelected,oldSize = thumbnailSize;
 	int totalSelect = factory.partAlbum[displayPart].avatarList.size();
 	avatarPart part = displayPart;
-	for(selected = 0;selected < totalSelect; selected++){
+	for(tempSelected = 0;tempSelected < totalSelect; tempSelected++){
 		for(tempSize = 0;tempSize<4;tempSize++){
 			changeThumbnailSize(tempSize);
 			matrix mat;
-			factory.makeModel(mat, getCareerColor(factory.career), size(thumbnailWidth, thumbnailHeight), part, selected, 0, getAvatarModelOffset(factory.career, part), getCareerRepresentativeFrame(factory.career), &bodyPI, &bodyMat);
-			fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, part) +"_" + CStrToStr(NumToCStr(factory.partAlbum[part].avatarList[selected].ID)) + ".png";
-			mat.makePNG(fileName);
-			double rate = (double)selected/totalSelect +
+			factory.makeModel(mat, getCareerColor(factory.career), size(thumbnailWidth, thumbnailHeight), part, tempSelected, 0, getAvatarModelOffset(factory.career, part), getCareerRepresentativeFrame(factory.career), &bodyPI, &bodyMat);
+			fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, part) +"_" + CStrToStr(NumToCStr(factory.partAlbum[part].avatarList[tempSelected].ID)) + ".bmp";
+			KoishiExpand::KoishiImageTool::makeBMP(mat, fileName);
+			double rate = (double)tempSelected/totalSelect +
 				(double)tempSize/4/totalSelect;
 			GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos(1000*rate);
 			GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"("+	DoubleToCStr(100*rate) +	L"％)生成"+GetTail(StrToCStr(fileName))+L"中。");
@@ -639,8 +631,8 @@ void CToolAvatar::makeThumbnailByAll(){
 				changeThumbnailSize(tempSize);
 				matrix mat;
 				factory.makeModel(mat, getCareerColor(factory.career), size(thumbnailWidth, thumbnailHeight), (avatarPart)tempPart, selected, 0, getAvatarModelOffset(factory.career, (avatarPart)tempPart), getCareerRepresentativeFrame(factory.career), &bodyPI, &bodyMat);
-				fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, (avatarPart)tempPart) +"_" + CStrToStr(NumToCStr(factory.partAlbum[(avatarPart)tempPart].avatarList[selected].ID)) + ".png";
-				mat.makePNG(fileName);
+				fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, (avatarPart)tempPart) +"_" + CStrToStr(NumToCStr(factory.partAlbum[(avatarPart)tempPart].avatarList[selected].ID)) + ".bmp";
+				KoishiExpand::KoishiImageTool::makeBMP(mat, fileName);
 				mat.destory();
 				double rate = (double)(tempPart-1)/(APART_MAXCOUNT-1) +
 					(double)selected/totalSelect/(APART_MAXCOUNT-1) +
@@ -658,8 +650,8 @@ UINT CToolAvatar::makeThumbnailThread(void*para){
 	GET_DLG_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetRange32(0, 1000);
 	dlg->makeThumbnailByPart();
 	dlg->drawThumbnail(dlg->page);
-	GET_DLG_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"展示图生成完毕。");
-	dlg->MessageBox(L"展示图更新完毕。",L"提示");
+	GET_DLG_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"展示图生成完毕喵。");
+	dlg->MessageBox(L"展示图更新完毕喵。",L"提示喵");
 	return 0U;
 }
 UINT CToolAvatar::makeAllThumbnailThread(void*para){
@@ -668,8 +660,8 @@ UINT CToolAvatar::makeAllThumbnailThread(void*para){
 	GET_DLG_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetRange32(0, 1000);
 	dlg->makeThumbnailByAll();
 	dlg->drawThumbnail(dlg->page);
-	GET_DLG_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"所有展示图生成完毕。");
-	dlg->MessageBox(L"展示图更新完毕。",L"提示");
+	GET_DLG_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"所有展示图生成完毕喵。");
+	dlg->MessageBox(L"展示图更新完毕喵。",L"提示喵");
 	return 0U;
 }
 UINT CToolAvatar::makeIconThread(void*para){
@@ -683,7 +675,7 @@ UINT CToolAvatar::makeIconThread(void*para){
 	CStdioFile file;
 	file.Open(fileInfoName, CFile::modeCreate|CFile::modeWrite);
 	if(!no.loadFile(fileName)){
-		dlg->MessageBox(L"没能在时装资源库中找到图标文件："+StrToCStr(KoishiAvatar::getIconNPKName(dlg->factory.career))+"。",L"提示");
+		dlg->MessageBox(L"没能在时装资源库中找到图标文件喵："+StrToCStr(KoishiAvatar::getIconNPKName(dlg->factory.career))+"。",L"提示喵");
 		return 0U;
 	}
 	for(i = 1;i<APART_MAXCOUNT;i++){
@@ -702,7 +694,7 @@ UINT CToolAvatar::makeIconThread(void*para){
 						(double)k/io.indexCount/s.size()/(APART_MAXCOUNT-1);
 					GET_DLG_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos(1000*rate);
 					GET_DLG_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"("+DoubleToCStr(100*rate) +	L"％)提取第"+NumToCStr(k)+"帧中。");
-					iconMat.makePNG(CStrToStr(dlg->profile.getIconPath(dlg->factory.career)) + KoishiAvatar::getAvatarPartIMGName((avatarPart)i) + "_" + CStrToStr(NumToCStr(id)) + ".PNG");
+					KoishiExpand::KoishiImageTool::makeBMP(iconMat, CStrToStr(dlg->profile.getIconPath(dlg->factory.career)) + KoishiAvatar::getAvatarPartIMGName((avatarPart)i) + "_" + CStrToStr(NumToCStr(id)) + ".bmp");
 					iconMat.destory();
 					id ++;
 				}
@@ -713,12 +705,23 @@ UINT CToolAvatar::makeIconThread(void*para){
 	}
 	file.Close();
 	no.release();
-	dlg->MessageBox(L"图标更新完毕。",L"提示");
+	dlg->MessageBox(L"图标更新完毕喵。",L"提示喵");
 	return 0U;
 }
 //////////////
 //绘制展示图//
 //////////////
+bool CToolAvatar::loadImage(str fileNameWithoutExp, matrix &mat){
+	str fileName = fileNameWithoutExp + ".png";
+	if(mat.loadPNG(fileName)){
+		return true;
+	}
+	fileName = fileNameWithoutExp + ".bmp";
+	if(KoishiExpand::KoishiImageTool::loadBMP(mat, fileName)){
+		return true;
+	}
+	return false;
+}
 void CToolAvatar::loadIconCount(avatarCareer ac){
 	iconCount.clear();
 	for(int i = 0;i<APART_MAXCOUNT;i++){
@@ -749,11 +752,12 @@ void CToolAvatar::drawThumbnail(int page){
 		if(id >= maxCount){
 			factory.makeButton(mat, profile.getAvatarColor(1), size(thumbnailWidth, thumbnailHeight), 2);
 		}else{
-			str fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, displayPart) + "_" + CStrToStr(NumToCStr(factory.partAlbum[displayPart].avatarList[id].ID)) + ".png";
-			if(!mat.loadPNG(fileName)){
+			str fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, displayPart) + "_" + CStrToStr(NumToCStr(factory.partAlbum[displayPart].avatarList[id].ID));
+			if(!loadImage(fileName, mat)){
 				factory.makeButton(mat, profile.getAvatarColor(0), size(thumbnailWidth, thumbnailHeight), 3);
-				canvas.putFore(mat, LAY, point(column*thumbnailWidth, row*thumbnailHeight));
+				
 			}
+			canvas.putFore(mat, LAY, point(column*thumbnailWidth, row*thumbnailHeight));
 		}
 		mat.destory();
 		column ++;
@@ -825,8 +829,8 @@ void CToolAvatar::drawIconByAvatar(int page){
 				mat.putFore(quesMark, LAY, point(11,11));
 				canvas.putFore(mat, LAY, point(column*30, row*30));
 			}else{
-				str fileName = CStrToStr(profile.getIconPath(factory.career)) + getAvatarPartIMGName(displayPart)+"_"+CStrToStr(NumToCStr(dac[0].iconID))+".PNG";
-				if(!mat.loadPNG(fileName)){
+				str fileName = CStrToStr(profile.getIconPath(factory.career)) + getAvatarPartIMGName(displayPart)+"_"+CStrToStr(NumToCStr(dac[0].iconID));
+				if(!loadImage(fileName, mat)){
 					//辞典里找到但是图标库中未找到
 					factory.makeButton(mat, profile.getAvatarColor(0), size(30, 30), 3);
 					canvas.putFore(mat, LAY, point(column*30, row*30));
@@ -860,12 +864,12 @@ void CToolAvatar::drawIconByAvatar(int page){
 	//画选择标记
 	matrix mark(30, 30);
 	mark.fill(color(0x66, 0xFF, 0xFF, 0xFF));
-	selected = cbPart[displayPart]->GetCurSel() - 1;
+	int tempSelected = cbPart[displayPart]->GetCurSel() - 1;
 	int rn1 = page*380;
 	int rn2 = (page + 1)*380 - 1;
-	if(selected >= rn1 && selected <= rn2){
-		selected %= 380;
-		canvas.putFore(mark, LAY, point(30 * (selected % 24), 30 * (selected / 24)));
+	if(tempSelected >= rn1 && tempSelected <= rn2){
+		tempSelected %= 380;
+		canvas.putFore(mark, LAY, point(30 * (tempSelected % 24), 30 * (tempSelected / 24)));
 	}
 	CImage img;
 	img.Create(720, 480, 32);
@@ -898,8 +902,8 @@ void CToolAvatar::drawIconByIcon(int page){
 			//越界区域
 			factory.makeButton(mat, profile.getAvatarColor(1), size(30, 30), 2);
 		}else{
-			str fileName = CStrToStr(profile.getIconPath(factory.career)) + getAvatarPartIMGName(displayPart)+"_"+CStrToStr(NumToCStr(id))+".PNG";
-			if(!mat.loadPNG(fileName)){
+			str fileName = CStrToStr(profile.getIconPath(factory.career)) + getAvatarPartIMGName(displayPart)+"_"+CStrToStr(NumToCStr(id));
+			if(!loadImage(fileName, mat)){
 				//未读出区域
 				factory.makeButton(mat, profile.getAvatarColor(0), size(30, 30), 3);
 				canvas.putFore(mat, LAY, point(column*30, row*30));
@@ -933,12 +937,12 @@ void CToolAvatar::drawIconByIcon(int page){
 	//画选择标记
 	matrix mark(30, 30);
 	mark.fill(color(0x66, 0xFF, 0xFF, 0xFF));
-	selected = cbPart[displayPart]->GetCurSel() - 1;
+	int tempSelected = cbPart[displayPart]->GetCurSel() - 1;
 	int rn1 = page*380;
 	int rn2 = (page + 1)*380 - 1;
-	if(selected >= rn1 && selected <= rn2){
-		selected %= 380;
-		canvas.putFore(mark, LAY, point(30 * (selected % 24), 30 * (selected / 24)));
+	if(tempSelected >= rn1 && tempSelected <= rn2){
+		tempSelected %= 380;
+		canvas.putFore(mark, LAY, point(30 * (tempSelected % 24), 30 * (tempSelected / 24)));
 	}
 	CImage img;
 	img.Create(720, 480, 32);
@@ -1072,36 +1076,13 @@ void CToolAvatar::changeDisplayStyle(int newDisplayStyle){
 	int i, j;
 	switch(newDisplayStyle){
 	case 0:
-		for(int i=1;i<=9;i++){
-			//int oldSelected = cbPart[i]->GetCurSel() - 1;
-			//int newSelected = -1;
-			//int newSelectedPalette = -1;
+		for(i=1;i<=9;i++){
 			if(factory.partAlbum[i].valid){
-				//计算变更显示样式后新的选项值
-				//if(displayStyle == 1){
-				//	if(oldSelected == -1){
-				//		newSelected = -1;
-				//		newSelectedPalette = -1;
-				//	}else{
-				//		newSelected = factory.partAlbum[i].bigramList[selected].originPos;
-				//		newSelectedPalette = factory.partAlbum[i].bigramList[selected].paletteID;
-				//	}
-				//}
-				//if(displayStyle == 2){
-				//	if(oldSelected == -1){
-				//		newSelected = -1;
-				//		newSelectedPalette = -1;
-				//	}else{
-				//		DictAvatarContent content = dict.findTerm(factory.career, (avatarPart)i, oldSelected);
-				//		if(content.size() == 0){
-				//			newSelected = -1;
-				//			newSelectedPalette = -1;
-				//		}else{
-				//			newSelected = factory.partAlbum[i].findPosByID(content[0].ID, content[0].isTN);
-				//			newSelectedPalette = content[0].paletteID;
-				//		}
-				//	}
-				//}
+				//计算新选项
+				long newSelected, newSelectedPalette;
+				selectionTransform((avatarPart)i, displayStyle, newDisplayStyle,
+					cbPart[i]->GetCurSel() - 1, cbPalette[i]->GetCurSel(),
+					newSelected, newSelectedPalette);
 				//更新选项卡
 				cbPart[i]->ResetContent();
 				cbPart[i]->AddString(L"未选择");
@@ -1115,53 +1096,39 @@ void CToolAvatar::changeDisplayStyle(int newDisplayStyle){
 					cbPart[i]->AddString(str);
 				}
 				//使用新的选项值
-				//cbPart[i]->SetCurSel(newSelected+1);
-				//if(factory.partAlbum[i].avatarList[newSelected].v6palette > 0){
-				//	cbPalette[i]->ResetContent();
-				//	for(j = 0;j<factory.partAlbum[i].avatarList[newSelected].v6palette;j++){
-				//		cbPalette[i]->AddString(L"P"+NumToCStr(j));
-				//	}
-				//	cbPalette[i]->SetCurSel(newSelectedPalette);
-				//}else{
-				//	cbPalette[i]->ResetContent();
-				//	cbPalette[i]->AddString(L"NA");
-				//	cbPalette[i]->SetCurSel(0);
-				//}
+				cbPart[i]->SetCurSel(newSelected+1);
+				if(newSelected >= 0 && factory.partAlbum[i].avatarList[newSelected].v6palette > 0){
+					cbPalette[i]->ResetContent();
+					for(j = 0;j<factory.partAlbum[i].avatarList[newSelected].v6palette;j++){
+						cbPalette[i]->AddString(L"P"+NumToCStr(j));
+					}
+					cbPalette[i]->SetCurSel(0);
+					if(newSelectedPalette < factory.partAlbum[i].avatarList[newSelected].v6palette)
+						cbPalette[i]->SetCurSel(newSelectedPalette);
+				}else{
+					cbPalette[i]->ResetContent();
+					cbPalette[i]->AddString(L"NA");
+					cbPalette[i]->SetCurSel(0);
+				}
 			}else{
 				cbPart[i]->ResetContent();
 				cbPart[i]->AddString(L"未找到资源");
 				cbPart[i]->SetCurSel(0);
+				cbPalette[i]->ResetContent();
+				cbPalette[i]->AddString(L"NA");
+				cbPalette[i]->SetCurSel(0);
 			}
 		}
 		break;
 	case 1:
-		for(int i=1;i<=9;i++){
-			int oldSelected = cbPart[i]->GetCurSel() - 1;
-			int oldSelectedPalette = cbPalette[i]->GetCurSel();
-			int newSelected = -1;
+		for(i=1;i<=9;i++){
 			if(factory.partAlbum[i].valid){
-				//计算变更显示样式后新的选项值
-				//if(displayStyle == 0){
-				//	if(oldSelected == -1){
-				//		newSelected = -1;
-				//	}else{
-				//		newSelected = factory.partAlbum[i].avatarPosAtBigramList[oldSelected][oldSelectedPalette];
-				//	}
-				//}
-				//if(displayStyle == 2){
-				//	if(oldSelected == -1){
-				//		newSelected = -1;
-				//	}else{
-				//		avatar av = factory.partAlbum[i].avatarList[oldSelected];
-				//		DictAvatarContent content = dict.findTerm(factory.career, (avatarPart)i, av.ID, av.isTN, oldSelectedPalette);
-				//		if(content.size() == 0){
-				//			newSelected = -1;
-				//		}else{
-				//			//newSelected = factory.partAlbum[i].avatarPosAtBigramList[]
-				//			newSelected = factory.partAlbum[i].findPosByID(content[0].ID, content[0].isTN);
-				//		}
-				//	}
-				//}
+				//计算新选项
+				long newSelected, newSelectedPalette;
+				selectionTransform((avatarPart)i, displayStyle, newDisplayStyle,
+					cbPart[i]->GetCurSel() - 1, cbPalette[i]->GetCurSel(),
+					newSelected, newSelectedPalette);
+				//变换
 				cbPart[i]->ResetContent();
 				cbPart[i]->AddString(L"未选择");
 				for(j = 0;j <factory.partAlbum[i].bigramList.size(); j++){
@@ -1177,7 +1144,11 @@ void CToolAvatar::changeDisplayStyle(int newDisplayStyle){
 						cbPart[i]->AddString(t[0].avatarName + L" 等");
 					}
 				}
-				cbPart[i]->SetCurSel(0);
+				//更新选项卡
+				cbPart[i]->SetCurSel(newSelected+1);
+				cbPalette[i]->ResetContent();
+				cbPalette[i]->AddString(L"NA");
+				cbPalette[i]->SetCurSel(0);
 			}else{
 				cbPart[i]->ResetContent();
 				cbPart[i]->AddString(L"未找到资源");
@@ -1187,8 +1158,14 @@ void CToolAvatar::changeDisplayStyle(int newDisplayStyle){
 		break;
 	case 2:
 		loadIconCount(factory.career);	
-		for(int i=1;i<=9;i++){
+		for(i=1;i<=9;i++){
 			if(factory.partAlbum[i].valid){
+				//计算新选项
+				long newSelected, newSelectedPalette;
+				selectionTransform((avatarPart)i, displayStyle, newDisplayStyle,
+					cbPart[i]->GetCurSel() - 1, cbPalette[i]->GetCurSel(),
+					newSelected, newSelectedPalette);
+				//变换
 				cbPart[i]->ResetContent();
 				cbPart[i]->AddString(L"未选择");
 				for(j = 0;j <iconCount[i]; j++){
@@ -1202,6 +1179,11 @@ void CToolAvatar::changeDisplayStyle(int newDisplayStyle){
 					}
 				}
 				cbPart[i]->SetCurSel(0);
+				//更新选项卡
+				cbPart[i]->SetCurSel(newSelected+1);
+				cbPalette[i]->ResetContent();
+				cbPalette[i]->AddString(L"NA");
+				cbPalette[i]->SetCurSel(0);
 			}else{
 				cbPart[i]->ResetContent();
 				cbPart[i]->AddString(L"未找到资源");
@@ -1211,7 +1193,69 @@ void CToolAvatar::changeDisplayStyle(int newDisplayStyle){
 		break;
 	}
 }
-
+void CToolAvatar::selectionTransform(avatarPart ap, 
+	int oldDisplayStyle, int newDisplayStyle, 
+	long oldSelected, long oldSelectedPalette,
+	long &newSelected, long &newSelectedPalette){
+	if(oldSelected < 0 || oldSelectedPalette < 0){
+		newSelected = -1;
+		newSelectedPalette = 0;
+		return;
+	}
+	if(oldDisplayStyle == 0 && newDisplayStyle == 1){
+		newSelected = factory.partAlbum[ap].avatarPosAtBigramList[oldSelected][oldSelectedPalette];
+		newSelectedPalette = 0;
+	}
+	if(oldDisplayStyle == 1 && newDisplayStyle == 0){
+		avatarBigram ab = factory.partAlbum[ap].bigramList[oldSelected];
+		newSelected = ab.originPos;
+		newSelectedPalette = ab.paletteID;
+	}
+	if(oldDisplayStyle == 0 && newDisplayStyle == 2){
+		avatar av = factory.partAlbum[ap].avatarList[oldSelected];
+		DictAvatarContent termList = dict.findTerm(factory.career, ap, av.ID, av.isTN, oldSelectedPalette);
+		if(termList.size() == 0){
+			newSelected = -1;
+			newSelectedPalette = 0;
+		}else{
+			newSelected = termList[0].iconID;
+			newSelectedPalette = 0;
+		}
+	}
+	if(oldDisplayStyle == 2 && newDisplayStyle == 0){
+		DictAvatarContent termList = dict.findTerm(factory.career, ap, oldSelected);
+		if(termList.size() == 0){
+			newSelected = -1;
+			newSelectedPalette = 0;
+		}else{
+			newSelected = factory.partAlbum[ap].findPosByID(termList[0].ID, termList[0].isTN);
+			newSelectedPalette = termList[0].paletteID;
+		}
+	}
+	if(oldDisplayStyle == 1 && newDisplayStyle == 2){
+		avatarBigram ab = factory.partAlbum[ap].bigramList[oldSelected];
+		DictAvatarContent termList = dict.findTerm(factory.career, ap, ab.ID, ab.isTN, ab.paletteID);
+		if(termList.size() == 0){
+			newSelected = -1;
+			newSelectedPalette = 0;
+		}else{
+			newSelected = termList[0].iconID;
+			newSelectedPalette = 0;
+		}
+	}
+	if(oldDisplayStyle == 2 && newDisplayStyle == 1){
+		DictAvatarContent termList = dict.findTerm(factory.career, ap, oldSelected);
+		if(termList.size() == 0){
+			newSelected = -1;
+			newSelectedPalette = 0;
+		}else{
+			long pos = factory.partAlbum[ap].findPosByID(termList[0].ID, termList[0].isTN);
+			long posPal = termList[0].paletteID;
+			newSelected = factory.partAlbum[ap].avatarPosAtBigramList[pos][posPal];
+			newSelectedPalette = 0;
+		}
+	}
+}
 void CToolAvatar::OnBnClickedRadioDisplay1(){
 	// TODO: 切换展示图模式
 	changeDisplayStyle(0);
@@ -1240,8 +1284,10 @@ void CToolAvatar::OnComboPartChange(avatarPart ap){
 	switch(displayStyle){
 	case 0:
 		if(selected == -1){
+			GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已脱下喵。");
 			factory.changeIMG(ap, -1);
 		}else{
+			GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已切换装扮喵。");
 			factory.changeIMG(ap, selected);
 			page = selected/thumbnailCountPerPage;
 		}
@@ -1253,18 +1299,18 @@ void CToolAvatar::OnComboPartChange(avatarPart ap){
 				cbPalette[ap]->AddString(L"P"+NumToCStr(i));
 			}
 			cbPalette[ap]->SetCurSel(0);
-			cbPalette[ap]->EnableWindow(TRUE);
 		}else{
 			cbPalette[ap]->ResetContent();
 			cbPalette[ap]->AddString(L"NA");
 			cbPalette[ap]->SetCurSel(0);
-			cbPalette[ap]->EnableWindow(FALSE);
 		}
 		break;
 	case 1:
 		if(selected == -1){
+			GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已脱下喵。");
 			factory.changeIMG(ap, -1);
 		}else{
+			GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已切换装扮喵。");
 			factory.changeIMG(ap, factory.partAlbum[ap].bigramList[selected].originPos);
 			factory.partAlbum[ap].changePalette(factory.partAlbum[ap].bigramList[selected].paletteID);
 			page = selected/380;
@@ -1273,21 +1319,21 @@ void CToolAvatar::OnComboPartChange(avatarPart ap){
 		break;
 	case 2:
 		if(selected == -1){
+			GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已脱下喵。");
 			factory.changeIMG(ap, -1);
 		}else{
 			DictAvatarContent t = dict.findTerm(factory.career, ap, selected);
 			if(t.size() == 0){
+				GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"辞典里无对应装扮喵。");
 				factory.changeIMG(ap, -1);
 				factory.partAlbum[ap].changePalette(0);
-				if(IDYES == MessageBox(L"辞典里没有与该图标对应装扮，要为此图标添加装扮吗？", L"提示", MB_YESNO)){
-					MessageBox(L"施工中");
-				}
 			}else if(t.size() == 1){
+				GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已切换装扮喵。");
 				long pos = factory.partAlbum[ap].findPosByID(t[0].ID, t[0].isTN);
 				factory.changeIMG(ap, pos);
 				factory.partAlbum[ap].changePalette(t[0].paletteID);
 			}else{
-				MessageBox(L"注意：辞典里有个装扮与该图标对应，将只显示第一个对应的装扮。");
+				GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"辞典里有多个装扮对应喵。");
 				long pos = factory.partAlbum[ap].findPosByID(t[0].ID, t[0].isTN);
 				factory.changeIMG(ap, pos);
 				factory.partAlbum[ap].changePalette(t[0].paletteID);
@@ -1326,22 +1372,24 @@ void CToolAvatar::InvokeMappingDialog1(long getSelected){
 	ModalAvatarMap1 dlg;
 	if(getSelected == -1){
 		getSelected = 0;
-		return;
 	}
 	if(displayStyle== 0){
-		dlg.in.selected = cbPart[displayPart]->GetCurSel() + 1;
+		dlg.in.selected = getSelected;
 		dlg.in.selectedPalette = cbPalette[displayPart]->GetCurSel();
 	}else{
 		avatarBigram ab = factory.partAlbum[displayPart].bigramList[getSelected];
 		dlg.in.selected = ab.originPos;
 		dlg.in.selectedPalette = ab.paletteID;
 	}
+	loadIconCount(factory.career);	
+	dlg.in.maxIconCount = iconCount[displayPart];
 	dlg.in.ptrFactory = &factory;
 	dlg.in.ptrDict = &dict;
 	dlg.in.part = displayPart;
 	dlg.in.ptrProfile = &profile;
 	dlg.DoModal();
 }
+
 void CToolAvatar::InvokeMappingDialog2(long getSelected){
 	ModalAvatarMap2 dlg;
 	dlg.in.iconID = getSelected;
@@ -1351,6 +1399,7 @@ void CToolAvatar::InvokeMappingDialog2(long getSelected){
 	dlg.in.ptrProfile = &profile;
 	dlg.DoModal();
 }
+
 CPoint CToolAvatar::getWinMouseAxis(){
 	CPoint myPoint;
     GetCursorPos(&myPoint); //鼠标位置
@@ -1399,7 +1448,7 @@ void CToolAvatar::OnLButtonDown(UINT nFlags, CPoint point){
 			if(checkSelected < 1000){
 				int newSelected = thumbnailCountPerPage * page + checkSelected;
 				if(newSelected >= factory.partAlbum[displayPart].avatarList.size()){
-					MessageBox(L"此处没有内容。",L"提示");
+					GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"这里什么都没有喵。");
 					return ;
 				}else{
 					selected = newSelected;
@@ -1412,7 +1461,7 @@ void CToolAvatar::OnLButtonDown(UINT nFlags, CPoint point){
 					page --;
 					drawThumbnail(page);
 				}else{
-					MessageBox(L"已是第一页。",L"提示");
+					GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已是第一页喵。");
 					return;
 				}
 			}else if(checkSelected == 1001){
@@ -1421,7 +1470,7 @@ void CToolAvatar::OnLButtonDown(UINT nFlags, CPoint point){
 					page ++;
 					drawThumbnail(page);
 				}else{
-					MessageBox(L"已是最后页。",L"提示");
+					GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已是最后一页喵。");
 					return;
 				}
 			}else if(checkSelected == 1002){
@@ -1429,15 +1478,10 @@ void CToolAvatar::OnLButtonDown(UINT nFlags, CPoint point){
 				selected = -1;
 				cbPart[displayPart]->SetCurSel(0);
 				OnComboPartChange(displayPart);
+				GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已脱下喵。");
 			}else if(checkSelected == 1003){
-				//点开更新菜单
-				CMenu menu, *pPopup;  
-				menu.LoadMenu(IDR_MENU_AVATAR);  
-				pPopup = menu.GetSubMenu(1);  
-				CPoint myPoint; 
-				ClientToScreen(&myPoint);  
-				GetCursorPos(&myPoint); //鼠标位置  
-				pPopup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, myPoint.x, myPoint.y, this);
+				//重绘
+				drawThumbnail(page);
 			}
 			break;
 		case 1:
@@ -1445,7 +1489,7 @@ void CToolAvatar::OnLButtonDown(UINT nFlags, CPoint point){
 			if(checkSelected < 1000){
 				int newSelected = 380 * page + checkSelected;
 				if(newSelected >= factory.partAlbum[displayPart].bigramList.size()){
-					MessageBox(L"此处没有内容。",L"提示");
+					GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"这里什么都没有喵。");
 					return ;
 				}else{
 					selected = newSelected;
@@ -1458,7 +1502,7 @@ void CToolAvatar::OnLButtonDown(UINT nFlags, CPoint point){
 					page --;
 					drawIconByAvatar(page);
 				}else{
-					MessageBox(L"已是第一页。",L"提示");
+					GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已是第一页喵。");
 					return;
 				}
 			}else if(checkSelected == 1001){
@@ -1467,7 +1511,7 @@ void CToolAvatar::OnLButtonDown(UINT nFlags, CPoint point){
 					page ++;
 					drawIconByAvatar(page);
 				}else{
-					MessageBox(L"已是最后页。",L"提示");
+					GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已是最后一页喵。");
 					return;
 				}
 			}else if(checkSelected == 1002){
@@ -1475,15 +1519,10 @@ void CToolAvatar::OnLButtonDown(UINT nFlags, CPoint point){
 				selected = -1;
 				cbPart[displayPart]->SetCurSel(0);
 				OnComboPartChange(displayPart);
+				GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已脱下喵。");
 			}else if(checkSelected == 1003){
-				//点开更新菜单
-				CMenu menu, *pPopup;  
-				menu.LoadMenu(IDR_MENU_AVATAR);  
-				pPopup = menu.GetSubMenu(1);  
-				CPoint myPoint; 
-				ClientToScreen(&myPoint);  
-				GetCursorPos(&myPoint); //鼠标位置  
-				pPopup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, myPoint.x, myPoint.y, this);
+				//重绘
+				drawIconByAvatar(page);
 			}
 			break;
 		case 2:
@@ -1491,7 +1530,7 @@ void CToolAvatar::OnLButtonDown(UINT nFlags, CPoint point){
 			if(checkSelected < 1000){
 				int newSelected = 380 * page + checkSelected;
 				if(newSelected >= iconCount[displayPart]){
-					MessageBox(L"此处没有内容。",L"提示");
+					GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"这里什么都没有喵。");
 					return ;
 				}else{
 					selected = newSelected;
@@ -1504,7 +1543,7 @@ void CToolAvatar::OnLButtonDown(UINT nFlags, CPoint point){
 					page --;
 					drawIconByIcon(page);
 				}else{
-					MessageBox(L"已是第一页。",L"提示");
+					GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已是第一页喵。");
 					return;
 				}
 			}else if(checkSelected == 1001){
@@ -1513,7 +1552,7 @@ void CToolAvatar::OnLButtonDown(UINT nFlags, CPoint point){
 					page ++;
 					drawIconByIcon(page);
 				}else{
-					MessageBox(L"已是最后页。",L"提示");
+					GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已是最后一页喵。");
 					return;
 				}
 			}else if(checkSelected == 1002){
@@ -1521,15 +1560,11 @@ void CToolAvatar::OnLButtonDown(UINT nFlags, CPoint point){
 				selected = -1;
 				cbPart[displayPart]->SetCurSel(0);
 				OnComboPartChange(displayPart);
+				GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已脱下喵。");
 			}else if(checkSelected == 1003){
-				//点开更新菜单
-				CMenu menu, *pPopup;  
-				menu.LoadMenu(IDR_MENU_AVATAR);  
-				pPopup = menu.GetSubMenu(1);  
-				CPoint myPoint; 
-				ClientToScreen(&myPoint);  
-				GetCursorPos(&myPoint); //鼠标位置  
-				pPopup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, myPoint.x, myPoint.y, this);
+				//重绘
+				drawIconByIcon(page);
+				GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"已刷新喵。");
 			}
 			break;
 		}
@@ -1545,14 +1580,39 @@ void CToolAvatar::OnRButtonDown(UINT nFlags, CPoint point){
 			CMenu menu, *pPopup;  
 			menu.LoadMenu(IDR_MENU_AVATAR);
 			if(displayStyle == 0){
-				pPopup = menu.GetSubMenu(0);
+				int newSelected = thumbnailCountPerPage * page + checkSelected;
+				if(newSelected < factory.partAlbum[displayPart].avatarList.size()){
+					pPopup = menu.GetSubMenu(0);
+					CPoint myPoint; 
+					ClientToScreen(&myPoint);  
+					GetCursorPos(&myPoint); //鼠标位置  
+					pPopup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, myPoint.x, myPoint.y, this);
+				}
 			}
 			if(displayStyle == 1){
-				pPopup = menu.GetSubMenu(3);
+				int newSelected = 380 * page + checkSelected;
+				if(newSelected < factory.partAlbum[displayPart].bigramList.size()){
+					pPopup = menu.GetSubMenu(3);
+					CPoint myPoint; 
+					ClientToScreen(&myPoint);  
+					GetCursorPos(&myPoint); //鼠标位置  
+					pPopup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, myPoint.x, myPoint.y, this);
+				}
 			}
 			if(displayStyle == 2){
-				pPopup = menu.GetSubMenu(2);
+				int newSelected = 380 * page + checkSelected;
+				if(newSelected < iconCount[displayPart]){
+					pPopup = menu.GetSubMenu(2);
+					CPoint myPoint; 
+					ClientToScreen(&myPoint);  
+					GetCursorPos(&myPoint); //鼠标位置  
+					pPopup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, myPoint.x, myPoint.y, this);
+				}
 			}
+		}else if(checkSelected == 1003){
+			CMenu menu, *pPopup;  
+			menu.LoadMenu(IDR_MENU_AVATAR);  
+			pPopup = menu.GetSubMenu(1);  
 			CPoint myPoint; 
 			ClientToScreen(&myPoint);  
 			GetCursorPos(&myPoint); //鼠标位置  
@@ -1599,12 +1659,215 @@ void CToolAvatar::OnMenuAvatarRefresh(){
 	AfxBeginThread(makeThumbnailThread, this);
 }
 void CToolAvatar::OnMenuAvatarRefreshAll(){
-	if(IDYES == MessageBox(L"更新本职业所有装扮的展示图将花费较长时间(与装扮数有关)，确定继续喵？", L"提示", MB_YESNO)){
+	if(IDYES == MessageBox(L"更新本职业所有装扮的展示图将花费较长时间(与装扮数有关)，确定继续喵？", L"提示喵", MB_YESNO)){
 		AfxBeginThread(makeAllThumbnailThread, this);
 	}
 }
 void CToolAvatar::OnMenuAvatarRefreshIcon(){
-	if(IDYES == MessageBox(L"更新本职业所有装扮的图标将花费较长时间(与图标数有关)，确定继续喵？", L"提示", MB_YESNO)){
-		AfxBeginThread(makeIconThread, this);
+	AfxBeginThread(makeIconThread, this);
+}
+
+void CToolAvatar::OnBnClickedButtonOneKey(){
+	CMenu menu, *pPopup;  
+	menu.LoadMenu(IDR_MENU_AVATAR);
+	pPopup = menu.GetSubMenu(4);
+	CPoint myPoint; 
+	ClientToScreen(&myPoint);  
+	GetCursorPos(&myPoint); //鼠标位置  
+	pPopup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, myPoint.x, myPoint.y, this);
+}
+
+
+
+void CToolAvatar::OnMenuOneKeyLocalize(){
+	ModalAvatarUpdate dlg;
+	GET_CTRL(CEdit, IDC_EDIT_FOLDER)->GetWindowText(dlg.resourcePath);
+	dlg.profile = profile;
+	dlg.DoModal();
+}
+
+
+void CToolAvatar::OnMenuOneKeyPatch(){
+	// TODO: 在此添加命令处理程序代码
+	AfxBeginThread(makeOneKeyPatchThread, this);
+}
+
+UINT CToolAvatar::makeOneKeyPatchThread(void*para){
+	CToolAvatar*dlg = (CToolAvatar*)para;
+	dlg->makeOneKeyPatch();
+	return 0U;
+}
+void CToolAvatar::makeOneKeyPatch(){
+	NPKobject mixNo;
+	factory.makeNPK(mixNo);
+	IMGobject *ioList = new IMGobject[mixNo.count];
+	IMGobject newIO;
+	newIO.create(V2);
+	int maxFrameCount = 0;
+	//取最大帧数
+	for(int i=0;i<mixNo.count;i++){
+		mixNo.IMGextract(i, ioList[i]);
+		if(ioList[i].indexCount> maxFrameCount)
+			maxFrameCount = ioList[i].indexCount;
 	}
+	GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetRange32(0,maxFrameCount);
+	GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos(0);
+	GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"拼合资源中。");
+	for(long frame=0;frame<maxFrameCount;frame++){
+		GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos(frame);
+		matrix mPic, mPicTemp;
+		stream s;
+		PICinfo pi;
+		point ptLT, ptRB;
+		std::vector<int> mLeft, mTop, mRight, mBottom;
+		//计算点集的边界
+		for(int i=0;i<mixNo.count;i++){
+			long newFrame = ioList[i].linkFind(frame);
+			if(ioList[i].PICgetInfo(newFrame, pi)){
+				CHECK_VALID_CONTINUE(pi.picSize.area() > 1);
+				mLeft.push_back(pi.basePt.X);
+				mTop.push_back(pi.basePt.Y);
+				mRight.push_back(pi.basePt.X+pi.picSize.W-1);
+				mBottom.push_back(pi.basePt.Y+pi.picSize.H-1);
+			}
+		}
+		//所有帧都是空的
+		if(mLeft.size() == 0){
+			pi.basePt = point(0,0);
+			pi.comp = COMP_NONE;
+			pi.format = ARGB4444;
+			pi.dataSize = 2;
+			pi.picSize = size(1,1);
+			pi.frmSize = size(1,1);
+			s.allocate(2);
+			s.push((BYTE)0);
+			s.push((BYTE)0);
+			newIO.PICpush(pi, s);
+			s.release();
+			continue;
+		}
+		//计算帧的边界
+		int tLeft, tTop, tRight, tBottom;
+		for(int i=0;i<mLeft.size();i++){
+			if(i == 0){
+				tLeft = mLeft[0];
+				tTop = mTop[0];
+				tRight = mRight[0];
+				tBottom = mBottom[0];
+				continue;
+			}
+			if(mLeft[i]<tLeft)
+				tLeft = mLeft[i];
+			if(mRight[i]>tRight)
+				tRight = mRight[i];
+			if(mTop[i]<tTop)
+				tTop = mTop[i];
+			if(mBottom[i]>tBottom)
+				tBottom = mBottom[i];
+		}
+		ptLT.set(tLeft, tTop);
+		ptRB.set(tRight, tBottom);
+		mPic.create(tBottom-tTop+1, tRight-tLeft+1);
+		for(int i=0;i<mixNo.count;i++){
+			long newFrame = ioList[i].linkFind(frame);
+			if(ioList[i].PICgetInfo(newFrame, pi)){
+				CHECK_VALID_CONTINUE(pi.picSize.area() > 1);
+				ioList[i].PICextract(newFrame, mPicTemp);
+				mPic.putFore(mPicTemp, LAY, pi.basePt - ptLT);
+				mPicTemp.destory();
+			}
+		}
+		newIO.PICpreprocess(mPic, s, pi);
+		pi.set_basePt(ptLT);
+		newIO.PICpush(pi, s);
+		mPic.destory();
+		s.release();
+	}
+	///////////////////////////////////////
+	palette pal;
+	colorList clrList;
+	queue clrCount;
+	pal.push(clrList);
+	GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetRange32(0,newIO.indexCount);
+	GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos(0);
+	GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"构建色表中。");
+	for(long frame = 0;frame<newIO.indexCount;frame ++){
+		GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos(frame);
+		matrix mat;
+		if(!newIO.PICextract(frame, mat)){
+			continue;
+		}
+		for(int i = 0;i<mat.getElemCount();i++){
+			color clr = mat.getElem(i);
+			long clrPos = pal.findColor(clr,0);
+			if(clrPos == -1){
+				pal[0].push_back(clr);
+				clrCount.push_back(1);
+			}else{
+				clrCount[clrPos] ++;
+			}
+		}
+		mat.destory();
+	}
+	clrList = pal[0];
+	long finalColorCount = MIN(0xFF, pal.getColorCount(0));
+	colorList finalColorList;
+	for(int i = 0;i<finalColorCount; i++){
+		long maxCount = 0;
+		long maxID = -1;
+		for(int j = 0;j<clrCount.size();j++){
+			if(clrCount[j] > maxCount){
+				maxCount =clrCount[j];
+				maxID = j;
+			}
+		}
+		finalColorList.push_back(clrList[maxID]);
+		clrList.erase(clrList.begin() + maxID);
+		clrCount.erase(clrCount.begin() + maxID);
+	}
+	clrList = KoishiExpand::KoishiImageTool::nearbySort(finalColorList);
+	/////////////////////////////////////
+	GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos(newIO.indexCount);
+	GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"转换资源中。");
+	std::vector<IMGobject> outIOList;
+	newIO.convertToV4(outIOList, clrList, false);
+	////////////////////////////////////////////
+	GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetRange32(0, 1000);
+	GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos(0);
+	GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"构建引用IMG中。");
+	IMGobject emptyIO;
+	IMGobject::makeEmpty(emptyIO, outIOList[0].indexCount);
+	////////////////////////////////////////////
+	CExRabbitDlg *parent = (CExRabbitDlg*)context;
+	parent->fileNPKname = L"newNPK.npk";
+	parent->saveAlert = false;
+	parent->no.release();
+	parent->no.create();
+	parent->no.IMGpush(outIOList[0], "meow/reference.img");
+	parent->no.IMGpush(emptyIO, "meow/empty.img");
+	for(int i = 1;i<APART_MAXCOUNT;i++){
+		NPKobject *pBase = &(factory.partAlbum[i].sourceNPK);
+		for(int j = 0;j<pBase->count;j++){
+			str imgPath = pBase->content[j].imgname;
+			parent->no.IMGpushLink((i == APART_BODY) ? 0 : 1, imgPath);
+			GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos((i-1)*1000/(APART_MAXCOUNT-1) + j*1000/pBase->count/(APART_MAXCOUNT-1));
+		}
+		GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"构建引用IMG中("+StrToCStr(KoishiAvatar::getAvatarPartNPKName((avatarPart)i))+L")。");
+	}
+	MessageBox(L"制作完成了喵，请在EX中查看喵！",L"提示喵");
+	parent->updateIMGlist();
+	parent->updateInfo();
+}
+
+void CToolAvatar::OnMenuOneKeyNPK(){
+	// TODO: 在此添加命令处理程序代码
+	CExRabbitDlg *dlg = (CExRabbitDlg*)context;
+	dlg->no.release();
+	dlg->no.create();
+	dlg->fileNPKname = L"newNPK.npk";
+	dlg->saveAlert = false;
+	factory.makeNPK(dlg->no);
+	MessageBox(L"已经将有效IMG都弄到EX里了喵！",L"提示喵");
+	dlg->updateIMGlist();
+	dlg->updateInfo();
 }

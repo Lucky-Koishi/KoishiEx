@@ -12,8 +12,7 @@ DDS::DDS(const str &DDSfileName){
 	loadFile(DDSfileName);
 }
 DDS::~DDS(void){
-	data1.release();
-	data2.release();
+	data.release();
 }
 DDSHeader *DDS::getHeader(){
 	return &header;
@@ -76,10 +75,25 @@ bool DDS::load(const stream &s){
 	header.caps4 = _v;
 	_s.read(_v);
 	header.reserved2 = _v;
-	data1.allocate(header.pitchOrLinearSize + 1000);
-	_s.readStream(data1, header.pitchOrLinearSize);
-	data2.allocate(header.pitchOrLinearSize + 1000);
-	_s.readStream(data2, header.pitchOrLinearSize);
+	if(header.flags & DDSD_MIPMAPCOUNT){
+		//mipmap格式
+		if(header.mipMapCount >= 15){
+		return false;
+		}
+		long len = 0;
+		long originWidth = header.width;
+		long originHeight = header.height;
+		for(int i = 0 ;i<header.mipMapCount;i++){
+			len += MAX(1,((originWidth+3)/4))*MAX(1,((originHeight+3)/4))*((header.pixelFormat.fourCC == 0x31545844)?8:16);
+			originWidth /= 2;
+			originHeight /= 2;
+		}
+		data.allocate(len + 1000);
+		_s.readStream(data, len);
+	}else{
+		data.allocate(header.pitchOrLinearSize + 1000);
+		_s.readStream(data, header.pitchOrLinearSize);
+	}
 	return b;
 }
 bool DDS::loadFile(const str &DDSfileName){
@@ -95,7 +109,7 @@ bool DDS::loadFile(const str &DDSfileName){
 	return b;
 }
 bool DDS::make(stream &s){
-	s.allocate(128+data1.getLen()+data2.getLen()+2000);
+	s.allocate(128+data.getLen()+2000);
 
 	s.push((dword)header.magic);
 	s.push((dword)header.headSize);
@@ -129,8 +143,7 @@ bool DDS::make(stream &s){
 	s.push((dword)header.caps3);
 	s.push((dword)header.caps4);
 	s.push((dword)header.reserved2);
-	s.pushStream(data1,data1.getLen());
-	s.pushStream(data2,data2.getLen());
+	s.pushStream(data,data.getLen());
 	return false;
 }
 bool DDS::makeFile(const str &DDSfileName){
@@ -159,6 +172,9 @@ bool DDS::uncompress(matrix &mat){
 		return false;
 	}
 }
+bool DDS::uncompressMipmap(std::vector<matrix> &matList){
+	return false;
+}
 bool DDS::compress(const matrix &mat){
 	DXT5_compress(mat);
 	//设置头
@@ -167,7 +183,7 @@ bool DDS::compress(const matrix &mat){
 	header.flags = 0x81007;
 	header.height = (mat.getHeight()+3)/4*4;
 	header.width = (mat.getWidth()+3)/4*4;
-	header.pitchOrLinearSize = data1.getLen();
+	header.pitchOrLinearSize = data.getLen();
 	header.depth = 0;
 	header.mipMapCount = 0;
 	header.reserved1[0] = 0;
@@ -255,7 +271,7 @@ void DDS::DXT1_uncompress(matrix &mat){
 	stream s;
 	for(j=0;j<blockrow;j++){
 		for(i=0;i<blockcol;i++){
-			data1.readStream(s, 8);
+			data.readStream(s, 8);
 			DXT1_uncompress(s, _cl);
 			mat[4*j+0][4*i+0] = _cl[0];
 			mat[4*j+0][4*i+1] = _cl[1];
@@ -336,7 +352,7 @@ void DDS::DXT3_uncompress(matrix &mat){
 	stream s;
 	for(j=0;j<blockrow;j++){
 		for(i=0;i<blockcol;i++){
-			data1.readStream(s, 16);
+			data.readStream(s, 16);
 			DXT3_uncompress(s, _cl);
 			mat[4*j+0][4*i+0] = _cl[0];
 			mat[4*j+0][4*i+1] = _cl[1];
@@ -438,7 +454,7 @@ void DDS::DXT5_uncompress(matrix &mat){
 	stream s;
 	for(j=0;j<blockrow;j++){
 		for(i=0;i<blockcol;i++){
-			data1.readStream(s, 16);
+			data.readStream(s, 16);
 			DXT5_uncompress(s, _cl);
 			mat[4*j+0][4*i+0] = _cl[0];
 			mat[4*j+0][4*i+1] = _cl[1];
@@ -631,7 +647,7 @@ void DDS::DXT5_compress(const matrix &mat){
 	matrix mat1;
 	dword blockrow = (mat.getHeight()+3)/4;
 	dword blockcol = (mat.getWidth()+3)/4;
-	data1.reallocate(blockrow*blockcol*16);
+	data.reallocate(blockrow*blockcol*16);
 	mat.expand(mat1, 0, 4*blockrow-mat.getHeight(), 0, 4*blockcol-mat.getWidth());
 	dword i,j;
 	stream s;
@@ -656,7 +672,7 @@ void DDS::DXT5_compress(const matrix &mat){
 			clrList.push_back(mat1[4*j+3][4*i+2]);
 			clrList.push_back(mat1[4*j+3][4*i+3]);
 			DXT5_compress(clrList, s);
-			data1.pushStream(s,16);
+			data.pushStream(s,16);
 			s.release();
 		}
 	}
