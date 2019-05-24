@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "KoishiEx.h"
-#include "DDS.h"
+#include "KoishiImageTool.h"
 #include <assert.h>
 
 using namespace Koishi;
@@ -1435,26 +1435,20 @@ bool IMGobject::PICextract(long pos, matrix &mat, long paletteID){
 	TEXinfo di;
 	stream sMid, sPic;
 	PICgetInfo(pos, pi);
-	if(pi.get_format() == LINK){
+	if(pi.format == LINK){
 		pos = linkFind(pos);
 	}
 	PICgetInfo(pos, pi);
-	if(pi.get_format() != LINK){
-		if(pi.get_comp()<= 0X06){
+	if(pi.format != LINK){
+		if(pi.comp <= 0X06){
 			PICgetData(pos, sMid);
-			sMid.uncompressData(sPic, pi.get_comp());
+			sMid.uncompressData(sPic, pi.comp, 4*pi.picSize.area());
 			switch(version){
 			case V2:
 				mat.create(pi.get_picSize());
 				mat.push(sPic, pi.get_format());
 				break;
 			case V4:
-				/*mat.create(pi.get_picSize());
-				for(i=0;i<sPic.getLen();i++){
-					if(sPic[i]>=paletteData[0].size())
-						sPic[i] = 0;
-					mat.push(paletteData[0][sPic[i]]);
-				}*/
 				if(sPic.getLen() == pi.get_picSize().area()){
 					//索引形式
 					mat.create(pi.get_picSize());
@@ -1527,7 +1521,7 @@ bool IMGobject::PICpreprocess(const matrix &mat, stream &s, PICinfo &info, color
 	if(cf == ARGB8888){
 		stream sTemp;
 		mat.make(sTemp, ARGB8888);
-		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.ZLIBcompress(s);
 		sTemp.release();
 		info.set_comp(COMP_ZLIB);
 		info.set_format(ARGB8888);
@@ -1539,7 +1533,7 @@ bool IMGobject::PICpreprocess(const matrix &mat, stream &s, PICinfo &info, color
 	if(cf == ARGB4444){
 		stream sTemp;
 		mat.make(sTemp, ARGB4444);
-		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.ZLIBcompress(s);
 		sTemp.release();
 		info.set_comp(COMP_ZLIB);
 		info.set_format(ARGB4444);
@@ -1551,7 +1545,7 @@ bool IMGobject::PICpreprocess(const matrix &mat, stream &s, PICinfo &info, color
 	if(cf == ARGB1555){
 		stream sTemp;
 		mat.make(sTemp, ARGB1555);
-		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.ZLIBcompress(s);
 		sTemp.release();
 		info.set_comp(COMP_ZLIB);
 		info.set_format(ARGB1555);
@@ -1570,7 +1564,7 @@ bool IMGobject::PICpreprocess(const matrix &mat, stream &s, PICinfo &info, color
 			}
 			sTemp.push((uchar)paletteData.matchColor(mat.getElem(i)));
 		}
-		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.ZLIBcompress(s);
 		sTemp.release();
 		info.set_comp(COMP_ZLIB);
 		info.set_format(ARGB1555);
@@ -1585,7 +1579,7 @@ bool IMGobject::PICpreprocess(const matrix &mat, stream &s, PICinfo &info, color
 		KoishiDDS::DDS d;
 		d.compress(mat);
 		d.make(sTemp);
-		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.ZLIBcompress(s);
 		sTemp.release();
 		info.set_format(DDS_DXT5);
 		info.set_comp(COMP_ZLIB);
@@ -1616,9 +1610,9 @@ bool IMGobject::PICextractIndexMatrix(long pos, matrix &mat){
 	PICgetInfo(pos, pi);
 	if(pi.get_format() == ARGB1555){
 		PICgetData(pos, sMid);
-		sMid.uncompressData(sPic, pi.get_comp());
+		sMid.uncompressData(sPic, pi.comp, 4*pi.picSize.area());
 		//解压后索引矩阵的长度与宽×高必须一致
-		if(sPic.getLen() == pi.get_picSize().area()){
+		if(sPic.getLen() == pi.picSize.area()){
 			mat.create(pi.get_picSize());
 			for(i=0;i<sPic.getLen();i++){
 				mat.push(color(sPic[i],0,0,0));
@@ -1643,7 +1637,7 @@ bool IMGobject::PICpreprocessIndexMatrix(const matrix &mat, stream &s, PICinfo &
 	for(i=0;i<mat.getElemCount();i++){
 		sTemp.push(mat.getElem(i).A);
 	}
-	sTemp.compressData(s, COMP_ZLIB);
+	sTemp.ZLIBcompress(s);
 	sTemp.release();
 	info.set_comp(COMP_ZLIB);
 	info.set_format(ARGB1555);
@@ -1819,14 +1813,14 @@ bool IMGobject::TEXextract(long pos, matrix &mat){
 	stream sMid, sPic;
 	TEXgetInfo(pos, di);
 	TEXgetData(pos, sMid);
-	sMid.uncompressData(sPic, COMP_ZLIB);
-	if(di.get_format() > LINK){
+	sMid.ZLIBuncompress(sPic, di.dataLength + 1000);
+	if(di.format > LINK){
 		KoishiDDS::DDS d(sPic);
 		d.uncompress(mat);
 	}else{
 		if(sPic.getLen() == di.get_height()*di.get_width()){
 			//索引形式
-			mat.create(di.get_height(), di.get_width());
+			mat.create(di.height, di.width);
 			for(int i=0;i<sPic.getLen();i++){
 				if(sPic[i]>=paletteData[0].size()){
 					sPic[i] = 0;
@@ -1834,8 +1828,8 @@ bool IMGobject::TEXextract(long pos, matrix &mat){
 				mat.push(paletteData[0][sPic[i]]);
 			}
 		}else{
-			mat.create(di.get_height(), di.get_width());
-			mat.push(sPic, di.get_format());
+			mat.create(di.height, di.width);
+			mat.push(sPic, di.format);
 		}
 	}
 	return true;
@@ -1849,7 +1843,7 @@ bool IMGobject::TEXpreprocess(const matrix &mat, stream &s, TEXinfo &info, color
 		KoishiDDS::DDS d;
 		d.compress(mat);
 		d.make(sTemp);
-		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.ZLIBcompress(s);
 		info.set_reserved(1);
 		info.set_format(DDS_DXT5);
 		info.set_dataLength(sTemp.getLen());
@@ -1863,7 +1857,7 @@ bool IMGobject::TEXpreprocess(const matrix &mat, stream &s, TEXinfo &info, color
 	if(cf == ARGB8888){
 		stream sTemp;
 		mat.make(sTemp, ARGB8888);
-		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.ZLIBcompress(s);
 		info.set_reserved(1);
 		info.set_format(ARGB8888);
 		info.set_dataLength(sTemp.getLen());
@@ -1877,7 +1871,7 @@ bool IMGobject::TEXpreprocess(const matrix &mat, stream &s, TEXinfo &info, color
 	if(cf == ARGB4444){
 		stream sTemp;
 		mat.make(sTemp, ARGB4444);
-		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.ZLIBcompress(s);
 		info.set_reserved(1);
 		info.set_format(ARGB4444);
 		info.set_dataLength(sTemp.getLen());
@@ -1891,7 +1885,7 @@ bool IMGobject::TEXpreprocess(const matrix &mat, stream &s, TEXinfo &info, color
 	if(cf == ARGB1555){
 		stream sTemp;
 		mat.make(sTemp, ARGB1555);
-		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.ZLIBcompress(s);
 		info.reserved = 1;
 		info.format = ARGB1555;
 		info.dataLength = sTemp.getLen();
@@ -1912,7 +1906,7 @@ bool IMGobject::TEXpreprocess(const matrix &mat, stream &s, TEXinfo &info, color
 			}
 			sTemp.push((uchar)paletteData.matchColor(mat.getElem(i)));
 		}
-		sTemp.compressData(s, COMP_ZLIB);
+		sTemp.ZLIBcompress(s);
 		info.reserved = 1;
 		info.format = ARGB1555;
 		info.dataLength = sTemp.getLen();
@@ -2150,7 +2144,7 @@ bool IMGobject::convertToV5(std::vector<IMGobject> &newIOList, colorFormat cf, c
 					mPic.destory();
 					sPic.release();
 					pi.format = ti.format;
-					pi.comp = COMP_ZLIB2;
+					pi.comp = COMP_ZLIB_DUAL;
 					pi.dataSize = 0;
 					pi.picSize = size(ti.width, ti.height);
 					pi.TEXusing = newIO.V5_TEXCount - 1;
@@ -2247,8 +2241,8 @@ long IMGobject::linkFind(dword pos, dword depth){
 	PICgetInfo(pos, pi);
 	if(depth == 0){
 		return -1;
-	}else if(pi.get_format() == LINK){
-		return linkFind(pi.get_linkTo(), depth-1);
+	}else if(pi.format == LINK){
+		return linkFind(pi.linkTo, depth-1);
 	}else{
 		return pos;
 	}
@@ -2264,8 +2258,8 @@ bool IMGobject::empty(){
 	PICempty(s, pi);
 	PICpush(pi, s);
 	for(long i = 1;i<count;i++){
-		pi.set_format(LINK);
-		pi.set_linkTo(0);
+		pi.format = LINK;
+		pi.linkTo = 0;
 		PICpush(pi, s);
 	}
 	s.release();

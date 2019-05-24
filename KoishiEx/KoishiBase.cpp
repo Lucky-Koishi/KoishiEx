@@ -2,9 +2,6 @@
 #include "KoishiEx.h"
 #include <math.h>
 
-#pragma comment(lib, "libpng15.lib")
-#include "png.h"
-
 using namespace Koishi;
 
 //////////////////////////////////////////////////////////////
@@ -66,17 +63,6 @@ void color::set(dword colorDt, colorFormat clrFmt){
 		G = ((colorDt & 0x0000ff00) >> 8);
 		B = ((colorDt & 0x00ff0000) >> 16);
 		break;
-	case RGB565:
-		//////////////////////////////////////
-		////////////////RGB565////////////////
-		//1 1 1 1 1 1 1 1 //1 1 1 1 1 1 1 1 //
-		//|   R   | |     G     | |   B   | //
-		//////////////////////////////////////
-		A = (0xff);
-		R = ((colorDt & 0xf800) >> 11 << 3);
-		G = ((colorDt & 0x07e0) >> 5 << 2);
-		B = ((colorDt & 0x001f) >> 0 << 3);
-		break;
 	default:
 		set(colorDt, ARGB8888);
 		break;
@@ -95,9 +81,6 @@ void color::make(dword &colorDt, colorFormat clrFmt){
 		break;
 	case INDEX_FMT_PALETTE:
 		colorDt = (A<<24)|R|(G<<8)|(B<<16);
-		break;
-	case RGB565:
-		colorDt = 0xFF|(R>>3<<11)|(G>>2<<5)|(B>>3);
 		break;
 	default:
 		colorDt = (A<<24)|(R<<16)|(G<<8)|B;
@@ -683,12 +666,6 @@ longex matrix::push(const stream &s, colorFormat cf){
 			i++;
 		}
 		break;
-	case RGB565:
-		while(i+1<len){
-			push(color(s[i+1]<<8 | s[i+0], RGB565));
-			i+=2;
-		}
-		break;
 	default:
 		return push(s, ARGB8888);
 		break;
@@ -718,13 +695,6 @@ longex matrix::make(stream &s, colorFormat cf) const{
 		s.allocate(2*column*row);
 		for(i = 0; i< column*row; i++){
 			data[i].make(colorData,ARGB1555);
-			s.push((word)(colorData & 0xFFFF));
-		}
-		break;
-	case RGB565:
-		s.allocate(2*column*row);
-		for(i = 0; i< column*row; i++){
-			data[i].make(colorData,RGB565);
 			s.push((word)(colorData & 0xFFFF));
 		}
 		break;
@@ -1101,122 +1071,7 @@ void matrix::filledLattice(point p1, point p2, const color &clr1, const color &c
 		}
 	}
 }
-//#ifdef USE_PNG
-bool matrix::loadPNG(str fileName){
-	FILE *fp;  
-	png_structp png_ptr;  
-	png_infop info_ptr;  
-	png_bytep* row_pointers;  
-	uchar buf[4];  
-	long w, h, x, y, temp, color_type;
-	fp = fopen( fileName.c_str(), "rb" );  
-	if(!fp) {
-		return false;  
-	}  
-	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0 );  
-	info_ptr = png_create_info_struct(png_ptr);  
-	setjmp(png_jmpbuf(png_ptr));   
-	//读取4个字节，检查是不是PNG
-	temp = fread(buf, 1, 4, fp);  
-	if( temp < 4 ) {  
-		fclose(fp);  
-		png_destroy_read_struct( &png_ptr, &info_ptr, 0);  
-		return false;  
-	}  
-	temp = png_sig_cmp( (png_bytep)buf, (png_size_t)0, 4 );  
-	if(temp != 0) {  
-		fclose(fp);  
-		png_destroy_read_struct(&png_ptr, &info_ptr, 0);  
-		return false;  
-	}  
-	rewind(fp);  
-	//是PNG，读取文件
-	png_init_io(png_ptr, fp );   
-	png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND, 0);  
-	color_type = png_get_color_type( png_ptr, info_ptr );  
-	w = png_get_image_width( png_ptr, info_ptr );  
-	h = png_get_image_height( png_ptr, info_ptr ); 
-	row_pointers = png_get_rows( png_ptr, info_ptr );  
-	switch( color_type ) {  
-	case PNG_COLOR_TYPE_RGB_ALPHA:  
-		data = new color[w*h];
-		temp = 0;
-		for( y=0; y<h; ++y ) {  
-			for( x=0; x<w*4; ) {  
-				/* 以下是RGBA数据，需要自己补充代码，保存RGBA数据 */  
-				data[temp].R = (row_pointers[y][x++]); // red  
-				data[temp].G = (row_pointers[y][x++]); // green  
-				data[temp].B = (row_pointers[y][x++]); // blue
-				data[temp].A = (row_pointers[y][x++]);   
-				temp ++;
-			}  
-		}  
-		break;  
-	case PNG_COLOR_TYPE_RGB:  
-		data = new color[w*h];
-		temp = 0;
-		for(y=0; y<h; ++y) {  
-			for(x=0; x<w*3;) {  
-				data[temp].A = (0XFF); // alpha  
-				data[temp].R = (row_pointers[y][x++]); // red  
-				data[temp].G = (row_pointers[y][x++]); // green  
-				data[temp].B = (row_pointers[y][x++]); // blue  
-				temp ++;
-			}  
-		}  
-		break;  
-	default:  
-		fclose(fp);  
-		png_destroy_read_struct( &png_ptr, &info_ptr, 0);  
-		return false;  
-	}
-	fclose(fp);
-	png_destroy_read_struct( &png_ptr, &info_ptr, 0);
-	column = w;
-	row = h;
-	return true;
-}
-bool  matrix::makePNG(str fileName){
-	long j, i, temp, pos,pos1;    
-	png_structp png_ptr;  
-	png_infop info_ptr;   
-	png_bytep * row_pointers;  
-	FILE *fp = fopen(fileName.c_str(), "wb");  
-	if (!fp){  
-		return false;  
-	}  
-	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);  
-	info_ptr = png_create_info_struct(png_ptr);  
-	setjmp(png_jmpbuf(png_ptr));
-	png_init_io(png_ptr, fp);  
-	png_set_IHDR(png_ptr, info_ptr, column, row, 8, PNG_COLOR_TYPE_RGB_ALPHA, 0,0, 0);  
-	png_write_info(png_ptr, info_ptr);  
-	temp = 4 * column;  
-	pos = 0;  
-	pos1 = 0;
-	row_pointers = new png_bytep[row];
-	for(i = 0; i < row; i++)  
-	{  
-		row_pointers[i] = new unsigned char[temp];
-		for(j = 0; j < temp; j += 4)  
-		{  
-			row_pointers[i][j]   = data[pos1].R; // red  
-			row_pointers[i][j+1] = data[pos1].G; // green  
-			row_pointers[i][j+2] = data[pos1].B; // blue  
-			row_pointers[i][j+3] = data[pos1].A; // alpha
-			pos1++;
-			++pos;  
-		}  
-	}  
-	png_write_image(png_ptr, row_pointers);  
-	png_write_end(png_ptr, NULL);  
 
-	for (j=0; j<row; j++)  
-		delete[] row_pointers[j];  
-	delete[] row_pointers;  
-	fclose(fp);  
-	return true;
-}
 palette::palette(){
 	clear();
 }

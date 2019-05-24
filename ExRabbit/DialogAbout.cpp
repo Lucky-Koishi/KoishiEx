@@ -51,5 +51,5 @@ BOOL CDialogAbout::OnInitDialog()
 void CDialogAbout::OnBnClickedOk()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	ShowWindow(SW_HIDE);
+	OnOK();
 }

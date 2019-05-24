@@ -8,7 +8,7 @@
 #include "../KoishiEx/Koishifactory.cpp"
 #include "../KoishiEx/sha256.cpp"
 #include "TestFunc.h"
-#include "../KoishiEx//DDS.cpp"
+#include "../KoishiEx//KoishiImageTool.cpp"
 #include "../KoishiEx//avatar.cpp"
 #include "../KoishiEx//KoishiExpand.cpp"
 #include <string>
@@ -18,23 +18,18 @@
 #include <time.h>
 #include <stdlib.h>
 #include <io.h>
+#include <MMSystem.h>
+#pragma comment(lib, "winmm.lib")
 using namespace Koishi;
 using namespace KoishiAvatar;
-using namespace KoishiExpand::KoishiImageTool;
+using namespace KoishiImageTool::GIF;
 using namespace KoishiExpand;
 
-uchar deal(uchar p){
-	//È¡·´£¬Ñ­»·×óÒÆ
-	uchar rp = ~p;
-	uchar res = rp << 5;
-	res |= rp >> 3;
-	return res;
-}
 int _tmain(int argc, _TCHAR* argv[]){
-	BMPobject bo;
-	matrix mat;
-	mat.loadPNG("1.png");
-	makeBMP(mat, "±¿µ°×ò¶ù.bmp");
-	//while(1);
+	
+
+	system("pause");
+
+	
 	return 0;
 }

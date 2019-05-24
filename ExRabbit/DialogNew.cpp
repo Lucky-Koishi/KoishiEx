@@ -131,8 +131,17 @@ void CDialogNew::OnBnClickedOk()
 	if(m_ch1.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
+		dlg->io.release();
+		dlg->io.create(V2);
+		dlg->fileIMGname = L"newV2.img";
 		dlg->fileNPKname = L"newNPK.npk";
+		dlg->no.IMGpush(dlg->io, "newV2.img");
+		dlg->switchIMGver(dlg->io.version);
 		dlg->updateIMGlist();
+		dlg->updatePIClist();
+		dlg->updateTEXlist();
+		dlg->updateColorTable();
+		dlg->updateInfo();
 	}else if(m_ch3.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
@@ -140,7 +149,7 @@ void CDialogNew::OnBnClickedOk()
 		dlg->io.create(V2);
 		dlg->fileIMGname = L"newV2.img";
 		dlg->fileNPKname = L"newNPK.npk";
-		dlg->no.IMGpush(dlg->io, "new.img");
+		dlg->no.IMGpush(dlg->io, "newV2.img");
 		dlg->switchIMGver(dlg->io.version);
 		dlg->updateIMGlist();
 		dlg->updatePIClist();
@@ -154,7 +163,7 @@ void CDialogNew::OnBnClickedOk()
 		dlg->io.create(V4);
 		dlg->fileIMGname = L"newV4.img";
 		dlg->fileNPKname = L"newNPK.npk";
-		dlg->no.IMGpush(dlg->io, "new.img");
+		dlg->no.IMGpush(dlg->io, "newV4.img");
 		dlg->switchIMGver(dlg->io.version);
 		dlg->updateIMGlist();
 		dlg->updatePIClist();
@@ -168,7 +177,7 @@ void CDialogNew::OnBnClickedOk()
 		dlg->io.create(V5);
 		dlg->fileIMGname = L"newV5.img";
 		dlg->fileNPKname = L"newNPK.npk";
-		dlg->no.IMGpush(dlg->io, "new.img");
+		dlg->no.IMGpush(dlg->io, "newV5.img");
 		dlg->switchIMGver(dlg->io.version);
 		dlg->updateIMGlist();
 		dlg->updatePIClist();
@@ -182,7 +191,7 @@ void CDialogNew::OnBnClickedOk()
 		dlg->io.create(V6);
 		dlg->fileIMGname = L"newV6.img";
 		dlg->fileNPKname = L"newNPK.npk";
-		dlg->no.IMGpush(dlg->io, "new.img");
+		dlg->no.IMGpush(dlg->io, "newV6.img");
 		dlg->io.CLRnewPalette();
 		dlg->switchIMGver(dlg->io.version);
 		GET_DLG_CTRL(CComboBox, IDC_COMBO_PRO)->ResetContent();

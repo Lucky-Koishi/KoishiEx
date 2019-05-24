@@ -607,7 +607,17 @@ void avatarFactory::makeNPK(NPKobject &no){
 			continue;
 		if(partAlbum[ap].layerIMGpos[al] == -1)
 			continue;
-		no.IMGpush(partAlbum[ap].layerIMG[al], partAlbum[ap].layerIMGpath[al]);
+		if(partAlbum[ap].layerIMG[al].version == V6){
+			std::vector<IMGobject> ioList;
+			partAlbum[ap].layerIMG[al].convertToV4(ioList, colorList());
+			if(partAlbum[ap].selectedPalette > 0 && partAlbum[ap].selectedPalette < ioList.size()){
+				no.IMGpush(ioList[partAlbum[ap].selectedPalette], KoishiAvatar::imgAddV4Num(partAlbum[ap].layerIMGpath[al], partAlbum[ap].selectedPalette));
+			}else{
+				no.IMGpush(partAlbum[ap].layerIMG[al], partAlbum[ap].layerIMGpath[al]);
+			}
+		}else{
+			no.IMGpush(partAlbum[ap].layerIMG[al], partAlbum[ap].layerIMGpath[al]);
+		}
 	}
 }
 void avatarFactory::updateMatrix(avatarPart ap){

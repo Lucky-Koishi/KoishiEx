@@ -78,13 +78,57 @@ void stream::release(){
 		len = 0;
 	}
 }
-uchar& stream::operator[] (longex _i) const{
-	return data[_i];
+uchar& stream::operator[] (longex pos) const{
+	return data[pos];
 }
 stream::operator str(){
 	return (char*)data;
 }
-void stream::clear(){
+uchar stream::getBit(longex pos, long bitCount) const{
+	//将字节流按1位/2位/4位分段
+	longex atByte;
+	long inByte;
+	switch(bitCount){
+	case 1:
+		atByte = pos / 8;
+		inByte = pos % 8;
+		return (data[atByte] & (1 << inByte)) >> inByte;
+	case 2:
+		atByte = pos / 4;
+		inByte = pos % 4;
+		return (data[atByte] & (3 << (inByte << 1))) >> (inByte << 1);
+	case 4:
+		atByte = pos / 2;
+		inByte = pos % 2;
+		return (data[atByte] & (15 << (inByte << 2))) >> (inByte << 2);
+	}
+	return data[pos];
+}
+uchar stream::getRBit(longex pos, long bitCount) const{
+	//将字节流按1位/2位/4位分段
+	longex atByte;
+	long inByte;
+	switch(bitCount){
+	case 1:
+		atByte = pos / 8;
+		inByte = 7 - pos % 8;
+		return (data[atByte] & (1 << inByte)) >> inByte;
+	case 2:
+		atByte = pos / 4;
+		inByte = 3 - pos % 4;
+		return (data[atByte] & (3 << (inByte << 1))) >> (inByte << 1);
+	case 4:
+		atByte = pos / 2;
+		inByte = 1 - pos % 2;
+		return (data[atByte] & (15 << (inByte << 2))) >> (inByte << 2);
+	}
+	return data[pos];
+}
+void stream::clear(bool makeZero){
+	if(makeZero){
+		for(longex i = 0 ;i<maxLen;i++)
+			data[i] = 0;
+	}
 	len = 0;
 }
 uchar stream::push(uchar _d){
@@ -216,6 +260,14 @@ uchar stream::read(long &_i){
 	dword bresult;
 	read(bresult);
 	_i = (long)bresult;
+	return 1;
+}
+uchar stream::read(void *dest, longex l){
+	if(pt > len - l)
+		return 0;
+	for(longex i = 0;i<l; i++){
+		*((uchar*)dest+i) = data[pt++];
+	}
 	return 1;
 }
 str stream::readString(dword _len){
@@ -397,58 +449,21 @@ void stream::getSHA256(stream &dest, const stream &added){
 int stream::compressData(stream &dest, compressType type){
 	switch(type){
 	case COMP_ZLIB:
-		{
-			longex tryLength = getLen()+1000; 
-			dest.allocate(tryLength);
-			int i = (int)compress(dest.data, (dword*)&tryLength, data, getLen());
-			dest.len = tryLength;
-			return i;
-		}
-		break;
-	case COMP_NONE:
-		{
-			dest = *this;
-			return 0;
-		}
-		break;
+	case COMP_ZLIB_DUAL:
+		return ZLIBcompress(dest);
 	default:
-		{
-			dest = *this;
-			return 0;
-		}
-		break;
+		dest = *this;
+		return 0;
 	}
  }
 int stream::uncompressData(stream &dest, compressType type, longex tryLength){
 	switch(type){
 	case COMP_ZLIB:
-		{
-			 dest.allocate(tryLength);
-			 int i = (int)uncompress(dest.data, (dword*)&tryLength, data, getLen());
-			 dest.len = tryLength;
-			 return i;
-		}
-		break;
-	case COMP_ZLIB2:
-		{
-			 dest.allocate(tryLength);
-			 int i = (int)uncompress(dest.data, (dword*)&tryLength, data, getLen());
-			 dest.len = tryLength;
-			 return i;
-		}
-		break;
-	case COMP_NONE:
-		{
-			dest = *this;
-			return 0;
-		}
-		break;
+	case COMP_ZLIB_DUAL:
+		return ZLIBuncompress(dest, tryLength);
 	default:
-		{
-			dest = *this;
-			return 0;
-		}
-		break;
+		dest = *this;
+		return 0;
 	}
  }
 
@@ -501,10 +516,24 @@ int stream::BZcompress(stream &dest){
 	return i;
 }
 //进行BZ2解压
-int stream::BZdecompress(stream &dest){
+int stream::BZuncompress(stream &dest){
 	unsigned int len = 100*getLen();
 	dest.allocate(len);
 	int i = BZ2_bzBuffToBuffDecompress((char*)dest.data, &len, (char*)data, getLen(), 0, 0);
 	dest.len = len;
+	return i;
+}
+
+int stream::ZLIBcompress(stream &dest){
+	longex tryLength = getLen()+1000; 
+	dest.allocate(tryLength);
+	int i = (int)compress(dest.data, (dword*)&tryLength, data, getLen());
+	dest.len = tryLength;
+	return i;
+}
+int stream::ZLIBuncompress(stream &dest, longex tryLength){
+	dest.allocate(tryLength);
+	int i = (int)uncompress(dest.data, (dword*)&tryLength, data, getLen());
+	dest.len = tryLength;
 	return i;
 }

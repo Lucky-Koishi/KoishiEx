@@ -207,7 +207,8 @@ BOOL CToolAvatar::OnInitDialog()
 }
 
 void CToolAvatar::OnBnClickedButtonResource(){
-	HWND hwnd= GetSafeHwnd();
+	MessageBox(L"请在“系统菜单→设置”里对试衣间资源目录进行设置喵！",L"提示喵");
+	/*HWND hwnd= GetSafeHwnd();
 	CString filePath= L"";
 	LPMALLOC pMalloc;
 	if(::SHGetMalloc(&pMalloc) == NOERROR){
@@ -235,7 +236,7 @@ void CToolAvatar::OnBnClickedButtonResource(){
 			}
 		}
 		pMalloc->Release();
-	}
+	}*/
 }
 void CToolAvatar::OnCbnSelchangeComboPart1(){
 	OnComboPartChange(APART_CAP);
@@ -553,7 +554,7 @@ UINT CToolAvatar::animationThread(void*para){
 			frame = dlg->animation[localFrame];
 			dlg->factory.changeFrame(frame);
 			dlg->draw();
-			Sleep(10);
+			Sleep(60);
 			localFrame ++;
 			if(localFrame >= dlg->animationLength)
 				localFrame = 0;
@@ -581,8 +582,8 @@ void CToolAvatar::makeThumbnailBySingle(int newSelected){
 		changeThumbnailSize(tempSize);
 		matrix mat;
 		factory.makeModel(mat, getCareerColor(factory.career), size(thumbnailWidth, thumbnailHeight), part, newSelected, 0, getAvatarModelOffset(factory.career, part), getCareerRepresentativeFrame(factory.career), &bodyPI, &bodyMat);
-		fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, part) + "_" + CStrToStr(NumToCStr(factory.partAlbum[part].avatarList[newSelected].ID)) + ".bmp";
-		KoishiExpand::KoishiImageTool::makeBMP(mat, fileName);
+		fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, part) + "_" + CStrToStr(NumToCStr(factory.partAlbum[part].avatarList[newSelected].ID)) + ".PNG";
+		KoishiImageTool::makePNG(mat, fileName);
 	}
 	changeThumbnailSize(oldSize);
 }
@@ -603,8 +604,8 @@ void CToolAvatar::makeThumbnailByPart(){
 			changeThumbnailSize(tempSize);
 			matrix mat;
 			factory.makeModel(mat, getCareerColor(factory.career), size(thumbnailWidth, thumbnailHeight), part, tempSelected, 0, getAvatarModelOffset(factory.career, part), getCareerRepresentativeFrame(factory.career), &bodyPI, &bodyMat);
-			fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, part) +"_" + CStrToStr(NumToCStr(factory.partAlbum[part].avatarList[tempSelected].ID)) + ".bmp";
-			KoishiExpand::KoishiImageTool::makeBMP(mat, fileName);
+			fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, part) +"_" + CStrToStr(NumToCStr(factory.partAlbum[part].avatarList[tempSelected].ID)) + ".PNG";
+			KoishiImageTool::makePNG(mat, fileName);
 			double rate = (double)tempSelected/totalSelect +
 				(double)tempSize/4/totalSelect;
 			GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos(1000*rate);
@@ -631,8 +632,8 @@ void CToolAvatar::makeThumbnailByAll(){
 				changeThumbnailSize(tempSize);
 				matrix mat;
 				factory.makeModel(mat, getCareerColor(factory.career), size(thumbnailWidth, thumbnailHeight), (avatarPart)tempPart, selected, 0, getAvatarModelOffset(factory.career, (avatarPart)tempPart), getCareerRepresentativeFrame(factory.career), &bodyPI, &bodyMat);
-				fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, (avatarPart)tempPart) +"_" + CStrToStr(NumToCStr(factory.partAlbum[(avatarPart)tempPart].avatarList[selected].ID)) + ".bmp";
-				KoishiExpand::KoishiImageTool::makeBMP(mat, fileName);
+				fileName = CStrToStr(profile.getThumbnailPath(thumbnailSize, factory.career)) + KoishiAvatar::getAvatarIMGName(factory.career, (avatarPart)tempPart) +"_" + CStrToStr(NumToCStr(factory.partAlbum[(avatarPart)tempPart].avatarList[selected].ID)) + ".PNG";
+				KoishiImageTool::makePNG(mat, fileName);
 				mat.destory();
 				double rate = (double)(tempPart-1)/(APART_MAXCOUNT-1) +
 					(double)selected/totalSelect/(APART_MAXCOUNT-1) +
@@ -694,7 +695,7 @@ UINT CToolAvatar::makeIconThread(void*para){
 						(double)k/io.indexCount/s.size()/(APART_MAXCOUNT-1);
 					GET_DLG_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos(1000*rate);
 					GET_DLG_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"("+DoubleToCStr(100*rate) +	L"％)提取第"+NumToCStr(k)+"帧中。");
-					KoishiExpand::KoishiImageTool::makeBMP(iconMat, CStrToStr(dlg->profile.getIconPath(dlg->factory.career)) + KoishiAvatar::getAvatarPartIMGName((avatarPart)i) + "_" + CStrToStr(NumToCStr(id)) + ".bmp");
+					KoishiImageTool::makePNG(iconMat, CStrToStr(dlg->profile.getIconPath(dlg->factory.career)) + KoishiAvatar::getAvatarPartIMGName((avatarPart)i) + "_" + CStrToStr(NumToCStr(id)) + ".PNG");
 					iconMat.destory();
 					id ++;
 				}
@@ -713,11 +714,11 @@ UINT CToolAvatar::makeIconThread(void*para){
 //////////////
 bool CToolAvatar::loadImage(str fileNameWithoutExp, matrix &mat){
 	str fileName = fileNameWithoutExp + ".png";
-	if(mat.loadPNG(fileName)){
+	if(KoishiImageTool::loadPNG(mat, fileName)){
 		return true;
 	}
 	fileName = fileNameWithoutExp + ".bmp";
-	if(KoishiExpand::KoishiImageTool::loadBMP(mat, fileName)){
+	if(KoishiImageTool::loadBMP(mat, fileName)){
 		return true;
 	}
 	return false;
@@ -1009,10 +1010,8 @@ void CToolAvatar::changeThumbnailSize(int tSize){
 void CToolAvatar::OnCbnSelchangeComboCareer(){
 	// TODO: 在此添加控件通知处理程序代码
 	CHECK_VALID(GET_CTRL(CComboBox, IDC_COMBO_CAREER)->GetCurSel()>0);
-	CString sourcePath;
-	GET_CTRL(CEdit, IDC_EDIT_FOLDER)->GetWindowText(sourcePath);
 	factory.clear();
-	factory.setPath(CStrToStr(sourcePath+L"\\"));
+	factory.setPath(CStrToStr(profile.getAvatarPath()));
 	factory.setCarrer((avatarCareer)(GET_CTRL(CComboBox, IDC_COMBO_CAREER)->GetCurSel()));
 	AfxBeginThread(loadNPKThread, this);
 }
@@ -1681,7 +1680,6 @@ void CToolAvatar::OnBnClickedButtonOneKey(){
 
 void CToolAvatar::OnMenuOneKeyLocalize(){
 	ModalAvatarUpdate dlg;
-	GET_CTRL(CEdit, IDC_EDIT_FOLDER)->GetWindowText(dlg.resourcePath);
 	dlg.profile = profile;
 	dlg.DoModal();
 }
@@ -1825,7 +1823,7 @@ void CToolAvatar::makeOneKeyPatch(){
 		clrList.erase(clrList.begin() + maxID);
 		clrCount.erase(clrCount.begin() + maxID);
 	}
-	clrList = KoishiExpand::KoishiImageTool::nearbySort(finalColorList);
+	clrList = KoishiImageTool::nearbySort(finalColorList);
 	/////////////////////////////////////
 	GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos(newIO.indexCount);
 	GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"转换资源中。");

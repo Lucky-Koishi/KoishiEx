@@ -183,6 +183,10 @@ UINT ThreadToolIMGSearch(PVOID para){
 		ret = fileFind.FindNextFile();
 		CString name = fileFind.GetFileName();
 		CString path = fileFind.GetFilePath();
+		if(fileFind.IsSystem())
+			continue;
+		if(fileFind.IsHidden())
+			continue;
         fileList.push_back(name);
 		filePath.push_back(path);
     }

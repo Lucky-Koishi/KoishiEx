@@ -255,11 +255,11 @@ void ModalAvatarMap1::drawIcon(){
 
 bool ModalAvatarMap1::loadImage(str fileNameWithoutExp, matrix &mat){
 	str fileName = fileNameWithoutExp + ".png";
-	if(mat.loadPNG(fileName)){
+	if(KoishiImageTool::loadPNG(mat, fileName)){
 		return true;
 	}
 	fileName = fileNameWithoutExp + ".bmp";
-	if(KoishiExpand::KoishiImageTool::loadBMP(mat, fileName)){
+	if(KoishiImageTool::loadBMP(mat, fileName)){
 		return true;
 	}
 	return false;

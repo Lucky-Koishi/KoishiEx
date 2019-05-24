@@ -178,6 +178,7 @@ public:
 
 	CBitmap m_logoPic;
 	CBitmap m_buttonPic[25];
+	CBitmap m_buttonPicX[25];
 	CImageList i_lIMG,i_lPIC,i_lTEX;
 	void draw(bool isTex = false);
 public:
@@ -212,11 +213,7 @@ public:
 	CToolIMGSearch toolIMGSearch;
 	CToolAvatar toolAvatar;
 	CToolDict toolDict;
-	//第四个工具
-	//去掉
-	//第五个工具
 	CToolSPK toolSPK;
-	//第六个工具
 	CToolForceEx toolForceEx;
 
 	//CButton m_btnPalette;
@@ -268,7 +265,7 @@ public:
 	afx_msg void OnBnClickedToolButton11();
 	afx_msg void OnBnClickedToolButton12();
 	afx_msg void OnBnClickedToolButton13();
-
+	void changeToolButtonStatus();
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnBnClickedToolButton14();
@@ -327,6 +324,7 @@ public:
 	afx_msg void OnMenuPictureGetPng();
 	afx_msg void OnMenuPictureGetPngPatch();
 	static UINT ThreadPictureGetPNG(void*context);
+	static UINT ThreadPictureGetGIF(void*context);
 	int ParaPictureGetPNG;
 	afx_msg void OnMenuTextureChooseAll();
 	afx_msg void OnMenuTextureChooseInverse();
@@ -400,4 +398,16 @@ public:
 	afx_msg void OnDrawSetCompare2();
 	afx_msg void OnDrawCompareEnabled();
 	afx_msg void OnDrawCompareDisabled();
+	afx_msg void OnToolsNpkLock();
+	afx_msg void OnMenuPictureGetGIF();
+	afx_msg void OnMenuColorTableClassical();
+	afx_msg void OnMenuColorTable16();
+	afx_msg void OnMenuColorTable256();
+	afx_msg void OnMenuColorTableExtractCurrent();
+	afx_msg void OnMenuColorTableExtractAllFrame();
+	static UINT pickColorFrame(void*context);
+	static UINT pickColorImage(void*context);
+	//
+	CToolTipCtrl m_ttc;
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

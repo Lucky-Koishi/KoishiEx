@@ -5,7 +5,6 @@
 using namespace Koishi;
 using namespace KoishiAvatar;
 using namespace KoishiExpand::KoishiMarkTool;
-using namespace KoishiExpand::KoishiImageTool;
 using namespace KoishiExpand::KoishiDownloadTool;
 void KoishiExpand::KoishiMarkTool::CharMat(char p, matrix &mat, color clr){
 	if(p>='a'&& p <= 'z'){
@@ -611,7 +610,7 @@ void SPKobject::extractTrueStream(stream &s){
 	for(int i = 0;i<indexCount;i++){
 		extract(i, s1);
 		if(list[i].bzlib){
-			s1.BZdecompress(s2);
+			s1.BZuncompress(s2);
 			s.pushStream(s2,s2.getLen());
 		}else{
 			s.pushStream(s1,s1.getLen());
@@ -789,7 +788,7 @@ bool TCTobject::makeNPK(Koishi::str NPKfileName){
 	sHead.allocate(2);
 	sHead.push((word)0x9C78);
 	s.insertStream(sHead, 2, 0);
-	s.uncompressData(s1, COMP_ZLIB, uncomSize);
+	s.ZLIBuncompress(s1, uncomSize);
 	s1.readStream(sOut, uncomSize);
 	sOut.makeFile(NPKfileName);
 	s.release();
@@ -927,229 +926,6 @@ bool KoishiExpand::IMGobjectV1::release(){
 	lenList.clear();
 	return true;
 }
-/////////////图像工具////////////////////
-color KoishiExpand::KoishiImageTool::gradient(const color &sourceColor, const colorList &keyColorList, Koishi::colorProperty cp){
-	if(keyColorList.size() == 0){
-		return sourceColor;
-	}
-	if(keyColorList.size() == 1){
-		return keyColorList[0];
-	}
-	double theProp = sourceColor.getProperty(cp);
-	double delta = 1.0/(keyColorList.size()-1);		//步长
-	int step = (int)(theProp / delta);
-	if(step >= keyColorList.size() - 1){
-		step = keyColorList.size() - 2;
-	}
-	return color(
-		(uchar)(theProp*keyColorList[step].A) + (uchar)((1-theProp)*keyColorList[step+1].A),
-		(uchar)(theProp*keyColorList[step].R) + (uchar)((1-theProp)*keyColorList[step+1].R),
-		(uchar)(theProp*keyColorList[step].G) + (uchar)((1-theProp)*keyColorList[step+1].G),
-		(uchar)(theProp*keyColorList[step].B) + (uchar)((1-theProp)*keyColorList[step+1].B)
-	);
-}
-colorList KoishiExpand::KoishiImageTool::rainbowSort(const colorList &originList){
-	colorList oldColorList = originList;
-	colorList newColorList;
-	for(int i = 0;i<originList.size();i++){
-		int minValue = 36100;
-		int minID = -1;
-		for(int j = 0;j<oldColorList.size();j++){
-			colorHSV hsv;
-			oldColorList[j].getHSV(hsv);
-			int value = 100*hsv.H + 100 * hsv.V+ 10 * hsv.S;
-			if(value < minValue){
-				minID = j;
-				minValue = value;
-			}
-		}
-		newColorList.push_back(oldColorList[minID]);
-		oldColorList.erase(oldColorList.begin() + minID);
-	}
-	return newColorList;
-}
-colorList KoishiExpand::KoishiImageTool::nearbySort(const colorList &originList){
-	colorList oldColorList = originList;
-	colorList newColorList;
-	for(int i = 0;i<originList.size();i++){
-		if(i == 0){
-			newColorList.push_back(oldColorList[0]);
-			oldColorList.erase(oldColorList.begin());
-			continue;
-		}
-		int minDist = 196608;
-		int minID = -1;
-		for(int j = 0;j<oldColorList.size();j++){
-			int dist = color::EuclideanDistanceSquareOf(newColorList[i-1], oldColorList[j]);
-			if(dist < minDist){
-				minID = j;
-				minDist = dist;
-			}
-		}
-		newColorList.push_back(oldColorList[minID]);
-		oldColorList.erase(oldColorList.begin() + minID);
-	}
-	return newColorList;
-}
-///////////BMP//////////////////
-void KoishiExpand::KoishiImageTool::makeBMP(const matrix &mat, str fileName){
-	BMPobject bo;
-	bo.input(mat);
-	bo.makeFile(fileName);
-}
-bool KoishiExpand::KoishiImageTool::loadBMP(matrix &mat, str fileName){
-	BMPobject bo;
-	if(bo.loadFile(fileName)){
-		bo.output(mat);
-		return true;
-	}
-	return false;
-}
-bool BMPobject::load(stream s){
-	s.ptMoveTo(0);
-	s.read(header.magic);
-	if(header.magic != 0x4D42)
-		return false;
-	s.read(header.fileSize);
-	s.read(header.reserved);
-	s.read(header.dataOffset);
-	s.read(info.infoSize);
-	s.read(info.width);
-	s.read(info.height);
-	s.read(info.planes);
-	s.read(info.bitCount);
-	s.read(info.compression);
-	s.read(info.dataSize);
-	s.read(info.xPixelsPerMeter);
-	s.read(info.yPixelsPerMeter);
-	s.read(info.colorUsed);
-	s.read(info.colorImportant);
-	quads.clear();
-	if(info.bitCount <= 8){
-		for(int i = 0;i<(1<<info.bitCount);i++){
-			color clr;
-			s.read(clr.B);
-			s.read(clr.G);
-			s.read(clr.R);
-			s.read(clr.A);
-			clr.A = 0xFF;
-			quads.push_back(clr);
-		}
-	}
-	s.readStream(data, header.fileSize - header.dataOffset);
-	return true;
-}
-bool BMPobject::loadFile(str fileName){
-	stream s;
-	s.loadFile(fileName);
-	return load(s);
-}
-void BMPobject::make(stream &s){
-	s.release();
-	s.allocate(header.dataOffset + data.len);
-	s.push(header.magic);
-	s.push(header.fileSize);
-	s.push(header.reserved);
-	s.push(header.dataOffset);
-	s.push(info.infoSize);
-	s.push(info.width);
-	s.push(info.height);
-	s.push(info.planes);
-	s.push(info.bitCount);
-	s.push(info.compression);
-	s.push(info.dataSize);
-	s.push(info.xPixelsPerMeter);
-	s.push(info.yPixelsPerMeter);
-	s.push(info.colorUsed);
-	s.push(info.colorImportant);
-	for(long i = 0;i<quads.size();i++){
-		s.push(quads[i].B);
-		s.push(quads[i].G);
-		s.push(quads[i].R);
-		s.push((uchar)0);
-	}
-	s.pushStream(data, data.len);
-}
-void BMPobject::makeFile(str fileName){
-	stream s;
-	make(s);
-	s.makeFile(fileName);
-}
-void BMPobject::output(matrix &mat){
-	long bitPerRow = info.width * info.bitCount;
-	long dwPerRow = bitPerRow / 32;
-	if(bitPerRow & 0x1F){
-		dwPerRow ++;	//补零
-	}
-	data.ptMoveTo(0);
-	stream lineStream;
-	mat.create(size(info.width, info.height));
-	for(long i = 0;i<info.height;i++){
-		data.readStream(lineStream, 4 * dwPerRow);
-		for(long id = 0;id < info.width ;id++){
-			if(info.bitCount <= 8){
-				//一个字节里对应好几个像素值
-				uchar currentByte = lineStream[id * info.bitCount / 8];				//当前字节
-				uchar bitOffset = 8 / info.bitCount - id % (8 / info.bitCount) - 1;	//取第几位
-				uchar mask = (1 << info.bitCount) - 1;								//掩膜
-				uchar value = currentByte >> (bitOffset * info.bitCount) & mask;	//最终索引
-				mat[info.height - i - 1][id] = quads[value];
-			}else if(info.bitCount == 16){
-				//采用RGB555格式
-				word currentWord = lineStream[2*id] | lineStream[2*id + 1] << 8;
-				uchar mask = 0x1F;
-				uchar bValue = currentWord & mask;
-				uchar gValue = currentWord >> 5 & mask;
-				uchar rValue = currentWord >> 10 & mask;
-				mat[info.height - i - 1][id] = color(rValue, gValue, bValue);
-			}else if(info.bitCount == 24){
-				uchar bValue = lineStream[3*id];
-				uchar gValue = lineStream[3*id+1];
-				uchar rValue = lineStream[3*id+2];
-				mat[info.height - i - 1][id] = color(rValue, gValue, bValue);
-			}else if(info.bitCount == 32){
-				uchar bValue = lineStream[4*id];
-				uchar gValue = lineStream[4*id+1];
-				uchar rValue = lineStream[4*id+2];
-				mat[info.height - i - 1][id] = color(rValue, gValue, bValue);
-			}else{
-				return;
-			}
-		}
-	}
-}
-void BMPobject::input(const matrix &mat){
-	quads.clear();
-	data.release();
-	data.allocate(mat.getElemCount() * 3 + mat.getHeight() * 3 + 1000); //加上高度×3是为补齐4字节预留
-	for(long i = mat.getHeight() - 1;i >= 0;i--){
-		for(long j = 0;j<mat.getWidth();j++){
-			data.push(mat[i][j].B);
-			data.push(mat[i][j].G);
-			data.push(mat[i][j].R);
-		}
-		long addZeroCount = data.len % 4;
-		for(long j = 0;j<addZeroCount;j++){
-			data.push((uchar)0);
-		}
-	}
-	header.magic = 0x4D42;
-	header.fileSize = 54 + data.len;
-	header.reserved = 0;
-	header.dataOffset = 54;
-	info.infoSize = 40;
-	info.width = mat.getWidth();
-	info.height = mat.getHeight();
-	info.planes = 1;
-	info.bitCount = 24;
-	info.compression = 0;
-	info.dataSize = data.len;
-	info.xPixelsPerMeter = 0;
-	info.yPixelsPerMeter = 0;
-	info.colorUsed = 0;
-	info.colorImportant = 0;
-}
-
 
 ///////////全帧展示////////////////////////
 
@@ -1217,4 +993,130 @@ bool KoishiExpand::exhibit::putMatrix(const matrix &newMat, bool expanded){
 	}
 	rList[currentRow].push_back(left + newMat.getWidth());
 	return true;
+}
+
+/////////////////////////////////////////////////////
+int KoishiExpand::authorLock::checkLock(str fileName, str password){
+	stream s, sStr, sSHA1, sSHA2;
+	sStr.allocate(password.size());
+	sStr.pushString(password);
+	sStr.getSHA256(sSHA1);
+	//没能打开文件
+	if(!s.loadFile(fileName))
+		return 3;
+	//长度不够，不可能含有锁
+	if(s.len < 38)
+		return 3;
+	s.ptMoveTo(s.len - 6);
+	//未加锁
+	if("XYZZY" != s.readString(6))
+		return 2;
+	//已经加锁
+	s.ptMoveTo(s.len - 38);
+	s.readStream(sSHA2, 32);
+	for(int i = 0;i<32;i++){
+		if(sSHA1[i] != sSHA2[i])
+			return 0;
+	}	
+	return 1;
+
+}
+bool KoishiExpand::authorLock::addLock(str fileName, str password){
+	stream s, sStr, sSHA1;
+	sStr.allocate(password.size());
+	sStr.pushString(password);
+	sStr.getSHA256(sSHA1);
+	if(checkLock(fileName, password) < 2)
+		return false;	//已经有锁所以不能加锁
+	if(!s.loadFile(fileName))
+		return false;	//无法读取文件
+	s.pushStream(sSHA1, 32);
+	s.pushString("XYZZY");
+	s.push(uchar(0));
+	s.makeFile(fileName);
+	return true;
+}
+//////////////////////////////////////////////////////////////////////////////
+void KoishiExpand::textDisplay::binary(const stream &in, stream &out){
+	out.release();
+	out.allocate(in.len*10);
+	for(longex i = 0;i<in.len;i++){
+		if(i % 16 == 0){
+			char s[10];
+			itoa(i, s, 16);
+			out.pushString(str(s));
+			out.push((uchar)' ');
+		}
+		uchar mask = 1;
+		for(uchar j = 0;j<8;j++){
+			if(in[i] & mask){
+				out.push((uchar)'1');
+			}else{
+				out.push((uchar)'0');
+			}
+			mask <<= 1;
+		}
+		
+		out.push((uchar)' ');
+		if(i % 16 == 15){
+			out.push((uchar)'\r');
+			out.push((uchar)'\n');
+		}
+	}
+}
+void KoishiExpand::textDisplay::binaryFile(const stream &in, str fileName){
+	stream out;
+	binary(in, out);
+	out.makeFile(fileName);
+}
+void KoishiExpand::textDisplay::binaryCompareFile(const stream &in1, const stream &in2, str fileName){
+	stream out;
+	longex maxLen =MAX(in1.len, in2.len);
+	out.allocate(maxLen*40);
+	for(longex i = 0;i<maxLen;i+=16){
+		//head:
+		char s[10];
+		itoa(i, s, 16);
+		out.pushString(str(s));
+		out.push((uchar)':');
+		out.push((uchar)' ');
+		for(uchar j = 0;j<16;j++){
+			uchar mask = 1;
+			for(uchar k = 0;k<8;k++){
+				if(i+j>=in1.len){
+					out.push((uchar)' ');
+				}else if(in1[i+j] & mask){
+					out.push((uchar)'1');
+				}else{
+					out.push((uchar)'0');
+				}
+				mask <<= 1;
+			}
+			out.push((uchar)' ');
+		}
+		out.push((uchar)'\r');
+		out.push((uchar)'\n');
+		out.pushString(str(s));
+		out.push((uchar)':');
+		out.push((uchar)' ');
+		for(uchar j = 0;j<16;j++){
+			uchar mask = 1;
+			for(uchar k = 0;k<8;k++){
+				if(i+j>=in2.len){
+					out.push((uchar)' ');
+				}else if(in2[i+j] & mask){
+					out.push((uchar)'1');
+				}else{
+					out.push((uchar)'0');
+				}
+				mask <<= 1;
+			}
+			out.push((uchar)' ');
+		}
+		out.push((uchar)'\r');
+		out.push((uchar)'\n');
+		out.push((uchar)'\r');
+		out.push((uchar)'\n');
+	}
+	out.makeFile(fileName);
 }

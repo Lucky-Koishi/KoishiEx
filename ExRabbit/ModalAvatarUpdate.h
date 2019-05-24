@@ -29,7 +29,6 @@ public:
 	bool isStart[14];
 	bool isOver[14];
 public:
-	CString resourcePath;
 	Profile profile;
 	volatile int updateSerial;
 	static UINT updateThread(void* para);

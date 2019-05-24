@@ -16,7 +16,7 @@ public:
 	DWORD avatarColor0;
 	DWORD avatarColor1;
 	DWORD avatarThumbSize;
-
+	DWORD miniSecPerFrame;
 public:
 	void defaultProfile();
 	void loadProfile();

@@ -18,6 +18,7 @@ void Profile::defaultProfile(){
 	avatarColor0 = 0xFFCCCC;
 	avatarColor1 = 0xCCCCFF;
 	avatarThumbSize = 1;
+	miniSecPerFrame = 100;
 }
 void Profile::loadProfile(){
 	CStdioFile file;
@@ -61,6 +62,9 @@ void Profile::loadProfile(){
 			if(termStr == L"[AVATAR_THUMBSIZE]"){
 				avatarThumbSize = _ttoi(valueStr);
 			}
+			if(termStr == L"[GIF_MSPF]"){
+				miniSecPerFrame = _ttoi(valueStr);
+			}
 		}
 		setlocale(LC_CTYPE, old_locale);
 		free(old_locale);
@@ -86,6 +90,7 @@ void Profile::saveProfile(){
 	file.WriteString(L"[AVATAR_COLOR0]" + NumToCStr(avatarColor0) + L"\n");
 	file.WriteString(L"[AVATAR_COLOR1]" + NumToCStr(avatarColor1) + L"\n");
 	file.WriteString(L"[AVATAR_THUMBSIZE]" + NumToCStr(avatarThumbSize) + L"\n");
+	file.WriteString(L"[GIF_MSPF]" + NumToCStr(miniSecPerFrame) + L"\n");
 	setlocale(LC_CTYPE, old_locale);
 	free(old_locale);
 	file.Close();

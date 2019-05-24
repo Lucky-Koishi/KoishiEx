@@ -6,6 +6,7 @@
 #include "ToolForceEx.h"
 #include "afxdialogex.h"
 #include "ExRabbitDlg.h"
+#include "ModalLockInput.h"
 
 // CToolForceEx 对话框
 
@@ -47,6 +48,12 @@ void CToolForceEx::OnBnClickedButton1()
 	CString extFilter = _T("NPK文件(*.NPK)|*.NPK||");
 	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	if(dlg.DoModal() == IDOK){
+		if(KoishiExpand::authorLock::checkLock(CStrToStr(dlg.GetPathName()), "") == 0){
+			ModalLockInput dlg;
+			dlg.fileCheckName = fileName;
+			if(IDCANCEL == dlg.DoModal())
+				return;
+		}
 		fileName = dlg.GetPathName();
 		m_eNPK.SetWindowText(fileName);
 	}

@@ -32,11 +32,11 @@ namespace Koishi{
 	typedef std::vector<longex> queueex;
 
 	//IMG版本号
-	enum IMGversion{V1 = 1, V2 = 2, V4 = 4, V5 = 5, V6 = 6, OGG = -1, VUDEF = 0};
-	//压缩格式
-	enum compressType{COMP_NONE = 5, COMP_ZLIB = 6, COMP_ZLIB2 = 7, COMP_UDEF = 0};
+	enum IMGversion:dword{V1 = 1, V2 = 2, V4 = 4, V5 = 5, V6 = 6, VUDEF = 0};
+	//辅助号
+	enum compressType:dword{COMP_NONE = 5, COMP_ZLIB = 6, COMP_ZLIB_DUAL = 7, COMP_UDEF = 0};
 	//颜色格式
-	enum colorFormat{ARGB8888 = 0x10, ARGB4444 = 0x0F, ARGB1555 = 0x0E, LINK = 0x11, DDS_DXT1 = 0x12, DDS_DXT3 = 0x13, DDS_DXT5 = 0x14, COLOR_UDEF = 0, INDEX_FMT_PALETTE, RGB565};
+	enum colorFormat:dword{ARGB8888 = 0x10, ARGB4444 = 0x0F, ARGB1555 = 0x0E, LINK = 0x11, DDS_DXT1 = 0x12, DDS_DXT3 = 0x13, DDS_DXT5 = 0x14, COLOR_UDEF = 0, INDEX_FMT_PALETTE};
 	//混合模式
 	enum colorMethod{LAY, DARKEN, MULTIPLY, COLORBURN, LINEARBURN, LIGHTEN, SCREEN, COLORDODGE, LINEARDODGE, OVERLAY, HARDLIGHT, SOFTLIGHT, VIVIDLIGHT, LINEARLIGHT, PINLIGHT, HARDMIX, DIFFER, EXCLUSION};
 	//可修改图片索引项数据
@@ -70,7 +70,9 @@ namespace Koishi{
 		void release();
 	public:
 		//下标函数
-		uchar& operator[] (longex _i) const;
+		uchar& operator[] (longex pos) const;
+		uchar getBit(longex pos, long bitCount = 1) const;
+		uchar getRBit(longex pos, long bitCount = 1) const;
 		operator str();
 		longex getLen() const;
 		longex getMaxLen() const;
@@ -78,7 +80,7 @@ namespace Koishi{
 		longex ptMoveTo(longex pos);
 		longex ptMove(longex dist);
 	public:
-		void clear();
+		void clear(bool makeZero = false);
 		//插入数据
 		uchar push(uchar d);
 		uchar push(word d);
@@ -91,6 +93,7 @@ namespace Koishi{
 		uchar read(dword &d);
 		uchar read(longex &d);
 		uchar read(long &i);
+		uchar read(void *dest, longex l);
 		//插入字符串
 		uchar pushString(str s);
 		//读取字符串
@@ -125,8 +128,9 @@ namespace Koishi{
 		longex findStream(const stream &s, longex startPos = 0);
 		longex splitStream(const stream &s, queueex &posList, queueex &lenList);
 		int BZcompress(stream &dest);
-		int BZdecompress(stream &dest);
-
+		int BZuncompress(stream &dest);
+		int ZLIBcompress(stream &dest);
+		int ZLIBuncompress(stream &dest, longex tryLength = MAX_UNCOMPRESSED_DATA_LENGTH);
 	public:
 		uchar *data;
 		longex len,maxLen,pt;
@@ -292,8 +296,8 @@ namespace Koishi{
 		void filledRectangle(point p1, point p2, const color &clr);
 		void filledLattice(point p1, point p2, const color &clr1, const color &clr2, long size);
 	public:
-		bool loadPNG(str fileName);
-		bool makePNG(str fileName);
+		//bool loadPNG(str fileName);
+		//bool makePNG(str fileName);
 	protected:
 		color *data;
 		dword column, row, pt;
@@ -646,45 +650,40 @@ namespace KoishiExpand{
 		std::vector<queue> rList;	//指定行中每列的起始坐标(单行中每一张图的x坐标)
 		int hMaxPerRow;				//当前放入行的图的最大高度，用于计算另起一行时的新y坐标
 	};
-	namespace KoishiImageTool{
-		extern color gradient(const color &sourceColor, const colorList &keyColorList, Koishi::colorProperty cp);
-		extern colorList rainbowSort(const colorList &originList);
-		extern colorList nearbySort(const colorList &originList);
-		extern void makeBMP(const matrix &mat, str fileName);
-		extern bool loadBMP(matrix &mat, str fileName);
-		typedef struct BMPheader{
-			word magic;
-			dword fileSize;
-			dword reserved;
-			dword dataOffset;
-		}BMPheader;
-		typedef struct BMPinfo{
-			dword infoSize;
-			dword width;
-			dword height;
-			word planes;
-			word bitCount;
-			dword compression;
+	class authorLock{
+	public:
+		//返回0口令错误 返回1口令正确 返回2无锁 返回3无此文件或文件长度不够
+		static int checkLock(str fileName, str password);
+		static bool addLock(str fileName, str password);
+	};
+	class textDisplay{
+	public:
+		static void binary(const stream &in, stream &out);		//以二进制输出字节流，低位在前高位在后
+		static void binaryFile(const stream &in, str fileName);	//输出文件
+		static void binaryCompareFile(const stream &in1, const stream &in2, str fileName);	//输出文件
+	};
+	//////////////////////////////////////////////////////////////////////////////////////
+	namespace KoishiAudioTool{
+		typedef struct WAVinfo{
+			dword magic;
 			dword dataSize;
-			dword xPixelsPerMeter;
-			dword yPixelsPerMeter;
-			dword colorUsed;
-			dword colorImportant;
-		}BMPinfo;
-		class BMPobject{
-			stream data;
-		public:
-			BMPheader header;
-			BMPinfo info;
-			colorList quads;
-		public:
-			bool load(stream s);
-			bool loadFile(str fileName);
-			void make(stream &s);
-			void makeFile(str fileName);
-			void output(matrix &mat);
-			void input(const matrix &mat);
-		};
+			dword format;
+		}WAVinfo;
+		typedef struct WAVheader{
+			dword magic;
+			dword blockSize;
+			word audioFormat;
+			word countChannels;
+			dword sampleRate;
+			dword byteRate;
+			word blockAlign;
+			word bitsPerSample;
+		}WAVheader;
+		typedef struct WAVfact{
+			dword magic;
+			dword dw1;
+			dword dw2;
+		}WAVfact;
 	}
 }
 

@@ -137,6 +137,45 @@
     <None Include="res\icon_version_link.ico">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="res\tool_button_2X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_4x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_5x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_6x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_7x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_8x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_9x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_10x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_11x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_12x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_13x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_14x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_15x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExRabbit.h">
@@ -262,6 +301,12 @@
     <ClInclude Include="ModalImageRemove.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ModalLock.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalLockInput.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExRabbit.cpp">
@@ -379,6 +424,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ModalImageRemove.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalLock.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalLockInput.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

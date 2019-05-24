@@ -371,7 +371,7 @@ UINT ModalTransform::pickColorFrame(void*context){
 		}
 	}
 	clrList = pal[0];
-	long finalColorCount = MIN(0xFF, pal.getColorCount(0));
+	long finalColorCount = MIN(0xFE, pal.getColorCount(0));
 	colorList finalColorList;
 	dlg->bar.show(finalColorCount);
 	for(int i = 0;i<finalColorCount; i++){
@@ -389,7 +389,8 @@ UINT ModalTransform::pickColorFrame(void*context){
 		clrCount.erase(clrCount.begin() + maxID);
 	}
 	dlg->bar.setInfo(L"正在生成调色板喵……", finalColorCount);
-	dlg->out.useColorPalette[dlg->currentPaletteID] = KoishiExpand::KoishiImageTool::nearbySort(finalColorList);
+	dlg->out.useColorPalette[dlg->currentPaletteID] = KoishiImageTool::nearbySort(finalColorList);
+	dlg->out.useColorPalette[dlg->currentPaletteID].insert(dlg->out.useColorPalette[dlg->currentPaletteID].begin(), color(0,0,0,0));
 	dlg->bar.hide();
 	dlg->updatePaletteList();
 	dlg->updatePalette();
@@ -422,7 +423,7 @@ UINT ModalTransform::pickColorImage(void*context){
 		mat.destory();
 	}
 	clrList = pal[0];
-	long finalColorCount = MIN(0xFF, pal.getColorCount(0));
+	long finalColorCount = MIN(0xFE, pal.getColorCount(0));
 	colorList finalColorList;
 	dlg->bar.show(finalColorCount);
 	for(int i = 0;i<finalColorCount; i++){
@@ -440,7 +441,8 @@ UINT ModalTransform::pickColorImage(void*context){
 		clrCount.erase(clrCount.begin() + maxID);
 	}
 	dlg->bar.setInfo(L"正在生成调色板喵……", finalColorCount);
-	dlg->out.useColorPalette[dlg->currentPaletteID] = KoishiExpand::KoishiImageTool::nearbySort(finalColorList);
+	dlg->out.useColorPalette[dlg->currentPaletteID] = KoishiImageTool::nearbySort(finalColorList);
+	dlg->out.useColorPalette[dlg->currentPaletteID].insert(dlg->out.useColorPalette[dlg->currentPaletteID].begin(), color(0,0,0,0));
 	dlg->bar.hide();
 	dlg->updatePaletteList();
 	dlg->updatePalette();

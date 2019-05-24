@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "../KoishiEx/koishiex.h"
-#include "../KoishiEx/DDS.h"
+#include "../KoishiEx/KoishiImageTool.h"
 //////////////////////////////////////////////////////
 //Ö§³Ö
 //////////////////////////////////////////////////////

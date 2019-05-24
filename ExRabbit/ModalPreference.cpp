@@ -253,7 +253,7 @@ BOOL ModalPreference::OnInitDialog(){
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE8)->SetWindowText(NumToCStr(modifiedProfile.avatarColor0));
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE9)->SetWindowText(NumToCStr(modifiedProfile.avatarColor1));
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE10)->SetWindowText(NumToCStr(modifiedProfile.avatarThumbSize));
-
+	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE11)->SetWindowText(NumToCStr(modifiedProfile.miniSecPerFrame));
 	return TRUE;
 }
 
@@ -268,6 +268,13 @@ void ModalPreference::OnBnClickedOk(){
 	if(iTemp > 3)
 		iTemp = 3;
 	modifiedProfile.avatarThumbSize = iTemp;
+	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE11)->GetWindowText(sTemp);
+	iTemp = _ttoi(sTemp);
+	if(iTemp < 10)
+		iTemp = 10;
+	if(iTemp > 3000)
+		iTemp = 3000;
+	modifiedProfile.miniSecPerFrame = iTemp;
 	modifiedProfile.saveProfile();
 	CDialogEx::OnOK();
 }

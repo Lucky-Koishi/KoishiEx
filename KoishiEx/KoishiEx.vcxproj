@@ -48,6 +48,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>MSVCRT.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -64,6 +65,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <IgnoreSpecificDefaultLibraries>MSVCRT.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -71,8 +73,8 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DDS.h" />
     <ClInclude Include="KoishiEx.h" />
+    <ClInclude Include="KoishiImageTool.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="sha256.h" />
     <ClInclude Include="stdafx.h" />
@@ -82,11 +84,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="avatar.cpp" />
-    <ClCompile Include="DDS.cpp" />
     <ClCompile Include="KoishiBase.cpp" />
     <ClCompile Include="KoishiData.cpp" />
     <ClCompile Include="KoishiExpand.cpp" />
     <ClCompile Include="KoishiFactory.cpp" />
+    <ClCompile Include="KoishiImageTool.cpp" />
     <ClCompile Include="sha256.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -65,34 +65,7 @@ void CToolDict::OnBnClickedButton4()
 void CToolDict::OnBnClickedButton7()
 {
 	// TODO: 浏览
-	HWND hwnd= GetSafeHwnd();   //得到窗口句柄
-	CString filePath= L"";	//得到文件路径
-	LPMALLOC pMalloc;
-	if(::SHGetMalloc(&pMalloc) == NOERROR){	//取得IMalloc分配器接口
-		BROWSEINFO bi;
-		TCHAR pszBuffer[MAX_PATH];
-		LPITEMIDLIST pidl;   
-		bi.hwndOwner = hwnd;
-		bi.pidlRoot	= NULL;
-		bi.pszDisplayName = pszBuffer;
-		bi.lpszTitle = _T("选择文件夹");
-		bi.ulFlags =  BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS | BIF_RETURNFSANCESTORS;
-		bi.lpfn = NULL;
-		bi.lParam = 0;
-		bi.iImage = 0;
-		if((pidl =::SHBrowseForFolder(&bi)) != NULL){//取得IMalloc分配器接口   
-			if(::SHGetPathFromIDList(pidl, pszBuffer)){ //获得一个文件系统路径
-				filePath = pszBuffer;
-			}
-			pMalloc->Free(pidl);	//释放内存
-			if(filePath.GetLength()<=1){
-				MessageBox(L"并不是有效的文件夹喵！",L"提示喵");
-			}else{
-				m_e2.SetWindowText(filePath);
-			}
-		}
-		pMalloc->Release();	//释放接口
-	}
+	MessageBox(L"请在“系统菜单→设置”里对辞典资源目录进行设置喵！",L"提示喵");
 }
 
 

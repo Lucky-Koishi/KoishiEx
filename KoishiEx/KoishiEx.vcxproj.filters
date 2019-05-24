@@ -37,10 +37,10 @@
     <ClInclude Include="zlib.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DDS.h">
+    <ClInclude Include="resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
+    <ClInclude Include="KoishiImageTool.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -60,13 +60,13 @@
     <ClCompile Include="sha256.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DDS.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="avatar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="KoishiExpand.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="KoishiImageTool.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

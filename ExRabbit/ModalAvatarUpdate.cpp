@@ -45,7 +45,7 @@ void ModalAvatarUpdate::updateCareer(avatarCareer ac){
 	int i, j, k, p = ac - 1;
 	avatarFactory factory;
 	factory.setCarrer(ac);
-	factory.setPath(CStrToStr(resourcePath));
+	factory.setPath(CStrToStr(profile.getAvatarPath()));
 
 	eList[p]->SetWindowText(L"读取NPK中。");
 	pcList[p]->SetRange32(0, 8);
@@ -75,8 +75,8 @@ void ModalAvatarUpdate::updateCareer(avatarCareer ac){
 				//TRACE(NumToCStr(ac)+L"\n");
 				matrix mat;
 				factory.makeModel(mat, getCareerColor(ac), size(thumbnailWidthList[tempSize], thumbnailHeightList[tempSize]), (avatarPart)tempPart, selected, 0, getAvatarModelOffset(ac, (avatarPart)tempPart), getCareerRepresentativeFrame(ac), &bodyPI, &bodyMat);
-				fileName = CStrToStr(profile.getThumbnailPath(tempSize, ac)) + KoishiAvatar::getAvatarIMGName(ac, (avatarPart)tempPart) +"_" + CStrToStr(NumToCStr(factory.partAlbum[(avatarPart)tempPart].avatarList[selected].ID)) + ".bmp";
-				KoishiExpand::KoishiImageTool::makeBMP(mat, fileName);
+				fileName = CStrToStr(profile.getThumbnailPath(tempSize, ac)) + KoishiAvatar::getAvatarIMGName(ac, (avatarPart)tempPart) +"_" + CStrToStr(NumToCStr(factory.partAlbum[(avatarPart)tempPart].avatarList[selected].ID)) + ".PNG";
+				KoishiImageTool::makePNG(mat, fileName);
 				mat.destory();
 				double rate = (double)(tempPart-1)/(APART_MAXCOUNT-1) +
 					(double)selected/totalSelect/(APART_MAXCOUNT-1) +
@@ -87,7 +87,7 @@ void ModalAvatarUpdate::updateCareer(avatarCareer ac){
 		}
 	}
 
-	fileName = CStrToStr(resourcePath + L"\\") + KoishiAvatar::getIconNPKName(ac);
+	fileName = CStrToStr(profile.getAvatarPath()) + KoishiAvatar::getIconNPKName(ac);
 	CString fileInfoName = profile.getIconPath(ac) + L"count.txt";
 	eList[p]->SetWindowText(L"读取图标中。");
 	pcList[p]->SetPos(0);
@@ -115,7 +115,7 @@ void ModalAvatarUpdate::updateCareer(avatarCareer ac){
 							(double)k/io.indexCount/s.size()/(APART_MAXCOUNT-1);
 						pcList[p]->SetPos(1000*rate);
 						eList[p]->SetWindowText(L"("+DoubleToCStr(100*rate) +	L"％)提取"+ StrToCStr(KoishiAvatar::getAvatarPartIMGName((avatarPart)i) + "_" )+NumToCStr(id)+L"图标中。");
-						KoishiExpand::KoishiImageTool::makeBMP(iconMat, CStrToStr(profile.getIconPath(ac)) + KoishiAvatar::getAvatarPartIMGName((avatarPart)i) + "_" + CStrToStr(NumToCStr(id)) + ".bmp");
+						KoishiImageTool::makePNG(iconMat, CStrToStr(profile.getIconPath(ac)) + KoishiAvatar::getAvatarPartIMGName((avatarPart)i) + "_" + CStrToStr(NumToCStr(id)) + ".PNG");
 						iconMat.destory();
 						id ++;
 					}
@@ -152,23 +152,11 @@ UINT ModalAvatarUpdate::updateCareerThread(void* para){
 	if(ac == ACAREER_MAXCOUNT)
 		return 0;
 	dlg->isStart[ac - 1] = true;
-	/*if(dlg -> updateSerial <14){
-		Sleep(10);
-		dlg -> updateSerial ++;
-		int currentSerial = dlg->updateSerial;
-		if(currentSerial >= 4){
-			while(dlg->isOver[currentSerial-4] == false);
-		}
-		AfxBeginThread(updateCareerThread, para);
-	}*/
-	//TRACE(NumToCStr(ac)+L" START\n");
 	if(dlg->bList[ac-1]->GetCheck() == TRUE){
 		dlg->updateCareer(ac);
 	}else{
 		dlg->eList[ac-1]->SetWindowText(L"忽视此项");
 	}
-	//TRACE(NumToCStr(ac)+L" end\n");
-		
 	dlg->isOver[ac - 1] = true;
 	//检测还有哪个没开始
 	for(int i = 4;i<ACAREER_MAXCOUNT-1;i++){

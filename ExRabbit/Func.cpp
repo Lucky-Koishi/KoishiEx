@@ -6,7 +6,7 @@
 #include "../KoishiEx/Koishifactory.cpp"
 #include "../KoishiEx/koishiexpand.cpp"
 #include "../KoishiEx/sha256.cpp"
-#include "../KoishiEx/DDS.cpp"
+#include "../KoishiEx/KoishiImageTool.cpp"
 #include "../KoishiEx/avatar.cpp"
 #include "goodlistctrl.cpp"
 

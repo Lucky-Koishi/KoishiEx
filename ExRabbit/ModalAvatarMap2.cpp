@@ -225,11 +225,11 @@ void ModalAvatarMap2::OnPaint()
 
 bool ModalAvatarMap2::loadImage(str fileNameWithoutExp, matrix &mat){
 	str fileName = fileNameWithoutExp + ".png";
-	if(mat.loadPNG(fileName)){
+	if(KoishiImageTool::loadPNG(mat, fileName)){
 		return true;
 	}
 	fileName = fileNameWithoutExp + ".bmp";
-	if(KoishiExpand::KoishiImageTool::loadBMP(mat, fileName)){
+	if(KoishiImageTool::loadBMP(mat, fileName)){
 		return true;
 	}
 	return false;

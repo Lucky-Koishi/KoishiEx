@@ -205,7 +205,7 @@ void ModalGradient::drawScale(){
 	for(int x = 0;x<W;x++){
 		uchar grayed = 0xFF*x/W;
 		TRACE(NumToCStr(grayed)+L":");
-		color current = KoishiExpand::KoishiImageTool::gradient(color(0xFF, grayed, grayed, grayed), keyColorList, COLOR_GRAYSCALE);
+		color current = KoishiImageTool::gradient(color(0xFF, grayed, grayed, grayed), keyColorList, COLOR_GRAYSCALE);
 		TRACE(DoubleToCStr(current.getProperty(COLOR_GRAYSCALE))+L"\n");
 		gradients.line(point(x, 0), point(x, H-1), current);
 	}
