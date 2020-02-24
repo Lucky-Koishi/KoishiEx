@@ -74,6 +74,9 @@ BEGIN_MESSAGE_MAP(CToolAvatar, CDialogEx)
 	ON_COMMAND(ID_MENU_ONE_KEY_LOCALIZE, &CToolAvatar::OnMenuOneKeyLocalize)
 	ON_COMMAND(ID_MENU_ONE_KEY_PATCH, &CToolAvatar::OnMenuOneKeyPatch)
 	ON_COMMAND(ID_MENU_ONE_KEY_NPK, &CToolAvatar::OnMenuOneKeyNPK)
+	ON_CBN_SELCHANGE(IDC_COMBO_MULTCOLOR, &CToolAvatar::OnCbnSelchangeComboMultcolor)
+	ON_COMMAND(ID_MENU_ONE_KEY_HIDE, &CToolAvatar::OnMenuOneKeyHide)
+	ON_CBN_SELCHANGE(IDC_COMBO_SUIT, &CToolAvatar::OnCbnSelchangeComboSuit)
 END_MESSAGE_MAP()
 
 
@@ -84,11 +87,12 @@ BOOL CToolAvatar::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化
 	SetWindowPos(NULL,0,0,950,630,SWP_NOZORDER|SWP_NOMOVE);
+	GET_CTRL(CComboBox, IDC_COMBO_SUIT)->ShowWindow(SW_HIDE);
 
 	SET_CTRL(CButton, IDC_BUTTON_RESOURCE, 10, 10, 70, 30);
 	SET_CTRL(CEdit, IDC_EDIT_FOLDER, 80, 10, 200, 30);
-	SET_CTRL(CComboBox, IDC_COMBO_CAREER, 10, 40, 200, 60);
-
+	SET_CTRL(CComboBox, IDC_COMBO_CAREER, 10, 40, 150, 60);
+	SET_CTRL(CComboBox, IDC_COMBO_MULTCOLOR, 160, 40, 200, 60);
 	SET_CTRL(CButton, IDC_BUTTON_PART1, 10, 70, 50, 94);
 	SET_CTRL(CComboBox, IDC_COMBO_PART1, 60, 70, 150, 90);
 	SET_CTRL(CComboBox, IDC_COMBO_PALETTE1, 160, 70, 200, 90);
@@ -144,7 +148,15 @@ BOOL CToolAvatar::OnInitDialog()
 	GET_CTRL(CComboBox, IDC_COMBO_CAREER)->AddString(L"守护者");
 	GET_CTRL(CComboBox, IDC_COMBO_CAREER)->AddString(L"魔枪士");
 	GET_CTRL(CComboBox, IDC_COMBO_CAREER)->AddString(L"枪剑士");
-	
+	GET_CTRL(CComboBox, IDC_COMBO_MULTCOLOR)->ResetContent();
+	GET_CTRL(CComboBox, IDC_COMBO_MULTCOLOR)->AddString(L"-");
+	GET_CTRL(CComboBox, IDC_COMBO_MULTCOLOR)->AddString(L"0");
+	GET_CTRL(CComboBox, IDC_COMBO_MULTCOLOR)->AddString(L"1");
+	GET_CTRL(CComboBox, IDC_COMBO_MULTCOLOR)->AddString(L"2");
+	GET_CTRL(CComboBox, IDC_COMBO_MULTCOLOR)->AddString(L"3");
+	GET_CTRL(CComboBox, IDC_COMBO_MULTCOLOR)->AddString(L"4");
+	GET_CTRL(CComboBox, IDC_COMBO_MULTCOLOR)->AddString(L"5");
+	GET_CTRL(CComboBox, IDC_COMBO_MULTCOLOR)->SetCurSel(0);
 	cbPart[0] = NULL;
 	cbPart[1] = GET_CTRL(CComboBox, IDC_COMBO_PART1);
 	cbPart[2] = GET_CTRL(CComboBox, IDC_COMBO_PART2);
@@ -208,35 +220,6 @@ BOOL CToolAvatar::OnInitDialog()
 
 void CToolAvatar::OnBnClickedButtonResource(){
 	MessageBox(L"请在“系统菜单→设置”里对试衣间资源目录进行设置喵！",L"提示喵");
-	/*HWND hwnd= GetSafeHwnd();
-	CString filePath= L"";
-	LPMALLOC pMalloc;
-	if(::SHGetMalloc(&pMalloc) == NOERROR){
-		BROWSEINFO bi;
-		TCHAR pszBuffer[MAX_PATH];
-		LPITEMIDLIST pidl;   
-		bi.hwndOwner = hwnd;
-		bi.pidlRoot	= NULL;
-		bi.pszDisplayName = pszBuffer;
-		bi.lpszTitle = _T("选择文件夹");
-		bi.ulFlags =  BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS | BIF_RETURNFSANCESTORS;
-		bi.lpfn = NULL;
-		bi.lParam = 0;
-		bi.iImage = 0;
-		if((pidl =::SHBrowseForFolder(&bi)) != NULL){
-			if(::SHGetPathFromIDList(pidl, pszBuffer)){
-				filePath = pszBuffer;
-			}
-			pMalloc->Free(pidl);
-			if(filePath.GetLength()<=1){
-				MessageBox(L"并不是有效的文件夹喵！",L"提示喵");
-			}else{
-				GET_CTRL(CEdit, IDC_EDIT_FOLDER)->SetWindowText(filePath);
-				factory.setPath(CStrToStr(filePath));
-			}
-		}
-		pMalloc->Release();
-	}*/
 }
 void CToolAvatar::OnCbnSelchangeComboPart1(){
 	OnComboPartChange(APART_CAP);
@@ -554,7 +537,7 @@ UINT CToolAvatar::animationThread(void*para){
 			frame = dlg->animation[localFrame];
 			dlg->factory.changeFrame(frame);
 			dlg->draw();
-			Sleep(60);
+			Sleep(dlg->profile.miniSecPerFrame);
 			localFrame ++;
 			if(localFrame >= dlg->animationLength)
 				localFrame = 0;
@@ -684,7 +667,7 @@ UINT CToolAvatar::makeIconThread(void*para){
 		int id = 0;
 		for(j = 0;j<s.size();j++){
 			dword pos;
-			if(no.IMGfind(s[j], pos)){
+			if(no.find(s[j], pos)){
 				IMGobject io;
 				no.IMGextract(pos, io);
 				for(k = 0;k<io.indexCount;k++){
@@ -1351,6 +1334,21 @@ void CToolAvatar::OnComboPaletteChange(avatarPart ap){
 	if(!moving)
 		draw();
 }
+void CToolAvatar::OnCbnSelchangeComboMultcolor(){
+	CHECK_VALID(displayStyle == 0);
+	int selected = GET_CTRL(CComboBox, IDC_COMBO_MULTCOLOR)->GetCurSel();
+	CHECK_VALID(selected > 0);
+	for(int i = 1 ; i < ::APART_BODY; i++){
+		int maxCount = cbPalette[i]->GetCount();
+		if(selected - 1 >= maxCount)
+			continue;
+		factory.partAlbum[i].changePalette(selected - 1);
+		cbPalette[i]->SetCurSel(selected - 1);
+	}
+	if(!moving)
+		draw();
+}
+
 //点击对应的按钮
 void CToolAvatar::OnButtonSelectThumbnail(avatarPart ap){
 	displayPart = ap;
@@ -1738,8 +1736,8 @@ void CToolAvatar::makeOneKeyPatch(){
 			pi.picSize = size(1,1);
 			pi.frmSize = size(1,1);
 			s.allocate(2);
-			s.push((BYTE)0);
-			s.push((BYTE)0);
+			s.pushByte(0);
+			s.pushByte(0);
 			newIO.PICpush(pi, s);
 			s.release();
 			continue;
@@ -1763,8 +1761,8 @@ void CToolAvatar::makeOneKeyPatch(){
 			if(mBottom[i]>tBottom)
 				tBottom = mBottom[i];
 		}
-		ptLT.set(tLeft, tTop);
-		ptRB.set(tRight, tBottom);
+		ptLT = point(tLeft, tTop);
+		ptRB = point(tRight, tBottom);
 		mPic.create(tBottom-tTop+1, tRight-tLeft+1);
 		for(int i=0;i<mixNo.count;i++){
 			long newFrame = ioList[i].linkFind(frame);
@@ -1776,7 +1774,7 @@ void CToolAvatar::makeOneKeyPatch(){
 			}
 		}
 		newIO.PICpreprocess(mPic, s, pi);
-		pi.set_basePt(ptLT);
+		pi.basePt = ptLT;
 		newIO.PICpush(pi, s);
 		mPic.destory();
 		s.release();
@@ -1846,8 +1844,8 @@ void CToolAvatar::makeOneKeyPatch(){
 	for(int i = 1;i<APART_MAXCOUNT;i++){
 		NPKobject *pBase = &(factory.partAlbum[i].sourceNPK);
 		for(int j = 0;j<pBase->count;j++){
-			str imgPath = pBase->content[j].imgname;
-			parent->no.IMGpushLink((i == APART_BODY) ? 0 : 1, imgPath);
+			str imgPath = pBase->entry[j].comment;
+			parent->no.pushLink((i == APART_BODY) ? 0 : 1, imgPath);
 			GET_CTRL(CProgressCtrl, IDC_PROGRESS_LOADING)->SetPos((i-1)*1000/(APART_MAXCOUNT-1) + j*1000/pBase->count/(APART_MAXCOUNT-1));
 		}
 		GET_CTRL(CEdit, IDC_EDIT_LOADING_INFO)->SetWindowText(L"构建引用IMG中("+StrToCStr(KoishiAvatar::getAvatarPartNPKName((avatarPart)i))+L")。");
@@ -1868,4 +1866,37 @@ void CToolAvatar::OnMenuOneKeyNPK(){
 	MessageBox(L"已经将有效IMG都弄到EX里了喵！",L"提示喵");
 	dlg->updateIMGlist();
 	dlg->updateInfo();
+}
+
+
+void CToolAvatar::OnMenuOneKeyHide()
+{
+	// TODO: 在此添加命令处理程序代码
+	CExRabbitDlg *dlg = (CExRabbitDlg*)context;
+	NPKobject no;
+	IMGobject io, emptyIO;
+	factory.makeNPK(no);
+	if(no.count == 0){
+		MessageBox(L"不存在有效的IMG喵！",L"提示喵");
+		return;
+	}
+	no.IMGextract(0, io);
+	dlg->no.release();
+	dlg->no.create();
+	dlg->fileNPKname = L"newNPK.npk";
+	dlg->saveAlert = false;
+	IMGobject::makeEmpty(emptyIO, io.indexCount);
+	dlg->no.IMGpush(emptyIO, "meow/empty.img");
+	for(int i = 0;i<no.count;i++){
+		dlg->no.pushLink(0, no.entry[i].comment);
+	}
+	MessageBox(L"已经将有效IMG隐藏后弄到EX里了喵！",L"提示喵");
+	dlg->updateIMGlist();
+	dlg->updateInfo();
+}
+
+
+void CToolAvatar::OnCbnSelchangeComboSuit()
+{
+	// TODO: 在此添加控件通知处理程序代码
 }

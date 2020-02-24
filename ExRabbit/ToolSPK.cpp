@@ -193,7 +193,7 @@ void CToolSPK::loadPackage(){
 				}
 			}else{
 				m_lSPK.DeleteAllItems();
-				m_lSPK.EasyInsertItem(L"列表中不包含I2文件夹。,");
+				m_lSPK.EasyInsertItem(L"列表中不包含音效文件夹。,");
 			}
 		}else{
 			m_lSPK.DeleteAllItems();

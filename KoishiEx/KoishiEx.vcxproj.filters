@@ -43,6 +43,15 @@
     <ClInclude Include="KoishiImageTool.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="KoishiAudioTool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="KoishiNeoplePack.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BZ2.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -67,6 +76,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="KoishiImageTool.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="KoishiAudioTool.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="bz2.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

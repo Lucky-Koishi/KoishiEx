@@ -163,7 +163,7 @@ void ModalInsertTexture::OnBnClickedOk(){
 	GET_CTRL(CEdit, IDC_EDIT_RESOURCE)->GetWindowText(out.fileName);
 	//判断禁止事项
 	matrix mat;
-	KoishiDDS::DDS dds;
+	DDSobject dds;
 	if(out.inputFormat == 1){
 		if(!KoishiImageTool::loadPNG(mat, CStrToStr(out.fileName))){
 			MessageBox(L"无法读取该PNG文件喵！",L"错误喵");

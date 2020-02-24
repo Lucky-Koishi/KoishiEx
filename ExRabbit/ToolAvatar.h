@@ -146,4 +146,7 @@ public:
 	void makeOneKeyPatch();
 	static UINT makeOneKeyPatchThread(void*para);
 	afx_msg void OnMenuOneKeyNPK();
+	afx_msg void OnCbnSelchangeComboMultcolor();
+	afx_msg void OnMenuOneKeyHide();
+	afx_msg void OnCbnSelchangeComboSuit();
 };

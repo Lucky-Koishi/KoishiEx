@@ -1,11 +1,15 @@
 #pragma once
 #include "stdafx.h"
 #include "../KoishiEx/koishiex.h"
+#include "../KoishiEx/KoishiNeoplePack.h"
 #include "../KoishiEx/KoishiImageTool.h"
 //////////////////////////////////////////////////////
 //Ö§³Ö
 //////////////////////////////////////////////////////
 using namespace Koishi;
+using namespace KoishiNeoplePack;
+using namespace KoishiImageTool;
+using KoishiImageTool::DDS::DDSobject;
 void CStrToStr(CString cstr,str &str1);
 str CStrToStr(CString cstr);
 CString StrToCStr(str str1);

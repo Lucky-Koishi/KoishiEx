@@ -73,8 +73,11 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BZ2.h" />
+    <ClInclude Include="KoishiAudioTool.h" />
     <ClInclude Include="KoishiEx.h" />
     <ClInclude Include="KoishiImageTool.h" />
+    <ClInclude Include="KoishiNeoplePack.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="sha256.h" />
     <ClInclude Include="stdafx.h" />
@@ -84,6 +87,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="avatar.cpp" />
+    <ClCompile Include="bz2.cpp" />
+    <ClCompile Include="KoishiAudioTool.cpp" />
     <ClCompile Include="KoishiBase.cpp" />
     <ClCompile Include="KoishiData.cpp" />
     <ClCompile Include="KoishiExpand.cpp" />

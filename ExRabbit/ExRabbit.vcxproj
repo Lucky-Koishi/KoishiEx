@@ -105,6 +105,7 @@
     <None Include="res\cursor4.cur" />
     <None Include="res\cursor5.cur" />
     <None Include="res\ExRabbit.rc2" />
+    <None Include="res\icon3.ico" />
     <None Include="res\icon_format_ARGB1555.ico" />
     <None Include="res\icon_format_ARGB4444.ico" />
     <None Include="res\icon_format_ARGB8888.ico" />
@@ -112,13 +113,16 @@
     <None Include="res\icon_format_DXT3.ico" />
     <None Include="res\icon_format_DXT5.ico" />
     <None Include="res\icon_format_LINK.ico" />
+    <None Include="res\icon_format_LINK2.ico" />
     <None Include="res\icon_format_PALETTE.ico" />
     <None Include="res\icon_main.ico" />
+    <None Include="res\icon_unkown.ico" />
     <None Include="res\icon_version_1.ico" />
     <None Include="res\icon_version_2.ico" />
     <None Include="res\icon_version_4.ico" />
     <None Include="res\icon_version_5.ico" />
     <None Include="res\icon_version_6.ico" />
+    <None Include="res\icon_version_audio.ico" />
     <None Include="res\icon_version_link.ico" />
     <None Include="res\icon_version_NUL.ico" />
     <None Include="res\LOGO.bmp" />

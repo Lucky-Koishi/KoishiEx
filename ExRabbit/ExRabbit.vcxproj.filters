@@ -176,6 +176,18 @@
     <None Include="res\tool_button_15x.bmp">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="res\icon3.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_unkown.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_audio.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_LINK2.ico">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExRabbit.h">

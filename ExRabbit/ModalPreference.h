@@ -33,4 +33,6 @@ public:
 public:
 	Profile modifiedProfile;
 	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClickedButtonSetpic1();
+	afx_msg void OnBnClickedButtonSetpic2();
 };

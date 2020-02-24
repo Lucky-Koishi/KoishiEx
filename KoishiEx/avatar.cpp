@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "KoishiEx.h"
+#include "KoishiNeoplePack.h"
 
 using namespace KoishiAvatar;
 
@@ -186,6 +187,8 @@ extern bool KoishiAvatar::parseAvatarName(const str &avatarName, avatar &av, ava
 		return false;
 	}
 	i = avatarName.size()-5;
+	if(i<0)
+		return false;
 	p = avatarName[i-1];
 	q = avatarName[i];
 	al = ALAYER_UD;
@@ -309,6 +312,8 @@ extern bool KoishiAvatar::parseAvatarName(const str &avatarName, avatar &av, ava
 		al = ALAYER_X2;
 		i -= 2;
 	}
+	if(i<0)
+		return false;
 	while(isnum(p = avatarName[i--])){
 		numstr.push_back(p);
 	}
@@ -425,7 +430,7 @@ bool avatarAlbum::loadNPK(){
 	for(int i = 0;i<sourceNPK.count;i++){
 		avatar av;
 		avatarLayer layer;
-		if(!::parseAvatarName(shorten(sourceNPK.content[i].imgname), av, layer))
+		if(!::parseAvatarName(shorten(sourceNPK.entry[i].comment), av, layer))
 			continue;
 		bool isNew = true;
 		for(int j = 0;j<avatarList.size();j++){
@@ -438,7 +443,7 @@ bool avatarAlbum::loadNPK(){
 		}
 		if(isNew){
 			av.layer[layer] = true;
-			av.v6palette = sourceNPK.getPaletteCount(i);
+			av.v6palette = sourceNPK.IMGgetPaletteCount(i);
 			std::vector<long> newi;
 			for(long j =0;j<ALAYER_MAXCOUNT;j++)
 				newi.push_back(-1);
@@ -489,7 +494,7 @@ bool avatarAlbum::changeIMG(long newSelect){
 			layerIMGpath[i] = "";
 			if(avatarPos[selected][i] != -1){
 				sourceNPK.IMGextract(avatarPos[selected][i], layerIMG[i]);
-				layerIMGpath[i] = sourceNPK.content[avatarPos[selected][i]].imgname;
+				layerIMGpath[i] = sourceNPK.entry[avatarPos[selected][i]].comment;
 			}
 		}
 	}

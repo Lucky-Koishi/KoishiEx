@@ -3,6 +3,8 @@
 //
 #include "stdafx.h"
 #include "../KoishiEx/koishiex.h"
+#include "../KoishiEx//KoishiNeoplePack.h"
+
 #include "GoodListCtrl.h"
 #include "DialogNew.h"
 #include "DialogAbout.h"
@@ -38,7 +40,8 @@
 
 // CExRabbitDlg 对话框
 using namespace Koishi;
-
+using namespace KoishiNeoplePack;
+using KoishiImageTool::DDS::DDSobject;
 class CExRabbitDlg : public CDialogEx
 {
 // 构造
@@ -137,6 +140,7 @@ public:
 		point endPoint;							//记录鼠标移动后的坐标
 		std::vector<point> drawnPoint;			//记录画刷/画擦按住经过的轨迹
 		matrix oldMatrix;						//应用画刷时产生一个旧的矩阵用以撤销
+		bool oldMatrixEnable;					//点击画刷左键的时候变为true，切换工具/帧的时候变为false
 	}canvasOperatePara;
 	//颜色操作
 	struct structColorOperatePara{
@@ -407,7 +411,11 @@ public:
 	afx_msg void OnMenuColorTableExtractAllFrame();
 	static UINT pickColorFrame(void*context);
 	static UINT pickColorImage(void*context);
-	//
+	
 	CToolTipCtrl m_ttc;
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnMenuImageInsertOther();
+	afx_msg void OnMenuImageInsertCopy();
+	afx_msg void OnMenuImageInsertLink();
+	afx_msg void OnMenuImageDelink();
 };

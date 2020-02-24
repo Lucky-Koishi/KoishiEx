@@ -6,7 +6,6 @@
 #include "ModalAvatarUpdate.h"
 #include "afxdialogex.h"
 
-
 // ModalAvatarUpdate ¶Ô»°¿ò
 
 IMPLEMENT_DYNAMIC(ModalAvatarUpdate, CDialogEx)
@@ -104,7 +103,7 @@ void ModalAvatarUpdate::updateCareer(avatarCareer ac){
 			int id = 0;
 			for(j = 0;j<s.size();j++){
 				dword pos;
-				if(no.IMGfind(s[j], pos)){
+				if(no.find(s[j], pos)){
 					IMGobject io;
 					no.IMGextract(pos, io);
 					for(k = 0;k<io.indexCount;k++){

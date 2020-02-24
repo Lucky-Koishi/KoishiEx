@@ -57,7 +57,7 @@ BOOL CToolIMGSearch::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化
 	m_list.SetExtendedStyle(m_list.GetExtendedStyle()|LVS_EX_ONECLICKACTIVATE|LVS_EX_FULLROWSELECT);
-	m_list.EasyInsertColumn(L"NPK名字,350,IMG名字,550,IMG版本,50,NPK路径,550");
+	m_list.EasyInsertColumn(L"NPK名字,350,IMG名字,550,NPK路径,550");
 	m_p1.SetRange32(0,1000);
 	m_b6.EnableWindow(false);
 	stopSign =false;
@@ -177,7 +177,7 @@ UINT ThreadToolIMGSearch(PVOID para){
 	BOOL ret = fileFind.FindFile(dir);
 	std::vector<CString> fileList;
 	std::vector<CString> filePath;
-	std::vector<IMGversion> unused;
+	//std::vector<IMGversion> unused;
 	fileList.clear();
 	while (ret){
 		ret = fileFind.FindNextFile();
@@ -194,10 +194,11 @@ UINT ThreadToolIMGSearch(PVOID para){
 	NPKobject no;
 	dlg->m_list.DeleteAllItems();
 	for(i=0;i<fileList.size();i++){
-		no.loadIndex(CStrToStr(filePath[i]),unused);
+		no.loadFile(CStrToStr(filePath[i]));
+		//no.loadIndex(CStrToStr(filePath[i]),unused);
 		for(j=0;j<no.count;j++){
-			if(no.content[j].imgname.find(CStrToStr(keyWord)) != str::npos){
-				dlg->m_list.EasyInsertItem(fileList[i]+L","+StrToCStr(no.content[j].imgname)+L","+NumToCStr(unused[j])+L","+filePath[i]);
+			if(no.entry[j].comment.find(CStrToStr(keyWord)) != str::npos){
+				dlg->m_list.EasyInsertItem(fileList[i]+L","+StrToCStr(no.entry[j].comment)+L","+filePath[i]);
 				if(j%10==1){
 					dlg->m_p1.SetPos(1000*i/fileList.size()+1000*j/fileList.size()/no.count);
 					if(dlg->stopSign){

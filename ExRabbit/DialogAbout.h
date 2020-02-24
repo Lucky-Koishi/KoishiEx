@@ -25,4 +25,7 @@ public:
 public:
 	CBitmap m_QRbmp;
 	afx_msg void OnBnClickedOk();
+	afx_msg void OnGoToColg();
+	afx_msg void OnGoToExNpk();
+	afx_msg void OnBnClickedButton1();
 };

@@ -1,9 +1,11 @@
 #include "StdAfx.h"
 #include "KoishiEx.h"
+#include "KoishiNeoplePack.h"
 #include <fstream> 
 
 using namespace Koishi;
 using namespace KoishiAvatar;
+using namespace KoishiNeoplePack;
 using namespace KoishiExpand::KoishiMarkTool;
 using namespace KoishiExpand::KoishiDownloadTool;
 void KoishiExpand::KoishiMarkTool::CharMat(char p, matrix &mat, color clr){
@@ -557,38 +559,38 @@ bool SPKobject::load(str fileName){
 	if(!data.loadFile(fileName)){
 		return false;
 	}
-	data.read(magic);
+	data.readDWord(magic);
 	if(magic != 0x1B111){
 		data.release();
 		return false;
 	}
 	for(i=0;i<260;i++){
-		data.read(name[i]);
+		data.readByte(name[i]);
 	}
-	data.read(reserve1);
-	data.read(decompressed_len);
+	data.readDWord(reserve1);
+	data.readDWord(decompressed_len);
 	for(i=0;i<32;i++){
-		data.read(hash[i]);
+		data.readByte(hash[i]);
 	}
-	data.read(maxBlockSize);
-	data.read(indexCount);
+	data.readDWord(maxBlockSize);
+	data.readDWord(indexCount);
 	listLen.clear();
 	for(i=0;i<indexCount;i++){
-		data.read(dw);
+		data.readDWord(dw);
 		listLen.push_back(dw);
 	}
 	for(i=0;i<indexCount;i++){
 		SPKblock sb;
-		sb.startPos = data.getPtPos();
-		data.read(sb.bzlib);
-		data.read(sb.len);
-		data.read(sb.bzlib_r);
-		data.read(sb.len_r);
+		sb.startPos = data.getPosition();
+		data.readDWord(sb.bzlib);
+		data.readDWord(sb.len);
+		data.readDWord(sb.bzlib_r);
+		data.readDWord(sb.len_r);
 		for(j=0;j<32;j++){
-			data.read(sb.hash[j]);
+			data.readByte(sb.hash[j]);
 		}
-		sb.mainStartPos = data.getPtPos();
-		data.ptMove(sb.len);
+		sb.mainStartPos = data.getPosition();
+		data.movePosition(sb.len);
 		list.push_back(sb);
 	}
 	return true;
@@ -599,7 +601,7 @@ void SPKobject::release(){
 }
 
 void SPKobject::extract(int pos, stream &s){
-	data.ptMoveTo(list[pos].mainStartPos);
+	data.setPosition(list[pos].mainStartPos);
 	data.readStream(s, list[pos].len);
 }
 
@@ -611,9 +613,9 @@ void SPKobject::extractTrueStream(stream &s){
 		extract(i, s1);
 		if(list[i].bzlib){
 			s1.BZuncompress(s2);
-			s.pushStream(s2,s2.getLen());
+			s.pushStream(s2,s2.length);
 		}else{
-			s.pushStream(s1,s1.getLen());
+			s.pushStream(s1,s1.length);
 		}
 	}
 }
@@ -651,37 +653,37 @@ LSTfolder::LSTfolder(){
 void LSTobject::load(Koishi::stream &s){
 	int i,j;
 	for(i=0;i<32;i++){
-		s.read(hash[i]);
+		s.readByte(hash[i]);
 	}
-	s.read(magic);
-	s.read(reserve);
-	s.read(reserve2);
+	s.readDWord(magic);
+	s.readDWord(reserve);
+	s.readDWord(reserve2);
 	list.clear();
 	while(true){
 		LSTfolder lf;
-		if(!s.read(lf.nameLen)){
+		if(!s.readDWord(lf.nameLen)){
 			break;
 		}
 		for(i=0;i<lf.nameLen;i++){
-			s.read(lf.name[i]);
+			s.readByte(lf.name[i]);
 		}
-		s.read(lf.fileCount);
+		s.readDWord(lf.fileCount);
 		lf.list.clear();
 		for(j=0;j<lf.fileCount;j++){
 			LSTfile lfl;
-			s.read(lfl.nameLen);
+			s.readDWord(lfl.nameLen);
 			for(i=0;i<lfl.nameLen;i++){
-				s.read(lfl.name[i]);
+				s.readByte(lfl.name[i]);
 			}
-			s.read(lfl.compLen);
-			s.read(lfl.fileLen);
-			s.read(lfl.hashLen);
+			s.readDWord(lfl.compLen);
+			s.readDWord(lfl.fileLen);
+			s.readDWord(lfl.hashLen);
 			for(i=0;i<lfl.hashLen;i++){
-				s.read(lfl.hash[i]);
+				s.readByte(lfl.hash[i]);
 			}
 			lf.list.push_back(lfl);
 		}
-		s.read(lf.subFolderCount);
+		s.readDWord(lf.subFolderCount);
 		list.push_back(lf);
 	}
 }
@@ -691,40 +693,40 @@ bool LSTobject::load(const str &fileName){
 	if(!s.loadFile(fileName))
 		return false;
 	for(i=0;i<32;i++){
-		s.read(hash[i]);
+		s.readByte(hash[i]);
 	}
-	s.read(magic);
+	s.readDWord(magic);
 	if(magic != 0x54534C){
 		return false;
 	}
-	s.read(reserve);
-	s.read(reserve2);
+	s.readDWord(reserve);
+	s.readDWord(reserve2);
 	list.clear();
 	while(true){
 		LSTfolder lf;
-		if(!s.read(lf.nameLen)){
+		if(!s.readDWord(lf.nameLen)){
 			break;
 		}
 		for(i=0;i<lf.nameLen;i++){
-			s.read(lf.name[i]);
+			s.readByte(lf.name[i]);
 		}
-		s.read(lf.fileCount);
+		s.readDWord(lf.fileCount);
 		lf.list.clear();
 		for(j=0;j<lf.fileCount;j++){
 			LSTfile lfl;
-			s.read(lfl.nameLen);
+			s.readDWord(lfl.nameLen);
 			for(i=0;i<lfl.nameLen;i++){
-				s.read(lfl.name[i]);
+				s.readByte(lfl.name[i]);
 			}
-			s.read(lfl.compLen);
-			s.read(lfl.fileLen);
-			s.read(lfl.hashLen);
+			s.readDWord(lfl.compLen);
+			s.readDWord(lfl.fileLen);
+			s.readDWord(lfl.hashLen);
 			for(i=0;i<lfl.hashLen;i++){
-				s.read(lfl.hash[i]);
+				s.readByte(lfl.hash[i]);
 			}
 			lf.list.push_back(lfl);
 		}
-		s.read(lf.subFolderCount);
+		s.readDWord(lf.subFolderCount);
 		list.push_back(lf);
 	}
 	return true;
@@ -743,38 +745,52 @@ bool LSTobject::getImagePack2(LSTfolder &lf){
 	return false;
 }
 
+bool LSTobject::getSoundPack(LSTfolder &lf){
+	int i;
+	for(i=0;i<list.size();i++){
+		str s1((char*)list[i].name);
+		str s2 = "SoundPacks";
+		if(s1 == s2){
+			lf = list[i];
+			return true;
+		}
+	}
+	return false;
+}
+
+
 bool TCTobject::load(Koishi::str fileName){
 	int i;
 	if(!data.loadFile(fileName)){
 		return false;
 	}
-	data.read(magic);
+	data.readDWord(magic);
 	if(magic != 0x04034b50){
 		return false;
 	}
-	data.read(minVersion);
-	data.read(GTBF);
-	data.read(compMethod);
-	data.read(lastTime);
-	data.read(lastDate);
-	data.read(CRC32);
-	data.read(comSize);
-	data.read(uncomSize);
-	data.read(nmSize);
-	data.read(exSize);
+	data.readWord(minVersion);
+	data.readWord(GTBF);
+	data.readWord(compMethod);
+	data.readWord(lastTime);
+	data.readWord(lastDate);
+	data.readDWord(CRC32);
+	data.readDWord(comSize);
+	data.readDWord(uncomSize);
+	data.readWord(nmSize);
+	data.readWord(exSize);
 	for(i=0;i<256;i++){
 		 name[i] = 0;
 		 if(i<nmSize){
-			 data.read(name[i]);
+			 data.readByte(name[i]);
 		 }
 	}
 	for(i=0;i<256;i++){
 		 ex[i] = 0;
 		 if(i<exSize){
-			 data.read(ex[i]);
+			 data.readByte(ex[i]);
 		 }
 	}
-	dtStartPos = data.getPtPos();
+	dtStartPos = data.getPosition();
 	return true;
 }
 bool TCTobject::release(){
@@ -783,10 +799,10 @@ bool TCTobject::release(){
 }
 bool TCTobject::makeNPK(Koishi::str NPKfileName){
 	stream s, s1, sHead,sOut;
-	data.ptMoveTo(dtStartPos);
+	data.setPosition(dtStartPos);
 	data.readStream(s, comSize);
 	sHead.allocate(2);
-	sHead.push((word)0x9C78);
+	sHead.pushWord(0x9C78);
 	s.insertStream(sHead, 2, 0);
 	s.ZLIBuncompress(s1, uncomSize);
 	s1.readStream(sOut, uncomSize);
@@ -819,21 +835,21 @@ bool LSTobjectGF::load(const Koishi::str &fileName){
 	sSplit.release();
 	list.clear();
 	for(i=1;i<pos.size();i++){
-		s.ptMoveTo(pos[i]);
+		s.setPosition(pos[i]);
 		LSTfileGF lf;
 		j = 0;
 		while(true){
-			s.read(n);
+			s.readByte(n);
 			if(n == 0x22){
 				break;
 			}else{
 				lf.name[j++] = n;
 			}
 		}
-		s.read(n);
+		s.readByte(n);
 		j = 0;
 		while(true){
-			s.read(n);
+			s.readByte(n);
 			if(n == 0x20){
 				break;
 			}else{
@@ -842,7 +858,53 @@ bool LSTobjectGF::load(const Koishi::str &fileName){
 		}
 		j = 0;
 		while(true){
-			s.read(n);
+			s.readByte(n);
+			if(n == 0x0D){
+				break;
+			}else{
+				lf.lenStr[j++] = n;
+			}
+		}
+		list.push_back(lf);
+	}
+	return true;
+}
+bool LSTobjectGF::load2(const Koishi::str &fileName){
+	int i,j;
+	unsigned char n;
+	stream s,sSplit;
+	queueex pos, len;
+	s.loadFile(fileName);
+	sSplit.allocate(20);
+	sSplit.pushString("SoundPacks\\");
+	s.splitStream(sSplit, pos, len);
+	sSplit.release();
+	list.clear();
+	for(i=1;i<pos.size();i++){
+		s.setPosition(pos[i]);
+		LSTfileGF lf;
+		j = 0;
+		while(true){
+			s.readByte(n);
+			if(n == 0x22){
+				break;
+			}else{
+				lf.name[j++] = n;
+			}
+		}
+		s.readByte(n);
+		j = 0;
+		while(true){
+			s.readByte(n);
+			if(n == 0x20){
+				break;
+			}else{
+				lf.hash[j++] = n;
+			}
+		}
+		j = 0;
+		while(true){
+			s.readByte(n);
 			if(n == 0x0D){
 				break;
 			}else{
@@ -868,52 +930,44 @@ bool KoishiExpand::IMGobjectV1::load(Koishi::stream &s){
 	unsigned long dwTemp;
 	unsigned long dwVersion;
 	unsigned long dwIndexCount;
-	s.ptMoveTo(0);
-	Koishi::str sz = s.readString(20);
-	if(sz != "Neople Image File")
+	s.resetPosition();
+	if(s.readString(20) != "Neople Image File")
 		return false;
-	s.read(dwTemp);	//保留位
-	s.read(dwVersion); //版本
-	if(dwVersion != (unsigned long)Koishi::V1){
+	s.readDWord(dwTemp);	//保留位
+	s.readDWord(dwVersion); //版本
+	if(dwVersion != (unsigned long)V1){
 		return false;
 	}
-	s.read(dwIndexCount);	//INDEX数
+	s.readDWord(dwIndexCount);	//INDEX数
 	PICcontent.clear();
 	posList.clear();
 
 	for(i=0;i<dwIndexCount;i++){
 		PICinfo pi;
-		s.read(dwTemp);
-		pi.set_format((Koishi::colorFormat)dwTemp);
-		s.read(dwTemp);
-		pi.set_comp((Koishi::compressType)dwTemp);
-		s.read(dwTemp);
-		pi.picSize.W = (long)dwTemp;
-		s.read(dwTemp);
-		pi.picSize.H = (long)dwTemp;
-		s.read(dwTemp);
-		pi.set_dataSize(dwTemp);
-		s.read(dwTemp);
+		s.read(&pi.format, 4);
+		s.read(&pi.comp, 4);
+		s.readInt(pi.picSize.W);
+		s.readInt(pi.picSize.H);
+		s.readDWord(pi.dataSize);
+		s.readInt(pi.basePt.X);
 		pi.basePt.X = (long)dwTemp;
-		s.read(dwTemp);
+		s.readInt(pi.basePt.Y);
 		pi.basePt.Y = (long)dwTemp;
-		s.read(dwTemp);
-		pi.frmSize.W = (long)dwTemp;
-		s.read(dwTemp);
-		pi.frmSize.H = (long)dwTemp;
+		s.readInt(pi.frmSize.W);
+		s.readInt(pi.frmSize.H);
 		PICcontent.push_back(pi);
-		posList.push_back(s.getPtPos());
-		lenList.push_back(pi.get_dataSize());
-		s.ptMove(pi.get_dataSize());
+		posList.push_back(s.getPosition());
+		lenList.push_back(pi.dataSize);
+		s.movePosition(pi.dataSize);
 	}
 	return true;
 }
-bool KoishiExpand::IMGobjectV1::make(Koishi::IMGobject &io){
+bool KoishiExpand::IMGobjectV1::make(IMGobject &io){
 	io.create(V2);
 	stream s;
 	int i;
 	for(i=0;i<PICcontent.size();i++){
-		data.ptMoveTo(posList[i]);
+		data.setPosition(posList[i]);
 		data.readStream(s, lenList[i]);
 		io.PICpush(PICcontent[i], s);
 		s.release();
@@ -1000,19 +1054,19 @@ int KoishiExpand::authorLock::checkLock(str fileName, str password){
 	stream s, sStr, sSHA1, sSHA2;
 	sStr.allocate(password.size());
 	sStr.pushString(password);
-	sStr.getSHA256(sSHA1);
+	sStr.SHA256code(sSHA1);
 	//没能打开文件
 	if(!s.loadFile(fileName))
 		return 3;
 	//长度不够，不可能含有锁
-	if(s.len < 38)
+	if(s.length < 38)
 		return 3;
-	s.ptMoveTo(s.len - 6);
+	s.setPosition(s.length - 6);
 	//未加锁
 	if("XYZZY" != s.readString(6))
 		return 2;
 	//已经加锁
-	s.ptMoveTo(s.len - 38);
+	s.setPosition(s.length - 38);
 	s.readStream(sSHA2, 32);
 	for(int i = 0;i<32;i++){
 		if(sSHA1[i] != sSHA2[i])
@@ -1025,42 +1079,42 @@ bool KoishiExpand::authorLock::addLock(str fileName, str password){
 	stream s, sStr, sSHA1;
 	sStr.allocate(password.size());
 	sStr.pushString(password);
-	sStr.getSHA256(sSHA1);
+	sStr.SHA256code(sSHA1);
 	if(checkLock(fileName, password) < 2)
 		return false;	//已经有锁所以不能加锁
 	if(!s.loadFile(fileName))
 		return false;	//无法读取文件
 	s.pushStream(sSHA1, 32);
 	s.pushString("XYZZY");
-	s.push(uchar(0));
+	s.pushByte(uchar(0));
 	s.makeFile(fileName);
 	return true;
 }
 //////////////////////////////////////////////////////////////////////////////
 void KoishiExpand::textDisplay::binary(const stream &in, stream &out){
 	out.release();
-	out.allocate(in.len*10);
-	for(longex i = 0;i<in.len;i++){
+	out.allocate(in.length*10);
+	for(longex i = 0;i<in.length;i++){
 		if(i % 16 == 0){
 			char s[10];
 			itoa(i, s, 16);
 			out.pushString(str(s));
-			out.push((uchar)' ');
+			out.pushByte(' ');
 		}
 		uchar mask = 1;
 		for(uchar j = 0;j<8;j++){
 			if(in[i] & mask){
-				out.push((uchar)'1');
+				out.pushByte((uchar)'1');
 			}else{
-				out.push((uchar)'0');
+				out.pushByte((uchar)'0');
 			}
 			mask <<= 1;
 		}
 		
-		out.push((uchar)' ');
+		out.pushByte((uchar)' ');
 		if(i % 16 == 15){
-			out.push((uchar)'\r');
-			out.push((uchar)'\n');
+			out.pushByte((uchar)'\r');
+			out.pushByte((uchar)'\n');
 		}
 	}
 }
@@ -1071,52 +1125,52 @@ void KoishiExpand::textDisplay::binaryFile(const stream &in, str fileName){
 }
 void KoishiExpand::textDisplay::binaryCompareFile(const stream &in1, const stream &in2, str fileName){
 	stream out;
-	longex maxLen =MAX(in1.len, in2.len);
+	longex maxLen =MAX(in1.length, in2.length);
 	out.allocate(maxLen*40);
 	for(longex i = 0;i<maxLen;i+=16){
 		//head:
 		char s[10];
 		itoa(i, s, 16);
 		out.pushString(str(s));
-		out.push((uchar)':');
-		out.push((uchar)' ');
+		out.pushByte((uchar)':');
+		out.pushByte((uchar)' ');
 		for(uchar j = 0;j<16;j++){
 			uchar mask = 1;
 			for(uchar k = 0;k<8;k++){
-				if(i+j>=in1.len){
-					out.push((uchar)' ');
+				if(i+j>=in1.length){
+					out.pushByte((uchar)' ');
 				}else if(in1[i+j] & mask){
-					out.push((uchar)'1');
+					out.pushByte((uchar)'1');
 				}else{
-					out.push((uchar)'0');
+					out.pushByte((uchar)'0');
 				}
 				mask <<= 1;
 			}
-			out.push((uchar)' ');
+			out.pushByte((uchar)' ');
 		}
-		out.push((uchar)'\r');
-		out.push((uchar)'\n');
+		out.pushByte((uchar)'\r');
+		out.pushByte((uchar)'\n');
 		out.pushString(str(s));
-		out.push((uchar)':');
-		out.push((uchar)' ');
+		out.pushByte((uchar)':');
+		out.pushByte((uchar)' ');
 		for(uchar j = 0;j<16;j++){
 			uchar mask = 1;
 			for(uchar k = 0;k<8;k++){
-				if(i+j>=in2.len){
-					out.push((uchar)' ');
+				if(i+j>=in2.length){
+					out.pushByte((uchar)' ');
 				}else if(in2[i+j] & mask){
-					out.push((uchar)'1');
+					out.pushByte((uchar)'1');
 				}else{
-					out.push((uchar)'0');
+					out.pushByte((uchar)'0');
 				}
 				mask <<= 1;
 			}
-			out.push((uchar)' ');
+			out.pushByte((uchar)' ');
 		}
-		out.push((uchar)'\r');
-		out.push((uchar)'\n');
-		out.push((uchar)'\r');
-		out.push((uchar)'\n');
+		out.pushByte((uchar)'\r');
+		out.pushByte((uchar)'\n');
+		out.pushByte((uchar)'\r');
+		out.pushByte((uchar)'\n');
 	}
 	out.makeFile(fileName);
 }

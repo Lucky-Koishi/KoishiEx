@@ -3,89 +3,121 @@
 #include "sha256.h"
 
 #pragma comment(lib, "zlib.lib")
-#pragma comment(lib, "libbz2.lib")
 #include "zlib.h"
-#include "bzlib.h"
+#include "bz2.h"
 
 using namespace Koishi;
 
-//class stream
+//#define sdebug
+#ifdef sdebug
+	#define vprintf(x, y) printf(x, y)
+#else
+	#define vprintf(x, y)
+#endif
+//stream类
 stream::stream(){
-	maxLen = 0;
-	len = 0;
 	data = NULL;
-	pt = 0;
+	length = 0;
+	storage = 0;
+	position = 0;
+	bitPosition = 0;
 }
-stream::stream(longex _len){
-	maxLen = _len;
-	len = 0;
-	pt = 0;
-	data = new uchar[maxLen];
+stream::stream(longex newLen){
+	if(newLen == 0){
+		data = NULL;
+	}else{
+		data = new uchar[newLen];
+		vprintf("Allocate %d bytes.\n", newLen);
+		memset(data, 0, newLen);
+	}
+	length = 0;
+	storage = newLen;
+	position = 0;
+	bitPosition = 0;
 }
-stream::stream(const stream& _s){
-	maxLen = _s.maxLen;
-	len = _s.len;
-	pt = 0;
-	data = new uchar[maxLen];
-	if(data)
-		memcpy(data, _s.data, maxLen);
+stream::stream(const stream& sSource){
+	if(sSource.storage == 0){
+		data = NULL;
+	}else{
+		data = new uchar[sSource.storage];
+		vprintf("Allocate %d bytes.\n", sSource.storage);
+		memcpy(data, sSource.data, sSource.storage);
+	}
+	length = sSource.length;
+	storage = sSource.storage;
+	position = 0;
+	bitPosition = 0;
+}
+stream& stream::operator = (const stream &sSource){
+	if(this == &sSource)
+		return *this;
+	if(data){
+		delete[] data;
+		vprintf("Release %d bytes.\n", sSource.storage);
+	}
+	if(sSource.storage == 0){
+		data = NULL;
+	}else{
+		data = new uchar[sSource.storage];
+		vprintf("Allocate %d bytes.\n", sSource.storage);
+		memcpy(data, sSource.data, sSource.storage);
+	}
+	length = sSource.length;
+	storage = sSource.storage;
+	position = 0;
+	bitPosition = 0;
+	return *this;
 }
 stream::~stream(){
 	release();
 }
-stream& stream::operator = (const stream &_s){
-	if(this == &_s)
-		return *this;
-	if(data)
-		delete[] data;
-	maxLen = _s.maxLen;
-	len = _s.len;
-	data = new uchar[maxLen];
-	if(data)
-		memcpy(data, _s.data, maxLen);
-	return *this;
-}
-void stream::allocate(longex _len){
-	if(!data){
-		len = 0;
-		pt = 0;
-		maxLen = _len;
-		data = new uchar[maxLen];
-		for(dword i = 0;i<maxLen;i++){
-			data[i] = 0;
-		}
-	}
-}
-void stream::reallocate(longex _len){
-	if(_len<maxLen){
+void stream::allocate(longex newLen){
+	release();
+	if(newLen == 0){
 		return;
 	}
-	uchar *buff = new uchar[len];
-	longex buffLen = len;
+	if(!data){
+		length = 0;
+		position = 0;
+		bitPosition = 0;
+		storage = newLen;
+		data = new uchar[storage];
+		vprintf("Allocate %d bytes.\n", storage);
+		memset(data, 0, storage);
+	}
+}
+void stream::reallocate(longex newLen){
+	if(newLen<storage){
+		//不用重新分配了
+		return;
+	}
+	uchar *buff = new uchar[length];
+	longex buffLen = length;
 	memcpy(buff, data, buffLen);
 	release();
-	allocate(_len);
-	for(longex i = 0;i<buffLen;i++){
-		push(buff[i]);
-	}
+	allocate(newLen);
+	memcpy(data, buff, buffLen);
+	length = buffLen;
 	delete[] buff;
 }
 void stream::release(){
 	if(data){
 		delete[] data;
+		vprintf("Release %d bytes.\n", storage);
 		data = NULL;
-		maxLen = 0;
-		len = 0;
+		length = 0;
+		storage = 0;
+		position = 0;
 	}
+}
+void stream::clear(){
+	memset(data, 0, storage);
+	length = 0;
 }
 uchar& stream::operator[] (longex pos) const{
 	return data[pos];
 }
-stream::operator str(){
-	return (char*)data;
-}
 uchar stream::getBit(longex pos, long bitCount) const{
-	//将字节流按1位/2位/4位分段
 	longex atByte;
 	long inByte;
 	switch(bitCount){
@@ -124,62 +156,252 @@ uchar stream::getRBit(longex pos, long bitCount) const{
 	}
 	return data[pos];
 }
-void stream::clear(bool makeZero){
-	if(makeZero){
-		for(longex i = 0 ;i<maxLen;i++)
-			data[i] = 0;
+void *stream::begin(longex pos) const{
+	return data + pos;
+}
+void *stream::end(longex pos) const{
+	return data + length - pos;
+}
+/////////////////////////////////////////////////
+longex stream::getPosition() const{
+	return position;
+}
+longex stream::resetPosition(){
+	position = 0;
+	return 0;
+}
+longex stream::movePosition(longex dist){
+	longex now = position;
+	longex goal = now + dist;
+	if(goal<0){
+		position = 0;
+	}else if(goal>length){
+		position = length;
+	}else{
+		position = goal;
 	}
-	len = 0;
+	return position;
 }
-uchar stream::push(uchar _d){
-	data[len++] = _d;
-	return 1;
+longex stream::setPosition(longex pos){
+	if(pos<0)
+		pos = 0;
+	if(pos>length)
+		pos = length;
+	position = pos;
+	return position;
 }
-uchar stream::push(word _d){
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	return 1;
+/////////////////////////////////
+
+bool stream::pushByte(uchar d){
+	if(length < storage){
+		data[length++] = d;
+		return true;
+	}else{
+		return false;
+	}
 }
-uchar stream::push(dword _d){
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	return 1;
+bool stream::pushWord(word d){
+	if(length + 1< storage){
+		memcpy(data + length, &d, 2);
+		length += 2;
+		return true;
+	}else{
+		return false;
+	}
 }
-uchar stream::push(longex _d){
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	_d >>= 8;
-	data[len++] = _d & 0xFF;
-	return 1;
+bool stream::pushDWord(dword d){
+	if(length + 3< storage){
+		memcpy(data + length, &d, 4);
+		length += 4;
+		return true;
+	}else{
+		return false;
+	}
 }
-uchar stream::push(long _i){
-	return push((dword)_i);
+bool stream::pushInt64(longex d){
+	if(length + 7< storage){
+		memcpy(data + length, &d, 4);
+		length += 4;
+		return true;
+	}else{
+		return false;
+	}
 }
-uchar stream::pushString(str _s){
-	for(longex i = 0;i<_s.size();i++)
-		data[len++] = (uchar)_s[i];
-	return 1;
+bool stream::pushInt(long i){
+	if(length + 3< storage){
+		memcpy(data + length, &i, 4);
+		length += 4;
+		return true;
+	}else{
+		return false;
+	}
+}
+bool stream::pushString(str s){
+	if(length + s.size() <= storage){
+		for(longex i = 0;i<s.size();i++)
+			data[length++] = s[i];
+		return true;
+	}else{
+		return false;
+	}
+}
+void stream::pushStream(const stream &addedStream, longex len){
+	if(length + len > storage){
+		reallocate((length + len) * 2);
+	}
+	for(longex i = 0;i<MIN(len, addedStream.length);i++)
+		data[length++] = addedStream[i];
+}
+void stream::push(const void *sour, longex len){
+	if(length + len > storage){
+		reallocate((length + len) * 2);
+	}
+	for(longex i = 0;i<len;i++)
+		data[length++] = *((char*)sour+i);
+}
+bool stream::readByte(uchar& d){
+	if(position > length - 1)
+		return false;
+	d = data[position];
+	movePosition(1);
+	return true;
+}
+bool stream::readWord(word& d){
+	if(position > length -2)
+		return false;
+	d = data[position] | data[position+1]<<8;
+	movePosition(2);
+	return true;
+}
+bool stream::readDWord(dword& d){
+	if(position > length -4){
+		return false;
+	}
+	d = data[position] | data[position+1]<<8 | data[position+2]<<16 | data[position+3] << 24;
+	movePosition(4);
+	return true;
+}
+bool stream::readInt64(longex& d){
+	if(position > length -8){
+		return false;
+	}
+	dword i1 = data[position] | data[position+1]<<8 | data[position+2]<<16 | data[position+3]<<24;
+	dword i2 = data[position+4] | data[position+5]<<8 | data[position+6]<<16 | data[position+7]<<24;
+	movePosition(8);
+	d = (longex)(((unsigned long long)i2 << 32) | i1);
+	return true;
+}
+bool stream::readInt(long& d){
+	dword dw;
+	bool b;
+	b = readDWord(dw);
+	d = (long)dw;
+	return b;
+}
+str stream::readString(dword len){
+	if(position > length - len){
+		return "";
+	}
+	stream s(len+1);
+	readStream(s, len);
+	s.pushByte(0);
+	return (char*)s.data;
+}
+longex stream::read(void *dest, longex len){
+	if(position > length - len)
+		len = length - position;
+	for(longex i = 0;i<len; i++){
+		*((uchar*)dest+i) = data[position++];
+	}
+	return len;
+}
+longex stream::readStream(stream &dest, longex len){
+	if(position > length -len){
+		len = length - position;
+	}
+	dest.allocate(len*2);
+	for(longex i = 0; i<len;i++){
+		dest.pushByte(data[position+i]);
+	}
+	position += len;
+	return len;
+}
+void stream::insertStream(const stream &insertStream, longex len, longex pos){
+	if(len > insertStream.length)
+		len = insertStream.length;
+	if(len + length > storage)
+		reallocate((length + len)*2);
+	if(pos > length)
+		pos = length;
+	//开始处理
+	stream prefix;
+	stream suffix;
+	longex i;
+	prefix.allocate(pos);
+	for(i = 0;i<pos;i++)
+		prefix.pushByte(data[i]);
+	suffix.allocate(length-pos);
+	for(i = 0;i<length-pos;i++)
+		suffix.pushByte(data[pos+i]);
+	clear();
+	pushStream(prefix, prefix.length);
+	pushStream(insertStream, len);
+	pushStream(suffix, suffix.length);
+	prefix.release();
+	suffix.release();
+}
+void stream::deleteStream(longex pos, longex len){
+	if(pos > length)
+		pos = length;
+	if(len+pos > length)
+		len = length - pos;
+	if(len <= 0)
+		return;
+	//开始处理
+	stream prefix;
+	stream suffix;
+	prefix.allocate(pos);
+	for(longex i = 0;i<pos;i++)
+		prefix.pushByte(data[i]);
+	suffix.allocate(length-pos-len);
+	for(longex i = 0;i<length -pos-len;i++)
+		suffix.pushByte(data[pos+len+i]);
+	clear();
+	pushStream(prefix, prefix.length);
+	pushStream(suffix, suffix.length);
+	prefix.release();
+	suffix.release();
+}
+bool stream::modifyByte(longex pos, uchar d){
+	if(pos<length || pos>=0){
+		data[pos] = d;
+		return true;
+	}
+	return false;
+}
+bool stream::modifyDWord(longex pos, dword d){
+	if(pos<length-4 || pos>=0){
+		data[pos] = (d & 0xff);
+		data[pos+1] = ((d >> 8) & 0xff);
+		data[pos+2] = ((d >> 16) & 0xff);
+		data[pos+3] = ((d >> 24) & 0xff);
+		return true;
+	}
+	return false;
+}
+bool stream::modifyInt(longex pos, long i){
+	if(pos<length-4 || pos>=0){
+		data[pos] = (i & 0xff);
+		data[pos+1] = ((i >> 8) & 0xff);
+		data[pos+2] = ((i >> 16) & 0xff);
+		data[pos+3] = ((i >> 24) & 0xff);
+		return true;
+	}
+	return false;
 }
 longex stream::replace(const uchar &whos, const uchar &to){
 	longex count = 0;
-	for(longex i = 0;i<len;i++){
+	for(longex i = 0;i<length;i++){
 		if(data[i]==whos){
 			count ++;
 			data[i] = to;
@@ -187,208 +409,11 @@ longex stream::replace(const uchar &whos, const uchar &to){
 	}
 	return count;
 }
-uchar stream::pushStream(const stream &_s, longex _len){
-	if(getLen() + _len > getMaxLen()){
-		reallocate(getLen() + _len * 5);
-	}
-	for(longex i = 0;i<_len;i++)
-		data[len++] = _s.data[i];
-	return 1;
-}
-longex stream::getLen() const{
-	return len;
-}
-longex stream::getMaxLen() const{
-	return maxLen;
-}
-longex stream::getPtPos() const{
-	return pt;
-}
-longex stream::ptMove(longex dist){
-	longex now = (longex)pt;
-	longex goa = now + dist;
-	if(goa<0){
-		pt = 0;
-	}else if((longex)goa>len){
-		pt = len;
-	}else{
-		pt = (longex)goa;
-	}
-	return pt;
-}
-longex stream::ptMoveTo(longex pos){
-	if(pos<0)
-		pos = 0;
-	if(pos>len)
-		pos = len;
-	pt = (longex)pos;
-	return pt;
-}
-uchar stream::read(uchar &_d){
-	if(pt > len - 1){
-		return 0;
-	}
-	_d = data[pt];
-	ptMove(sizeof(uchar));
-	return 1;
-}
-uchar stream::read(word &_d){
-	if(pt > len -2){
-		return 0;
-	}
-	_d = data[pt] | data[pt+1]<<8;
-	ptMove(sizeof(word));
-	return 1;
-}
-uchar stream::read(dword &_d){
-	if(pt > len -4){
-		return 0;
-	}
-	_d = data[pt] | data[pt+1]<<8 | data[pt+2]<<16 | data[pt+3]<<24;
-	ptMove(sizeof(dword));
-	return 1;
-}
-uchar stream::read(longex &_d){
-	if(pt > len -8){
-		return 0;
-	}
-	_d = data[pt] | data[pt+1]<<8 | data[pt+2]<<16 | data[pt+3]<<24 | ((longex)(data[pt+4] | data[pt+5]<<8 | data[pt+6]<<16 | data[pt+7]<<24)<<32);
-	ptMove(sizeof(64));
-	return 1;
-}
-uchar stream::read(long &_i){
-	dword bresult;
-	read(bresult);
-	_i = (long)bresult;
-	return 1;
-}
-uchar stream::read(void *dest, longex l){
-	if(pt > len - l)
-		return 0;
-	for(longex i = 0;i<l; i++){
-		*((uchar*)dest+i) = data[pt++];
-	}
-	return 1;
-}
-str stream::readString(dword _len){
-	if(pt > len -_len){
-		return "";
-	}
-	stream _s(_len+1);
-	readStream(_s, _len);
-	_s.push((uchar)0);
-	return (char*)_s.data;
-}
-void stream::readStream(stream &dest, longex _len){
-	if(pt > len -_len){
-		_len = len - pt;
-	}
-	dest.reallocate(_len);
-	dest.clear();
-	for(longex i = 0; i<_len;i++){
-		dest.push(data[pt+i]);
-	}
-	pt += _len;
-}
-void stream::insertStream(const stream &_s, longex _len, longex _pos){
-	//len超过s的长度
-	if(_len > _s.getLen()){
-		_len = _s.getLen();
-	}
-	//超过最大长度时重新分配
-	if(_len + getLen() > getMaxLen()){
-		reallocate(getLen() + _len*5);
-	}
-	//插入点超过全长默认在最后追加
-	if(_pos > getLen()){
-		_pos = getLen();
-	}
-	//开始处理
-	stream prefix, suffix;
-	longex i;
-	//首部时prefix无效
-	if(_pos>0){
-		prefix.allocate(_pos);
-		for(i = 0;i<_pos;i++){
-			prefix.push(data[i]);
-		}
-	}
-	if(_pos < getLen()){
-		suffix.allocate(getLen()-_pos);
-		for(i = 0;i<getLen()-_pos;i++){
-			suffix.push(data[_pos+i]);
-		}
-	}
-	clear();
-	if(prefix.getLen()>0){
-		pushStream(prefix, prefix.getLen());
-	}
-	pushStream(_s, _len);
-	if(suffix.getLen()>0){
-		pushStream(suffix, suffix.getLen());
-	}
-	prefix.release();
-	suffix.release();
-}
-void stream::deleteStream(longex _pos, longex _len){
-	//
-	if(_pos > getLen()){
-		_pos = getLen();
-	}
-	//删除长度的结尾超过总长
-	if(_len+_pos> getLen()){
-		_len = getLen() - _pos;
-	}
-	if(_len <= 0)
-		return;
-	//开始处理
-	stream prefix, suffix;
-	longex i;
-	//首部时prefix无效
-	if(_pos>0){
-		prefix.allocate(_pos);
-		for(i = 0;i<_pos;i++){
-			prefix.push(data[i]);
-		}
-	}
-	if(_pos + _len< getLen()){
-		suffix.allocate(getLen()-_pos-_len);
-		for(i = 0;i<getLen()-_pos-_len;i++){
-			suffix.push(data[_pos+_len+i]);
-		}
-	}
-	clear();
-	if(prefix.getLen()>0){
-		pushStream(prefix, prefix.getLen());
-	}
-	if(suffix.getLen()>0){
-		pushStream(suffix, suffix.getLen());
-	}
-	prefix.release();
-	suffix.release();
-}
-bool stream::modify(longex _pos, uchar _d){
-	if(_pos<getLen() || _pos>=0){
-		data[_pos] = _d;
-		return true;
-	}
-	return false;
-}
-bool stream::modify(longex _pos, long _i){
-	if(_pos<getLen()-4 || _pos>=0){
-		data[_pos] = (_i & 0xff);
-		data[_pos+1] = ((_i >> 8) & 0xff);
-		data[_pos+2] = ((_i >> 16) & 0xff);
-		data[_pos+3] = ((_i >> 24) & 0xff);
-		return true;
-	}
-	return false;
-}
 bool stream::makeFile(str fileName){
 	FILE *fl = fopen(fileName.c_str(), "wb");
 	if(!fl)
 		return false;
-	fwrite(data, 1, len, fl);
+	fwrite(data, 1, length, fl);
 	fclose(fl);
 	return true;
 }
@@ -400,77 +425,35 @@ bool stream::loadFile(str fileName){
 	longex sz = ftell(fl);
 	reallocate(sz+1);
 	fseek(fl, 0, SEEK_SET);
-	len = fread((void*)data, 1, sz, fl);
+	length = fread((void*)data, 1, sz, fl);
 	fclose(fl);
 	return true;
 }
 
 void stream::nameMask(){
-	if(len < 256){
+	if(length < 256)
 		return;
-	}
 	str IMGnameMask = "puchikon@neople dungeon and fighter DNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNF";
-	for(long i = 0;i<255;i++){
+	for(long i = 0;i<255;i++)
 		data[i]^= IMGnameMask[i];
-	}
 }
 
-void stream::getSHA256(stream &dest){
+void stream::SHA256code(stream &dest){
 	uchar *buff = new uchar[32];
-	longex len = getLen();
+	longex len = length;
 	KoishiSHA256::SHA256 sha;
 	sha.reset();
 	sha.add(data, len);
 	sha.getHash(buff);
-	long i;
 	dest.allocate(32);
-	for(i=0;i<32;i++){
-		dest.push(buff[i]);
-	}
+	dest.push(buff, 32);
 	delete[] buff;
 }
-
-void stream::getSHA256(stream &dest, const stream &added){
-	stream s(*this);
-	s.pushStream(added, added.getLen());
-	uchar *buff = new uchar[32];
-	longex len = s.getLen()/17*17;
-	KoishiSHA256::SHA256 sha;
-	sha.reset();
-	sha.add(s.data, len);
-	sha.getHash(buff);
-	long i;
-	dest.allocate(32);
-	for(i=0;i<32;i++){
-		dest.push(buff[i]);
-	}
-	delete[] buff;
-}
-int stream::compressData(stream &dest, compressType type){
-	switch(type){
-	case COMP_ZLIB:
-	case COMP_ZLIB_DUAL:
-		return ZLIBcompress(dest);
-	default:
-		dest = *this;
-		return 0;
-	}
- }
-int stream::uncompressData(stream &dest, compressType type, longex tryLength){
-	switch(type){
-	case COMP_ZLIB:
-	case COMP_ZLIB_DUAL:
-		return ZLIBuncompress(dest, tryLength);
-	default:
-		dest = *this;
-		return 0;
-	}
- }
 
 longex stream::findStream(const stream &s,longex startPos){
-	int fLine = s.getLen();
+	int fLine = s.length;
 	int i;
-	while(startPos + fLine <= getLen()){
+	while(startPos + fLine <= length){
 		bool isOK = true;
 		for(i=0;i<fLine;i++){
 			if(data[startPos+i] != s[i]){
@@ -489,14 +472,14 @@ longex stream::findStream(const stream &s,longex startPos){
 
 longex stream::splitStream(const stream &s, queueex &posList, queueex &lenList){
 	longex startPos = 0;
-	longex fLine = s.getLen();
+	longex fLine = s.length;
 	posList.clear();
 	lenList.clear();
 	posList.push_back(0);
 	while(true){
 		longex p = findStream(s, startPos);
 		if(p == -1){
-			lenList.push_back(getLen()-startPos);
+			lenList.push_back(length-startPos);
 			break;
 		}else{
 			lenList.push_back(p-startPos);
@@ -509,31 +492,31 @@ longex stream::splitStream(const stream &s, queueex &posList, queueex &lenList){
 
 //进行BZ2压缩
 int stream::BZcompress(stream &dest){
-	unsigned int len = 10*getLen();
+	unsigned int len = 10*length;
 	dest.allocate(len);
-	int i = BZ2_bzBuffToBuffCompress((char*)dest.data, &len, (char*)data, getLen(), 1, 0, 0);
-	dest.len = len;
+	int i = BZ2_bzBuffToBuffCompress((char*)dest.data, &len, (char*)data, length, 1, 0, 0);
+	dest.length = len;
 	return i;
 }
 //进行BZ2解压
 int stream::BZuncompress(stream &dest){
-	unsigned int len = 100*getLen();
+	unsigned int len = 1000*length;
 	dest.allocate(len);
-	int i = BZ2_bzBuffToBuffDecompress((char*)dest.data, &len, (char*)data, getLen(), 0, 0);
-	dest.len = len;
+	int i = BZ2_bzBuffToBuffDecompress((char*)dest.data, &len, (char*)data, length, 0, 0);
+	dest.length = len;
 	return i;
 }
 
 int stream::ZLIBcompress(stream &dest){
-	longex tryLength = getLen()+1000; 
+	longex tryLength = length+1000; 
 	dest.allocate(tryLength);
-	int i = (int)compress(dest.data, (dword*)&tryLength, data, getLen());
-	dest.len = tryLength;
+	int i = (int)compress(dest.data, (dword*)&tryLength, data, length);
+	dest.length = tryLength;
 	return i;
 }
 int stream::ZLIBuncompress(stream &dest, longex tryLength){
 	dest.allocate(tryLength);
-	int i = (int)uncompress(dest.data, (dword*)&tryLength, data, getLen());
-	dest.len = tryLength;
+	int i = (int)uncompress(dest.data, (dword*)&tryLength, data, length);
+	dest.length = tryLength;
 	return i;
 }

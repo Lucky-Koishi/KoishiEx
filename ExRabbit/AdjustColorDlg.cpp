@@ -169,7 +169,7 @@ void CAdjustColorDlg::applyEffect(){
 			clr.moveR((deltaR>=0)?deltaR*(0xff-clr.R)/100:deltaR*clr.R/100);
 			clr.moveG((deltaR>=0)?deltaG*(0xff-clr.G)/100:deltaG*clr.G/100);
 			clr.moveB((deltaR>=0)?deltaB*(0xff-clr.B)/100:deltaB*clr.B/100);
-			clr.moveA((deltaA>=0)?deltaA*(0xff-clr.A)/100:deltaA*clr.A/100);
+			clr.moveA((deltaA>=0)?deltaA*(0xff-clr.alpha)/100:deltaA*clr.alpha/100);
 			if(dlg->io.version == V4 || dlg->io.version == V5 || dlg->io.version == V6){
 				dlg->io.CLRreplace(i, clr, GET_DLG_CTRL(CComboBox, IDC_COMBO_PRO)->GetCurSel());
 				dlg->cl[i] = clr;
@@ -195,7 +195,7 @@ void CAdjustColorDlg::applyEffect(){
 			clr.moveR((deltaR>=0)?deltaR*(0xff-clr.R)/100:deltaR*clr.R/100);
 			clr.moveG((deltaR>=0)?deltaG*(0xff-clr.G)/100:deltaG*clr.G/100);
 			clr.moveB((deltaR>=0)?deltaB*(0xff-clr.B)/100:deltaB*clr.B/100);
-			clr.moveA((deltaA>=0)?deltaA*(0xff-clr.A)/100:deltaA*clr.A/100);
+			clr.moveA((deltaA>=0)?deltaA*(0xff-clr.alpha)/100:deltaA*clr.alpha/100);
 			mat.setElem(i, clr);
 		}
 		dlg->io.PICpreprocess(mat, s, pi, pi.format);

@@ -11,6 +11,10 @@ typedef struct DictAvatarTerm{
 	CString avatarName;
 }DictAvatarTerm;
 
+typedef struct DictAvatarSuitTerm{
+	long ID[KoishiAvatar::APART_MAXCOUNT];
+	CString suitName;
+}DictAvatarSuitTerm;
 typedef std::vector<DictAvatarTerm> DictAvatarContent;
 
 class DictAvatar{
@@ -37,4 +41,3 @@ public:
 	DictAvatarContent findTerm(avatarCareer ac, avatarPart ap, long ID, bool isTN, long paletteID);
 	DictAvatarContent findTerm(avatarCareer ac, avatarPart ap, CString avatarName);
 };
-

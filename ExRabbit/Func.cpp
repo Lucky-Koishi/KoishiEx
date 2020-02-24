@@ -7,8 +7,10 @@
 #include "../KoishiEx/koishiexpand.cpp"
 #include "../KoishiEx/sha256.cpp"
 #include "../KoishiEx/KoishiImageTool.cpp"
+#include "../KoishiEx/KoishiAudioTool.cpp"
 #include "../KoishiEx/avatar.cpp"
 #include "goodlistctrl.cpp"
+#include "../koishiEx/bz2.cpp"
 
 void CStrToStr(CString cstr,str &str1)  
 {  
@@ -69,7 +71,7 @@ CString SzToCStr(size pt){
 }
 CString ClrToCStr(color clr){
 	CString s;
-	s.Format(L"%02X%02X%02X%02X",clr.R,clr.G,clr.B,clr.A);
+	s.Format(L"%02X%02X%02X%02X",clr.R,clr.G,clr.B,clr.alpha);
 	return s;
 }
 int B16CStrToNum(CString b16cstr){

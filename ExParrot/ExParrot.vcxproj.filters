@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+    <None Include="res\ExParrot.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ExParrot.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon1.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_main.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_vorbis.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_sou.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ico00001.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\ico00002.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_image.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_link.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_mp3.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_NUL.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_wave.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\LOGO2.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_1.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_2.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_3.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_4.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_5.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_6.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_7.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_8.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_9.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_10.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_11.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_12.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_13.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ExParrot.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ExParrotDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Func.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GoodListCtrl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Profile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalRename.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalSoundHide.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalSoundInsert.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyBar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyAdjustVolume.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyStretch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyEcho.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolSPK2.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ExParrot.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ExParrotDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Func.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Profile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GoodListCtrl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalRename.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalSoundHide.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalSoundInsert.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyBar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyAdjustVolume.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyStretch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyEcho.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolSPK2.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ExParrot.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

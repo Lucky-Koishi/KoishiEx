@@ -64,6 +64,7 @@ CExRabbitDlg::CExRabbitDlg(CWnd* pParent /*=NULL*/)
 	canvasOperatePara.canvasPara = CANVAS_DEFAULT;
 	canvasOperatePara.brushShape = 1;		
 	canvasOperatePara.brushSize = 5;
+	canvasOperatePara.oldMatrixEnable = false;
 	fileNPKname = L"newNPK.npk";
 	fileIMGname = L"newIMG.img";
 	
@@ -234,6 +235,10 @@ BEGIN_MESSAGE_MAP(CExRabbitDlg, CDialogEx)
 	ON_COMMAND(ID_MENU_COLOR_TABLE_256, &CExRabbitDlg::OnMenuColorTable256)
 	ON_COMMAND(ID_MENU_COLOR_TABLE_EXTRACT_CURRENT, &CExRabbitDlg::OnMenuColorTableExtractCurrent)
 	ON_COMMAND(ID_MENU_COLOR_TABLE_EXTRACT_ALL_FRAME, &CExRabbitDlg::OnMenuColorTableExtractAllFrame)
+	ON_COMMAND(ID_MENU_IMAGE_INSERT_OTHER, &CExRabbitDlg::OnMenuImageInsertOther)
+	ON_COMMAND(ID_MENU_IMAGE_INSERT_COPY, &CExRabbitDlg::OnMenuImageInsertCopy)
+	ON_COMMAND(ID_MENU_IMAGE_INSERT_REF, &CExRabbitDlg::OnMenuImageInsertLink)
+	ON_COMMAND(ID_MENU_IMAGE_DELINK, &CExRabbitDlg::OnMenuImageDelink)
 	END_MESSAGE_MAP()
 /////////
 
@@ -278,11 +283,14 @@ BOOL CExRabbitDlg::OnInitDialog(){
 
 	ioComp.create(V2);
 
-	i_lIMG.Create(16,16, TRUE|ILC_COLOR24, 7, 1);
+	i_lIMG.Create(16,16, TRUE|ILC_COLOR24, 10, 1);
 	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON_NUL));		//0号资源·无效
 	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON_LINK));		//1号资源·LINK
+	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON_UNKNOWN));	//2号资源
+	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON_AUDIO));		//3号资源
 	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON1));
 	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON2));
+	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON3));
 	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON4));
 	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON5));
 	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON6));
@@ -412,10 +420,10 @@ void CExRabbitDlg::OnPaint()
 		dc.FillSolidRect(rect,profile.mainColor); 
 #endif
 		CDialogEx::OnPaint();
+		TRACE("1\n");
 		draw(drawPara.texture);
 		updateColorTable();
 	}
-
 }
 
 //当用户拖动最小化窗口时系统调用此函数取得光标
@@ -536,11 +544,11 @@ void CExRabbitDlg::updateIMGlist(){
 	updateInfo();
 	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->DeleteAllItems();
 	for(int i = 0;i<no.count;i++){
-		long linkPos = no.IMGcheckLink(i);
-		if(linkPos == -1){
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->EasyInsertItem(GetTail(StrToCStr(no.content[i].imgname)), getIconIMG((IMGversion)no.getVersion(i)));
+		int li = no.checkLink(i);
+		if(li == i){
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->EasyInsertItem(GetTail(StrToCStr(no.entry[i].comment)), getIconIMG((IMGversion)no.IMGgetVersion(i)));
 		}else{
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->EasyInsertItem(GetTail(StrToCStr(no.content[i].imgname) + L"[#"+NumToCStr(linkPos)+L"]"), 1);
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->EasyInsertItem(GetTail(StrToCStr(no.entry[i].comment) + L"["+GetTail(StrToCStr(no.entry[li].comment))+L"]"), 1);
 		}
 	}
 }
@@ -549,21 +557,35 @@ void CExRabbitDlg::updatePIClist(){
 	// 更新帧列表
 	////////////////////////////////
 	CString cstr;
-	GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->DeleteAllItems();
-	for(int i=0;i<io.indexCount;i++){
-		cstr = NumToCStr(i) + L",";
-		cstr += FmtToCStr(io.PICcontent[i].get_format(), io.version);
-		if(io.PICcontent[i].get_format() == LINK){
-			cstr += NumToCStr(io.PICcontent[i].get_linkTo());
+	int currentCount = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->GetItemCount();
+	int i = 0;
+	while(true){
+		if(i < io.indexCount){
+			if(i < currentCount){
+				updatePICterm(i);
+			}else{
+				cstr = NumToCStr(i) + L",";
+				cstr += FmtToCStr(io.PICcontent[i].format, io.version);
+				if(io.PICcontent[i].format == LINK)
+					cstr += NumToCStr(io.PICcontent[i].linkTo);
+				cstr += L",";
+				cstr += PtToCStr(io.PICcontent[i].basePt) + L",";
+				cstr += SzToCStr(io.PICcontent[i].picSize)+L",";
+				cstr += SzToCStr(io.PICcontent[i].frmSize)+L",";
+				if(io.version == V5){
+					cstr += L"纹理集"+NumToCStr(io.PICcontent[i].TEXusing)+L":"+PtToCStr(io.PICcontent[i].TEXpointLT)+L"-"+PtToCStr(io.PICcontent[i].TEXpointRB);
+				}
+				GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->EasyInsertItem(cstr,getIconPIC(io.PICcontent[i].format));
+			}
+			i++;
+		}else{
+			if(i < currentCount){
+				GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->DeleteItem(i);
+				currentCount --;
+			}else{
+				break;
+			}
 		}
-		cstr += L",";
-		cstr += PtToCStr(io.PICcontent[i].get_basePt()) + L",";
-		cstr += SzToCStr(io.PICcontent[i].get_picSize())+L",";
-		cstr += SzToCStr(io.PICcontent[i].get_frmSize())+L",";
-		if(io.version == V5){
-			cstr += L"纹理集"+NumToCStr(io.PICcontent[i].get_TEXusing())+L":"+PtToCStr(io.PICcontent[i].get_TEXpointLT())+L"-"+PtToCStr(io.PICcontent[i].get_TEXpointRB());
-		}
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->EasyInsertItem(cstr,getIconPIC(io.PICcontent[i].get_format()));
 	}
 	if(io.indexCount > 0){
 		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemState(0, LVIS_FOCUSED | LVIS_SELECTED,LVIS_FOCUSED | LVIS_SELECTED);   
@@ -576,9 +598,10 @@ void CExRabbitDlg::updatePICterm(int pos){
 	//只更新pos
 	CHECK_VALID(pos>=0);
 	CHECK_VALID(pos<io.indexCount);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItem(pos,0,LVIF_IMAGE,NULL,getIconPIC(io.PICcontent[pos].get_format()),0,0,0);
+	GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItem(pos,0,LVIF_IMAGE,NULL,getIconPIC(io.PICcontent[pos].format),0,0,0);
 	if(io.PICcontent[pos].format == LINK){
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 1, FmtToCStr(io.PICcontent[pos].get_format(), io.version) + NumToCStr(io.PICcontent[pos].get_linkTo()));
+		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 0, NumToCStr(pos));
+		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 1, FmtToCStr(io.PICcontent[pos].format, io.version) + NumToCStr(io.PICcontent[pos].linkTo));
 		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 2, L"");
 		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 3, L"");
 		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 4, L"");
@@ -586,12 +609,13 @@ void CExRabbitDlg::updatePICterm(int pos){
 			GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 5, L"");
 		}
 	}else{
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 1, FmtToCStr(io.PICcontent[pos].get_format(), io.version));
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 2, PtToCStr(io.PICcontent[pos].get_basePt()));
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 3, SzToCStr(io.PICcontent[pos].get_picSize()));
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 4, SzToCStr(io.PICcontent[pos].get_frmSize()));
+		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 0, NumToCStr(pos));
+		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 1, FmtToCStr(io.PICcontent[pos].format, io.version));
+		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 2, PtToCStr(io.PICcontent[pos].basePt));
+		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 3, SzToCStr(io.PICcontent[pos].picSize));
+		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 4, SzToCStr(io.PICcontent[pos].frmSize));
 		if(io.version == V5){
-			GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 5, L"纹理集"+NumToCStr(io.PICcontent[pos].get_TEXusing())+L":"+PtToCStr(io.PICcontent[pos].get_TEXpointLT())+L"-"+PtToCStr(io.PICcontent[pos].get_TEXpointRB()));
+			GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 5, L"纹理集"+NumToCStr(io.PICcontent[pos].TEXusing)+L":"+PtToCStr(io.PICcontent[pos].TEXpointLT)+L"-"+PtToCStr(io.PICcontent[pos].TEXpointRB));
 		}
 	}
 }
@@ -602,10 +626,10 @@ void CExRabbitDlg::updateTEXlist(){
 	GET_CTRL(CGoodListCtrl, IDC_LIST_DDS)->DeleteAllItems();
 	for(int i=0;i<io.TEXcontent.size();i++){
 		cstr = L"#" + NumToCStr(i) + L",";
-		cstr += FmtToCStr((colorFormat)(int)io.TEXcontent[i].get_format(),V5)+L",";
-		cstr += NumToCStr(io.TEXcontent[i].get_width())+L"×";
-		cstr += NumToCStr(io.TEXcontent[i].get_height());
-		GET_CTRL(CGoodListCtrl, IDC_LIST_DDS)->EasyInsertItem(cstr,getIconPIC(io.TEXcontent[i].get_format()));
+		cstr += FmtToCStr((colorFormat)(int)io.TEXcontent[i].format,V5)+L",";
+		cstr += NumToCStr(io.TEXcontent[i].width)+L"×";
+		cstr += NumToCStr(io.TEXcontent[i].height);
+		GET_CTRL(CGoodListCtrl, IDC_LIST_DDS)->EasyInsertItem(cstr,getIconPIC(io.TEXcontent[i].format));
 	}
 }
 void CExRabbitDlg::setDefaultColor(){
@@ -619,7 +643,7 @@ void CExRabbitDlg::setDefaultColor(){
 	colorHSV ch;
 	for(int i=0;i<10;i++){
 		color clr;
-		clr.A = 0xFF;
+		clr.alpha = 0xFF;
 		ch.H = (i*36+350)%360;
 		ch.V = 1;
 		ch.S = 0.33;
@@ -782,7 +806,7 @@ void CExRabbitDlg::updateInfo(){
 	CString cstr;
 	cstr = L"文件名："+GetTail(fileNPKname)+L"\r\n";
 	cstr += L"大小："+NumToCStr(no.getSize())+L"字节\r\n";
-	cstr += L"IMG数："+NumToCStr(no.count);
+	cstr += L"条目数："+NumToCStr(no.count);
 	cstr += (crtIMGid  == -1) ? L"" : ( L"/"  + NumToCStr(crtIMGid));
 	GET_CTRL(CEdit, IDC_EDIT_NPK)->SetWindowText(cstr);
 
@@ -934,15 +958,10 @@ void CExRabbitDlg::OnNMClickListImg(NMHDR *pNMHDR, LRESULT *pResult)
 	if(row>=0){
 		crtIMGid = row;
 		fndIMGid = row;
-		long linkCheckIMG = no.IMGcheckLink(row);
-		if(linkCheckIMG >= 0){
-			crtIMGid = linkCheckIMG;
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(crtIMGid);
-		}
-		if(no.getVersion(row) == V1 && IDYES == MessageBox(L"这个IMG是V1喵，需要转化为V2喵？", L"提示喵", MB_YESNO)){
+		if(no.IMGgetVersion(row) == V1 && IDYES == MessageBox(L"这个IMG是V1喵，需要转化为V2喵？", L"提示喵", MB_YESNO)){
 			KoishiExpand::IMGobjectV1 io1;
 			stream s;
-			no.randomExtract(row, s);
+			no.extract(row, s);
 			if(!io1.load(s)){
 				MessageBox(L"转换失败喵！", L"提示喵");
 				return;
@@ -957,13 +976,14 @@ void CExRabbitDlg::OnNMClickListImg(NMHDR *pNMHDR, LRESULT *pResult)
 			io.release();
 			no.IMGextract(row, io);
 		}
-		fileIMGname = StrToCStr(no.content[row].imgname);
+		fileIMGname = StrToCStr(no.entry[row].comment);
 		switchIMGver(io.version);
 		updatePIClist();
 		updateTEXlist();
 		updateColorTable();
 	}
 	updateInfo();
+	canvasOperatePara.oldMatrixEnable = false;
 	*pResult = 0;
 }
 
@@ -994,6 +1014,7 @@ void CExRabbitDlg::OnNMClickListTex(NMHDR *pNMHDR, LRESULT *pResult)
 	crtTEXid = pNMListView->iItem;
 	updateInfo();
 	draw(true);
+	canvasOperatePara.oldMatrixEnable = false;
 	*pResult = 0;
 }
 
@@ -1023,6 +1044,7 @@ void CExRabbitDlg::OnNMClickListPic(NMHDR *pNMHDR, LRESULT *pResult)
 	crtPICid = pNMListView->iItem;
 	updateInfo();
 	draw();
+	canvasOperatePara.oldMatrixEnable = false;
 	*pResult = 0;
 }
 
@@ -1126,7 +1148,7 @@ void CExRabbitDlg::OnLvnKeydownListImg(NMHDR *pNMHDR, LRESULT *pResult)
 	if(row>=0){
 		io.release();
 		no.IMGextract(row, io);
-		fileIMGname = StrToCStr(no.content[row].imgname);
+		fileIMGname = StrToCStr(no.entry[row].comment);
 		switchIMGver(io.version);
 		updatePIClist();
 		updateTEXlist();
@@ -1348,8 +1370,17 @@ void CExRabbitDlg::OnStnClickedLogo()
 }
 
 int CExRabbitDlg::getIconIMG(IMGversion iv){
-	int iconList[10] = {0, 2, 3, 0, 4, 5, 6, 0, 0, 0};
-	return iconList[iv];
+	if(iv == VUDEF)
+		return 0;
+	if(iv == VUKNOWN)
+		return 2;
+	if(iv == VSOUND)
+		return 3;
+	if(iv <= 6){
+		TRACE(NumToCStr(iv));
+		return iv + 3;
+	}
+	return 0;
 }
 int CExRabbitDlg::getIconPIC(colorFormat cf){
 	int iconList[21] = {0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0, 0, 3, 2, 1, 4, 6, 7, 8};
@@ -1358,7 +1389,7 @@ int CExRabbitDlg::getIconPIC(colorFormat cf){
 			return 5;
 		}
 	}
-	return iconList[cf];
+	return iconList[cf%21];
 }
 void CExRabbitDlg::getSelected(CGoodListCtrl *listCtrl, int highLine, int targetPara, std::vector<int> &selected){
 	selected.clear();
@@ -1615,11 +1646,11 @@ void CExRabbitDlg::OnModify02()
 	OnModify01();
 	CString defExt = _T("IMG文件(*.IMG)|*.IMG");
 	CString extFilter = _T("IMG文件(*.IMG)|*.IMG||");
-	CFileDialog dlg(false, defExt, Underlining(StrToCStr(no.content[crtIMGid].imgname)), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
+	CFileDialog dlg(false, defExt, Underlining(StrToCStr(no.entry[crtIMGid].comment)), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	CString fileName1;
 	if(dlg.DoModal() == IDOK){
 		fileName1 = dlg.GetPathName();
-		if(no.randomExtract(crtIMGid, CStrToStr(fileName1))){
+		if(no.extract(crtIMGid, CStrToStr(fileName1))){
 			MessageBox(_T("保存完毕喵！"),L"提示喵");
 		}else{
 			MessageBox(_T("保存失败喵！"),L"提示喵");
@@ -1686,10 +1717,7 @@ UINT CExRabbitDlg::threadMix(PVOID para){
 			pi.picSize = size(1,1);
 			pi.frmSize = size(1,1);
 			s.allocate(4);
-			s.push((BYTE)0);
-			s.push((BYTE)0);
-			s.push((BYTE)0);
-			s.push((BYTE)0);
+			s.pushDWord(0);
 			newIO.PICpush(pi, s);
 			s.release();
 			continue;
@@ -1708,8 +1736,8 @@ UINT CExRabbitDlg::threadMix(PVOID para){
 			if(mBottom[i]>tBottom)
 				tBottom = mBottom[i];
 		}
-		ptLT.set(tLeft, tTop);
-		ptRB.set(tRight, tBottom);
+		ptLT = point(tLeft, tTop);
+		ptRB = point(tRight, tBottom);
 		matf.create(tBottom-tTop+1, tRight-tLeft+1);
 		for(i=0;i<imgCount;i++){
 			if(ioList[i].PICgetInfo(k, pi)){
@@ -1733,7 +1761,7 @@ UINT CExRabbitDlg::threadMix(PVOID para){
 			}
 		}
 		newIO.PICpreprocess(matf, s, pi);
-		pi.set_basePt(ptLT);
+		pi.basePt = ptLT;
 		newIO.PICpush(pi, s);
 		matf.destory();
 		s.release();
@@ -1751,6 +1779,7 @@ UINT CExRabbitDlg::threadDraw(PVOID para){
 	CExRabbitDlg* dlg = (CExRabbitDlg*)para;
 	if(dlg->drawing)
 		return 0;
+	//TRACE("draw\n");
 	dlg->drawing = 1;
 	structDrawPara SDP = dlg->drawPara;
 	int picRow = dlg->crtPICid;
@@ -1790,9 +1819,9 @@ UINT CExRabbitDlg::threadDraw(PVOID para){
 			for(j = 0;j<content.getHeight();j++){
 				color clr = content.getElem(j, i);
 				if(i<content.getWidth()*0.3 || j < content.getHeight()*0.3){
-					clr.A = MIN(0xB0*j/(0.3*content.getHeight()), 0xB0*i/(0.3*content.getWidth()));
+					clr.alpha = MIN(0xB0*j/(0.3*content.getHeight()), 0xB0*i/(0.3*content.getWidth()));
 				}else{
-					clr.A = 0xB0;
+					clr.alpha = 0xB0;
 				}
 				content.setElem(j,i,clr);
 			}
@@ -1906,7 +1935,7 @@ UINT CExRabbitDlg::threadDraw(PVOID para){
 				content.zoom(SDP.zoomRate);
 				for(i = 0;i<content.getElemCount();i++){
 					color clr = content.getElem(i);
-					clr.A /= 2;
+					clr.alpha /= 2;
 					content.setElem(i, clr);
 				}
 				canvas.putFore(content, SDP.mixMode, po.basePt*SDP.zoomRate+SDP.basePoint);
@@ -2006,6 +2035,7 @@ UINT CExRabbitDlg::playThread(PVOID para){
 				dlg->crtPICid = row;
 				dlg->updateInfo();
 				dlg->draw();
+				
 				Sleep(100);
 				if(dlg->playing == 0){
 					break;
@@ -2026,7 +2056,7 @@ void CExRabbitDlg::OnBnClickedToolButton1(){
     pPopup = menu.GetSubMenu(0); 
     CPoint myPoint;  
     ClientToScreen(&myPoint);  
-    GetCursorPos(&myPoint); //鼠标位置  
+    GetCursorPos(&myPoint); //鼠标位置
     pPopup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, myPoint.x, myPoint.y, this); 
 }
 void CExRabbitDlg::OnBnClickedToolButton2(){
@@ -2039,6 +2069,7 @@ void CExRabbitDlg::OnBnClickedToolButton3(){
 	// TODO: 在此添加控件通知处理程序代码
 	drawPara.entireTextureMode = !drawPara.entireTextureMode;
 	canvasOperatePara.canvasOperation = CANVAS_SHOW;
+	canvasOperatePara.oldMatrixEnable = false;
 	draw();
 }
 void CExRabbitDlg::OnBnClickedToolButton4(){
@@ -2053,17 +2084,20 @@ void CExRabbitDlg::OnBnClickedToolButton4(){
 void CExRabbitDlg::OnBnClickedToolButton5(){
 	//TODO: 播放
 	canvasOperatePara.canvasOperation = CANVAS_SHOW;
+	canvasOperatePara.oldMatrixEnable = false;
 	playing = !playing;
 	changeToolButtonStatus();
 }
 void CExRabbitDlg::OnBnClickedToolButton6(){
 	// TODO: 拖动
 	canvasOperatePara.canvasOperation = CANVAS_DRAG;
+	canvasOperatePara.oldMatrixEnable = false;
 	changeToolButtonStatus();
 }
 void CExRabbitDlg::OnBnClickedToolButton7()
 {	//TODO: 缩放
 	canvasOperatePara.canvasOperation = CANVAS_ZOOM;
+	canvasOperatePara.oldMatrixEnable = false;
 	changeToolButtonStatus();
 }
 void CExRabbitDlg::OnBnClickedToolButton8(){
@@ -2073,6 +2107,7 @@ void CExRabbitDlg::OnBnClickedToolButton8(){
 		return;
 	}
 	canvasOperatePara.canvasOperation = CANVAS_MOVE;
+	canvasOperatePara.oldMatrixEnable = false;
 	changeToolButtonStatus();
 }
 void CExRabbitDlg::OnBnClickedToolButton9(){
@@ -2086,6 +2121,7 @@ void CExRabbitDlg::OnBnClickedToolButton9(){
 		return;
 	}
 	canvasOperatePara.canvasOperation = CANVAS_CUT;
+	canvasOperatePara.oldMatrixEnable = false;
 	changeToolButtonStatus();
 }
 void CExRabbitDlg::OnBnClickedToolButton10(){
@@ -2100,6 +2136,7 @@ void CExRabbitDlg::OnBnClickedToolButton10(){
 	}
 	if(canvasOperatePara.canvasOperation != CANVAS_BRUSH){
 		canvasOperatePara.canvasOperation = CANVAS_BRUSH;
+		canvasOperatePara.oldMatrixEnable = false;
 	}else{
 		TinySetBrush dlg;
 		dlg.size = canvasOperatePara.brushSize;
@@ -2121,6 +2158,7 @@ void CExRabbitDlg::OnBnClickedToolButton11(){
 		MessageBox(L"不能对V5版本的IMG贴图进行画线条喵！",L"提示喵");
 		return;
 	}
+	canvasOperatePara.oldMatrixEnable = false;
 	canvasOperatePara.canvasOperation = CANVAS_DRAWLINE;
 	changeToolButtonStatus();
 }
@@ -2134,6 +2172,7 @@ void CExRabbitDlg::OnBnClickedToolButton12(){
 		MessageBox(L"不能对V5版本的IMG贴图进行画矩形喵！",L"提示喵");
 		return;
 	}
+	canvasOperatePara.oldMatrixEnable = false;
 	canvasOperatePara.canvasOperation = CANVAS_DRAWRECT;
 	changeToolButtonStatus();
 }
@@ -2148,6 +2187,7 @@ void CExRabbitDlg::OnBnClickedToolButton13(){
 		return;
 	}
 	if(canvasOperatePara.canvasOperation != CANVAS_ERASE){
+		canvasOperatePara.oldMatrixEnable = false;
 		canvasOperatePara.canvasOperation = CANVAS_ERASE;
 	}else{
 		TinySetBrush dlg;
@@ -2181,6 +2221,7 @@ void CExRabbitDlg::OnBnClickedToolButton14(){
 		MessageBox(L"请先暂停播放喵！", L"提示喵");
 		return;
 	}
+	canvasOperatePara.oldMatrixEnable = false;
 	canvasOperatePara.canvasOperation = CANVAS_PICK;
 	changeToolButtonStatus();
 }
@@ -2196,6 +2237,7 @@ void CExRabbitDlg::OnBnClickedToolButton15(){
 		MessageBox(L"不能对V5版本的IMG贴图进行打标喵！",L"提示喵");
 		return;
 	}
+	canvasOperatePara.oldMatrixEnable = false;
 	canvasOperatePara.canvasOperation = CANVAS_MARK;
 	changeToolButtonStatus();
 }
@@ -2642,6 +2684,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			break;
 		case CANVAS_MOUSE_LEFT_PRESS:
 			canvasOperatePara.canvasOperating = true;
+			canvasOperatePara.oldMatrixEnable = true;
 			getMouseTrueAxis(truePt);
 			canvasOperatePara.drawnPoint.clear();
 			{
@@ -2659,6 +2702,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			break;
 		case CANVAS_MOUSE_LEFT_DRAG:
 			canvasOperatePara.currentCursor = 8;
+			canvasOperatePara.oldMatrixEnable = true;
 			getMouseTrueAxis(truePt);
 			{
 				int size = canvasOperatePara.brushSize;
@@ -2705,6 +2749,8 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			break;
 		case CANVAS_MOUSE_RIGHT_PRESS:
 			if(!canvasOperatePara.canvasOperating){
+				if(!canvasOperatePara.oldMatrixEnable)
+					break;
 				matrix mat;
 				stream s;
 				PICinfo pi;
@@ -2750,6 +2796,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			break;
 		case CANVAS_MOUSE_LEFT_PRESS:
 			canvasOperatePara.canvasOperating = true;
+			canvasOperatePara.oldMatrixEnable = true;
 			getMouseTrueAxis(truePt);
 			canvasOperatePara.drawnPoint.clear();
 			{
@@ -2767,6 +2814,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			break;
 		case CANVAS_MOUSE_LEFT_DRAG:
 			canvasOperatePara.currentCursor = 9;
+			canvasOperatePara.oldMatrixEnable = true;
 			getMouseTrueAxis(truePt);
 			{
 				int size = canvasOperatePara.brushSize;
@@ -2800,7 +2848,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 					canvasOperatePara.oldMatrix = mat;
 					uchar emptyID = 0;
 					for(int i = 0;i<cl.size();i++){
-						if(cl[i].A == 0){
+						if(cl[i].alpha == 0){
 							emptyID = i;
 						}
 					}
@@ -2819,6 +2867,8 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			break;
 		case CANVAS_MOUSE_RIGHT_PRESS:
 			if(!canvasOperatePara.canvasOperating){
+				if(!canvasOperatePara.oldMatrixEnable)
+					break;
 				matrix mat;
 				stream s;
 				PICinfo pi;
@@ -2850,11 +2900,13 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			break;
 		case CANVAS_MOUSE_LEFT_PRESS:
 			canvasOperatePara.canvasOperating = true;
+			canvasOperatePara.oldMatrixEnable = true;
 			getMouseTrueAxis(truePt);
 			canvasOperatePara.startPoint = truePt;
 			break;
 		case CANVAS_MOUSE_LEFT_DRAG:
 			canvasOperatePara.currentCursor = 2;
+			canvasOperatePara.oldMatrixEnable = true;
 			getMouseTrueAxis(truePt);
 			canvasOperatePara.movePoint = truePt;
 			draw();
@@ -2888,6 +2940,8 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			break;
 		case CANVAS_MOUSE_RIGHT_PRESS:
 			if(!canvasOperatePara.canvasOperating){
+				if(!canvasOperatePara.oldMatrixEnable)
+					break;
 				matrix mat;
 				stream s;
 				PICinfo pi;
@@ -2919,11 +2973,13 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			break;
 		case CANVAS_MOUSE_LEFT_PRESS:
 			canvasOperatePara.canvasOperating = true;
+			canvasOperatePara.oldMatrixEnable = true;
 			getMouseTrueAxis(truePt);
 			canvasOperatePara.startPoint = truePt;
 			break;
 		case CANVAS_MOUSE_LEFT_DRAG:
 			canvasOperatePara.currentCursor = 2;
+			canvasOperatePara.oldMatrixEnable = true;
 			getMouseTrueAxis(truePt);
 			canvasOperatePara.movePoint = truePt;
 			draw();
@@ -2957,6 +3013,8 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			break;
 		case CANVAS_MOUSE_RIGHT_PRESS:
 			if(!canvasOperatePara.canvasOperating){
+				if(!canvasOperatePara.oldMatrixEnable)
+					break;
 				matrix mat;
 				stream s;
 				PICinfo pi;
@@ -2991,6 +3049,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 				getMouseTrueAxis(truePt);
 				TinyAddMark dlg;
 				if(IDOK == dlg.DoModal()){
+					canvasOperatePara.oldMatrixEnable = true;
 					str markText = dlg.text;
 					matrix mat;
 					stream s;
@@ -3030,6 +3089,8 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			break;
 		case CANVAS_MOUSE_RIGHT_PRESS:
 			if(!canvasOperatePara.canvasOperating){
+				if(!canvasOperatePara.oldMatrixEnable)
+					break;
 				matrix mat;
 				stream s;
 				PICinfo pi;
@@ -3171,7 +3232,7 @@ void CExRabbitDlg::OnMenuColorTableDeleteOne(){
 		for(int i = 0;i<cl.size();i++){
 			int id = cl.size() - 1 - i;
 			if(colorOperatePara.isChosen[id]){
-				colorOperatePara.v2Color.erase(cl.begin() + id);
+				colorOperatePara.v2Color.erase(colorOperatePara.v2Color.begin() + id);
 				cl.erase(cl.begin() + id);
 			}
 		}
@@ -3424,7 +3485,7 @@ UINT CExRabbitDlg::ThreadPictureInsert(void*context){
 	matrix mPic;
 	stream sPic;
 	PICinfo pInfo;
-	KoishiDDS::DDS DDSHelper;
+	DDSobject DDSHelper;
 	//确定处理目标
 	switch(para->operate){
 	case 1:
@@ -4085,7 +4146,7 @@ UINT CExRabbitDlg::ThreadPictureGradient(void*context){
 				color clr = mPic.getElem(n);
 				color newClr = KoishiImageTool::gradient(clr, keyColorList, para->useProperty);
 				if(para->remainAlpha){
-					newClr.A = clr.A;
+					newClr.alpha = clr.alpha;
 				}
 				mPic.setElem(n, newClr);
 			}
@@ -4102,7 +4163,7 @@ UINT CExRabbitDlg::ThreadPictureGradient(void*context){
 			color clr = dlg->cl[i];
 			color newClr = KoishiImageTool::gradient(clr, keyColorList, para->useProperty);
 			if(para->remainAlpha){
-				newClr.A = clr.A;
+				newClr.alpha = clr.alpha;
 			}
 			dlg->cl[i] = newClr;
 			dlg->io.CLRreplace(i, newClr, GET_DLG_CTRL(CComboBox, IDC_COMBO_PRO)->GetCurSel());
@@ -4162,7 +4223,7 @@ UINT CExRabbitDlg::ThreadPictureColor(void*context){
 			clr.moveR((para->R>=0)?para->R*(0xff-clr.R)/100:para->R*clr.R/100);
 			clr.moveG((para->R>=0)?para->G*(0xff-clr.G)/100:para->G*clr.G/100);
 			clr.moveB((para->R>=0)?para->B*(0xff-clr.B)/100:para->B*clr.B/100);
-			clr.moveA((para->a>=0)?para->a*(0xff-clr.A)/100:para->a*clr.A/100);
+			clr.moveA((para->a>=0)?para->a*(0xff-clr.alpha)/100:para->a*clr.alpha/100);
 			mPic.setElem(n, clr);
 		}
 		dlg->io.PICpreprocess(mPic, sPic, pInfo, pInfo.format);
@@ -4244,7 +4305,7 @@ UINT CExRabbitDlg::ThreadPictureMark(void*context){
 				markString += NumToCStr(id);
 			}
 			if(subString.Left(1) == L"I"){
-				markString += GetTail(StrToCStr(dlg->no.content[dlg->crtIMGid].imgname));
+				markString += GetTail(StrToCStr(dlg->no.entry[dlg->crtIMGid].comment));
 			}
 			if(subString.Left(1) == L"X"){
 				markString += NumToCStr(pInfo.basePt.X);
@@ -4371,7 +4432,7 @@ UINT CExRabbitDlg::ThreadPictureGetGIF(void*context){
 	}
 	dlg->bar.setInfo(L"正在生成GIF喵……",targetList.size());
 	KoishiImageTool::GIF::GIFobject go;
-	go.input(matList, 100, dlg->no.content[dlg->crtIMGid].imgname, targetList);
+	go.input(matList, dlg->profile.miniSecPerFrame, dlg->no.entry[dlg->crtIMGid].comment, targetList);
 	CString fileName = dlg->profile.getOutputPath(dlg->fileNPKname,dlg->fileIMGname)+NumToCStr(targetList[0])+L".GIF";
 	go.makeFile(CStrToStr(fileName));
 	dlg->processing = 0;
@@ -4427,7 +4488,7 @@ UINT CExRabbitDlg::ThreadTextureInsert(void*context){
 	matrix mPic;
 	stream sPic;
 	TEXinfo tInfo;
-	KoishiDDS::DDS DDSHelper;
+	DDSobject DDSHelper;
 	//确定处理目标
 	switch(para->operate){
 	case 1:
@@ -4454,8 +4515,8 @@ UINT CExRabbitDlg::ThreadTextureInsert(void*context){
 		sOrigin.loadFile(CStrToStr(para->fileName));
 		sOrigin.ZLIBcompress(sCompressed);
 		DDSHelper.load(sOrigin);
-		tInfo.dataLength = sOrigin.getLen();
-		tInfo.compressedLength = sCompressed.getLen();
+		tInfo.dataLength = sOrigin.length;
+		tInfo.compressedLength = sCompressed.length;
 		tInfo.format = (colorFormat)(DDS_DXT1 + ((DDSHelper.getHeader()->pixelFormat.fourCC - 0x31545844) >> 25));
 		tInfo.height = DDSHelper.getHeader()->height;
 		tInfo.width = DDSHelper.getHeader()->width;
@@ -4620,9 +4681,9 @@ UINT CExRabbitDlg::ThreadImageExtract(void*context){
 	dlg->bar.show(targetList.size()-1);
 	for(int i=0;i<targetList.size();i++){
 		int id = targetList[i];
-		dlg->bar.setInfo(L"正在提取"+GetTail(StrToCStr(dlg->no.content[id].imgname))+L"喵……", i);
-		fileName = filePath+Underlining(StrToCStr(dlg->no.content[id].imgname));
-		dlg->no.randomExtract(id, CStrToStr(fileName));
+		dlg->bar.setInfo(L"正在提取"+GetTail(StrToCStr(dlg->no.entry[id].comment))+L"喵……", i);
+		fileName = filePath+Underlining(StrToCStr(dlg->no.entry[id].comment));
+		dlg->no.extract(id, CStrToStr(fileName));
 	}
 	dlg->MessageBox(L"全部提取完毕喵！已保存到"+dlg->profile.getOutputPath(dlg->fileNPKname)+L"了喵！",L"提示喵");
 	dlg->bar.hide();
@@ -4635,10 +4696,21 @@ void CExRabbitDlg::OnMenuImageSave(){
 	CHECK_VALID(crtIMGid >= 0);
 	CString defExt = _T("IMG文件(*.IMG)|*.IMG");
 	CString extFilter = _T("IMG文件(*.IMG)|*.IMG||");
-	CFileDialog dlg(false, defExt, Underlining(StrToCStr(no.content[crtIMGid].imgname)), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
+	CFileDialog dlg(false, defExt, Underlining(StrToCStr(no.entry[crtIMGid].comment)), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	if(dlg.DoModal() == IDOK){
-		no.randomExtract(crtIMGid, CStrToStr(dlg.GetPathName()));
+		no.extract(crtIMGid, CStrToStr(dlg.GetPathName()));
 		MessageBox(_T("保存完毕喵！"));
+	}
+}
+
+void CExRabbitDlg::OnMenuImageInsertOther(){
+	// TODO: 在此添加命令处理程序代码
+	CString defExt = _T("所有文件(*.*)|*.*");
+	CString extFilter = _T("所有文件(*.*)|*.*||");
+	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, extFilter, this);
+	if(dlg.DoModal() == IDOK){
+		no.insert(crtIMGid, CStrToStr(dlg.GetPathName()),shorten(CStrToStr(dlg.GetPathName())));
+		updateIMGlist();
 	}
 }
 
@@ -4710,7 +4782,7 @@ UINT CExRabbitDlg::ThreadImageInsert(void*context){
 			int countSuccess = 0;
 			int conflict = -1;
 			for(int i = 0;i<newNO.count; i++){
-				dlg->bar.setInfo(L"当前插入"+GetTail(StrToCStr(newNO.content[i].imgname))+
+				dlg->bar.setInfo(L"当前插入"+GetTail(StrToCStr(newNO.entry[i].comment))+
 					L"喵……(成功"+NumToCStr(countSuccess)+
 					L"个,跳过"+NumToCStr(countSkip)+
 					L"个,替换"+NumToCStr(countReplace)+
@@ -4723,15 +4795,15 @@ UINT CExRabbitDlg::ThreadImageInsert(void*context){
 				}
 				conflict =  -1;
 				for(int j = 0;j<dlg->no.count;j++){
-					CString s1 = GetTail(StrToCStr(newNO.content[i].imgname));
-					CString s2 = GetTail(StrToCStr(dlg->no.content[j].imgname));
+					CString s1 = GetTail(StrToCStr(newNO.entry[i].comment));
+					CString s2 = GetTail(StrToCStr(dlg->no.entry[j].comment));
 					if(s1 == s2){
 						conflict = j;
 						break;
 					}
 				}
 				if(conflict < 0){
-					dlg->no.IMGinsert(insertPos + countSuccess, newIO, newNO.content[i].imgname);
+					dlg->no.IMGinsert(insertPos + countSuccess, newIO, newNO.entry[i].comment);
 					countSuccess ++;
 				}else{
 					//冲突处理
@@ -4744,7 +4816,7 @@ UINT CExRabbitDlg::ThreadImageInsert(void*context){
 						countReplace ++;
 						break;
 					case 3:
-						dlg->no.IMGinsert(insertPos + countSuccess, newIO, newNO.content[i].imgname+"(new)");
+						dlg->no.IMGinsert(insertPos + countSuccess, newIO, newNO.entry[i].comment+"(new)");
 						countSuccess ++;
 						break;
 					}
@@ -4793,7 +4865,7 @@ UINT CExRabbitDlg::ThreadImageInsert(void*context){
 					dlg->bar.setMax(newNO.count);
 					for(int i = 0;i<newNO.count; i++){
 						dlg->bar.setInfo(L"当前插入"+fileList[fileID] +
-							L"中的" + GetTail(StrToCStr(newNO.content[i].imgname))+
+							L"中的" + GetTail(StrToCStr(newNO.entry[i].comment))+
 							L"喵……(成功"+NumToCStr(countSuccess)+
 							L"个,跳过"+NumToCStr(countSkip)+
 							L"个,替换"+NumToCStr(countReplace)+
@@ -4805,15 +4877,15 @@ UINT CExRabbitDlg::ThreadImageInsert(void*context){
 						}
 						conflict =  -1;
 						for(int j = 0;j<dlg->no.count;j++){
-							CString s1 = GetTail(StrToCStr(newNO.content[i].imgname));
-							CString s2 = GetTail(StrToCStr(dlg->no.content[j].imgname));
+							CString s1 = GetTail(StrToCStr(newNO.entry[i].comment));
+							CString s2 = GetTail(StrToCStr(dlg->no.entry[j].comment));
 							if(s1 == s2){
 								conflict = j;
 								break;
 							}
 						}
 						if(conflict < 0){
-							dlg->no.IMGinsert(insertPos + totalSuccess, newIO, newNO.content[i].imgname);
+							dlg->no.IMGinsert(insertPos + totalSuccess, newIO, newNO.entry[i].comment);
 							countSuccess ++;
 							totalSuccess ++;
 						}else{
@@ -4827,7 +4899,7 @@ UINT CExRabbitDlg::ThreadImageInsert(void*context){
 								countReplace ++;
 								break;
 							case 3:
-								dlg->no.IMGinsert(insertPos + totalSuccess, newIO, newNO.content[i].imgname+"(new)");
+								dlg->no.IMGinsert(insertPos + totalSuccess, newIO, newNO.entry[i].comment+"(new)");
 								countSuccess ++;
 								totalSuccess ++;
 								break;
@@ -4898,7 +4970,7 @@ UINT CExRabbitDlg::ThreadImageDelete(void*context){
 	dlg->bar.show(targetList.size()-1);
 	for(int i=0;i<targetList.size();i++){
 		int id = targetList[targetList.size()-i-1];
-		dlg->bar.setInfo(L"正在删除"+GetTail(StrToCStr(dlg->no.content[id].imgname))+L"喵……", i);
+		dlg->bar.setInfo(L"正在删除"+GetTail(StrToCStr(dlg->no.entry[id].comment))+L"喵……", i);
 		dlg->no.IMGremove(id);
 	}
 	dlg->bar.hide();
@@ -4912,12 +4984,52 @@ void CExRabbitDlg::OnMenuImageRename(){
 	// TODO: 在此添加命令处理程序代码
 	CHECK_VALID(crtIMGid>=0);
 	ModalRename dlg;
-	dlg.oldName = StrToCStr(no.content[crtIMGid].imgname);
+	dlg.oldName = StrToCStr(no.entry[crtIMGid].comment);
 	if(IDOK == dlg.DoModal()){
-		no.IMGrename(crtIMGid,  CStrToStr(dlg.newName));
+		no.rename(crtIMGid,  CStrToStr(dlg.newName));
 		updateInfo();
 		GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(crtIMGid, 0, GetTail(dlg.newName));
 		fileIMGname = dlg.newName;
+	}
+}
+
+void CExRabbitDlg::OnMenuImageInsertCopy(){
+	// TODO: 在此添加命令处理程序代码
+	CHECK_VALID(crtIMGid>=0);
+	stream sr;
+	str newComment = no.entry[crtIMGid].comment;
+	if(newComment.size() > 4 && newComment[newComment.size() - 4 ] == '.'){
+		newComment.insert(newComment.end() - 4, '2');
+	}else{
+		newComment.push_back('2');
+	}
+	no.extract(crtIMGid, sr);
+	no.insert(crtIMGid + 1, sr, newComment);
+	updateIMGlist();
+}
+
+
+void CExRabbitDlg::OnMenuImageInsertLink(){
+	// TODO: 在此添加命令处理程序代码
+	CHECK_VALID(crtIMGid>=0);
+	str newComment = no.entry[crtIMGid].comment;
+	if(newComment.size() > 4 && newComment[newComment.size() - 4 ] == '.'){
+		newComment.insert(newComment.end() - 4, '2');
+	}else{
+		newComment.push_back('2');
+	}
+	no.insertLink(crtIMGid + 1, crtIMGid, newComment); 
+	updateIMGlist();
+}
+
+
+void CExRabbitDlg::OnMenuImageDelink(){
+	// TODO: 在此添加命令处理程序代码
+	CHECK_VALID(crtIMGid>=0);
+	if(no.delink(crtIMGid)){
+		updateIMGlist();
+	}else{
+		MessageBox(L"并不是引用IMG喵！");
 	}
 }
 
@@ -4939,7 +5051,7 @@ UINT CExRabbitDlg::ThreadImageHide(void*context){
 	dlg->bar.show(targetList.size()-1);
 	for(int i = 0; i<targetList.size();i++){
 		int id = targetList[targetList.size() - 1 - i];
-		dlg->bar.setInfo(L"正在隐藏"+GetTail(StrToCStr(dlg->no.content[id].imgname))+L"喵……", i);
+		dlg->bar.setInfo(L"正在隐藏"+GetTail(StrToCStr(dlg->no.entry[id].comment))+L"喵……", i);
 		IMGobject oldIO, newIO;
 		if(!dlg->no.IMGextract(id, oldIO)){
 			continue;
@@ -4976,11 +5088,12 @@ UINT CExRabbitDlg::ThreadImageTransform(void*context){
 	dlg->bar.show(targetList.size()-1);
 	for(int i = 0; i<targetList.size();i++){
 		int id = targetList[targetList.size() - 1 - i];
-		dlg->bar.setInfo(L"正在转换"+GetTail(StrToCStr(dlg->no.content[id].imgname))+L"喵……", i);
+		dlg->bar.setInfo(L"正在转换"+GetTail(StrToCStr(dlg->no.entry[id].comment))+L"喵……", i);
 		std::vector<IMGobject> ioOutList;
 		IMGobject ioIn;
-		if(!dlg->no.IMGextract(id, ioIn))
+		if(!dlg->no.IMGextract(id, ioIn)){
 			continue;
+		}
 		switch(para.version){
 		case V2:
 			ioIn.convertToV2(ioOutList, para.outputFormat);
@@ -5000,7 +5113,7 @@ UINT CExRabbitDlg::ThreadImageTransform(void*context){
 				dlg->no.IMGreplace(id, ioOutList[p]);
 				GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(id, 0, LVIF_IMAGE, NULL, dlg->getIconIMG(para.version),0,0,0);
 			}else{
-				str newName = KoishiAvatar::imgAddV4Num(dlg->no.content[id].imgname, p);
+				str newName = KoishiAvatar::imgAddV4Num(dlg->no.entry[id].comment, p);
 				dlg->no.IMGinsert(id + p, ioOutList[p], newName);
 				GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_IMG)->InsertItem(id+p, GetTail(StrToCStr(newName)),dlg->getIconIMG(para.version));
 			}
@@ -5040,21 +5153,24 @@ void CExRabbitDlg::OnMenuImageChooseReverse(){
 void CExRabbitDlg::OnMenuImageMoveUp(){
 	int row = crtIMGid;
 	CHECK_VALID(row>=1);
-	IMGobject ioTemp;
-	no.IMGextract(row, ioTemp);
-	str ioName = no.content[row].imgname;
-	no.IMGremove(row);
-	no.IMGinsert(row-1, ioTemp, ioName);
-	ioTemp.release();
-	CString s1 = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetItemText(row, 0);
-	CString s2 = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetItemText(row-1, 0);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(row,0,s2);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(row-1,0,s1);
+	NPKentry ne = no.entry[row];
+	no.entry[row] = no.entry[row - 1];
+	no.entry[row - 1] = ne;
+	for(int i = 0;i<=1;i++){
+		int id = row - i;
+		int li = no.checkLink(id);
+		if(li == id){
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(id, 0, GetTail(StrToCStr(no.entry[id].comment)));
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconIMG((IMGversion)no.IMGgetVersion(id)),0,0,0);
+		}else{
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(id, 0, GetTail(StrToCStr(no.entry[id].comment)
+				+ L"["+GetTail(StrToCStr(no.entry[li].comment))+L"]"));
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(id, 0, LVIF_IMAGE, NULL, 1, 0,0,0);
+		}
+	}
 	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(row - 1);
 	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemState(row - 1,LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
 	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemState(row ,0, LVIS_SELECTED|LVIS_FOCUSED);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(row-1, 0, LVIF_IMAGE, NULL, getIconIMG((IMGversion)no.getVersion(row-1)),0,0,0);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(row, 0, LVIF_IMAGE, NULL, getIconIMG((IMGversion)no.getVersion(row)),0,0,0);
 	crtIMGid = row - 1;
 	updateInfo();
 }
@@ -5063,21 +5179,24 @@ void CExRabbitDlg::OnMenuImageMoveDown(){
 	int row = crtIMGid;
 	CHECK_VALID(row>=0);
 	CHECK_VALID(row<no.count);
-	IMGobject ioTemp;
-	no.IMGextract(row, ioTemp);
-	str ioName = no.content[row].imgname;
-	no.IMGremove(row);
-	no.IMGinsert(row+1, ioTemp, ioName);
-	ioTemp.release();
-	CString s1 = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetItemText(row, 0);
-	CString s2 = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetItemText(row+1, 0);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(row,0,s2);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(row+1,0,s1);
+	NPKentry ne = no.entry[row];
+	no.entry[row] = no.entry[row + 1];
+	no.entry[row + 1] = ne;
+	for(int i = 0;i<=1;i++){
+		int id = row + i;
+		int li = no.checkLink(id);
+		if(li == id){
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(id, 0, GetTail(StrToCStr(no.entry[id].comment)));
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconIMG((IMGversion)no.IMGgetVersion(id)),0,0,0);
+		}else{
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(id, 0, GetTail(StrToCStr(no.entry[id].comment)
+				+ L"["+GetTail(StrToCStr(no.entry[li].comment))+L"]"));
+			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(id, 0, LVIF_IMAGE, NULL, 1, 0,0,0);
+		}
+	}
 	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(row + 1);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemState(row+1,LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
+	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemState(row + 1,LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
 	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemState(row ,0, LVIS_SELECTED|LVIS_FOCUSED);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(row+1, 0, LVIF_IMAGE, NULL, getIconIMG((IMGversion)no.getVersion(row+1)),0,0,0);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(row, 0, LVIF_IMAGE, NULL, getIconIMG((IMGversion)no.getVersion(row)),0,0,0);
 	crtIMGid = row + 1;
 	updateInfo();
 }
@@ -5090,12 +5209,13 @@ void CExRabbitDlg::OnMenuImageAutoSort(){
 UINT CExRabbitDlg::ThreadImageAutoSort(void*context){
 	CExRabbitDlg *dlg = (CExRabbitDlg *)context;
 	int i,j;
-	std::vector<int> iList;
-	std::vector<int> newQueue;
+	queue wList1, wList2, qList;
+	std::vector<NPKentry> oldEntry = dlg->no.entry;
+	//计算每个部件的权重
 	for(i=0;i<dlg->no.count;i++){
 		avatar av;
-		avatarLayer al;
-		parseAvatarName(KoishiAvatar::shorten(dlg->no.content[i].imgname), av, al);
+		avatarLayer al = ALAYER_UD;
+		parseAvatarName(KoishiAvatar::shorten(dlg->no.entry[i].comment), av, al);
 		//计算WEIGHT
 		int weight = 0;
 		for(j=0;j<TOTAL_LAYER_COUNT;j++){
@@ -5103,29 +5223,32 @@ UINT CExRabbitDlg::ThreadImageAutoSort(void*context){
 			avatarLayer ly;
 			getMQData(j, pt, ly);
 			if(av.part == pt && ly == al){
-				weight = TOTAL_LAYER_COUNT-1-j;
+				weight = TOTAL_LAYER_COUNT - 1 - j;
 				break;
 			}
 		}
-		iList.push_back(weight);
+		wList1.push_back(weight);
 	}
-	newQueue.clear();
-	for(i=0;i<=63;i++){
-		for(j=0;j<iList.size();j++){
-			if(iList[j] == i){
-				newQueue.push_back(j);
+	//插入排序
+	for(i = 0;i<wList1.size();i++){
+		j = 0;
+		while(j<wList2.size()){
+			if(wList1[i] < wList2[j]){
+				j ++;
+			}else{
+				break;
 			}
 		}
+		if(j < wList2.size()){
+			wList2.insert(wList2.begin() + j, wList1[i]);
+			qList.insert(qList.begin() + j, i);
+		}else{
+			wList2.push_back(wList1[i]);
+			qList.push_back(i);
+		}
 	}
-	IMGobject io;
-	for(i=0;i<newQueue.size();i++){
-		dlg->no.IMGextract(newQueue[i], io);
-		dlg->no.IMGpush(io, dlg->no.content[newQueue[i]].imgname);
-		io.release();
-	}
-	for(i=0;i<newQueue.size();i++){
-		dlg->no.IMGremove(0);
-	}
+	for(i = 0;i<qList.size();i++)
+		dlg->no.entry[i] = oldEntry[qList[qList.size() - 1 - i]];
 	dlg->updateIMGlist();
 	dlg->updateInfo();
 	return 0;
@@ -5481,12 +5604,13 @@ UINT CExRabbitDlg::pickColorImage(void*context){
 	dlg->bar.hide();
 	return 0U;
 }
-
 BOOL CExRabbitDlg::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: 在此添加专用代码和/或调用基类
-
-	if(pMsg->message==WM_MOUSEMOVE)
+	
+	if(pMsg->message==WM_MOUSEMOVE){
 		m_ttc.RelayEvent(pMsg);
+	}
 	return CDialogEx::PreTranslateMessage(pMsg);
 }
+

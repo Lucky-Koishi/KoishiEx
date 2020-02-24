@@ -109,7 +109,7 @@ void ModalGradient::OnBnClickedButtonColor1(){
 		sclr = cdlg.GetColor();
 		colorStr.Format(L"%02X%02X%02X", GetRValue(sclr),
 			GetGValue(sclr), GetBValue(sclr));
-		out.keyColor1 = color(out.keyColor1.A, GetRValue(sclr),
+		out.keyColor1 = color(out.keyColor1.alpha, GetRValue(sclr),
 			GetGValue(sclr), GetBValue(sclr));
 		GET_CTRL(CEdit, IDC_EDIT_KEYCOLOR1)->SetWindowText(colorStr);
 		drawScale();
@@ -128,7 +128,7 @@ void ModalGradient::OnBnClickedButtonColor2(){
 		sclr = cdlg.GetColor();
 		colorStr.Format(L"%02X%02X%02X", GetRValue(sclr),
 			GetGValue(sclr), GetBValue(sclr));
-		out.keyColor2 = color(out.keyColor2.A, GetRValue(sclr),
+		out.keyColor2 = color(out.keyColor2.alpha, GetRValue(sclr),
 			GetGValue(sclr), GetBValue(sclr));
 		GET_CTRL(CEdit, IDC_EDIT_KEYCOLOR2)->SetWindowText(colorStr);
 		drawScale();
@@ -249,8 +249,8 @@ void ModalGradient::OnEnChangeEditKeyalpha1()
 	CString colorStr;
 	GET_CTRL(CEdit, IDC_EDIT_KEYALPHA1)->GetWindowText(colorStr);
 	int colorValue = B16CStrToNum(colorStr);
-	if(colorValue != out.keyColor1.A){
-		out.keyColor1.A = colorValue;
+	if(colorValue != out.keyColor1.alpha){
+		out.keyColor1.alpha = colorValue;
 		drawScale();
 	}
 }
@@ -267,8 +267,8 @@ void ModalGradient::OnEnChangeEditKeyalpha2()
 	CString colorStr;
 	GET_CTRL(CEdit, IDC_EDIT_KEYALPHA2)->GetWindowText(colorStr);
 	int colorValue = B16CStrToNum(colorStr);
-	if(colorValue != out.keyColor2.A){
-		out.keyColor2.A = colorValue;
+	if(colorValue != out.keyColor2.alpha){
+		out.keyColor2.alpha = colorValue;
 		drawScale();
 	}
 }

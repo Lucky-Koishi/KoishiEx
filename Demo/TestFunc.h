@@ -3,11 +3,11 @@
 
 clock_t start, end;
 #define TIC start = clock()
-#define TOC end = clock();printf("%f seconds.\n", (double)(end-start)/CLOCKS_PER_SEC)
+#define TOC end = clock();printf("%.3lf seconds. \n", (double)(end-start)/CLOCKS_PER_SEC)
 
 void disp(stream &s, int l = 0){
-	if(l>s.len || l == 0){
-		l = s.len;
+	if(l>s.length || l == 0){
+		l = s.length;
 	}
 	int i;
 	for(i = 0;i<l;i++){
@@ -15,8 +15,8 @@ void disp(stream &s, int l = 0){
 	}
 }
 void dispx(stream &s, int l = 0){
-	if(l>s.len || l == 0){
-		l = s.len;
+	if(l>s.length || l == 0){
+		l = s.length;
 	}
 	int i;
 	for(i = 0;i<l;i++){
@@ -24,8 +24,8 @@ void dispx(stream &s, int l = 0){
 	}
 }
 void disps(stream &s, int l = 0){
-	if(l>s.len || l == 0){
-		l = s.len;
+	if(l>s.length || l == 0){
+		l = s.length;
 	}
 	int i;
 	for(i = 0;i<l;i++){

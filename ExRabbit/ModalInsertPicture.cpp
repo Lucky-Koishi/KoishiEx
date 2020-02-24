@@ -284,7 +284,7 @@ void ModalInsertPicture::OnBnClickedOk()
 		}
 	}
 	matrix mat;
-	KoishiDDS::DDS dds;
+	DDSobject dds;
 	if(out.type == 2 && out.inputFormat == 1){
 		if(!KoishiImageTool::loadPNG(mat, CStrToStr(out.fileName))){
 			MessageBox(L"无法读取该PNG文件喵！",L"错误喵");

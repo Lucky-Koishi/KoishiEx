@@ -26,7 +26,7 @@ void color::set(dword colorDt, colorFormat clrFmt){
 		//|      A      |   |      R      |   |      G      |   |      B      | //
 		//////////////////////////////////////////////////////////////////////////
 	case ARGB8888:
-		A = ((colorDt & 0xff000000) >> 24);
+		alpha = ((colorDt & 0xff000000) >> 24);
 		R = ((colorDt & 0x00ff0000) >> 16);
 		G = ((colorDt & 0x0000ff00) >> 8);
 		B = ((colorDt & 0x000000ff) >> 0);
@@ -37,7 +37,7 @@ void color::set(dword colorDt, colorFormat clrFmt){
 		//|  A  | |  R  |   |  G  | |  B  | //
 		//////////////////////////////////////
 	case ARGB4444:
-		A = (((colorDt & 0xf000) >> 12) * 0x11);
+		alpha = (((colorDt & 0xf000) >> 12) * 0x11);
 		R = ((colorDt & 0x0f00) >> 8 << 4);
 		G = ((colorDt & 0x00f0) >> 4 << 4);
 		B = ((colorDt & 0x000f) >> 0 << 4);
@@ -48,7 +48,7 @@ void color::set(dword colorDt, colorFormat clrFmt){
 		//A |   R   | |     G   | |   B   | //
 		//////////////////////////////////////
 	case ARGB1555:
-		A = (((colorDt & 0x8000) >> 15) * 0xff);
+		alpha = (((colorDt & 0x8000) >> 15) * 0xff);
 		R = ((colorDt & 0x7c00) >> 10 << 3);
 		G = ((colorDt & 0x03e0) >> 5 << 3);
 		B = ((colorDt & 0x001f) >> 0 << 3);
@@ -58,7 +58,7 @@ void color::set(dword colorDt, colorFormat clrFmt){
 		/////ABGR8888/////
 		//////////////////
 	case INDEX_FMT_PALETTE:
-		A = ((colorDt & 0xff000000) >> 24);
+		alpha = ((colorDt & 0xff000000) >> 24);
 		R = ((colorDt & 0x000000ff) >> 0);
 		G = ((colorDt & 0x0000ff00) >> 8);
 		B = ((colorDt & 0x00ff0000) >> 16);
@@ -71,19 +71,19 @@ void color::set(dword colorDt, colorFormat clrFmt){
 void color::make(dword &colorDt, colorFormat clrFmt){
 	switch(clrFmt){
 	case ARGB8888:
-		colorDt = (A<<24)|(R<<16)|(G<<8)|B;
+		colorDt = (alpha<<24)|(R<<16)|(G<<8)|B;
 		break;
 	case ARGB4444:
-		colorDt = (A>>4<<12)|(R>>4<<8)|(G>>4<<4)|(B>>4);
+		colorDt = (alpha>>4<<12)|(R>>4<<8)|(G>>4<<4)|(B>>4);
 		break;
 	case ARGB1555:
-		colorDt = (A>>7<<15)|(R>>3<<10)|(G>>3<<5)|(B>>3);
+		colorDt = (alpha>>7<<15)|(R>>3<<10)|(G>>3<<5)|(B>>3);
 		break;
 	case INDEX_FMT_PALETTE:
-		colorDt = (A<<24)|R|(G<<8)|(B<<16);
+		colorDt = (alpha<<24)|R|(G<<8)|(B<<16);
 		break;
 	default:
-		colorDt = (A<<24)|(R<<16)|(G<<8)|B;
+		colorDt = (alpha<<24)|(R<<16)|(G<<8)|B;
 		break;
 	}
 }
@@ -95,7 +95,7 @@ double color::getProperty(colorProperty theProperty) const{
 	colorHSV theHSV;
 	switch(theProperty){
 	case COLOR_ALPHA:
-		return (double)A/255;
+		return (double)alpha/255;
 	case COLOR_CHANNEL_BLUE:
 		return (double)B/255;
 	case COLOR_CHANNEL_GREEN:
@@ -118,7 +118,7 @@ double color::getProperty(colorProperty theProperty) const{
 	}
 }
 color::operator dword() const{
-	return (dword)(A<<24)|(R<<16)|(G<<8)|B;
+	return (dword)(alpha<<24)|(R<<16)|(G<<8)|B;
 }
 double color::mixMethod(double a, double b, colorMethod method){
 	double c;
@@ -261,11 +261,11 @@ uchar color::mixMethod(uchar a, uchar b, colorMethod method){
 	return (word)C;
 }
 void color::mixWith(const color &clr2, colorMethod method){
-	double a1 = (double)A/255;
+	double a1 = (double)alpha/255;
 	double r1 = (double)R/255;
 	double g1 = (double)G/255;
 	double b1 = (double)B/255;
-	double a2 = (double)clr2.A/255;
+	double a2 = (double)clr2.alpha/255;
 	double r2 = (double)clr2.R/255;
 	double g2 = (double)clr2.G/255;
 	double b2 = (double)clr2.B/255;
@@ -280,7 +280,7 @@ void color::mixWith(const color &clr2, colorMethod method){
 		g = mixMethod(g1,g2,method);
 		b = mixMethod(b1,b2,method);
 	}
-	A = a*255;
+	alpha = a*255;
 	R = r*255;
 	G = g*255;
 	B = b*255;
@@ -458,22 +458,22 @@ void color::moveB(short delta){
 	}
 }
 void color::moveA(short delta){
-	if(A + delta>255){
-		A = 255;
-	}else if(A + delta<0){
-		A = 0;
+	if(alpha + delta>255){
+		alpha = 255;
+	}else if(alpha + delta<0){
+		alpha = 0;
 	}else{
-		A += delta;
+		alpha += delta;
 	}
 }
-int color::EuclideanDistanceSquareOf(const color &a, const color &b){
+int color::distance_2(const color &a, const color &b){
 	return (int)(a.R-b.R)*(a.R-b.R)+(a.G-b.G)*(a.G-b.G)+(a.B-b.B)*(a.B-b.B);
 }
 color color::lose(const color &c, uchar part){
-	return color(c.A, c.R/part*part, c.G/part*part, c.B/part*part);
+	return color(c.alpha, c.R/part*part, c.G/part*part, c.B/part*part);
 }
 color color::loseBit(const color &c, uchar bit){
-	return color(c.A, c.R>>bit<<bit, c.G>>bit<<bit, c.B>>bit<<bit);
+	return color(c.alpha, c.R>>bit<<bit, c.G>>bit<<bit, c.B>>bit<<bit);
 }
 color color::loseBlack(const color &c, uchar gamma){
 	uchar newR = c.R;
@@ -482,34 +482,17 @@ color color::loseBlack(const color &c, uchar gamma){
 	uchar newA = 255 - (255 - newR)  * (255 - newG)  * (255 - newB)/ 255/ 255;
 	double gm = pow((double)newA/255, gamma);
 	newA = gm*255;
-	return color(c.A*newA/255, newR, newG, newB);
+	return color(c.alpha*newA/255, newR, newG, newB);
 }
 ///////////////////////////////////////////////////////////////
 //point & size
 point::point(){
-	set(0,0);
+	X = 0;
+	Y = 0;
 }
 point::point(long x, long y){
-	set(x,y);
-}
-void point::set(long x, long y){
 	X = x;
 	Y = y;
-}
-void point::moveHonz(long dist){
-	X += dist;
-}
-void point::moveVert(long dist){
-	Y += dist;
-}
-void point::move(long honzDist, long vertDist){
-	set(X+honzDist, Y+vertDist);
-}
-void point::move(size sz){
-	set(X+sz.W, Y+sz.H);
-}
-point point::oppo() const{
-	return point(-X, -Y);
 }
 point point::operator + (const point &delta) const{
 	return point(X + delta.X, Y + delta.Y);
@@ -539,12 +522,10 @@ point point::operator ~ () const{
 	return point(Y, X);
 }
 size::size(){
-	set(0,0);
+	W = 0;
+	H = 0;
 }
 size::size(long w, long h){
-	set(w,h);
-}
-void size::set(long w, long h){
 	W = w;
 	H = h;
 }
@@ -639,7 +620,7 @@ void matrix::push(color _clr){
 }
 
 longex matrix::push(const stream &s, colorFormat cf){
-	dword len = s.getLen();
+	dword len = s.length;
 	dword i = 0;
 	switch(cf){
 	case ARGB8888:
@@ -681,31 +662,31 @@ longex matrix::make(stream &s, colorFormat cf) const{
 		s.allocate(4*column*row);
 		for(i = 0; i< column*row; i++){
 			data[i].make(colorData,ARGB8888);
-			s.push(colorData);
+			s.pushDWord(colorData);
 		}
 		break;
 	case ARGB4444:
 		s.allocate(2*column*row);
 		for(i = 0; i< column*row; i++){
 			data[i].make(colorData,ARGB4444);
-			s.push((word)(colorData & 0xFFFF));
+			s.pushWord(colorData & 0xFFFF);
 		}
 		break;
 	case ARGB1555:
 		s.allocate(2*column*row);
 		for(i = 0; i< column*row; i++){
 			data[i].make(colorData,ARGB1555);
-			s.push((word)(colorData & 0xFFFF));
+			s.pushWord(colorData & 0xFFFF);
 		}
 		break;
 	case INDEX_FMT_PALETTE:
 		s.allocate(column*row);
 		for(i = 0; i< column*row; i++){
-			s.push((uchar)data[i].A);
+			s.pushByte(data[i].index);
 		}
 		break;
 	}
-	return s.getPtPos();
+	return s.getPosition();
 }
 
 color *matrix::operator[] (dword _i) const{
@@ -853,7 +834,7 @@ void matrix::getElemHonzBound(dword &lower, dword &upper) const{
 	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
-			if(getElem(i, j).A != 0){
+			if(getElem(i, j).alpha != 0){
 				if(lower>j){
 					lower = j;
 				}
@@ -870,7 +851,7 @@ void matrix::getElemVertBound(dword &lower, dword &upper) const{
 	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
-			if(getElem(i, j).A != 0){
+			if(getElem(i, j).alpha != 0){
 				if(lower>i){
 					lower = i;
 				}
@@ -1010,7 +991,7 @@ void matrix::turnShield(){
 			clr.R = 0xFF;
 			clr.G = 0xFF;
 			clr.B = 0xFF;
-			clr.A /= 2;
+			clr.alpha /= 2;
 			setElem(i, j ,clr);
 		}
 	}
@@ -1134,16 +1115,16 @@ long palette::matchColor(color goalColor, long paletteID, long &nearestDistance)
 	long nearestID = -1;
 	nearestDistance = 3 * 0x100 * 0x100;
 	for(long i = 0;i<colorList.size();i++){
-		if(colorList[i].A == 0 && goalColor.A <= 0x7F){
+		if(colorList[i].alpha == 0 && goalColor.alpha <= 0x7F){
 			//匹配透明颜色
 			nearestDistance = 0;
 			return i;
-		}else if(colorList[i].A == 0){
+		}else if(colorList[i].alpha == 0){
 			//加此步是为了防止非透明颜色与透明颜色进行匹配
 			continue;
 		}else{
 			//匹配普通颜色
-			long newNearest = color::EuclideanDistanceSquareOf(colorList[i], goalColor);
+			long newNearest = color::distance_2(colorList[i], goalColor);
 			if(newNearest < nearestDistance){
 				nearestDistance = newNearest;
 				nearestID = i;
@@ -1156,26 +1137,6 @@ long palette::matchColor(color goalColor, long paletteID, long &nearestDistance)
 	}
 	return nearestID;
 }
-bool palette::joinWith(const colorList &list, long paletteID){
-	if(paletteID >= getCount()){
-		return false;
-	}
-	colorList list2;
-	list2.clear();
-	long i;
-	for(i = 0;i<list.size();i++){
-		if(findColor(list[i], paletteID) < 0){
-			list2.push_back(list[i]);
-		}
-	}
-	if(getColorCount(paletteID)+list2.size() > 256){
-		return false;
-	}
-	for(i = 0;i<list2.size();i++){
-		table[paletteID].push_back(list2[i]);
-	}
-	return true;
-}
 bool palette::tinyMake(stream &s, long paletteID){
 	if(paletteID >= getCount()){
 		return false;
@@ -1183,12 +1144,12 @@ bool palette::tinyMake(stream &s, long paletteID){
 	long i;
 	colorList list = table[paletteID];
 	s.allocate(sizeof(color)*(10+list.size()));
-	s.push((long)list.size());
+	s.pushInt(list.size());
 	for(i = 0;i<list.size();i++){
-		s.push((uchar)list[i].R);
-		s.push((uchar)list[i].G);
-		s.push((uchar)list[i].B);
-		s.push((uchar)list[i].A);
+		s.pushByte(list[i].R);
+		s.pushByte(list[i].G);
+		s.pushByte(list[i].B);
+		s.pushByte(list[i].alpha);
 	}
 	return false;
 }
@@ -1196,15 +1157,15 @@ bool palette::bigMake(stream &s){
 	long i,j;
 	colorList list;
 	s.allocate(sizeof(color)*(1000+getCount()+getTotalColorCount()));
-	s.push((long)getCount());
+	s.pushInt(getCount());
 	for(j=0;j<getCount();j++){
 		list = table[j];
-		s.push((long)list.size());
+		s.pushInt(list.size());
 		for(i = 0;i<list.size();i++){
-			s.push((uchar)list[i].R);
-			s.push((uchar)list[i].G);
-			s.push((uchar)list[i].B);
-			s.push((uchar)list[i].A);
+			s.pushByte(list[i].R);
+			s.pushByte(list[i].G);
+			s.pushByte(list[i].B);
+			s.pushByte(list[i].alpha);
 		}
 	}
 	return false;
@@ -1216,22 +1177,22 @@ bool palette::makeACT(str fileName, const colorList &lc){
 	long alphaIndex = 0;
 	for(long i = 0;i<256;i++){
 		if(i<lc.size()){
-			if(lc[i].A == 0){
+			if(lc[i].alpha == 0){
 				alphaIndex = i;
 			}
-			s.push(lc[i].R);
-			s.push(lc[i].G);
-			s.push(lc[i].B);
+			s.pushByte(lc[i].R);
+			s.pushByte(lc[i].G);
+			s.pushByte(lc[i].B);
 		}else{
-			s.push((uchar)0);
-			s.push((uchar)0);
-			s.push((uchar)0);
+			s.pushByte(0);
+			s.pushByte(0);
+			s.pushByte(0);
 		}
 	}
-	s.push((uchar)(lc.size() >> 8));
-	s.push((uchar)(lc.size() & 0xff));
-	s.push((uchar)0);
-	s.push((uchar)(alphaIndex & 0xff));
+	s.pushByte((lc.size() >> 8));
+	s.pushByte((lc.size() & 0xff));
+	s.pushByte(0);
+	s.pushByte((alphaIndex & 0xff));
 	s.makeFile(fileName);
 	s.release();
 	return true;
@@ -1239,7 +1200,7 @@ bool palette::makeACT(str fileName, const colorList &lc){
 bool palette::loadACT(str fileName, colorList &lc){
 	stream s;
 	s.loadFile(fileName);
-	long len = s.getLen();
+	long len = s.length;
 	if(len == 768){
 		lc.clear();
 		for(long i = 0;i<256;i++){
@@ -1268,13 +1229,13 @@ bool palette::makeCID(str fileName, const colorList &lc){
 	stream s;
 	s.allocate(lc.size()*4 + 100);
 	s.pushString("KoishiColor");
-	s.push((uchar)0);
-	s.push((dword)lc.size());
+	s.pushByte(0);
+	s.pushDWord(lc.size());
 	for(int i = 0;i<lc.size();i++){
-		s.push((uchar)lc[i].A);
-		s.push((uchar)lc[i].R);
-		s.push((uchar)lc[i].G);
-		s.push((uchar)lc[i].B);
+		s.pushByte(lc[i].alpha);
+		s.pushByte(lc[i].R);
+		s.pushByte(lc[i].G);
+		s.pushByte(lc[i].B);
 	}
 	s.makeFile(fileName);
 	s.release();
@@ -1283,19 +1244,19 @@ bool palette::makeCID(str fileName, const colorList &lc){
 bool palette::loadCID(str fileName, colorList &lc){
 	stream s;
 	s.loadFile(fileName);
-	s.ptMoveTo(12);
+	s.setPosition(12);
 	dword clrCount;
-	s.read(clrCount);
+	s.readDWord(clrCount);
 	for(int i = 0;i<clrCount;i++){
 		uchar p;
 		color clr;
-		s.read(p);
-		clr.A = p;
-		s.read(p);
+		s.readByte(p);
+		clr.alpha = p;
+		s.readByte(p);
 		clr.R = p;
-		s.read(p);
+		s.readByte(p);
 		clr.G = p;
-		s.read(p);
+		s.readByte(p);
 		clr.B = p;
 	}
 	s.release();
@@ -1361,4 +1322,559 @@ colorList palette::palette256(){
 		}
 	}
 	return cl;
+}
+void stream::bitAlignPosition(){
+	bitPosition = getPosition() * 8;
+}
+void stream::alignBitPosition(){
+	if(bitPosition % 8 == 0)
+		movePosition(bitPosition / 8);
+	movePosition(bitPosition / 8 + 1);
+}
+void stream::bitResetPosition(){
+	bitPosition = 0;
+}
+longex stream::bitGetPosition(){
+	return bitPosition;
+}
+void stream::bitSetPosition(longex bitPos){
+	bitPosition = bitPos;
+}
+uchar stream::bitGet(longex bitPos){
+	if(bitPos < 0 || bitPos >= length * 8)
+		return false;
+	longex pos = bitPos/8;
+	longex off = bitPos % 8;
+	if((data[pos] & (1 << off)) == 0)
+		return 0;
+	return 1;
+}
+bool stream::bitSet(longex bitPos, uchar value){
+	if(bitPos < 0 || bitPos > length * 8)
+		return false;
+	longex pos = bitPos / 8;
+	longex off = bitPos % 8;
+	if(value){
+		data[pos] |= (1 << off);
+	}else{
+		data[pos] &= ~(1 << off);
+	}
+	return true;
+}
+bool stream::bitPush(const void *sour, longex bitLen){
+	if(bitPosition  + bitLen > storage * 8){
+		return false;
+	}
+	uchar *usour = (uchar *)sour;
+	for(longex i = 0;i<bitLen;i++){
+		uchar c = usour[i/8] & (1<<(i%8));
+		bitSet(bitPosition, c);
+		bitPosition ++;
+		//写入会导致长度变化
+		if(bitPosition >= length * 8){
+			length = bitPosition / 8 + 1;
+		}
+	}
+	return true;
+}
+bool stream::bitPush(dword value, longex bitLen){
+	if(bitLen >= 32)
+		bitLen = 32;
+	if(bitPosition  + bitLen > storage * 8){
+		return false;
+	}
+	uchar *usour = (uchar *)&value;
+	for(longex i = 0;i<bitLen;i++){
+		uchar c = usour[i/8] & (1<<(i % 8));
+		bitSet(bitPosition, c);
+		bitPosition ++;
+		//写入会导致长度变化
+		if(bitPosition >= length * 8){
+			length = bitPosition / 8 + 1;
+		}
+	}
+	
+	return true;
+}
+bool stream::bitRead(void *dest, longex bitLen){
+	if(bitPosition  + bitLen > length*8){
+		return false;			//没那么多数据去读
+	}
+	//初始化dest
+	longex len = bitLen / 8;
+	if(bitLen % 8 != 0)
+		len ++;
+	memset(dest, 0, len);
+	//赋值
+	uchar *usour = (uchar *)dest;
+	for(longex i = 0;i<bitLen;i++){
+		usour[i/8] |= bitGet(bitPosition) << (i % 8);
+		bitPosition ++;
+	}
+	return true;
+}
+bool stream::bitRead(dword &value, longex bitLen){
+	if(bitLen >= 32)
+		bitLen = 32;
+	if(bitPosition  + bitLen > length*8){
+		return false;			//没那么多数据去读
+	}
+	//初始化dest
+	value = 0;
+	//赋值
+	uchar *usour = (uchar *)&value;
+	for(longex i = 0;i<bitLen;i++){
+		usour[i/8] |= bitGet(bitPosition) << (i % 8);
+		bitPosition ++;
+	}
+	return true;
+}
+/////////////////////////////////////////////////////////////
+sample::sample(){
+	data = 0;
+}
+sample::sample(short a1){
+	data = (word)a1;
+}
+sample::sample(short a1, short a2){
+	value[0] = a1;
+	value[1] = a2;
+}
+short &sample::operator [](int i){
+	return value[i % 2];
+}
+sample sample::operator + (const sample &delta) const{
+	sample d = delta;
+	return sample(shortPlus(value[0], d[0]), shortPlus(value[1], d[1]));
+}
+sample sample::operator - (const sample &delta) const{
+	sample d = delta;
+	return sample(shortPlus(value[0], -d[0]), shortPlus(value[1], -d[1]));
+}
+sample sample::operator + () const{
+	return *this;
+}
+sample sample::operator - () const{
+	return sample(-value[0], -value[1]);
+}
+sample sample::operator * (double mult) const{
+	return sample(shortMult(value[0], mult), shortMult(value[1], mult));
+}
+sample sample::operator / (double mult) const{
+	return sample(shortMult(value[0], 1.0/mult), shortMult(value[1], 1.0/mult));
+}
+sample sample::operator ~ () const{
+	return sample(value[1], value[0]);
+}
+short sample::shortPlus(short a, short b){
+	int r = a + b;
+	if(r > 32767)
+		r = 32767;
+	if(r < -32767)
+		r = -32767;
+	return r;
+}
+short sample::shortMult(short a, double b){
+	int r = b * a;
+	if(r > 32767)
+		r = 32767;
+	if(r < -32767)
+		r = -32767;
+	return r;
+}
+audio::audio(){
+	channel = 0;
+	sampleRate = 44100;
+	length = 0;
+	pt = 0;
+	data = NULL;
+}
+audio::audio(const longex &newLen, int ch, int newSample){
+	channel = ch;
+	sampleRate = newSample;
+	length = newLen;
+	pt = 0;
+	data = new sample[newLen + 1000];
+	fill(sample(0));
+}
+audio::audio(const audio &sour){
+	channel = sour.channel;
+	sampleRate = sour.sampleRate;
+	length = sour.length;
+	pt = 0;
+	data = new sample[length + 1000];
+	fill(sample(0));
+	memcpy(data, sour.data, sizeof(sample)*length);
+}
+audio::audio(const stream &PCM, int ch, int newSample){
+	channel = ch;
+	sampleRate = newSample;
+	if(ch == 0)
+		return;
+	length = PCM.length / (2 * ch);
+	pt = 0;
+	data = new sample[length + 1000];
+	fill(sample(0));
+	stream s = PCM;
+	s.setPosition(0);
+	for(int i = 0;i<length;i++){
+		sample p;
+		short useless = 0;
+		for(int j = 0;j<ch;j++){
+			if(j <= 1){
+				s.read(&p.value[j], 2);
+			}else{
+				s.read(&useless, 2);
+			}
+		}
+		data[i] = p;
+	}
+}
+audio::~audio(){
+	destory();
+}
+audio& audio::operator = (const audio &sour){
+	if(this == &sour)
+		return *this;
+	if(data)
+		delete[] data;
+	length = sour.length;
+	channel = sour.channel;
+	sampleRate = sour.sampleRate;
+	data = new sample[length+1000];
+	fill(sample(0));
+	pt = 0;
+	if(data)
+		memcpy(data,sour.data, sizeof(sample)*length);
+	return *this;
+}
+void audio::create(longex newLen){
+	if(!data){
+		length = newLen;
+		data = new sample[newLen+1000];
+		pt = 0;
+		fill(0);
+	}
+}
+void audio::create(const stream &PCM, int ch, int newSample){
+	destory();
+	channel = ch;
+	sampleRate = newSample;
+	if(ch == 0)
+		return;
+	length = PCM.length / (2 * ch);
+	pt = 0;
+	data = new sample[length + 1000];
+	fill(sample(0));
+	stream s = PCM;
+	s.setPosition(0);
+	for(int i = 0;i<length;i++){
+		sample p;
+		short useless = 0;
+		for(int j = 0;j<ch;j++){
+			if(j <= 1){
+				s.read(&p.value[j], 2);
+			}else{
+				s.read(&useless, 2);
+			}
+		}
+		data[i] = p;
+	}
+}
+void audio::destory(){
+	if(data){
+		delete[] data;
+		length = 0;
+		pt = 0;
+		data = NULL;
+		channel = 0;
+	}
+}
+void audio::fill(const sample &sp){
+	for(int i = 0;i<length;i++)
+		data[i] = sp;
+}
+void audio::make(stream &s){
+	if(channel == 0)
+		return;
+	s.allocate(length * 2 * channel + 1000);
+	for(int i = 0;i< length; i++)
+		for(int j = 0;j<channel;j++)
+			if(j < 2){
+				s.push(&data[i].value[j], 2);
+			}else{
+				s.pushWord(0);
+			}
+}
+void audio::make2(stream &s){
+	if(channel == 0)
+		return;
+	s.allocate(length * 4  + 1000);
+	for(int i = 0;i< length; i++)
+		s.push(&data[i], 4);
+}
+sample & audio::operator[](longex i) const{
+	return data[i];
+}
+longex audio::getLastTime() const{
+	if(sampleRate == 0)
+		return 0;
+	return 1000 * length / sampleRate;
+}
+longex audio::getPos(longex minisec) const{
+	return minisec * sampleRate / 1000;
+}
+longex audio::getTime(longex pos) const{
+	return 1000 * pos / sampleRate;
+}
+sample *audio::begin(longex pos) const{
+	return data + pos;
+}
+sample *audio::end(longex pos) const{
+	return data + length - pos;
+}
+void audio::expand(audio &ad, longex newLen){
+	ad.create(newLen);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	memcpy(ad.data, data, sizeof(sample)*MIN(newLen, length));
+}
+void audio::clip(audio &ad, longex left, longex right){
+	if(left > right)
+		return;
+	if(length == 0)
+		return;
+	if(right >= length)
+		right = length - 1;
+	if(left > right)
+		left = right;
+	ad.create(right - left);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	if(right - left>0)
+		memcpy(ad.data, data+left, sizeof(sample)*(right-left));
+}
+void audio::clipToBegin(audio &ad, longex right){
+	clip(ad, 0, right);
+}
+void audio::clipToEnd(audio &ad, longex left){
+	clip(ad, left, length-1);
+}
+void audio::reverse(audio &ad){
+	ad.create(length);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	for(int i = 0;i<length;i++)
+		ad.data[i] = data[length - i - 1];
+}
+void audio::mult(audio &ad, double value){
+	ad.create(length);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	for(int i = 0;i<length;i++)
+		ad.data[i] = data[i] * value;
+}
+void audio::multCurve(audio &ad, sequence curve, int joinMethod){
+	ad.create(length);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	sequence seq = curve;
+	int i = 0;
+	bool flag = true;
+	while(curve.size() < length){
+		switch(joinMethod){
+		case 0:
+			curve.push_back(1.0f);
+			break;
+		case 1:
+			curve.push_back(seq[i]);
+			i = ( i<seq.size() ? (i + 1):0);
+			break;
+		case 2:
+			curve.push_back(seq[i]);
+			if(flag){
+				if(i == seq.size() - 1){
+					flag = false;
+					i --;
+				}else{
+					i ++;
+				}
+			}else{
+				if(i == 0){
+					flag = true;
+					i ++;
+				}else{
+					i --;
+				}
+			}
+			break;
+		}
+	}
+	for(int i = 0;i<length;i++)
+		ad.data[i] = data[i] * curve[i];
+}
+void audio::multCurve(audio &ad, double(*f)(double)){
+	ad.create(length);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	for(int i = 0;i<length;i++)
+		ad.data[i] = data[i] * f(i);
+}
+void audio::applayFadeIn(audio &ad, longex last){
+	if(last >= length)
+		last = length;
+	ad.create(length);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	for(int i = 0;i<length;i++){
+		if(i<last){
+			double m = 1.0*i/last;
+			ad.data[i] = data[i] * m;
+		}else{
+			ad.data[i] = data[i];
+		}
+	}
+}
+void audio::applayFadeOut(audio &ad, longex last){
+	if(last >= length)
+		last = length;
+	ad.create(length);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	for(int i = 0;i<length;i++){
+		if(i > length - last){
+			double m = 1.0 * (length - i) / last;
+			ad.data[i] = data[i] * m;
+		}else{
+			ad.data[i] = data[i];
+		}
+	}
+}
+void audio::zoom(audio &ad, double rate){
+	ad.create(length*rate);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	for(int i = 0;i<length;i++)
+		for(longex j = i*rate;j<(i+1)*rate;j++){
+			ad.data[j] = data[i];
+		}
+}
+void audio::swapChannel(audio &ad){
+	ad.create(length);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	for(int i = 0;i<length;i++){
+		ad.data[i] = ~data[i];
+	}
+}
+void audio::echo(audio &ad, int times, int offset, double attenuation){
+	ad.create(length + offset * times);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	for(int i = 0;i<=times;i++){
+		for(int j = 0;j < length; j++){
+			ad.data[j + offset * i] = ad.data[j + offset * i] + data[j] * attenuation;
+		}
+		attenuation *=	attenuation;
+	}
+}
+void audio::expand(longex newLen){
+	audio ad;
+	expand(ad, newLen);
+	destory();*this = ad;ad.destory();
+}
+void audio::clip(longex left, longex right){
+	audio ad;
+	clip(ad, left, right);
+	destory();*this = ad;ad.destory();
+}
+void audio::clipToBegin(longex pos){
+	audio ad;
+	clipToBegin(ad, pos);
+	destory();*this = ad;ad.destory();
+}
+void audio::clipToEnd(longex pos){
+	audio ad;
+	clipToEnd(ad, pos);
+	destory();*this = ad;ad.destory();
+}
+void audio::reverse(){
+	audio ad;
+	reverse(ad);
+	destory();*this = ad;ad.destory();
+}
+void audio::mult(double value){
+	audio ad;
+	mult(ad, value);
+	destory();*this = ad;ad.destory();
+}
+void audio::multCurve(sequence curve, int joinMethod){
+	audio ad;
+	multCurve(ad, curve, joinMethod);
+	destory();*this = ad;ad.destory();
+}
+void audio::multCurve(double(*f)(double)){
+	audio ad;
+	multCurve(ad, f);
+	destory();*this = ad;ad.destory();
+}
+void audio::applayFadeIn(longex last){
+	audio ad;
+	applayFadeIn(ad, last);
+	destory();*this = ad;ad.destory();
+}
+void audio::applayFadeOut(longex last){
+	audio ad;
+	applayFadeOut(ad, last);
+	destory();*this = ad;ad.destory();
+}
+void audio::zoom(double rate){
+	audio ad;
+	zoom(ad, rate);
+	destory();*this = ad;ad.destory();
+}
+void audio::swapChannel(){
+	audio ad;
+	swapChannel(ad);
+	destory();*this = ad;ad.destory();
+}
+void audio::echo(int times, int offset, double attenuation){
+	audio ad;
+	echo(ad, times, offset, attenuation);
+	destory();*this = ad;ad.destory();
+}
+void audio::cat(const audio &ad){
+	audio newAd(length + ad.length, channel, sampleRate);
+	int p = 0;
+	for(int i = 0;i<length;i++){
+		newAd[p++] = data[i];
+	}
+	for(int i = 0;i<ad.length;i++){
+		newAd[p++] = ad[i];
+	}
+	destory();*this = newAd;newAd.destory();
+}
+void audio::mixWith(const audio &ad, double percent, longex offset){
+	audio ad1 = ad;
+	for(int i = offset;i<length;i++){
+		if(i - offset >= ad1.length)
+			break;
+		data[i] =  data[i] + ad1[i - offset]*percent;
+	}
+}
+void audio::doubleChannel(){
+	if(channel != 1)
+		return;
+	channel = 2;
+	for(int i = 0;i<length;i++){
+		data[i] = sample(data[i][0], data[i][0]);	
+	}
+}
+void audio::getChannel(audio &ad, int ch) const{
+	ad.create(length);
+	ad.channel = 1;
+	ad.sampleRate = sampleRate;
+	for(int i = 0;i<length;i++){
+		ad.data[i] = sample(data[i][ch]);	
+	}
 }

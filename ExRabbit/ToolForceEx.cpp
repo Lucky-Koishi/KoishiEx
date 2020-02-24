@@ -96,7 +96,7 @@ UINT CToolForceEx::extractIMGthread(PVOID para){
 		dlg->m_eProc.SetWindowText(info1);
 		dlg->m_eOK.SetWindowText(info2);
 		dlg->m_pProc.SetPos((i+1)*100/max);
-		s.ptMoveTo(pos[i]-8);
+		s.setPosition(pos[i]-8);
 		s.readStream(sPart, len[i]+8);
 		fileN.Format(dlg->fileName + L".%d.IMG", i);
 		CStrToStr(fileN, fn);

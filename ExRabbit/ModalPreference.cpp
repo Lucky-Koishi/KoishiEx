@@ -39,6 +39,8 @@ BEGIN_MESSAGE_MAP(ModalPreference, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_PREFERENCE8, &ModalPreference::OnBnClickedButtonPreference8)
 	ON_BN_CLICKED(IDC_BUTTON_PREFERENCE9, &ModalPreference::OnBnClickedButtonPreference9)
 	ON_BN_CLICKED(IDOK, &ModalPreference::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_BUTTON_SETPIC1, &ModalPreference::OnBnClickedButtonSetpic1)
+	ON_BN_CLICKED(IDC_BUTTON_SETPIC2, &ModalPreference::OnBnClickedButtonSetpic2)
 END_MESSAGE_MAP()
 
 
@@ -277,4 +279,37 @@ void ModalPreference::OnBnClickedOk(){
 	modifiedProfile.miniSecPerFrame = iTemp;
 	modifiedProfile.saveProfile();
 	CDialogEx::OnOK();
+}
+
+
+void ModalPreference::OnBnClickedButtonSetpic1(){
+	// TODO: 在此添加控件通知处理程序代码
+	CString defExt = L"PNG图像(*.png)|*.png";
+	CString extFilter = L"PNG图像(*.png)|*.png||";
+	CString filePath, extName;
+	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
+	if(dlg.DoModal() == IDOK){
+		filePath = dlg.GetPathName();
+		matrix mPic;
+		loadPNG(mPic, CStrToStr(filePath));
+		mPic.clip(0, 39, 0, 149);
+		makeBMP(mPic, CStrToStr(modifiedProfile.getSupportPath() + L"LOGO.bmp"));
+		MessageBox(L"设置LOGO完毕喵。（注意：尺寸会裁剪到150×40）",L"提示喵");
+	}
+}
+
+
+void ModalPreference::OnBnClickedButtonSetpic2(){
+	// TODO: 在此添加控件通知处理程序代码
+	CString defExt = L"PNG图像(*.png)|*.png";
+	CString extFilter = L"PNG图像(*.png)|*.png||";
+	CString filePath, extName;
+	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
+	if(dlg.DoModal() == IDOK){
+		filePath = dlg.GetPathName();
+		matrix mPic;
+		loadPNG(mPic, CStrToStr(filePath));
+		makePNG(mPic, CStrToStr(modifiedProfile.getSupportPath() + L"back.png"));
+		MessageBox(L"设置背景完毕喵。",L"提示喵");
+	}
 }
