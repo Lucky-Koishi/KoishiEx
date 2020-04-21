@@ -27,15 +27,17 @@ namespace Koishi{
 	typedef unsigned long dword;
 	typedef long long longex;
 	typedef unsigned long long ulongex;
+	class complex;
 	typedef std::vector<long> queue;
 	typedef std::vector<double> sequence;
 	typedef std::vector<longex> queueex;
+	typedef std::vector<complex> compsequence;
 	enum colorFormat:dword{
 		ARGB8888 = 0x10, ARGB4444 = 0x0F, ARGB1555 = 0x0E, LINK = 0x11, DDS_DXT1 = 0x12, DDS_DXT3 = 0x13, DDS_DXT5 = 0x14, COLOR_UDEF = 0, INDEX_FMT_PALETTE
 	};
 	enum colorMethod{
 		//颜色运算 覆盖·变暗·正片叠底·颜色加深·线性加深·变亮·滤色·颜色减淡·线性减淡·叠加·强光·柔光·亮光·线性光·点光·实色混合·插值·排除
-		LAY, DARKEN, MULTIPLY, COLORBURN, LINEARBURN, LIGHTEN, SCREEN, COLORDODGE, LINEARDODGE, OVERLAY, HARDLIGHT, SOFTLIGHT, VIVIDLIGHT, LINEARLIGHT, PINLIGHT, HARDMIX, DIFFER, EXCLUSION
+		LAY, DARKEN, MULTIPLY, COLORBURN, LINEARBURN, LIGHTEN, SCREEN, COLORDODGE, LINEARDODGE, OVERLAY, HARDLIGHT, SOFTLIGHT, VIVIDLIGHT, LINEARLIGHT, PINLIGHT, HARDMIX, DIFFER, EXCLUSION, REPLACE
 	};
 	enum colorProperty{
 		//颜色属性 透明度·红色·绿色·蓝色·灰度·色调·饱和度·明度
@@ -45,7 +47,7 @@ namespace Koishi{
 	class color;
 	class point;
 	class size;
-	class matrix;
+	class image;
 	class palette;
 
 	typedef std::vector<color> colorList;
@@ -130,7 +132,7 @@ namespace Koishi{
 		int ZLIBcompress(stream &dest);
 		int ZLIBuncompress(stream &dest, longex tryLength = MAX_UNCOMPRESSED_DATA_LENGTH);
 		///////////////////////////////////////////////////
-		//位运算///////////////////////////////////////////
+		//位运算/不带LF是右端（低位就是低位）起////////////
 		///////////////////////////////////////////////////
 	private:
 		//位游标控制
@@ -141,12 +143,41 @@ namespace Koishi{
 		void bitResetPosition();					//重置位游标
 		longex bitGetPosition();					//设置位游标
 		void bitSetPosition(longex bitPos);			//设置位游标
+	public:
 		uchar bitGet(longex bitPos);				//获得指定位是高电平还是低电平
 		bool bitSet(longex bitPos, uchar value);	//修改单个位，value取值为零（低电平）或非零（高电平）
 		bool bitPush(const void *sour, longex bitLen);
 		bool bitPush(dword value, longex bitLen);	//一次性压入最多32位数值
 		bool bitRead(void *dest, longex bitLen);
 		bool bitRead(dword &value, longex bitLen);	//一次性读取最多32位数值
+		//左端First位运算
+	public:
+		uchar LFbitGet(longex bitPos);
+		bool LFbitSet(longex bitPos, uchar value);
+		bool LFbitPush(const void *sour, longex bitLen);
+		bool LFbitPush(dword value, longex bitLen);
+		bool LFbitRead(void *dest, longex bitLen);
+		bool LFbitRead(dword &value, longex bitLen);
+	};
+	///////////////////////////////////////
+	//基本类:复数
+	///////////////////////////////////////
+	class complex{
+	public:
+		complex(double a = 0, double b = 0);
+		double real, img;
+		complex operator +() const;
+		complex operator -() const;
+		double operator *() const;	//取地址被认为是求模
+		complex operator ~() const; //共轭
+		complex operator +(const complex &c) const;
+		complex operator -(const complex &c) const;
+		complex operator *(const complex &c) const;
+		complex operator /(const complex &c) const;
+		complex operator *(const double &m) const;
+		complex operator /(const double &m) const;
+		double radius() const;
+		double angle() const;
 	};
 	///////////////////////////////////////
 	//基本类:颜色信息
@@ -202,6 +233,8 @@ namespace Koishi{
 		static color lose(const color &c, uchar part);
 		static color loseBit(const color &c, uchar bit);
 		static color loseBlack(const color &c, uchar gamma);
+		static color getBrighten(const color &c);
+		static color getDarken(const color &c);
 	};
 	///////////////////////////////////////
 	//基本类:坐标点·尺寸
@@ -233,18 +266,21 @@ namespace Koishi{
 	///////////////////////////////////////
 	//基本类:矩阵，当R=G=B=0时，可以用做索引矩阵用
 	///////////////////////////////////////
-	class matrix{
+	class image{
 	public:
-		matrix();
-		matrix(dword _row, dword _column);
-		matrix(const size &_sz);
-		matrix(const matrix &_mat);
-		~matrix();
-		matrix& operator = (const matrix &_mat);
+		image();
+		image(dword _row, dword _column);
+		image(const size &_sz);
+		image(const image &_mat);
+		~image();
+		image& operator = (const image &_mat);
 	public:
-		public:
-		union{dword column, width;};
-		union{dword row, height;};
+		union{
+			dword column, width;
+		};
+		union{
+			dword row, height;
+		};
 	protected:
 		color *data;
 		dword pt;
@@ -279,17 +315,17 @@ namespace Koishi{
 		long moveHonz(long dist, const color &surplus = color(0,0,0,0));		//非0元素水平移动
 		long moveVert(long dist, const color &surplus = color(0,0,0,0));		//非0元素垂直移动
 		long replace(const color &whos, const color &to);//将指定颜色的所有像素变更为目标颜色
-		void putFore(const matrix &layer, colorMethod _met = LAY, point basePoint = point(0,0));	//以此矩阵为底层，画上目标矩阵
-		void putBack(const matrix &layer, colorMethod _met = LAY, point basePoint = point(0,0));	//以此矩阵为顶层，在其底下画上目标矩阵
+		void putFore(const image &layer, colorMethod _met = LAY, point basePoint = point(0,0));	//以此矩阵为底层，画上目标矩阵
+		void putBack(const image &layer, colorMethod _met = LAY, point basePoint = point(0,0));	//以此矩阵为顶层，在其底下画上目标矩阵
 	public:
 		//以此矩阵为基准计算其他矩阵
-		void clip(matrix &dest, dword rowStart, dword rowEnd, dword columnStart, dword columnEnd) const;//裁剪
-		void expand(matrix &dest, dword toTop, dword toBottom, dword toLeft, dword toRight) const;		//扩充
-		void zoom(matrix &dest, double ratio) const;			//缩放
-		void zoom(matrix &dest, double honzRatio, double vertRatio) const;	//缩放
+		void clip(image &dest, dword rowStart, dword rowEnd, dword columnStart, dword columnEnd) const;//裁剪
+		void expand(image &dest, dword toTop, dword toBottom, dword toLeft, dword toRight, color filledClr = color(0,0,0,0)) const;		//扩充
+		void zoom(image &dest, double ratio) const;			//缩放
+		void zoom(image &dest, double honzRatio, double vertRatio) const;	//缩放
 
 		void clip(dword rowStart, dword rowEnd, dword columnStart, dword columnEnd);
-		void expand(dword toTop, dword toBottom, dword toLeft, dword toRight);		//扩充
+		void expand(dword toTop, dword toBottom, dword toLeft, dword toRight, color filledClr = color(0,0,0,0));		//扩充
 		void zoom(double ratio);			//缩放
 		void zoom(double honzRatio, double vertRatio);	//缩放
 	public:
@@ -298,6 +334,8 @@ namespace Koishi{
 		void loseBit(uchar bit); //扔位
 		void loseBlack(uchar gamma); //去黑底
 		void turnShield();			//将实色色部分变为1/2透明的白色
+		void getBrighten();
+		void getDarken();
 	public:
 		//绘制操作
 		void line(point p1, point p2, const color &clr);
@@ -399,8 +437,7 @@ namespace Koishi{
 		void clipToEnd(audio &ad, longex left);
 		void reverse(audio &ad);
 		void mult(audio &ad, double value);
-		void multCurve(audio &ad, sequence curve, int joinMethod = 0);
-		void multCurve(audio &ad, double(*f)(double));
+		void multCurve(audio &ad, double(*f)(double)); //curve: 定义域为0 - 1的曲线，范围随意
 		void applayFadeIn(audio &ad, longex last);
 		void applayFadeOut(audio &ad, longex last);
 		void zoom(audio &ad, double rate);
@@ -413,7 +450,6 @@ namespace Koishi{
 		void clipToEnd(longex left);
 		void reverse();
 		void mult(double value);
-		void multCurve(sequence curve, int joinMethod = 0);
 		void multCurve(double(*f)(double));
 		void applayFadeIn(longex last);
 		void applayFadeOut(longex last);
@@ -425,6 +461,19 @@ namespace Koishi{
 		void mixWith(const audio &ad, double percent = 1, longex offset = 0);		//混音
 		void doubleChannel();
 		void getChannel(audio &ad, int ch) const;
+	public:
+		//平滑曲线 d为0-1之间
+		static double slope_up(double d);
+		static double slope_down(double d);
+	public:
+		void slow(audio &ad, int blockSize, int gapSize);		//gapSize不得超过blockSize的一半，减慢的速度不能小于50%，否则需要多次调用
+		void fast(audio &ad, int blockSize, int overlapSize);	//overlapSize不得超过blockSize的一半，加快速度不能超过2倍，否则需要多次调用
+		void slow(int blockSize, int gapSize);	
+		void fast(int blockSize, int overlapSize);
+		void adjustSpeed(audio &ad, double rate);				//变速 rate>1是加速
+		void adjustPitch(audio &ad, double rate);				//变调 rate>1是升调
+		void adjustSpeed(double rate);
+		void adjustPitch(double rate);
 	};
 }
 

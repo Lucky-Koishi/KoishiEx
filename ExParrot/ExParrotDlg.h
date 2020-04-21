@@ -14,8 +14,11 @@
 #include "ModalRename.h"
 #include "ModalSoundHide.h"
 #include "ModalSoundInsert.h"
+#include "ModalPreference2.h"
 
 #pragma once
+
+#define VERSION_STR "恋恋のEx白猫版.1.1"
 
 using namespace Koishi;
 using namespace KoishiNeoplePack;
@@ -94,7 +97,7 @@ public:
 	void getSelected(CGoodListCtrl *listCtrl, int highLine, int targetPara, std::vector<int> &selected);
 	void updateSNDlist();
 	void updateInfo();
-	matrix MP3image;
+	image MP3image;
 	void updateMP3image();
 public:
 	//播放器
@@ -102,15 +105,16 @@ public:
 	PCMdevice recorder;
 	bool recording;
 	static UINT playThread(void *para);
+	static UINT xThread(void *para);
 	//音标指针
 	longex leftBound, rightBound;				//选择的边界
 	longex dispLeftBound, dispRightBound;		//显示的边界
 	longex zoomBound1, zoomBound2;
 	void draw();
-	void makeGraph(matrix &graphMat, int w, int h);
+	void makeGraph(image &graphMat, int w, int h);
 	static UINT drawThread(void *para);
 	long power[16];								//功率谱
-	long cur;									//获得当前的分贝
+	long cur[2];								//获得当前
 	void drawPower();
 public:
 	//解码器
@@ -121,7 +125,6 @@ public:
 	
 	afx_msg void OnBnClickedButtonMenu();
 	afx_msg void OnBnClickedButtonMenu2();
-	
 	afx_msg void OnBnClickedButtonMenu3();
 	afx_msg void OnMain01();
 	afx_msg void OnMain02();
@@ -177,7 +180,8 @@ public:
 	static UINT ThreadControlLoad(void*context);
 	static UINT ThreadControlRecord(void*context);
 	CString loadPara;
-	bool loadReplace;
+	bool newRecord;				//录音时是否有音频文件
+	bool loadReplace;			//当存在音频时，是替换选定部分还是替换所有部分
 	afx_msg void OnBnClickedButtonControl5();
 
 	afx_msg void OnBnClickedToolButton1();

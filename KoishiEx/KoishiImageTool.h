@@ -12,8 +12,8 @@ namespace KoishiImageTool{
 	extern colorList nearbySort(const colorList &originList);
 	//////////////////////////////////////////
 	//BMP算法
-	extern void makeBMP(const matrix &mat, str fileName);
-	extern bool loadBMP(matrix &mat, str fileName);
+	extern void makeBMP(const image &mat, str fileName);
+	extern bool loadBMP(image &mat, str fileName);
 	namespace BMP{
 		typedef struct BMPheader{
 			word magic;
@@ -45,15 +45,15 @@ namespace KoishiImageTool{
 			bool loadFile(str fileName);
 			void make(stream &s);
 			void makeFile(str fileName);
-			void output(matrix &mat);
-			void input(const matrix &mat);
+			void output(image &mat);
+			void input(const image &mat);
 		};
 	}
 	/////////////////////////////////
 	//PNG算法
-	extern void makePNG(const matrix &mat, str fileName);
+	extern void makePNG(const image &mat, str fileName);
 	extern void makePNG(const colorList &clrList, str fileName);
-	extern bool loadPNG(matrix &mat, str fileName);
+	extern bool loadPNG(image &mat, str fileName);
 	namespace PNG{
 		extern word PNGword(word originWord);
 		extern dword PNGdword(dword originDword);
@@ -103,8 +103,8 @@ namespace KoishiImageTool{
 			bool loadFile(str fileName);
 			void make(stream &s);
 			void makeFile(str fileName);
-			bool output(matrix &mat);
-			void input(const matrix &mat);
+			bool output(image &mat);
+			void input(const image &mat);
 		private:
 			//滤波器计算
 			static uchar filter(uchar filterType, uchar curByte, uchar lefByte, uchar upByte, uchar lefUpByte);
@@ -191,20 +191,20 @@ namespace KoishiImageTool{
 		class GIFobject{
 		public:
 			GIFinfo info;
-			std::vector<GIFimage> image;
+			std::vector<GIFimage> frame;
 			std::vector<GIFexpand> expand;
 			std::vector<GIFcontrol> controller;
 			std::vector<GIFappData> appData;
 		public:
 			bool load(stream &s);
 			bool loadFile(const str &fileName);
-			bool output(matrix &mat, int frame = 0);
-			void input(const matrix &mat);
-			void input(const matrix &mat, const colorList &usePalette);
-			void input(const std::vector<matrix> &matList, int delayTime);
-			void input(const std::vector<matrix> &matList, int delayTime, const str &imgPath, const std::vector<int> &frameID);
-			void input(const std::vector<matrix> &matList, const colorList &usePalette, int delayTime);
-			void input(const std::vector<matrix> &matList, const colorList &usePalette, int delayTime, const str &imgPath, const std::vector<int> &frameID);
+			bool output(image &mat, int frameID = 0);
+			void input(const image &mat);
+			void input(const image &mat, const colorList &usePalette);
+			void input(const std::vector<image> &matList, int delayTime);
+			void input(const std::vector<image> &matList, int delayTime, const str &imgPath, const std::vector<int> &frameID);
+			void input(const std::vector<image> &matList, const colorList &usePalette, int delayTime);
+			void input(const std::vector<image> &matList, const colorList &usePalette, int delayTime, const str &imgPath, const std::vector<int> &frameID);
 			void make(stream &s);
 			void makeFile(const str &fileName);
 		};
@@ -288,23 +288,125 @@ namespace KoishiImageTool{
 			bool loadFile(const str &DDSfileName);
 			bool make(stream &s);
 			bool makeFile(const str &DDSfileName);
-			bool uncompress(matrix &mat);
-			bool uncompressMipmap(std::vector<matrix> &matList);
-			bool compress(const matrix &mat);
+			bool uncompress(image &mat);
+			bool uncompressMipmap(std::vector<image> &matList);
+			bool compress(const image &mat);
 			DDSHeader *getHeader();
 		public:
 			word RGB8888TO565(Koishi::color c8888);
 			Koishi::color RGB565TO8888(word c565);
 			void DXT1_uncompress(const stream &udata, colorList &clist);
-			void DXT1_uncompress(matrix &mat);
+			void DXT1_uncompress(image &mat);
 			void DXT3_uncompress(const stream &udata, colorList &clist);
-			void DXT3_uncompress(matrix &mat);
+			void DXT3_uncompress(image &mat);
 			void DXT5_uncompress(const stream &udata, colorList &clist);
-			void DXT5_uncompress(matrix &mat);
+			void DXT5_uncompress(image &mat);
 			void DXT5_compress(const colorList &clist, stream &dest);
-			void DXT5_compress(const matrix &mat);
+			void DXT5_compress(const image &mat);
 		};
 	}
-
-	
+	namespace JFIF{
+		enum JFIFtag:uchar{
+			JFIF_UD,	JFIF_COMM,	JFIF_JPG13,	JFIF_JPG12,
+			JFIF_JPG11,	JFIF_JPG10,	JFIF_JPG9,	JFIF_JPG8,
+			JFIF_JPG7,	JFIF_JPG6,	JFIF_JPG5,	JFIF_JPG4,
+			JFIF_JPG3,	JFIF_JPG2,	JFIF_JPG1,	JFIF_JPG0,
+			JFIF_APP15,	JFIF_APP14,	JFIF_APP13,	JFIF_APP12,
+			JFIF_APP11,	JFIF_APP10,	JFIF_APP9,	JFIF_APP8,
+			JFIF_APP7,	JFIF_APP6,	JFIF_APP5,	JFIF_APP4,
+			JFIF_APP3,	JFIF_APP2,	JFIF_APP1,	JFIF_APP,
+			JFIF_EXP,	JFIF_DHP,	JFIF_DRI,	JFIF_DNL,
+			JFIF_DQT,	JFIF_SOS,	JFIF_EOI,	JFIF_SOI,
+			JFIF_RST7,	JFIF_RST6,	JFIF_RST5,	JFIF_RST4,
+			JFIF_RST3,	JFIF_RST2,	JFIF_RST1,	JFIF_RST0,
+			JFIF_SOF15,	JFIF_SOF14,	JFIF_SOF13, JFIF_DAC,
+			JFIF_SOF11,	JFIF_SOF10,	JFIF_SOF9,	JFIF_JPG,
+			JFIF_SOF7,	JFIF_SOF6,	JFIF_SOF5,	JFIF_DHT,
+			JFIF_SOF3,	JFIF_SOF2,	JFIF_SOF1,	JFIF_SOF0
+		};
+		extern JFIFtag parseTag(const word &tagWord);
+		extern word JFIFword(const word &originWord);
+		struct JFIFblock{
+			JFIFtag tag;
+			dword len;
+			stream data;
+		};
+		struct JFIFthumbnail{
+			word width;
+			word height;
+			stream data;
+		};	//位于JFIFinfo中，一般都没有
+		struct JFIFinfo{
+			word mainVersion;
+			word subVersion;
+			word unitDensity;
+			dword horizontalDensity;
+			dword verticalDensity;
+			JFIFthumbnail thumbnail;
+		};	//从APP块解析
+		struct JFIFquantizeInfo{
+			word precision;
+			word ID;
+			word term[64];
+		};	//DQT块解析，可以有多个
+		struct JFIFstartFrame0{
+			word bitPerSample;
+			dword height;
+			dword width;
+			word colorDim;
+			struct{
+				word ID;
+				word horizontalSampleFactor;
+				word verticalSampleFactor;
+				word useQuantizeTableID;
+			}colorInfo[3];
+		};	//SOF块信息
+		struct JFIFhuffmanInfo{
+			word huffmanType;		//DC还是AC
+			word huffmanID;
+			uchar lenList[16];
+			stream data;
+		};	//DHT块信息
+		struct JFIFhuffmanEntry{
+			word code;
+			word value;
+			word bitLen;
+		};	//哈夫曼映射（一项），一个表可以解析出多项
+		typedef std::vector<JFIFhuffmanEntry> JFIFhuffmanMap; //哈夫曼映射表
+		struct JFIFdiffResetInfo{
+			word interval;
+		};	//DRI块信息
+		struct JFIFstartScan{
+			word colorDim;
+			struct{
+				word ID;
+				word DChuffmanID;
+				word AChuffmanID;
+			}colorInfo[3];
+		};	//SOS块信息
+		class JFIFobject{
+		public:
+			std::vector<JFIFblock> blockList;
+			stream imageData;
+		public:
+			bool load(const stream &sour);
+			bool loadFile(const str &fileName);
+		public:
+			JFIFinfo appInfo;
+			std::vector<JFIFquantizeInfo> quantizInfo;
+			JFIFstartFrame0 frameInfo;
+			std::vector<JFIFhuffmanInfo> huffmanACinfo;
+			std::vector<JFIFhuffmanInfo> huffmanDCinfo;
+			JFIFdiffResetInfo diffInfo;
+			JFIFstartScan scanInfo;
+		public:
+			void initDecoder();
+			void decodeHuffman();
+			void decodeQuantiz();
+		public:
+			std::vector<JFIFhuffmanMap> huffmanAC;	//交流映射表
+			std::vector<JFIFhuffmanMap> huffmanDC;	//直流映射表
+		};
+	}
 }
+

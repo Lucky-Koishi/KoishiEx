@@ -163,9 +163,9 @@ void ModalTransform::updatePalette(){
 	color clr;
 	color clrBack(0xFF, 0xFF, 0xFF, 0xFF);
 	color clrLine(0xFF, 0, 0, 0);
-	matrix canvas(160, 160);
-	matrix block(10, 10);
-	matrix alphaBlock(10, 10);
+	image canvas(160, 160);
+	image block(10, 10);
+	image alphaBlock(10, 10);
 	alphaBlock.filledLattice(point(0,0),point(9,9),color(0xff, 0xff, 0xff, 0xff),color(0xff,0xcc,0xcc,0xcc),3);
 	int index = 0;
 	for(j=0;j<16;j++){
@@ -349,7 +349,7 @@ void ModalTransform::OnMenuIndexingBaseOnImage(){
 UINT ModalTransform::pickColorFrame(void*context){
 	ModalTransform*dlg = (ModalTransform*)context;
 	IMGobject *ptrIO = dlg->in.contextIO;
-	matrix mat;
+	image mat;
 	palette pal;
 	colorList clrList;
 	queue clrCount;
@@ -406,7 +406,7 @@ UINT ModalTransform::pickColorImage(void*context){
 	dlg->bar.show(ptrIO->indexCount);
 	for(long getFrame = 0;getFrame<ptrIO->indexCount;getFrame ++){
 		dlg->bar.setInfo(L"正在提取第"+NumToCStr(getFrame+1)+L"帧的颜色喵……", getFrame);
-		matrix mat;
+		image mat;
 		if(!ptrIO->PICextract(getFrame, mat, dlg->in.currentPalette)){
 			continue;
 		}

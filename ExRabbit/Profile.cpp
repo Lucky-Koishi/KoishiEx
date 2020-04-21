@@ -17,8 +17,15 @@ void Profile::defaultProfile(){
 	canvasColor2 = 0xDDDDDD;
 	avatarColor0 = 0xFFCCCC;
 	avatarColor1 = 0xCCCCFF;
-	avatarThumbSize = 1;
+	avatarModelSize = 1;
 	miniSecPerFrame = 100;
+	audioBackColor = 0;
+	channel1Color = 0xFFFF00;
+	channel1Color = 0x33FF00;
+	volumeColor = 0xFFFF00;
+	MP3defaultColor = 0xCCCC00;
+	MP3quality = 3;
+	useDefaultRecorder = 1;
 }
 void Profile::loadProfile(){
 	CStdioFile file;
@@ -60,10 +67,31 @@ void Profile::loadProfile(){
 				avatarColor1 = _ttoi(valueStr);
 			}
 			if(termStr == L"[AVATAR_THUMBSIZE]"){
-				avatarThumbSize = _ttoi(valueStr);
+				avatarModelSize = _ttoi(valueStr);
 			}
 			if(termStr == L"[GIF_MSPF]"){
 				miniSecPerFrame = _ttoi(valueStr);
+			}
+			if(termStr == L"[AUDIOBACK_COLOR]"){
+				audioBackColor = _ttoi(valueStr);
+			}
+			if(termStr == L"[CHANNEL1_COLOR]"){
+				channel1Color = _ttoi(valueStr);
+			}
+			if(termStr == L"[CHANNEL2_COLOR]"){
+				channel2Color = _ttoi(valueStr);
+			}
+			if(termStr == L"[VOLUME_COLOR]"){
+				volumeColor = _ttoi(valueStr);
+			}
+			if(termStr == L"[MP3_DEFAULT_COLOR]"){
+				MP3defaultColor = _ttoi(valueStr);
+			}
+			if(termStr == L"[MP3_QUALITY]"){
+				MP3quality = _ttoi(valueStr);
+			}
+			if(termStr == L"[USE_DEFAULT_RECORDER]"){
+				useDefaultRecorder = _ttoi(valueStr);
 			}
 		}
 		setlocale(LC_CTYPE, old_locale);
@@ -89,8 +117,15 @@ void Profile::saveProfile(){
 	file.WriteString(L"[CANVAS_COLOR2]" + NumToCStr(canvasColor2) + L"\n");
 	file.WriteString(L"[AVATAR_COLOR0]" + NumToCStr(avatarColor0) + L"\n");
 	file.WriteString(L"[AVATAR_COLOR1]" + NumToCStr(avatarColor1) + L"\n");
-	file.WriteString(L"[AVATAR_THUMBSIZE]" + NumToCStr(avatarThumbSize) + L"\n");
+	file.WriteString(L"[AVATAR_THUMBSIZE]" + NumToCStr(avatarModelSize) + L"\n");
 	file.WriteString(L"[GIF_MSPF]" + NumToCStr(miniSecPerFrame) + L"\n");
+	file.WriteString(L"[AUDIOBACK_COLOR]" + NumToCStr(audioBackColor) + L"\n");
+	file.WriteString(L"[CHANNEL1_COLOR]" + NumToCStr(channel1Color) + L"\n");
+	file.WriteString(L"[CHANNEL2_COLOR]" + NumToCStr(channel2Color) + L"\n");
+	file.WriteString(L"[VOLUME_COLOR]" + NumToCStr(volumeColor) + L"\n");
+	file.WriteString(L"[MP3_DEFAULT_COLOR]" + NumToCStr(MP3defaultColor) + L"\n");
+	file.WriteString(L"[MP3_QUALITY]" + NumToCStr(MP3quality) + L"\n");
+	file.WriteString(L"[USE_DEFAULT_RECORDER]" + NumToCStr(useDefaultRecorder) + L"\n");
 	setlocale(LC_CTYPE, old_locale);
 	free(old_locale);
 	file.Close();
@@ -141,28 +176,35 @@ CString Profile::getDownloadPath(){
 	::CreateDirectory(savePathStr, NULL);
 	return savePathStr+L"\\";
 }
-CString Profile::getThumbnailPath(int thumbSize, KoishiAvatar::avatarCareer ac){
-	CString careerName[15] = {L"default",L"swordman",L"atswordman",L"fighter",L"atfighter",L"gunner",L"atgunner",L"mage",L"atmage",L"priest",L"atpriest",L"thief",L"knight",L"demoniclancer",L"gunblader"};
-	CString s[4] = {L"Small", L"Medium", L"Large", L"Huge"};
+CString Profile::getModelPath(int modelSize, KoishiAvatar::AvatarCharacter ac){
+	CString careerName[KoishiAvatar::ACHARACTER_MAXCOUNT] = {L"鬼剑士(男)",L"鬼剑士(女)",L"格斗家(女)",L"格斗家(男)",L"神枪手(男)",L"神枪手(女)",L"魔法师(女)",L"魔法师(男)",L"圣职者(男)",L"圣职者(女)",L"暗夜使者",L"守护者",L"魔枪士",L"枪剑士"};
+	CString s[4] = {L"小", L"中", L"大", L"巨大"};
 	CString savePathStr = outputPath;
 	::CreateDirectory(savePathStr, NULL);
-	savePathStr += L"\\Thumbnail";
+	savePathStr += L"\\Avatar";
 	::CreateDirectory(savePathStr, NULL);
-	savePathStr += L"\\" + s[thumbSize % 4];
+	savePathStr += L"\\" + s[modelSize % 4];
 	::CreateDirectory(savePathStr, NULL);
 	savePathStr += L"\\" + careerName[ac];
 	::CreateDirectory(savePathStr, NULL);
 	return savePathStr+L"\\";
 }
-CString Profile::getIconPath(KoishiAvatar::avatarCareer ac){
-	CString careerName[15] = {L"default",L"swordman",L"atswordman",L"fighter",L"atfighter",L"gunner",L"atgunner",L"mage",L"atmage",L"priest",L"atpriest",L"thief",L"knight",L"demoniclancer",L"gunblader"};
+CString Profile::getIconPath(KoishiAvatar::AvatarCharacter ac){
+	CString careerName[KoishiAvatar::ACHARACTER_MAXCOUNT] = {L"鬼剑士(男)",L"鬼剑士(女)",L"格斗家(女)",L"格斗家(男)",L"神枪手(男)",L"神枪手(女)",L"魔法师(女)",L"魔法师(男)",L"圣职者(男)",L"圣职者(女)",L"暗夜使者",L"守护者",L"魔枪士",L"枪剑士"};
 	CString savePathStr = outputPath;
 	::CreateDirectory(savePathStr, NULL);
-	savePathStr += L"\\Thumbnail";
+	savePathStr += L"\\Avatar";
 	::CreateDirectory(savePathStr, NULL);
-	savePathStr += L"\\AvatarIcon";
+	savePathStr += L"\\图标";
 	::CreateDirectory(savePathStr, NULL);
 	savePathStr += L"\\" + careerName[ac];
+	::CreateDirectory(savePathStr, NULL);
+	return savePathStr+L"\\";
+}
+CString Profile::getAvatarMapPath(){
+	CString savePathStr = outputPath;
+	::CreateDirectory(savePathStr, NULL);
+	savePathStr += L"\\Avatar";
 	::CreateDirectory(savePathStr, NULL);
 	return savePathStr+L"\\";
 }
@@ -189,4 +231,8 @@ Koishi::color Profile::getCanvasColor(int n){
 Koishi::color Profile::getAvatarColor(int n){
 	DWORD avatarColorList[3] = {avatarColor0, avatarColor1};
 	return color(0xFF, (avatarColorList[n%2] & 0xFF0000)>> 16, (avatarColorList[n%2] & 0XFF00)>> 8, avatarColorList[n%2] & 0xFF);
+}
+Koishi::color Profile::getAudioColor(int n){
+	DWORD audioColorList[5] = {audioBackColor, channel1Color, channel2Color, volumeColor, MP3defaultColor};
+	return color(0xFF, (audioColorList[n%5] & 0xFF0000)>> 16, (audioColorList[n%5] & 0XFF00)>> 8, audioColorList[n%5] & 0xFF);
 }

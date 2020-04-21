@@ -147,6 +147,9 @@
     <ClInclude Include="ToolSPK2.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ModalPreference2.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExParrot.cpp">
@@ -189,6 +192,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ToolSPK2.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalPreference2.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

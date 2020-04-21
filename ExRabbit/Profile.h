@@ -1,4 +1,5 @@
 #pragma once
+#include "../KoishiEx/avatar.h"
 class Profile
 {
 public:
@@ -15,8 +16,15 @@ public:
 	DWORD canvasColor2;
 	DWORD avatarColor0;
 	DWORD avatarColor1;
-	DWORD avatarThumbSize;
+	DWORD avatarModelSize;
 	DWORD miniSecPerFrame;
+	DWORD audioBackColor;
+	DWORD channel1Color;
+	DWORD channel2Color;
+	DWORD volumeColor;
+	DWORD MP3defaultColor;
+	DWORD MP3quality;
+	DWORD useDefaultRecorder;
 public:
 	void defaultProfile();
 	void loadProfile();
@@ -28,13 +36,15 @@ public:
 	CString getOutputPath(CString npkName, CString imgName);
 	CString getOutputPath(CString npkName, CString imgName, int clPro);
 	CString getDownloadPath();
-	CString getThumbnailPath(int thumbSize, KoishiAvatar::avatarCareer ac);
-	CString getIconPath(KoishiAvatar::avatarCareer ac);
+	CString getModelPath(int modelSize, KoishiAvatar::AvatarCharacter ac);
+	CString getIconPath(KoishiAvatar::AvatarCharacter ac);
+	CString getAvatarMapPath();
 	CString getSupportPath();
 	CString getNPKdictPath();
 	CString getAvatarPath();
 	Koishi::color getMainColor();
 	Koishi::color getCanvasColor(int n);
 	Koishi::color getAvatarColor(int n);
+	Koishi::color getAudioColor(int n);
 };
 

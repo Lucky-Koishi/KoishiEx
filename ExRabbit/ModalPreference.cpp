@@ -254,7 +254,7 @@ BOOL ModalPreference::OnInitDialog(){
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE7)->SetWindowText(NumToCStr(modifiedProfile.canvasColor2));
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE8)->SetWindowText(NumToCStr(modifiedProfile.avatarColor0));
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE9)->SetWindowText(NumToCStr(modifiedProfile.avatarColor1));
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE10)->SetWindowText(NumToCStr(modifiedProfile.avatarThumbSize));
+	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE10)->SetWindowText(NumToCStr(modifiedProfile.avatarModelSize));
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE11)->SetWindowText(NumToCStr(modifiedProfile.miniSecPerFrame));
 	return TRUE;
 }
@@ -269,7 +269,7 @@ void ModalPreference::OnBnClickedOk(){
 		iTemp = 0;
 	if(iTemp > 3)
 		iTemp = 3;
-	modifiedProfile.avatarThumbSize = iTemp;
+	modifiedProfile.avatarModelSize = iTemp;
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE11)->GetWindowText(sTemp);
 	iTemp = _ttoi(sTemp);
 	if(iTemp < 10)
@@ -290,7 +290,7 @@ void ModalPreference::OnBnClickedButtonSetpic1(){
 	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	if(dlg.DoModal() == IDOK){
 		filePath = dlg.GetPathName();
-		matrix mPic;
+		image mPic;
 		loadPNG(mPic, CStrToStr(filePath));
 		mPic.clip(0, 39, 0, 149);
 		makeBMP(mPic, CStrToStr(modifiedProfile.getSupportPath() + L"LOGO.bmp"));
@@ -307,7 +307,7 @@ void ModalPreference::OnBnClickedButtonSetpic2(){
 	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	if(dlg.DoModal() == IDOK){
 		filePath = dlg.GetPathName();
-		matrix mPic;
+		image mPic;
 		loadPNG(mPic, CStrToStr(filePath));
 		makePNG(mPic, CStrToStr(modifiedProfile.getSupportPath() + L"back.png"));
 		MessageBox(L"设置背景完毕喵。",L"提示喵");

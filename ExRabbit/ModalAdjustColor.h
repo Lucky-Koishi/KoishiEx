@@ -23,7 +23,7 @@ public:
 	struct INPUT{
 		IMGversion version;	//版本
 		colorList oldCl;	//旧的颜色表
-		matrix oldV2matrix;	//旧的当前帧
+		image oldV2matrix;	//旧的当前帧
 	}in;
 	struct OUTPUT{
 		int target;

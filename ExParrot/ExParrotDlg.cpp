@@ -46,10 +46,9 @@ CExParrotDlg::CExParrotDlg(CWnd* pParent /*=NULL*/)
 	zoomBound2 = 0;
 	processing = 0;
 	sizing = 0;
-	//////
 	for(int i = 0;i<16;i++)
 		power[i] = 0;								//功率谱
-	cur = 0;	
+	cur[0] = cur[1] = 0;	
 	canvasOperatePara.canvasOperating = false;
 	canvasOperatePara.canvasOperation = CANVAS_SELECT;
 	canvasOperatePara.firstPos = 0;
@@ -136,6 +135,7 @@ BOOL CExParrotDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	SetWindowText(_T(VERSION_STR));
 	SetWindowPos(NULL,0,0,width,height,SWP_NOZORDER|SWP_NOMOVE);
 	CRect rc;
 	GetClientRect(rc);
@@ -209,7 +209,9 @@ BOOL CExParrotDlg::OnInitDialog()
 	m_ttc.AddTool(GET_CTRL(CButton, IDC_TOOL_BUTTON13), L"回声");
 
 	MP3image.create(1,1);
-	MP3image.fill(color(0xFF,0xCC,0xDD));
+	MP3image.fill(profile.getAudioColor(4));
+
+	AfxBeginThread(xThread, this);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -272,9 +274,24 @@ UINT CExParrotDlg::decodeThread(void*p){
 			dlg->fileSNDname = StrToCStr(dlg->no.entry[id].comment);
 			oo.load(s);
 			oo.initDecoder();
-			loadOGG(dlg->au, oo);
+			
+			{
+				stream s;
+				oo.initPCM();
+				int i = 3;
+				int j = 0;
+				dlg->bar.setMax(oo.packs.size());
+				while(oo.packDecode(i++)){
+					oo.makePCM(j++);
+					dlg->bar.setPos(i);
+				}
+				oo.makePCMstream(s);
+				dlg->au.create(s, oo.info.channels, oo.info.sampleRate);
+			}
 			dlg->dispLeftBound = 0;
 			dlg->dispRightBound = dlg->au.length - 1;
+			dlg->leftBound = 0;
+			dlg->rightBound = 0;
 			dlg->updateInfo();
 			CString tempStr = L"类别:Ogg音频\r\n编码器信息:\r\n" + StrToCStr(oo.comment.vendorInfo) + L"\r\n";
 			tempStr += L"其他信息:\r\n";
@@ -306,6 +323,8 @@ UINT CExParrotDlg::decodeThread(void*p){
 			loadWAV(dlg->au, wo);
 			dlg->dispLeftBound = 0;
 			dlg->dispRightBound = dlg->au.length - 1;
+			dlg->leftBound = 0;
+			dlg->rightBound = 0;
 			dlg->updateInfo();
 			CString tempStr = L"类别:波形文件\r\n编码器信息:PCM\r\n";
 			GET_DLG_CTRL(CEdit, IDC_EDIT_SNDCOMMENT)->SetWindowText(tempStr);
@@ -327,25 +346,23 @@ void CExParrotDlg::decode(){
 void CExParrotDlg::draw(){
 	if(rightBound - leftBound > 0){
 		GET_CTRL(CEdit, IDC_EDIT_RANGE1)->SetWindowText(L"左端:" + DoubleToCStr(0.001F*au.getTime(leftBound))+L"s");
-		//GET_CTRL(CEdit, IDC_EDIT_RANGE2)->SetWindowText(DoubleToCStr(0.001F*au.getTime(leftBound+playerPos)));
 		GET_CTRL(CEdit, IDC_EDIT_RANGE3)->SetWindowText(L"右端:" + DoubleToCStr(0.001F*au.getTime(rightBound))+L"s");
 	}else{
 		GET_CTRL(CEdit, IDC_EDIT_RANGE1)->SetWindowText(L"左端:" + DoubleToCStr(0.001F*au.getTime(0))+L"s");
-		//GET_CTRL(CEdit, IDC_EDIT_RANGE2)->SetWindowText(DoubleToCStr(0.001F*au.getTime(playerPos)));
 		GET_CTRL(CEdit, IDC_EDIT_RANGE3)->SetWindowText(L"右端:" + DoubleToCStr(0.001F*au.getLastTime())+L"s");
 	}
 	AfxBeginThread(drawThread, this);
 }
-void CExParrotDlg::makeGraph(matrix &graphMat, int w, int h){
-	color clrLeftChannel = color(0xFF, 0xff, 0x66, 0x00);
-	color clrRightChannel = color(0xFF, 0xff, 0x00, 0xCC);
-	color clrBack = color(0xFF,0x66,0xCC,0xFF);
+void CExParrotDlg::makeGraph(image &graphMat, int w, int h){
+	color clrLeftChannel = profile.getAudioColor(1);//color(0xFF, 0xff, 0x66, 0x00);
+	color clrRightChannel = profile.getAudioColor(2);//color(0xFF, 0xff, 0x00, 0xCC);
+	color clrBack = profile.getAudioColor(0);//color(0xFF,0x66,0xCC,0xFF);
 	color clrBound = color(0xFF,0,0,0);
 	color clrZoom = color(0xFF,0xFF,0x22,0x22);
 	graphMat.create(h, w);
 	graphMat.fill(clrBack);
 	int i, j;
-	matrix content;
+	image content;
 	if(KoishiImageTool::loadPNG(content, CStrToStr(profile.getSupportPath() + L"back.png"))){
 		for(i = 0;i<content.getWidth();i++){
 			for(j = 0;j<content.getHeight();j++){
@@ -403,9 +420,7 @@ void CExParrotDlg::makeGraph(matrix &graphMat, int w, int h){
 	return;
 }
 void CExParrotDlg::drawPower(){
-	matrix mat;
-	//170 - 520
-	//380 - height-10
+	image mat;
 	int canw = 520-170;
 	int canh = height-10-380;
 	mat.create(canh, canw);
@@ -416,6 +431,8 @@ void CExParrotDlg::drawPower(){
 		clr.useHSV(hsv);
 		mat.filledRectangle(point(2+18*i, canh - (canh - 5)*(power[i] + 2)/100), point(17+18*i, canh - 3), clr);
 	}
+	mat.filledRectangle(point(290, canh - (canh - 5)*(cur[0] + 2)/100), point(290 + (canw - 296)/2, canh - 3), profile.getAudioColor(3));
+	mat.filledRectangle(point(293 + (canw - 296)/2, canh - (canh - 5)*(cur[1] + 2)/100), point(canw - 3, canh - 3), profile.getAudioColor(3));
 	int i, j;
 	CImage img;
 	img.Create(canw, canh, 32);
@@ -510,7 +527,7 @@ void CExParrotDlg::updateInfo(){
 }
 void CExParrotDlg::updateMP3image(){
 	int i, j;
-	matrix mat;
+	image mat;
 	MP3image.zoom(mat, 170.0f/MP3image.width, 170.0f/MP3image.height);
 	CImage img;
 	img.Create(170, 170, 32);
@@ -542,12 +559,41 @@ UINT CExParrotDlg::playThread(void *para){
 	}
 	return 0;
 }
+UINT CExParrotDlg::xThread(void *para){
+	CExParrotDlg*dlg = (CExParrotDlg*)para;
+	while(1){
+		if(dlg->recording){
+			dlg->cur[0] = dlg->recorder.energyLeft*100/32767;
+			dlg->cur[1] = dlg->recorder.energyRight*100/32767;
+			for(int i = 0;i<16;i++){
+				dlg->power[i] = dlg->recorder.freq[i]* 100 / 10000;
+				if(dlg->power[i] > 100)
+					dlg->power[i] = 100;
+			}
+		}else if(dlg->player.idv != -1){
+			dlg->cur[0] = dlg->player.dv[dlg->player.idv].energyLeft*100/32767;
+			dlg->cur[1] = dlg->player.dv[dlg->player.idv].energyRight*100/32767;
+			for(int i = 0;i<16;i++){
+				dlg->power[i] = dlg->player.dv[dlg->player.idv].freq[i]* 100 / 10000;
+				if(dlg->power[i] > 100)
+					dlg->power[i] = 100;
+			}
+		}
+		if(dlg->cur[0]>100)
+			dlg->cur[0] = 100;
+		if(dlg->cur[1]>100)
+			dlg->cur[1] = 100;
+		dlg->drawPower();
+		Sleep(4);
+	}
+	return 0U;
+}
 UINT CExParrotDlg::drawThread(void *para){
 	CExParrotDlg*dlg = (CExParrotDlg*)para;
 	dlg->drawPower();
 	int canw = dlg->width - 540;
 	int canh = dlg->height - 50;
-	matrix canvas;
+	image canvas;
 	dlg->makeGraph(canvas, canw, canh);
 	int i, j;
 	CImage img;
@@ -734,7 +780,12 @@ void CExParrotDlg::OnMain04(){
 
 void CExParrotDlg::OnMain05(){
 	// TODO: 在此添加命令处理程序代码
-	MessageBox(L"施工中");
+	ModalPreference2 dlg;
+	dlg.modifiedProfile = profile;
+	if(IDOK == dlg.DoModal()){
+		profile = dlg.modifiedProfile;
+		MessageBox(L"软件配置被修改喵，请重启以生效。",L"提示喵");
+	}
 }
 
 void CExParrotDlg::OnMain06(){
@@ -1302,14 +1353,8 @@ UINT CExParrotDlg::ThreadControlPlay(void*context){
 void CExParrotDlg::OnBnClickedButtonControl4(){
 	// TODO: 在此添加控件通知处理程序代码
 	if(!recording){
-		if(au.length == 0){
-			MessageBox(L"当前没有音频喵！无法录音喵！",L"提示喵");
-			return;
-		}
-		loadReplace = false;
-		if(rightBound-leftBound <= 0){
-			loadReplace = true;
-		}
+		loadReplace = rightBound-leftBound <= 0;	//未选择时为替换全部，否则替换选择区域
+		newRecord = au.length == 0;
 		AfxBeginThread(ThreadControlRecord, this);
 	}else{
 		recorder.stop();
@@ -1317,9 +1362,30 @@ void CExParrotDlg::OnBnClickedButtonControl4(){
 		recorder.getData(s);
 		audio newAd;
 		newAd.create(s, 2, 44100);
+		if(1/*如果录音过小·自动放大录音*/){
+			long maxEnergy = 0;
+			for(int i = 0;i<newAd.length;i++){
+				long a1 = abs((long)newAd[i].value[0]);
+				long a2 = abs((long)newAd[i].value[1]);
+				if(a1 > maxEnergy)
+					maxEnergy = a1;
+				if(a2 > maxEnergy)
+					maxEnergy = a2;
+			}
+			if(maxEnergy < 16384){
+				double powerup = 16384.f / maxEnergy;
+				newAd.mult(powerup);
+			}
+		}
 		recording = false;
-
-		if(loadReplace){
+		if(newRecord){
+			au.destory();
+			au = newAd;
+			stream s1;
+			makeWAV(newAd, s1);
+			no.push(s1, "new_record.ogg");
+			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->InsertItem(no.count,L"new_record.ogg", getIconSND(VWAVE));
+		}else if(loadReplace){
 			au.destory();
 			au = newAd;
 		}else{
@@ -1794,6 +1860,8 @@ void CExParrotDlg::OnMouseMove(UINT nFlags, CPoint pt){
 		getMousePos(pt);
 		GET_CTRL(CEdit, IDC_EDIT_RANGE2)->SetWindowText(L"滑鼠:"+DoubleToCStr(0.001F*au.getTime(pt))+L"s");
 		OnMouseEventCanvas(canvasOperatePara.canvasOperating ? CANVAS_MOUSE_LEFT_DRAG : CANVAS_MOUSE_MOVE, mousePt);
+	}else{
+		OnMouseEventCanvas(canvasOperatePara.canvasOperating ? CANVAS_MOUSE_LEFT_RELEASE : CANVAS_MOUSE_MOVE, mousePt);
 	}
 }
 void CExParrotDlg::OnLButtonUp(UINT nFlags, CPoint pt){

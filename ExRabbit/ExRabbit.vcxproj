@@ -5,9 +5,17 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -29,6 +37,13 @@
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -38,12 +53,19 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetName>blackcat</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>blackcat</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>blackcat</TargetName>
   </PropertyGroup>
@@ -96,9 +118,93 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="..\BUGtrace.txt" />
     <None Include="ReadMe.txt" />
+    <None Include="res\avatar_char_0.bmp" />
+    <None Include="res\avatar_char_0X.bmp" />
+    <None Include="res\avatar_char_1.bmp" />
+    <None Include="res\avatar_char_10.bmp" />
+    <None Include="res\avatar_char_10X.bmp" />
+    <None Include="res\avatar_char_11.bmp" />
+    <None Include="res\avatar_char_11X.bmp" />
+    <None Include="res\avatar_char_12.bmp" />
+    <None Include="res\avatar_char_12X.bmp" />
+    <None Include="res\avatar_char_13.bmp" />
+    <None Include="res\avatar_char_13X.bmp" />
+    <None Include="res\avatar_char_1X.bmp" />
+    <None Include="res\avatar_char_2.bmp" />
+    <None Include="res\avatar_char_2X.bmp" />
+    <None Include="res\avatar_char_3.bmp" />
+    <None Include="res\avatar_char_3X.bmp" />
+    <None Include="res\avatar_char_4.bmp" />
+    <None Include="res\avatar_char_4X.bmp" />
+    <None Include="res\avatar_char_5.bmp" />
+    <None Include="res\avatar_char_5X.bmp" />
+    <None Include="res\avatar_char_6.bmp" />
+    <None Include="res\avatar_char_6X.bmp" />
+    <None Include="res\avatar_char_7.bmp" />
+    <None Include="res\avatar_char_7X.bmp" />
+    <None Include="res\avatar_char_8.bmp" />
+    <None Include="res\avatar_char_8X.bmp" />
+    <None Include="res\avatar_char_9.bmp" />
+    <None Include="res\avatar_char_9X.bmp" />
+    <None Include="res\avatar_char_exit.bmp" />
+    <None Include="res\avatar_char_reserved.bmp" />
+    <None Include="res\avatar_tool_button_1.bmp" />
+    <None Include="res\avatar_tool_button_10.bmp" />
+    <None Include="res\avatar_tool_button_11.bmp" />
+    <None Include="res\avatar_tool_button_2.bmp" />
+    <None Include="res\avatar_tool_button_2x.bmp" />
+    <None Include="res\avatar_tool_button_3.bmp" />
+    <None Include="res\avatar_tool_button_3x.bmp" />
+    <None Include="res\avatar_tool_button_4.bmp" />
+    <None Include="res\avatar_tool_button_4x.bmp" />
+    <None Include="res\avatar_tool_button_5.bmp" />
+    <None Include="res\avatar_tool_button_6.bmp" />
+    <None Include="res\avatar_tool_button_7.bmp" />
+    <None Include="res\avatar_tool_button_8.bmp" />
+    <None Include="res\avatar_tool_button_9.bmp" />
+    <None Include="res\bitmap5.bmp" />
+    <None Include="res\char0.PNG" />
+    <None Include="res\char1.PNG" />
+    <None Include="res\char10.PNG" />
+    <None Include="res\char11.PNG" />
+    <None Include="res\char12.PNG" />
+    <None Include="res\char13.PNG" />
+    <None Include="res\char2.PNG" />
+    <None Include="res\char3.PNG" />
+    <None Include="res\char4.PNG" />
+    <None Include="res\char5.PNG" />
+    <None Include="res\char6.PNG" />
+    <None Include="res\char7.PNG" />
+    <None Include="res\char8.PNG" />
+    <None Include="res\char9.PNG" />
     <None Include="res\cursor1.cur" />
     <None Include="res\cursor2.cur" />
     <None Include="res\cursor3.cur" />
@@ -119,6 +225,7 @@
     <None Include="res\icon_unkown.ico" />
     <None Include="res\icon_version_1.ico" />
     <None Include="res\icon_version_2.ico" />
+    <None Include="res\icon_version_3.ico" />
     <None Include="res\icon_version_4.ico" />
     <None Include="res\icon_version_5.ico" />
     <None Include="res\icon_version_6.ico" />
@@ -127,6 +234,17 @@
     <None Include="res\icon_version_NUL.ico" />
     <None Include="res\LOGO.bmp" />
     <None Include="res\LOGO2.bmp" />
+    <None Include="res\part_button_0.bmp" />
+    <None Include="res\part_button_1.bmp" />
+    <None Include="res\part_button_2.bmp" />
+    <None Include="res\part_button_3.bmp" />
+    <None Include="res\part_button_4.bmp" />
+    <None Include="res\part_button_5.bmp" />
+    <None Include="res\part_button_6.bmp" />
+    <None Include="res\part_button_7.bmp" />
+    <None Include="res\part_button_8.bmp" />
+    <None Include="res\part_button_9.bmp" />
+    <None Include="res\png1.png" />
     <None Include="res\QRCODE.bmp" />
     <None Include="res\tool_button_1.bmp" />
     <None Include="res\tool_button_10.bmp" />
@@ -161,7 +279,6 @@
     <ClInclude Include="AdjustColorDlg.h" />
     <ClInclude Include="DialogAbout.h" />
     <ClInclude Include="DialogNew.h" />
-    <ClInclude Include="DictAvatar.h" />
     <ClInclude Include="DlgBar.h" />
     <ClInclude Include="ExRabbit.h" />
     <ClInclude Include="ExRabbitDlg.h" />
@@ -169,10 +286,9 @@
     <ClInclude Include="ModalAddMark.h" />
     <ClInclude Include="ModalAdjustCanvas.h" />
     <ClInclude Include="ModalAdjustColor.h" />
-    <ClInclude Include="ModalAvatarMap1.h" />
-    <ClInclude Include="ModalAvatarMap2.h" />
-    <ClInclude Include="ModalAvatarUpdate.h" />
     <ClInclude Include="ModalClearPicture.h" />
+    <ClInclude Include="ModalCopyInsert.h" />
+    <ClInclude Include="ModalCopyReplace.h" />
     <ClInclude Include="ModalGradient.h" />
     <ClInclude Include="ModalImageHide.h" />
     <ClInclude Include="ModalImageRemove.h" />
@@ -193,20 +309,29 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TinyAddMark.h" />
     <ClInclude Include="TinyBar.h" />
+    <ClInclude Include="TinyClipBoard.h" />
     <ClInclude Include="TinyColorSelect.h" />
     <ClInclude Include="TinySetBrush.h" />
     <ClInclude Include="ToolAvatar.h" />
-    <ClInclude Include="ToolAvatarES.h" />
+    <ClInclude Include="ToolAvatarCharacterSelection.h" />
+    <ClInclude Include="ToolAvatarIO.h" />
+    <ClInclude Include="ToolAvatarLocalizer.h" />
+    <ClInclude Include="ToolAvatarMark.h" />
+    <ClInclude Include="ToolAvatarModelConfig.h" />
+    <ClInclude Include="ToolAvatarModelSet.h" />
+    <ClInclude Include="ToolAvatarRegister.h" />
+    <ClInclude Include="ToolAvatarSuit.h" />
+    <ClInclude Include="ToolAvatarSuitRegister.h" />
     <ClInclude Include="ToolDict.h" />
     <ClInclude Include="ToolForceEx.h" />
     <ClInclude Include="ToolIMGSearch.h" />
+    <ClInclude Include="ToolPatch.h" />
     <ClInclude Include="ToolSPK.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdjustColorDlg.cpp" />
     <ClCompile Include="DialogAbout.cpp" />
     <ClCompile Include="DialogNew.cpp" />
-    <ClCompile Include="DictAvatar.cpp" />
     <ClCompile Include="DlgBar.cpp" />
     <ClCompile Include="ExRabbit.cpp" />
     <ClCompile Include="ExRabbitDlg.cpp" />
@@ -214,10 +339,9 @@
     <ClCompile Include="ModalAddMark.cpp" />
     <ClCompile Include="ModalAdjustCanvas.cpp" />
     <ClCompile Include="ModalAdjustColor.cpp" />
-    <ClCompile Include="ModalAvatarMap1.cpp" />
-    <ClCompile Include="ModalAvatarMap2.cpp" />
-    <ClCompile Include="ModalAvatarUpdate.cpp" />
     <ClCompile Include="ModalClearPicture.cpp" />
+    <ClCompile Include="ModalCopyInsert.cpp" />
+    <ClCompile Include="ModalCopyReplace.cpp" />
     <ClCompile Include="ModalGradient.cpp" />
     <ClCompile Include="ModalImageHide.cpp" />
     <ClCompile Include="ModalImageRemove.cpp" />
@@ -236,16 +360,27 @@
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TinyAddMark.cpp" />
     <ClCompile Include="TinyBar.cpp" />
+    <ClCompile Include="TinyClipBoard.cpp" />
     <ClCompile Include="TinyColorSelect.cpp" />
     <ClCompile Include="TinySetBrush.cpp" />
     <ClCompile Include="ToolAvatar.cpp" />
-    <ClCompile Include="ToolAvatarES.cpp" />
+    <ClCompile Include="ToolAvatarCharacterSelection.cpp" />
+    <ClCompile Include="ToolAvatarIO.cpp" />
+    <ClCompile Include="ToolAvatarLocalizer.cpp" />
+    <ClCompile Include="ToolAvatarMark.cpp" />
+    <ClCompile Include="ToolAvatarModelConfig.cpp" />
+    <ClCompile Include="ToolAvatarModelSet.cpp" />
+    <ClCompile Include="ToolAvatarRegister.cpp" />
+    <ClCompile Include="ToolAvatarSuit.cpp" />
+    <ClCompile Include="ToolAvatarSuitRegister.cpp" />
     <ClCompile Include="ToolDict.cpp" />
     <ClCompile Include="ToolForceEx.cpp" />
     <ClCompile Include="ToolIMGSearch.cpp" />
+    <ClCompile Include="ToolPatch.cpp" />
     <ClCompile Include="ToolSPK.cpp" />
   </ItemGroup>
   <ItemGroup>

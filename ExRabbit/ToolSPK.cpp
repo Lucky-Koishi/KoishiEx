@@ -47,6 +47,11 @@ BEGIN_MESSAGE_MAP(CToolSPK, CDialogEx)
 	ON_NOTIFY(NM_CLICK, IDC_LIST2, &CToolSPK::OnNMClickList2)
 	ON_BN_CLICKED(IDC_BUTTON20, &CToolSPK::OnBnClickedButton20)
 	ON_BN_CLICKED(IDC_BUTTON22, &CToolSPK::OnBnClickedButton22)
+	ON_BN_CLICKED(IDC_BUTTON_ADDONE, &CToolSPK::OnBnClickedButtonAddone)
+	ON_BN_CLICKED(IDC_BUTTON_ADDALL, &CToolSPK::OnBnClickedButtonAddall)
+	ON_BN_CLICKED(IDC_BUTTON_REMOVEONE, &CToolSPK::OnBnClickedButtonRemoveone)
+	ON_BN_CLICKED(IDC_BUTTON_REMOVEALL, &CToolSPK::OnBnClickedButtonRemoveall)
+	ON_BN_CLICKED(IDC_BUTTON4, &CToolSPK::OnBnClickedButton4)
 END_MESSAGE_MAP()
 
 
@@ -71,6 +76,7 @@ BOOL CToolSPK::OnInitDialog()
 	m_cRec.SetCurSel(0);
 
 	m_lSPK.EasyInsertColumn(L"NPK文件名,320,大小,80");
+	GET_CTRL(CGoodListCtrl, IDC_LIST3)->EasyInsertColumn(L"NPK文件名,260,状态,70");
 	serverChoose = 0;
 
 	URLaddr = L"http://d-fighter.dn.nexoncdn.co.kr/samsungdnf/neople/dnf_hg/";
@@ -489,4 +495,122 @@ void CToolSPK::OnBnClickedButton22()
 			m_lSPK.EasyInsertItem(L"没有列表或列表文件已损坏，请更新NPK列表。,");
 		}
 	}
+}
+
+
+void CToolSPK::OnBnClickedButtonAddone()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	int selected = m_lSPK.GetSelectionMark();
+	if(selected >= 0 && selected < m_lSPK.GetItemCount()){
+		CString s = m_lSPK.GetItemText(selected, 0);
+		GET_CTRL(CGoodListCtrl, IDC_LIST3)->EasyInsertItem(s+L",等待");
+	}
+}
+
+
+void CToolSPK::OnBnClickedButtonAddall()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	for(int selected = 0;selected<m_lSPK.GetItemCount();selected++){
+		CString s = m_lSPK.GetItemText(selected, 0);
+		GET_CTRL(CGoodListCtrl, IDC_LIST3)->EasyInsertItem(s+L",等待");
+	}
+}
+
+
+void CToolSPK::OnBnClickedButtonRemoveone()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	GET_CTRL(CGoodListCtrl, IDC_LIST3)->DeleteItem(GET_CTRL(CGoodListCtrl, IDC_LIST3)->GetItemCount()-1);
+}
+
+
+void CToolSPK::OnBnClickedButtonRemoveall()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	GET_CTRL(CGoodListCtrl, IDC_LIST3)->DeleteAllItems();
+}
+
+
+void CToolSPK::OnBnClickedButton4()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	AfxBeginThread(threadDownloadSPKpatch, this);
+}
+
+UINT CToolSPK::threadDownloadSPKpatch(PVOID para){
+	CToolSPK*dlg = (CToolSPK*)para;
+	GET_DLG_CTRL(CButton, IDC_BUTTON_ADDONE)->EnableWindow(false);
+	GET_DLG_CTRL(CButton, IDC_BUTTON_ADDALL)->EnableWindow(false);
+	GET_DLG_CTRL(CButton, IDC_BUTTON_REMOVEONE)->EnableWindow(false);
+	GET_DLG_CTRL(CButton, IDC_BUTTON_REMOVEALL)->EnableWindow(false);
+	GET_DLG_CTRL(CButton, IDC_BUTTON4)->EnableWindow(false);
+	dlg->downloadSPKpatch();
+	GET_DLG_CTRL(CButton, IDC_BUTTON_ADDONE)->EnableWindow(true);
+	GET_DLG_CTRL(CButton, IDC_BUTTON_ADDALL)->EnableWindow(true);
+	GET_DLG_CTRL(CButton, IDC_BUTTON_REMOVEONE)->EnableWindow(true);
+	GET_DLG_CTRL(CButton, IDC_BUTTON_REMOVEALL)->EnableWindow(true);
+	GET_DLG_CTRL(CButton, IDC_BUTTON4)->EnableWindow(true);
+	return 0U;
+}
+
+void CToolSPK::downloadSPKpatch(){
+	int i;
+	std::vector<CString> fileList;
+	CString ext = (serverChoose >=4 && serverChoose<=6) ? L".tct":L".spk";
+	for(i = 0;i<GET_CTRL(CGoodListCtrl, IDC_LIST3)->GetItemCount();i++)
+		fileList.push_back(GET_CTRL(CGoodListCtrl, IDC_LIST3)->GetItemText(i,0));
+	GET_CTRL(CProgressCtrl, IDC_PROGRESS_DOWNLOAD_INFO)->SetPos(0);
+	GET_CTRL(CProgressCtrl, IDC_PROGRESS_PARSE_INFO)->SetPos(0);
+	GET_CTRL(CProgressCtrl, IDC_PROGRESS_DOWNLOAD_INFO)->SetRange32(0, fileList.size());
+	GET_CTRL(CProgressCtrl, IDC_PROGRESS_PARSE_INFO)->SetRange32(0, fileList.size());
+	for(i = 0;i<fileList.size();i++){
+		GET_CTRL(CEdit, IDC_EDIT_DOWNLOAD_INFO)->SetWindowText(L"正在下载"+fileList[i]);
+		GET_CTRL(CGoodListCtrl, IDC_LIST3)->SetItemText(i,1, L"下载中");
+		CString URL = URLaddr + L"ImagePacks2/" + fileList[i] + ext;
+		localAddrFileName = localAddr + fileList[i] + ext;
+		if(0 != GetInternetFile(URL, localAddrFileName)){
+			GET_CTRL(CGoodListCtrl, IDC_LIST3)->SetItemText(i,1, L"下载失败");
+			GET_CTRL(CProgressCtrl, IDC_PROGRESS_DOWNLOAD_INFO)->SetPos(i+1);
+			continue;
+		}
+		GET_CTRL(CProgressCtrl, IDC_PROGRESS_DOWNLOAD_INFO)->SetPos(i+1);
+		//解析
+		CString NPKfileName = localAddrFileName.Left(localAddrFileName.GetLength() - 4);
+		GET_CTRL(CEdit, IDC_EDIT_PARSE_INFO)->SetWindowText(L"正在解析"+fileList[i]);
+		GET_CTRL(CGoodListCtrl, IDC_LIST3)->SetItemText(i,1, L"解析中");
+		if(ext == L".TCT" || ext == L".tct"){
+			TCTobject to;
+			if(!to.load(CStrToStr(localAddrFileName))){
+				GET_CTRL(CEdit, IDC_EDIT_PARSE_INFO)->SetWindowText(L"解析失败"+fileList[i]);
+				GET_CTRL(CGoodListCtrl, IDC_LIST3)->SetItemText(i,1, L"解析失败");
+				GET_CTRL(CProgressCtrl, IDC_PROGRESS_PARSE_INFO)->SetPos(i+1);
+				continue;
+			}
+			to.makeNPK(CStrToStr(NPKfileName));
+			GET_CTRL(CEdit, IDC_EDIT_PARSE_INFO)->SetWindowText(L"解析完毕"+fileList[i]);
+			GET_CTRL(CGoodListCtrl, IDC_LIST3)->SetItemText(i,1, L"解析成功");
+			GET_CTRL(CProgressCtrl, IDC_PROGRESS_PARSE_INFO)->SetPos(i+1);
+			continue;
+		}
+		if(ext == L".SPK" || ext == L".spk"){
+			SPKobject so;
+			if(!so.load(CStrToStr(localAddrFileName))){
+				GET_CTRL(CEdit, IDC_EDIT_PARSE_INFO)->SetWindowText(L"解析失败"+fileList[i]);
+				GET_CTRL(CGoodListCtrl, IDC_LIST3)->SetItemText(i,1, L"解析失败");
+				GET_CTRL(CProgressCtrl, IDC_PROGRESS_PARSE_INFO)->SetPos(i+1);
+				continue;
+			}
+			so.makeNPK(CStrToStr(NPKfileName));
+			GET_CTRL(CEdit, IDC_EDIT_PARSE_INFO)->SetWindowText(L"解析完毕"+fileList[i]);
+			GET_CTRL(CGoodListCtrl, IDC_LIST3)->SetItemText(i,1, L"解析成功");
+			GET_CTRL(CProgressCtrl, IDC_PROGRESS_PARSE_INFO)->SetPos(i+1);
+			continue;
+		}
+		GET_CTRL(CGoodListCtrl, IDC_LIST3)->SetItemText(i,1, L"解析失败");
+		GET_CTRL(CProgressCtrl, IDC_PROGRESS_PARSE_INFO)->SetPos(i+1);
+	}
+	GET_CTRL(CEdit, IDC_EDIT_DOWNLOAD_INFO)->SetWindowText(L"完成");
+	GET_CTRL(CEdit, IDC_EDIT_PARSE_INFO)->SetWindowText(L"完成");
 }

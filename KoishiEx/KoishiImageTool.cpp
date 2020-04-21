@@ -8,6 +8,7 @@ using namespace KoishiImageTool::BMP;
 using namespace KoishiImageTool::PNG;
 using namespace KoishiImageTool::GIF;
 using namespace KoishiImageTool::DDS;
+using namespace KoishiImageTool::JFIF;
 /////////////图像工具////////////////////
 color KoishiImageTool::gradient(const color &sourceColor, const colorList &keyColorList, Koishi::colorProperty cp){
 	if(keyColorList.size() == 0){
@@ -73,12 +74,12 @@ colorList KoishiImageTool::nearbySort(const colorList &originList){
 	return newColorList;
 }
 ///////////BMP//////////////////
-void KoishiImageTool::makeBMP(const matrix &mat, str fileName){
+void KoishiImageTool::makeBMP(const image &mat, str fileName){
 	BMPobject bo;
 	bo.input(mat);
 	bo.makeFile(fileName);
 }
-bool KoishiImageTool::loadBMP(matrix &mat, str fileName){
+bool KoishiImageTool::loadBMP(image &mat, str fileName){
 	BMPobject bo;
 	if(bo.loadFile(fileName)){
 		bo.output(mat);
@@ -156,7 +157,7 @@ void BMPobject::makeFile(str fileName){
 	make(s);
 	s.makeFile(fileName);
 }
-void BMPobject::output(matrix &mat){
+void BMPobject::output(image &mat){
 	long bitPerRow = info.width * info.bitCount;
 	long dwPerRow = bitPerRow / 32;
 	if(bitPerRow & 0x1F){
@@ -198,7 +199,7 @@ void BMPobject::output(matrix &mat){
 		}
 	}
 }
-void BMPobject::input(const matrix &mat){
+void BMPobject::input(const image &mat){
 	paletteColor.clear();
 	data.release();
 	data.allocate(mat.getElemCount() * 3 + mat.getHeight() * 3 + 1000); //加上高度×3是为补齐4字节预留
@@ -230,23 +231,23 @@ void BMPobject::input(const matrix &mat){
 	info.colorImportant = 0;
 }
 ////PNG/////////////////////
-void KoishiImageTool::makePNG(const matrix &mat, str fileName){
+void KoishiImageTool::makePNG(const image &mat, str fileName){
 	PNGobject po;
 	po.input(mat);
 	po.makeFile(fileName);
 }
 void KoishiImageTool::makePNG(const colorList &clrList, str fileName){
-	matrix mat(20*clrList.size(), 200);
+	image mat(20*clrList.size(), 200);
 	mat.filledLattice(point(0, 0), point(199, 20*clrList.size()-1), color(0xFF, 0xFF, 0xFF), color(0xCC, 0xCC, 0xCC), 8);
 	for(int i = 0;i<clrList.size();i++){
-		matrix mat1(20, 200);
+		image mat1(20, 200);
 		mat1.fill(clrList[i]);
 		mat.putFore(mat1, LAY, point(0, i*20));
 		mat1.destory();
 	}
 	makePNG(mat, fileName);
 }
-extern bool KoishiImageTool::loadPNG(matrix &mat, str fileName){
+extern bool KoishiImageTool::loadPNG(image &mat, str fileName){
 	PNGobject po;
 	if(po.loadFile(fileName)){
 		po.output(mat);
@@ -372,7 +373,7 @@ void PNGobject::makeFile(str fileName){
 	make(s);
 	s.makeFile(fileName);
 }
-bool PNGobject::output(matrix &mat){
+bool PNGobject::output(image &mat){
 	stream sCompressed, sFiltered;
 	sCompressed.allocate(info.width * info.height * 5);
 	long bitPerPixel, bytePerPixel, bytePerLine;
@@ -632,7 +633,7 @@ bool PNGobject::output(matrix &mat){
 	}
 	return true;
 }
-void PNGobject::input(const matrix &mat){
+void PNGobject::input(const image &mat){
 	stream sBlock, sCompressed, sOrigin, sScanline;
 	header.magic1 = 0x474E5089;
 	header.magic2 = 0x0A1A0A0D;
@@ -960,7 +961,7 @@ bool GIF::LZW::uncompress(stream &in, stream &out, uchar LWZminCodeSize, bool el
 }
 //////////////////////////////////////////////////////////////////
 bool GIF::GIFobject::load(stream &s){
-	image.clear();
+	frame.clear();
 	expand.clear();
 	appData.clear();
 	controller.clear();
@@ -1031,7 +1032,7 @@ bool GIF::GIFobject::load(stream &s){
 					s.readStream(originStream, len);
 					gi.dataDisposed.pushStream(originStream, len);
 				}
-				image.push_back(gi);
+				frame.push_back(gi);
 			}
 			break;
 		case '!':
@@ -1087,17 +1088,17 @@ bool GIF::GIFobject::loadFile(const str &fileName){
 	s.loadFile(fileName);
 	return load(s);
 }
-bool GIF::GIFobject::output(matrix &mat, int frame){
+bool GIF::GIFobject::output(image &mat, int frameID){
 	LZW l;
-	if(image.size() <= frame)
+	if(frame.size() <= frameID)
 		return false;
 	stream out;
-	l.uncompress(image[frame].dataDisposed, out, image[frame].LZWminCodeSize);
-	mat.create(image[frame].height, image[frame].width);
+	l.uncompress(frame[frameID].dataDisposed, out, frame[frameID].LZWminCodeSize);
+	mat.create(frame[frameID].height, frame[frameID].width);
 	colorList cl;
 	color bkColor;
-	if(image[frame].localColorValid){
-		cl = image[frame].localPalette;
+	if(frame[frameID].localColorValid){
+		cl = frame[frameID].localPalette;
 		bkColor = color(0xFF,0xFF,0xFF);
 	}else if(info.globalColorValid){
 		cl = info.globalPalette;
@@ -1105,8 +1106,8 @@ bool GIF::GIFobject::output(matrix &mat, int frame){
 	}else{
 		return false;
 	}
-	if(frame < controller.size() && controller[frame].alphaValid){
-		cl[controller[frame].alphaIndex].alpha = 0;
+	if(frameID < controller.size() && controller[frameID].alphaValid){
+		cl[controller[frameID].alphaIndex].alpha = 0;
 	}
 	for(int i = 0;i<mat.getElemCount();i++){
 		if(i < out.length){
@@ -1115,7 +1116,7 @@ bool GIF::GIFobject::output(matrix &mat, int frame){
 	}
 	return true;
 }
-void GIF::GIFobject::input(const matrix &mat){
+void GIF::GIFobject::input(const image &mat){
 	//提取调色板
 	palette pal;			//寻找用的调色板
 	colorList clrList;		//颜色列表
@@ -1163,7 +1164,7 @@ void GIF::GIFobject::input(const matrix &mat){
 	ga.appData.pushByte(0);
 	appData.push_back(ga);
 }
-void GIF::GIFobject::input(const matrix &mat, const colorList &usePalette){
+void GIF::GIFobject::input(const image &mat, const colorList &usePalette){
 	//更新头
 	info.version = "GIF89a";
 	info.globalColorValid = true;
@@ -1213,7 +1214,7 @@ void GIF::GIFobject::input(const matrix &mat, const colorList &usePalette){
 	ga.appData.pushByte(0);
 	appData.push_back(ga);
 	//更新这个帧的图像域
-	image.clear();
+	frame.clear();
 	GIFimage gi;
 	gi.xOffset = 0;
 	gi.yOffset = 0;
@@ -1234,9 +1235,9 @@ void GIF::GIFobject::input(const matrix &mat, const colorList &usePalette){
 	}
 	LZW l;
 	l.compress(rawData, gi.dataDisposed, gi.LZWminCodeSize);
-	image.push_back(gi);
+	frame.push_back(gi);
 }
-void GIF::GIFobject::input(const std::vector<matrix> &matList, int delayTime){
+void GIF::GIFobject::input(const std::vector<image> &matList, int delayTime){
 	//尝试生成多帧的图像
 	if(matList.size() == 0)
 		return;
@@ -1251,7 +1252,9 @@ void GIF::GIFobject::input(const std::vector<matrix> &matList, int delayTime){
 	info.height = matList[0].getHeight();
 	info.width = matList[0].getWidth();
 	//更新这个帧的控制域
-	controller.clear();appData.clear();image.clear();
+	controller.clear();
+	appData.clear();
+	frame.clear();
 	for(int id = 0;id<matList.size();id ++){
 		GIFcontrol gc;
 		gc.alphaIndex = 0;
@@ -1344,10 +1347,10 @@ void GIF::GIFobject::input(const std::vector<matrix> &matList, int delayTime){
 		}
 		LZW l;
 		l.compress(rawData, gi.dataDisposed, gi.LZWminCodeSize);
-		image.push_back(gi);
+		frame.push_back(gi);
 	}
 }
-void GIF::GIFobject::input(const std::vector<matrix> &matList, int delayTime, const str &imgPath, const std::vector<int> &frameID){
+void GIF::GIFobject::input(const std::vector<image> &matList, int delayTime, const str &imgPath, const std::vector<int> &frameID){
 	//更新头
 	if(matList.size() == 0)
 		return;
@@ -1362,7 +1365,9 @@ void GIF::GIFobject::input(const std::vector<matrix> &matList, int delayTime, co
 	info.height = matList[0].getHeight();
 	info.width = matList[0].getWidth();
 	//更新这个帧的控制域
-	controller.clear();appData.clear();image.clear();
+	controller.clear();
+	appData.clear();
+	frame.clear();
 	for(int id = 0;id<matList.size();id ++){
 		GIFcontrol gc;
 		gc.alphaIndex = 0;
@@ -1460,10 +1465,10 @@ void GIF::GIFobject::input(const std::vector<matrix> &matList, int delayTime, co
 		}
 		LZW l;
 		l.compress(rawData, gi.dataDisposed, gi.LZWminCodeSize);
-		image.push_back(gi);
+		frame.push_back(gi);
 	}
 }
-void GIF::GIFobject::input(const std::vector<matrix> &matList, const colorList &usePalette, int delayTime){
+void GIF::GIFobject::input(const std::vector<image> &matList, const colorList &usePalette, int delayTime){
 	//更新头
 	if(matList.size() == 0)
 		return;
@@ -1485,7 +1490,9 @@ void GIF::GIFobject::input(const std::vector<matrix> &matList, const colorList &
 		}
 	}
 	//更新这个帧的控制域
-	controller.clear();appData.clear();image.clear();
+	controller.clear();
+	appData.clear();
+	frame.clear();
 	for(int id = 0;id<matList.size();id ++){
 		GIFcontrol gc;
 		gc.alphaIndex = 0xFF;
@@ -1548,10 +1555,10 @@ void GIF::GIFobject::input(const std::vector<matrix> &matList, const colorList &
 		}
 		LZW l;
 		l.compress(rawData, gi.dataDisposed, gi.LZWminCodeSize);
-		image.push_back(gi);
+		frame.push_back(gi);
 	}
 }
-void GIF::GIFobject::input(const std::vector<matrix> &matList, const colorList &usePalette, int delayTime, const str &imgPath, const std::vector<int> &frameID){
+void GIF::GIFobject::input(const std::vector<image> &matList, const colorList &usePalette, int delayTime, const str &imgPath, const std::vector<int> &frameID){
 	//更新头
 	if(matList.size() == 0)
 		return;
@@ -1573,7 +1580,9 @@ void GIF::GIFobject::input(const std::vector<matrix> &matList, const colorList &
 		}
 	}
 	//更新这个帧的控制域
-	controller.clear();appData.clear();image.clear();
+	controller.clear();
+	appData.clear();
+	frame.clear();
 	for(int id = 0;id<matList.size();id ++){
 		GIFcontrol gc;
 		gc.alphaIndex = 0xFF;
@@ -1641,13 +1650,13 @@ void GIF::GIFobject::input(const std::vector<matrix> &matList, const colorList &
 		}
 		LZW l;
 		l.compress(rawData, gi.dataDisposed, gi.LZWminCodeSize);
-		image.push_back(gi);
+		frame.push_back(gi);
 	}
 }
 void GIF::GIFobject::make(stream &s){
 	longex estimateLen = 13;	//估算所需空间
 	estimateLen += 1000;		//给全局调色板留的空间
-	estimateLen += image.size() * (1000 + info.height * info.width);		//给图像数据留的空间
+	estimateLen += frame.size() * (1000 + info.height * info.width);		//给图像数据留的空间
 	estimateLen += controller.size() * 20;				//给控制数据留的空间
 	estimateLen += appData.size() * 1000;				//给应用数据留的空间，这些足够了
 	s.allocate(estimateLen);
@@ -1687,7 +1696,7 @@ void GIF::GIFobject::make(stream &s){
 		}
 	}
 	//插入各块：按照控制块，NET应用块（如果单帧则无此块），KOISHIEX应用块，图像块顺序插入
-	for(int id = 0;id < image.size(); id++){
+	for(int id = 0;id < frame.size(); id++){
 		//插入控制块
 		s.pushByte('!');
 		s.pushByte(GIFET_CONTROL);
@@ -1703,7 +1712,7 @@ void GIF::GIFobject::make(stream &s){
 		s.pushByte(controller[id].alphaIndex);
 		s.pushByte(0);
 		//插入NET应用快
-		if(appData.size() > 0 && image.size() > 1 && id == 0){
+		if(appData.size() > 0 && frame.size() > 1 && id == 0){
 			s.pushByte('!');
 			s.pushByte(GIFET_APPLICATION);
 			s.pushByte(11);
@@ -1714,7 +1723,7 @@ void GIF::GIFobject::make(stream &s){
 			s.pushByte(0);
 		}
 		//插入KOISHI应用块
-		int appId = (image.size() == 1) ? id :(id + 1);
+		int appId = (frame.size() == 1) ? id :(id + 1);
 		if(appId < appData.size()){
 			s.pushByte('!');
 			s.pushByte(GIFET_APPLICATION);
@@ -1744,57 +1753,57 @@ void GIF::GIFobject::make(stream &s){
 		}
 		//插入图像块
 		s.pushByte(',');
-		s.pushWord(image[id].xOffset);
-		s.pushWord(image[id].yOffset);
-		s.pushWord(image[id].width);
-		s.pushWord(image[id].height);
+		s.pushWord(frame[id].xOffset);
+		s.pushWord(frame[id].yOffset);
+		s.pushWord(frame[id].width);
+		s.pushWord(frame[id].height);
 		fieldChar = 0;
-		if(image[id].localColorValid){
+		if(frame[id].localColorValid){
 			fieldChar |= 0x80;
-			if(image[id].localInterlace)
+			if(frame[id].localInterlace)
 				fieldChar |= 0x40;
-			if(image[id].localColorSort)
+			if(frame[id].localColorSort)
 				fieldChar |= 0x20;
-			if(image[id].localColorCount > 128){
+			if(frame[id].localColorCount > 128){
 				fieldChar |= 0x7;
-			}else if(image[id].localColorCount > 64){
+			}else if(frame[id].localColorCount > 64){
 				fieldChar |= 0x6;
-			}else if(image[id].localColorCount > 32){
+			}else if(frame[id].localColorCount > 32){
 				fieldChar |= 0x5;
-			}else if(image[id].localColorCount > 16){
+			}else if(frame[id].localColorCount > 16){
 				fieldChar |= 0x4;
-			}else if(image[id].localColorCount > 8){
+			}else if(frame[id].localColorCount > 8){
 				fieldChar |= 0x3;
-			}else if(image[id].localColorCount > 4){
+			}else if(frame[id].localColorCount > 4){
 				fieldChar |= 0x2;
-			}else if(image[id].localColorCount > 2){
+			}else if(frame[id].localColorCount > 2){
 				fieldChar |= 0x1;
 			}
 		}
 		s.pushByte(fieldChar);
-		if(image[id].localColorValid){
-			for(int i = 0;i<image[id].localColorCount;i++){
-				s.pushByte(image[id].localPalette[i].R);
-				s.pushByte(image[id].localPalette[i].G);
-				s.pushByte(image[id].localPalette[i].B);
+		if(frame[id].localColorValid){
+			for(int i = 0;i<frame[id].localColorCount;i++){
+				s.pushByte(frame[id].localPalette[i].R);
+				s.pushByte(frame[id].localPalette[i].G);
+				s.pushByte(frame[id].localPalette[i].B);
 			}
 		}
-		s.pushByte(image[id].LZWminCodeSize);
+		s.pushByte(frame[id].LZWminCodeSize);
 		//剩下的分块写
-		int restLen = image[id].dataDisposed.length;
+		int restLen = frame[id].dataDisposed.length;
 		int pos = 0;
 		while(true){
 			if(restLen > 0xFE){
 				s.pushByte(0xFE);
 				for(int i = 0;i<0xFE;i++){
-					s.pushByte(image[id].dataDisposed[pos+i]);
+					s.pushByte(frame[id].dataDisposed[pos+i]);
 				}
 				pos += 0xFE;
 				restLen -= 0xFE;
 			}else{
 				s.pushByte(restLen);
 				for(int i = 0;i<restLen;i++){
-					s.pushByte(image[id].dataDisposed[pos+i]);
+					s.pushByte(frame[id].dataDisposed[pos+i]);
 				}
 				break;
 			}
@@ -1960,7 +1969,7 @@ bool DDSobject::makeFile(const str &DDSfileName){
 	s.release();
 	return false;
 }
-bool DDSobject::uncompress(matrix &mat){
+bool DDSobject::uncompress(image &mat){
 	switch(header.pixelFormat.fourCC){
 	case 0x31545844:
 		DXT1_uncompress(mat);
@@ -1978,10 +1987,10 @@ bool DDSobject::uncompress(matrix &mat){
 		return false;
 	}
 }
-bool DDSobject::uncompressMipmap(std::vector<matrix> &matList){
+bool DDSobject::uncompressMipmap(std::vector<image> &matList){
 	return false;
 }
-bool DDSobject::compress(const matrix &mat){
+bool DDSobject::compress(const image &mat){
 	DXT5_compress(mat);
 	//设置头
 	header.magic = 0x20534444;
@@ -2068,7 +2077,7 @@ void DDSobject::DXT1_uncompress(const stream &udata, colorList &clist){
 		clist.push_back(cTempList[iTempList[i]]);
 	}
 }
-void DDSobject::DXT1_uncompress(matrix &mat){
+void DDSobject::DXT1_uncompress(image &mat){
 	mat.create(header.height, header.width);
 	dword blockrow = mat.getHeight()/4;
 	dword blockcol = mat.getWidth()/4;
@@ -2149,7 +2158,7 @@ void DDSobject::DXT3_uncompress(const stream &udata, colorList &clist){
 		clist.push_back(cTemp);
 	}
 }
-void DDSobject::DXT3_uncompress(matrix &mat){
+void DDSobject::DXT3_uncompress(image &mat){
 	mat.create(header.height, header.width);
 	dword blockrow = mat.getHeight()/4;
 	dword blockcol = mat.getWidth()/4;
@@ -2251,7 +2260,7 @@ void DDSobject::DXT5_uncompress(const stream &udata, colorList &clist){
 		clist.push_back(cTemp);
 	}
 }
-void DDSobject::DXT5_uncompress(matrix &mat){
+void DDSobject::DXT5_uncompress(image &mat){
 	mat.create(header.height, header.width);
 	dword blockrow = mat.getHeight()/4;
 	dword blockcol = mat.getWidth()/4;
@@ -2449,8 +2458,8 @@ void DDSobject::DXT5_compress(const colorList &clist, stream &dest){
 	dest.pushByte((Koishi::uchar)((cTempList[12]>>0)|(cTempList[13]<<2)|(cTempList[14]<<4)|(cTempList[15]<<6)));
 }
 
-void DDSobject::DXT5_compress(const matrix &mat){
-	matrix mat1;
+void DDSobject::DXT5_compress(const image &mat){
+	image mat1;
 	dword blockrow = (mat.getHeight()+3)/4;
 	dword blockcol = (mat.getWidth()+3)/4;
 	data.reallocate(blockrow*blockcol*16);
@@ -2481,5 +2490,238 @@ void DDSobject::DXT5_compress(const matrix &mat){
 			data.pushStream(s,16);
 			s.release();
 		}
+	}
+}
+//////////////////////////////////////////////////////////////
+//  TAG列表  
+////////////////////////////////////////////////
+//帧开始标记
+//FFC0			SOF0		非层次Huffman编码·基线DCT
+//FFC1			SOF1		非层次Huffman编码·扩展顺序DCT
+//FFC2			SOF2		非层次Huffman编码·递进DCT
+//FFC3			SOF3		非层次Huffman编码·空间顺序无损
+//FFC5			SOF5		层次Huffman编码·差分DCT
+//FFC6			SOF6		层次Huffman编码·差分层次DCT
+//FFC7			SOF7		层次Huffman编码·差分空间无损
+//FFC8			JPG			非层次算术编码·保留
+//FFC9			SOF9		非层次算术编码·扩展顺序DCT
+//FFCA			SOF10		非层次算术编码·递进DCT
+//FFCB			SOF11		非层次算术编码·空间顺序无损
+//FFCD			SOF13		层次算术编码·差分DCT
+//FFCE			SOF14		层次算术编码·差分层次DCT
+//FFCF			SOF15		层次算术编码·差分空间无损
+//////////////////////////////////////////////////
+//FFC4			DHT			Huffman树表
+//FFCC			DAC			算术编码表
+//////////////////////////////////////////////////
+//FFD0-7		RST0-7		差分编码累积复位，8个
+//FFD8			SOI			图像开始
+//FFD9			EOI			图像结束
+//FFDA			SOS			开始扫描（之后接图像数据）
+//FFDB			DQT			量化表
+//FFDC			DNL			线数
+//FFDD			DRI			差分编码累积复位的间隔
+//FFDE			DHP			层次级数
+//FFDF			EXP			展开参考图像
+//FFE0-E		APP0-15		APP数据
+//FFF0-D		JPG0-14		保留，没卵用
+//FFFE			COM			注释
+//FF**			XXX			等价于**			
+extern JFIFtag KoishiImageTool::JFIF::parseTag(const word &tagWord){
+	uchar id = (tagWord ^ 0xFFFF) >> 8;
+	return id <= 63 ? (JFIFtag)id : JFIF_UD;
+}
+extern word KoishiImageTool::JFIF::JFIFword(const word &lenWord){
+	return  (lenWord & 0xFF) << 8 | lenWord >> 8;
+}
+bool JFIFobject::load(const stream &sour){
+	//如果检测到SOS前，标志为SOI只记录标记，标志为其他记录标记后要解析长度和携带数据
+	//如果检测到SOS后，一切均变为图像数据，但检测到EOI，RES0 - RES7时也会记录标记
+	//图像数据中0xFF与其他数据联合解析部分由解码进行，不在解析文件结构时进行。
+	stream s = sour;
+	word wTemp;
+	blockList.clear();
+	while(s.getPosition() < s.length){
+		JFIFblock block;
+		s.read(&wTemp, 2);
+		block.tag = parseTag(wTemp);
+		if(!(block.tag == JFIF_UD || block.tag == JFIF_SOI|| block.tag == JFIF_EOI)){
+			s.read(&wTemp, 2);
+			block.len = JFIFword(wTemp);
+			s.readStream(block.data, block.len - 2);
+		}else{
+			block.len = 0;
+		}
+		blockList.push_back(block);
+		if(block.tag == JFIF_SOS)
+			break;
+	}
+	imageData.clear();
+	imageData.allocate(100 + s.length - s.getPosition());
+	uchar u;
+	while(s.getPosition() < s.length){
+		s.readByte(u);
+		imageData.pushByte(u);
+		if(u == 0xFF && s.getPosition() < s.length){
+			uchar u2;
+			s.readByte(u2);
+			imageData.pushByte(u2);
+			if(u2 >= 0xD0 && u2 <= 0xD9){
+				JFIFblock block;
+				block.tag = parseTag(0xFF | u2 << 8);
+				block.len = 0;
+				blockList.push_back(block);
+				if(block.tag == JFIF_EOI){
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+bool JFIFobject::loadFile(const str &fileName){
+	stream s;
+	s.loadFile(fileName);
+	return load(s);
+}
+void JFIFobject::initDecoder(){
+	int i, j;
+	memset(&appInfo, 0, sizeof(appInfo));
+	memset(&frameInfo, 0, sizeof(frameInfo));
+	memset(&diffInfo, 0, sizeof(diffInfo));
+	memset(&scanInfo, 0, sizeof(scanInfo));
+	quantizInfo.clear();
+	huffmanACinfo.clear();
+	huffmanDCinfo.clear();
+	stream *pData;
+	uchar c = 0;
+	for(i = 0;i<blockList.size();i++){
+		pData = &blockList[i].data;
+		JFIFquantizeInfo qTable;
+		JFIFhuffmanInfo hTable;
+		switch(blockList[i].tag){
+		case JFIF_APP:
+			pData -> resetPosition();
+			pData -> movePosition(5);	//跳过"JFIF/0"
+			pData -> read(&appInfo.mainVersion, 1);
+			pData -> read(&appInfo.subVersion, 1);
+			pData -> read(&appInfo.unitDensity, 1);
+			pData -> read(&appInfo.horizontalDensity, 2);
+			pData -> read(&appInfo.verticalDensity, 2);
+			pData -> read(&appInfo.thumbnail.width, 1);
+			pData -> read(&appInfo.thumbnail.height, 1);
+			pData -> readStream(appInfo.thumbnail.data, 3 * appInfo.thumbnail.width * appInfo.thumbnail.height);
+			appInfo.horizontalDensity = JFIFword(appInfo.horizontalDensity);
+			appInfo.verticalDensity = JFIFword(appInfo.verticalDensity);
+			break;
+		case JFIF_DQT:
+			memset(&qTable, 0, sizeof(JFIFquantizeInfo));
+			pData -> resetPosition();
+			pData -> readByte(c);
+			qTable.ID = c & 0xF;
+			qTable.precision = (c & 0xF0) ? 16 : 8;
+			for(j = 0;j < 64;j++)
+				pData -> read(qTable.term + j, (c & 0xF0) ? 2 : 1);
+			quantizInfo.push_back(qTable);
+			break;
+		case JFIF_DHT:
+			memset(&hTable, 0, sizeof(JFIFhuffmanInfo));
+			pData -> resetPosition();
+			pData -> readByte(c);
+			hTable.huffmanID = c & 0xF;
+			hTable.huffmanType = (c & 0xF0) ? 1 : 0;
+			pData -> read(hTable.lenList, 16);
+			pData -> readStream(hTable.data, pData->length - pData->getPosition());
+			if(c & 0xF0){
+				huffmanACinfo.push_back(hTable);
+			}else{
+				huffmanDCinfo.push_back(hTable);
+			}
+			break;
+		case JFIF_DRI:
+			pData->resetPosition();
+			pData->read(&diffInfo.interval, 2);
+			diffInfo.interval = JFIFword(diffInfo.interval);
+			break;
+		case JFIF_SOF0:
+			pData -> resetPosition();
+			pData -> read(&frameInfo.bitPerSample, 1);
+			pData -> read(&frameInfo.height, 2);
+			pData -> read(&frameInfo.width, 2);
+			pData -> read(&frameInfo.colorDim, 1);
+			for(j = 0;j<frameInfo.colorDim;j++){
+				pData -> read(&frameInfo.colorInfo[j].ID, 1);
+				pData -> readByte(c);
+				pData ->read(&frameInfo.colorInfo[j].useQuantizeTableID, 1);
+				frameInfo.colorInfo[j].horizontalSampleFactor = c >> 4;
+				frameInfo.colorInfo[j].verticalSampleFactor = c & 0xF;
+			}
+			frameInfo.height = JFIFword(frameInfo.height);
+			frameInfo.width = JFIFword(frameInfo.width);
+			break;
+		case JFIF_SOS:
+			pData -> resetPosition();
+			pData -> read(&scanInfo.colorDim, 1);
+			for(j = 0;j<scanInfo.colorDim;j++){
+				pData -> read(&scanInfo.colorInfo[j].ID, 1);
+				pData -> readByte(c);
+				scanInfo.colorInfo[j].AChuffmanID = c >> 4;
+				scanInfo.colorInfo[j].DChuffmanID = c & 0xF;
+			}
+			break;
+		}
+	}
+}
+
+void JFIFobject::decodeHuffman(){
+	//解析AC
+	int i, j, k;
+	huffmanAC.clear();
+	huffmanDC.clear();
+	for(i=0;i<huffmanACinfo.size();i++){
+		JFIFhuffmanInfo &huffmanInfo = huffmanACinfo[i];
+		int entryCount = 0;
+		for(j = 0;j<16;j++){
+			entryCount += huffmanInfo.lenList[i];
+		}
+		JFIFhuffmanMap map;
+		JFIFhuffmanEntry prevEntry = {0xFFFF, 0, 0};
+		map.reserve(entryCount);
+		huffmanInfo.data.resetPosition();
+		for(j = 0;j<16;j++){
+			for(k = 0;k<huffmanInfo.lenList[j];k++){
+				JFIFhuffmanEntry entry = {prevEntry.code + 1, 0, j + 1};
+				huffmanInfo.data.read(&entry.value, 1);
+				if(entry.bitLen > prevEntry.bitLen){
+					entry.code <<= entry.bitLen - prevEntry.bitLen;
+				}
+				map.push_back(entry);
+				prevEntry = entry;
+			}
+		}
+		huffmanAC.push_back(map);
+	}
+	for(i=0;i<huffmanDCinfo.size();i++){
+		JFIFhuffmanInfo &huffmanInfo = huffmanDCinfo[i];
+		int entryCount = 0;
+		for(j = 0;j<16;j++){
+			entryCount += huffmanInfo.lenList[i];
+		}
+		JFIFhuffmanMap map;
+		JFIFhuffmanEntry prevEntry = {0xFFFF, 0, 0};
+		map.reserve(entryCount);
+		huffmanInfo.data.resetPosition();
+		for(j = 0;j<16;j++){
+			for(k = 0;k<huffmanInfo.lenList[j];k++){
+				JFIFhuffmanEntry entry = {prevEntry.code + 1, 0, j + 1};
+				huffmanInfo.data.read(&entry.value, 1);
+				if(entry.bitLen > prevEntry.bitLen){
+					entry.code <<= entry.bitLen - prevEntry.bitLen;
+				}
+				map.push_back(entry);
+				prevEntry = entry;
+			}
+		}
+		huffmanDC.push_back(map);
 	}
 }

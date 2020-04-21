@@ -123,6 +123,9 @@ color::operator dword() const{
 double color::mixMethod(double a, double b, colorMethod method){
 	double c;
 	switch(method){
+	case REPLACE:
+		c = a;
+		break;
 	case LAY://覆盖
 		c = a;
 		break;
@@ -195,6 +198,9 @@ uchar color::mixMethod(uchar a, uchar b, colorMethod method){
 	A = a;
 	switch(method){
 	case LAY://覆盖
+		C = A;
+		break;
+	case REPLACE:
 		C = A;
 		break;
 	case DARKEN://变暗
@@ -484,6 +490,12 @@ color color::loseBlack(const color &c, uchar gamma){
 	newA = gm*255;
 	return color(c.alpha*newA/255, newR, newG, newB);
 }
+color color::getBrighten(const color &c){
+	return color(c.alpha, 0xFF-((0xFF-c.R)>>1), 0xFF-((0xFF-c.G)>>1), 0xFF-((0xFF-c.B)>>1));
+}
+color color::getDarken(const color &c){
+	return color(c.alpha, c.R>>1, c.G>>1, c.B>>1);
+}
 ///////////////////////////////////////////////////////////////
 //point & size
 point::point(){
@@ -532,27 +544,27 @@ size::size(long w, long h){
 long size::area() const{
 	return W*H;
 }
-matrix::matrix(){
+image::image(){
 	column = 0;
 	row = 0;
 	pt = 0;
 	data = NULL;
 }
-matrix::matrix(dword _row, dword _column){
+image::image(dword _row, dword _column){
 	column = _column;
 	row = _row;
 	pt = 0;
 	data = new color[column*row+1000];
 	fill(0);
 }
-matrix::matrix(const size &_sz){
+image::image(const size &_sz){
 	column = _sz.W;
 	row = _sz.H;
 	pt = 0;
 	data = new color[column*row+1000];
 	fill(0);
 }
-matrix::matrix(const matrix &_mat){
+image::image(const image &_mat){
 	column = _mat.column;
 	row = _mat.row;
 	pt = 0;
@@ -560,10 +572,10 @@ matrix::matrix(const matrix &_mat){
 	if(data)
 		memcpy(data, _mat.data, 4*column*row+1000);
 }
-matrix::~matrix(){
+image::~image(){
 	destory();
 }
-matrix& matrix::operator = (const matrix &_mat){
+image& image::operator = (const image &_mat){
 	if(this == &_mat)
 		return *this;
 	if(data)
@@ -577,10 +589,10 @@ matrix& matrix::operator = (const matrix &_mat){
 	return *this;
 }
 
-bool matrix::valid(){
+bool image::valid(){
 	return !(data == NULL);
 }
-void matrix::create(dword _row, dword _column){
+void image::create(dword _row, dword _column){
 	if(!data){
 		row  = _row;
 		column = _column;
@@ -589,7 +601,7 @@ void matrix::create(dword _row, dword _column){
 		fill(0);
 	}
 }
-void matrix::create(const size &_sz){
+void image::create(const size &_sz){
 	if(!data){
 		row  = _sz.H;
 		column = _sz.W;
@@ -598,7 +610,7 @@ void matrix::create(const size &_sz){
 		fill(0);
 	}
 }
-void matrix::destory(){
+void image::destory(){
 	if(data){
 		delete[] data;
 		data = NULL;
@@ -608,18 +620,18 @@ void matrix::destory(){
 	}
 }
 
-void matrix::fill(color _clr){
+void image::fill(color _clr){
 	for(dword i = 0; i< column*row ; i++)
 		data[i] = _clr;
 }
 
-void matrix::push(color _clr){
+void image::push(color _clr){
 	data[pt] = _clr;
 	if(pt != column*row - 1)
 		pt++;
 }
 
-longex matrix::push(const stream &s, colorFormat cf){
+longex image::push(const stream &s, colorFormat cf){
 	dword len = s.length;
 	dword i = 0;
 	switch(cf){
@@ -654,7 +666,7 @@ longex matrix::push(const stream &s, colorFormat cf){
 	return i;
 }
 
-longex matrix::make(stream &s, colorFormat cf) const{
+longex image::make(stream &s, colorFormat cf) const{
 	dword i = 0;
 	dword colorData;
 	switch(cf){
@@ -689,20 +701,20 @@ longex matrix::make(stream &s, colorFormat cf) const{
 	return s.getPosition();
 }
 
-color *matrix::operator[] (dword _i) const{
+color *image::operator[] (dword _i) const{
 	return data + _i*column;
 }
-long matrix::getHeight() const{
+long image::getHeight() const{
 	return row;
 }
-long matrix::getWidth() const{
+long image::getWidth() const{
 	return column;
 }
-long matrix::getElemCount() const{
+long image::getElemCount() const{
 	return row*column;
 }	
 //取子阵
-void matrix::clip(matrix &dest, dword rowStart, dword rowEnd, dword columnStart, dword columnEnd) const{
+void image::clip(image &dest, dword rowStart, dword rowEnd, dword columnStart, dword columnEnd) const{
 	if(rowEnd>row)
 		rowEnd = row;
 	if(rowStart>rowEnd)
@@ -719,8 +731,9 @@ void matrix::clip(matrix &dest, dword rowStart, dword rowEnd, dword columnStart,
 		}
 	}
 }
-void matrix::expand(matrix &dest, dword toTop, dword toBottom, dword toLeft, dword toRight) const{
+void image::expand(image &dest, dword toTop, dword toBottom, dword toLeft, dword toRight, color filledClr) const{
 	dest.create(row+toTop+toBottom, column+toLeft+toRight);
+	dest.fill(filledClr);
 	dword i,j;
 	for(i=0;i<row;i++){
 		for(j=0;j<column;j++){
@@ -728,7 +741,7 @@ void matrix::expand(matrix &dest, dword toTop, dword toBottom, dword toLeft, dwo
 		}
 	}
 }
-void matrix::zoom(matrix &dest, double ratio) const{
+void image::zoom(image &dest, double ratio) const{
 	dest.create(row*ratio, column*ratio);
 	dword i,j;
 	for(i=0;i<row*ratio;i++){
@@ -737,7 +750,7 @@ void matrix::zoom(matrix &dest, double ratio) const{
 		}
 	}
 }
-void matrix::zoom(matrix &dest, double honzRatio, double vertRatio) const{
+void image::zoom(image &dest, double honzRatio, double vertRatio) const{
 	dest.create(row*vertRatio, column*honzRatio);
 	dword i,j;
 	for(i=0;i<row*vertRatio;i++){
@@ -746,50 +759,50 @@ void matrix::zoom(matrix &dest, double honzRatio, double vertRatio) const{
 		}
 	}
 }
-void matrix::clip(dword rowStart, dword rowEnd, dword columnStart, dword columnEnd){
-	matrix dest;
+void image::clip(dword rowStart, dword rowEnd, dword columnStart, dword columnEnd){
+	image dest;
 	clip(dest, rowStart, rowEnd, columnStart, columnEnd);
 	destory();
 	*this = dest;
 	dest.destory();
 }
-void matrix::expand(dword toTop, dword toBottom, dword toLeft, dword toRight){
-	matrix dest;
-	expand(dest, toTop, toBottom, toLeft, toRight);
+void image::expand(dword toTop, dword toBottom, dword toLeft, dword toRight, color filledClr){
+	image dest;
+	expand(dest, toTop, toBottom, toLeft, toRight, filledClr);
 	destory();
 	*this = dest;
 	dest.destory();
 }
-void matrix::zoom(double ratio){
-	matrix dest;
+void image::zoom(double ratio){
+	image dest;
 	zoom(dest, ratio);
 	*this = dest;
 	dest.destory();
 }
-void matrix::zoom(double honzRatio, double vertRatio){
-	matrix dest;
+void image::zoom(double honzRatio, double vertRatio){
+	image dest;
 	zoom(dest, honzRatio, vertRatio);
 	destory();
 	*this = dest;
 	dest.destory();
 }
 //元素统计
-void matrix::setElem(dword _id, const color &_clr){
+void image::setElem(dword _id, const color &_clr){
 	data[_id] = _clr;
 }
-void matrix::setElem(dword _row, dword _column, const color &_clr){
+void image::setElem(dword _row, dword _column, const color &_clr){
 	if(_row > row - 1 || _column > column - 1){
 		return;
 	}
 	data[_row*column+_column] = _clr;
 }
-color matrix::getElem(dword _id) const{
+color image::getElem(dword _id) const{
 	return data[_id];
 }
-color matrix::getElem(dword _row, dword _column) const{
+color image::getElem(dword _row, dword _column) const{
 	return data[_row*column+_column];
 }
-long matrix::getElemCountNzero() const{
+long image::getElemCountNzero() const{
 	dword total = 0;
 	for(dword i = 0;i<getElemCount();i++){
 		if(data[i] != (color)0){
@@ -798,7 +811,7 @@ long matrix::getElemCountNzero() const{
 	}
 	return total;
 }
-long matrix::getElemCountWhos(const color &whos) const{
+long image::getElemCountWhos(const color &whos) const{
 	dword total = 0;
 	for(dword i = 0;i<getElemCount();i++){
 		if(data[i] == whos){
@@ -807,7 +820,7 @@ long matrix::getElemCountWhos(const color &whos) const{
 	}
 	return total;
 }
-void matrix::getElemCountList(colorList &colorList) const{
+void image::getElemCountList(colorList &colorList) const{
 	colorList.clear();
 	color temp;
 	dword i,j,k;
@@ -828,7 +841,7 @@ void matrix::getElemCountList(colorList &colorList) const{
 		}
 	}
 }
-void matrix::getElemHonzBound(dword &lower, dword &upper) const{
+void image::getElemHonzBound(dword &lower, dword &upper) const{
 	lower = column - 1;
 	upper = 0;
 	dword i,j;
@@ -845,7 +858,7 @@ void matrix::getElemHonzBound(dword &lower, dword &upper) const{
 		}
 	}
 }
-void matrix::getElemVertBound(dword &lower, dword &upper) const{
+void image::getElemVertBound(dword &lower, dword &upper) const{
 	lower = row - 1;
 	upper = 0;
 	dword i,j;
@@ -863,7 +876,7 @@ void matrix::getElemVertBound(dword &lower, dword &upper) const{
 	}
 }
 //操作矩阵
-long matrix::moveHonz(long dist, const color &surplus){
+long image::moveHonz(long dist, const color &surplus){
 	long i,j;
 	color _clr;
 	for(i = 0;i<row;i++){
@@ -889,7 +902,7 @@ long matrix::moveHonz(long dist, const color &surplus){
 	}
 	return 1;
 }
-long matrix::moveVert(long dist, const color &surplus){
+long image::moveVert(long dist, const color &surplus){
 	long i,j;
 	color _clr;
 	for(j = 0;j<column;j++){
@@ -915,7 +928,7 @@ long matrix::moveVert(long dist, const color &surplus){
 	}
 	return 1;
 }
-long matrix::replace(const color &whos, const color &to){
+long image::replace(const color &whos, const color &to){
 	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
@@ -928,7 +941,7 @@ long matrix::replace(const color &whos, const color &to){
 }
 
 
-void matrix::putFore(const matrix &layer, colorMethod met, point basePoint){
+void image::putFore(const image &layer, colorMethod met, point basePoint){
 	dword i,j, tx, ty;
 	color clr;
 	for(i=0;i<layer.getWidth();i++){
@@ -943,7 +956,7 @@ void matrix::putFore(const matrix &layer, colorMethod met, point basePoint){
 		}
 	}
 }
-void matrix::putBack(const matrix &layer, colorMethod met, point basePoint){
+void image::putBack(const image &layer, colorMethod met, point basePoint){
 	dword i,j, tx, ty;
 	color clr;
 	for(i=0;i<layer.getWidth();i++){
@@ -959,7 +972,7 @@ void matrix::putBack(const matrix &layer, colorMethod met, point basePoint){
 	}
 }
 
-void matrix::lose(uchar fine){
+void image::lose(uchar fine){
 	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
@@ -967,7 +980,7 @@ void matrix::lose(uchar fine){
 		}
 	}
 }
-void matrix::loseBit(uchar bit){
+void image::loseBit(uchar bit){
 	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
@@ -975,7 +988,7 @@ void matrix::loseBit(uchar bit){
 		}
 	}
 }
-void matrix::loseBlack(uchar gamma){
+void image::loseBlack(uchar gamma){
 	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
@@ -983,7 +996,23 @@ void matrix::loseBlack(uchar gamma){
 		}
 	}
 }
-void matrix::turnShield(){
+void image::getBrighten(){
+	dword i,j;
+	for(i = 0;i<row;i++){
+		for(j = 0;j<column;j++){
+			setElem(i, j ,Koishi::color::getBrighten(getElem(i,j)));
+		}
+	}
+}
+void image::getDarken(){
+	dword i,j;
+	for(i = 0;i<row;i++){
+		for(j = 0;j<column;j++){
+			setElem(i, j ,Koishi::color::getDarken(getElem(i,j)));
+		}
+	}
+}
+void image::turnShield(){
 	dword i,j;
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
@@ -996,7 +1025,7 @@ void matrix::turnShield(){
 		}
 	}
 }
-void matrix::line(point p1, point p2, const color &clr){
+void image::line(point p1, point p2, const color &clr){
 	//数值微分法画线
 	long dx = p2.X - p1.X;
 	long dy = p2.Y - p1.Y;
@@ -1011,7 +1040,7 @@ void matrix::line(point p1, point p2, const color &clr){
 		y += ydelta;
 	}
 }
-void matrix::rectangle(point p1, point p2, const color &clr){
+void image::rectangle(point p1, point p2, const color &clr){
 	//画矩形
 	long x1 = MIN(p1.X, p2.X);
 	long x2 = MAX(p1.X, p2.X);
@@ -1026,7 +1055,7 @@ void matrix::rectangle(point p1, point p2, const color &clr){
 		setElem(i,x2,clr);
 	}
 }
-void matrix::filledRectangle(point p1, point p2, const color &clr){
+void image::filledRectangle(point p1, point p2, const color &clr){
 	long x1 = MIN(p1.X, p2.X);
 	long x2 = MAX(p1.X, p2.X);
 	long y1 = MIN(p1.Y, p2.Y);
@@ -1037,7 +1066,7 @@ void matrix::filledRectangle(point p1, point p2, const color &clr){
 		}
 	}
 }
-void matrix::filledLattice(point p1, point p2, const color &clr1, const color &clr2, long size){
+void image::filledLattice(point p1, point p2, const color &clr1, const color &clr2, long size){
 	long x1 = MIN(p1.X, p2.X);
 	long x2 = MAX(p1.X, p2.X);
 	long y1 = MIN(p1.Y, p2.Y);
@@ -1429,6 +1458,140 @@ bool stream::bitRead(dword &value, longex bitLen){
 	}
 	return true;
 }
+uchar stream::LFbitGet(longex bitPos){
+	if(bitPos < 0 || bitPos >= length * 8)
+		return false;
+	longex pos = bitPos/8;
+	longex off = 7 - bitPos % 8;
+	if((data[pos] & (1 << off)) == 0)
+		return 0;
+	return 1;
+}
+bool stream::LFbitSet(longex bitPos, uchar value){
+	if(bitPos < 0 || bitPos > length * 8)
+		return false;
+	longex pos = bitPos / 8;
+	longex off = 7 - bitPos % 8;
+	if(value){
+		data[pos] |= (1 << off);
+	}else{
+		data[pos] &= ~(1 << off);
+	}
+	return true;
+}
+bool stream::LFbitPush(const void *sour, longex bitLen){
+	if(bitPosition  + bitLen > storage * 8){
+		return false;
+	}
+	uchar *usour = (uchar *)sour;
+	for(longex i = 0;i<bitLen;i++){
+		longex lfi = bitLen - 1 - i;
+		uchar c = usour[lfi/8] & (1<<(lfi % 8));
+		LFbitSet(bitPosition, c);
+		bitPosition ++;
+		//写入会导致长度变化
+		if(bitPosition >= length * 8){
+			length = bitPosition / 8 + 1;
+		}
+	}
+	return true;
+}
+bool stream::LFbitPush(dword value, longex bitLen){
+	if(bitLen >= 32)
+		bitLen = 32;
+	if(bitPosition  + bitLen > storage * 8){
+		return false;
+	}
+	uchar *usour = (uchar *)&value;
+	for(longex i = 0;i<bitLen;i++){
+		longex lfi = bitLen - 1 - i;
+		uchar c = usour[lfi/8] & (1<<(lfi % 8));
+		LFbitSet(bitPosition, c);
+		bitPosition ++;
+		//写入会导致长度变化
+		if(bitPosition >= length * 8){
+			length = bitPosition / 8 + 1;
+		}
+	}
+	
+	return true;
+}
+bool stream::LFbitRead(void *dest, longex bitLen){
+	if(bitPosition  + bitLen > length*8){
+		return false;			//没那么多数据去读
+	}
+	//初始化dest
+	longex len = bitLen / 8;
+	if(bitLen % 8 != 0)
+		len ++;
+	memset(dest, 0, len);
+	//赋值
+	uchar *usour = (uchar *)dest;
+	for(longex i = 0;i<bitLen;i++){
+		longex lfi = bitLen - 1 - i;
+		usour[lfi/8] |= LFbitGet(bitPosition) << (lfi % 8);
+		bitPosition ++;
+	}
+	return true;
+}
+bool stream::LFbitRead(dword &value, longex bitLen){
+	if(bitLen >= 32)
+		bitLen = 32;
+	if(bitPosition  + bitLen > length*8){
+		return false;			//没那么多数据去读
+	}
+	//初始化dest
+	value = 0;
+	//赋值
+	uchar *usour = (uchar *)&value;
+	for(longex i = 0;i<bitLen;i++){
+		longex lfi = bitLen - 1 - i;
+		usour[lfi/8] |= LFbitGet(bitPosition) << (lfi % 8);
+		bitPosition ++;
+	}
+	return true;
+}
+/////////////////////////////////////////////////////////////
+complex::complex(double a, double b){
+	real = a;
+	img = b;
+}
+complex complex::operator +() const{
+	return complex(real, img);
+}
+complex complex::operator -() const{
+	return complex(-real, -img);
+}
+double complex::operator *() const{
+	return sqrt(real*real + img*img);
+}
+complex complex::operator ~() const{
+	return complex(real, -img);
+}
+complex complex::operator +(const complex &c) const{
+	return complex(real + c.real, img + c.img);
+}
+complex complex::operator -(const complex &c) const{
+	return complex(real - c.real, img - c.img);
+}
+complex complex::operator *(const complex &c) const{
+	return complex(real * c.real - img * c.img, real * c.img + img * c.real);
+}
+complex complex::operator /(const complex &c) const{
+	return *this*~c/(c.real*c.real + c.img*c.img);
+}
+complex complex::operator *(const double &m) const{
+	return complex(real*m, img*m);
+}
+complex complex::operator /(const double &m) const{
+	return complex(real/m, img/m);
+}
+double complex::radius() const{
+	return **this;
+}
+double complex::angle() const{
+	return atan2(img, real);
+}
 /////////////////////////////////////////////////////////////
 sample::sample(){
 	data = 0;
@@ -1674,51 +1837,12 @@ void audio::mult(audio &ad, double value){
 	for(int i = 0;i<length;i++)
 		ad.data[i] = data[i] * value;
 }
-void audio::multCurve(audio &ad, sequence curve, int joinMethod){
-	ad.create(length);
-	ad.channel = channel;
-	ad.sampleRate = sampleRate;
-	sequence seq = curve;
-	int i = 0;
-	bool flag = true;
-	while(curve.size() < length){
-		switch(joinMethod){
-		case 0:
-			curve.push_back(1.0f);
-			break;
-		case 1:
-			curve.push_back(seq[i]);
-			i = ( i<seq.size() ? (i + 1):0);
-			break;
-		case 2:
-			curve.push_back(seq[i]);
-			if(flag){
-				if(i == seq.size() - 1){
-					flag = false;
-					i --;
-				}else{
-					i ++;
-				}
-			}else{
-				if(i == 0){
-					flag = true;
-					i ++;
-				}else{
-					i --;
-				}
-			}
-			break;
-		}
-	}
-	for(int i = 0;i<length;i++)
-		ad.data[i] = data[i] * curve[i];
-}
 void audio::multCurve(audio &ad, double(*f)(double)){
 	ad.create(length);
 	ad.channel = channel;
 	ad.sampleRate = sampleRate;
 	for(int i = 0;i<length;i++)
-		ad.data[i] = data[i] * f(i);
+		ad.data[i] = data[i] * f(1.0*i/length);
 }
 void audio::applayFadeIn(audio &ad, longex last){
 	if(last >= length)
@@ -1808,11 +1932,6 @@ void audio::mult(double value){
 	mult(ad, value);
 	destory();*this = ad;ad.destory();
 }
-void audio::multCurve(sequence curve, int joinMethod){
-	audio ad;
-	multCurve(ad, curve, joinMethod);
-	destory();*this = ad;ad.destory();
-}
 void audio::multCurve(double(*f)(double)){
 	audio ad;
 	multCurve(ad, f);
@@ -1877,4 +1996,128 @@ void audio::getChannel(audio &ad, int ch) const{
 	for(int i = 0;i<length;i++){
 		ad.data[i] = sample(data[i][ch]);	
 	}
+}
+double audio::slope_up(double d){
+	double d1 = cos(1.57079632L*d);
+	return sin(1.57079632L*d1*d1);
+}
+double audio::slope_down(double d){
+	double d1 = sin(1.57079632L*d);
+	return sin(1.57079632L*d1*d1);
+}
+/*
+慢速算法，利用帧拉伸
+原来：111111111111222222222222333333333333....
+计算：1111(*)2222 -> AAAA 2222(*)3333 -> BBBB
+结果：111111111111AAAA222222222222BBBB333333333333....
+快速算法，利用帧重叠
+原来：111111111111222222222222333333333333....
+计算：1111(*)2222 -> AAAA 2222(*)3333 -> BBBB
+结果：——1111AAAA2222BBBB3333——....
+*/
+void audio::slow(audio &ad, int blockSize, int gapSize){
+	ad.create(1);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	longex off = 0;//帧起始位置
+	while(off <= length){
+		//取该帧
+		audio adFrame;
+		clip(adFrame, off, off+blockSize);
+		//取该帧后半部分和下一帧的前半部分
+		audio adMixPrev, adMixNext;
+		clip(adMixPrev, off + blockSize - gapSize, off + blockSize);
+		clip(adMixNext, off + blockSize, off + blockSize + gapSize);
+		//adMixPrev.multCurve(slope_down);
+		//adMixNext.multCurve(slope_up);
+		adMixPrev.applayFadeOut(gapSize);
+		adMixNext.applayFadeIn(gapSize);
+		//混合
+		audio adMixed = adMixPrev;
+		adMixed.mixWith(adMixNext);
+		ad.cat(adFrame);
+		ad.cat(adMixed);
+		off += blockSize;
+	}
+}
+void audio::fast(audio &ad, int blockSize, int overlapSize){
+	ad.create(1);
+	ad.channel = channel;
+	ad.sampleRate = sampleRate;
+	longex off = 0;//帧起始位置
+	while(off <= length){
+		//取该帧中间一块
+		audio adFrame;
+		clip(adFrame, off + overlapSize, off + blockSize - overlapSize);
+		//取该帧后半部分和下一帧的前半部分
+		audio adMixPrev, adMixNext;
+		clip(adMixPrev, off + blockSize - overlapSize, off + blockSize);
+		clip(adMixNext, off + blockSize, off + blockSize + overlapSize);
+		//adMixPrev.multCurve(slope_down);
+		//adMixNext.multCurve(slope_up);
+		adMixPrev.applayFadeOut(overlapSize);
+		adMixNext.applayFadeIn(overlapSize);
+		//混合
+		audio adMixed = adMixPrev;
+		adMixed.mixWith(adMixNext);
+		ad.cat(adFrame);
+		ad.cat(adMixed);
+		off += blockSize;
+	}
+}
+
+void audio::slow(int blockSize, int gapSize){
+	audio ad;
+	slow(ad, blockSize, gapSize);
+	destory();
+	*this = ad;
+	ad.destory();
+}
+void audio::fast(int blockSize, int overlapSize){
+	audio ad;
+	fast(ad, blockSize, overlapSize);
+	destory();
+	*this = ad;
+	ad.destory();
+}
+void audio::adjustSpeed(audio &ad, double rate){
+	int blockSize = 2048;
+	if(rate <= 0 || rate == 1){
+		ad = *this;
+	}else if(rate < 1 && rate >= 0.8){
+		double r1 = (1 - rate)/rate;
+		int gapSize = blockSize * r1;
+		slow(ad, blockSize, gapSize);
+	}else if(rate < 0.8){
+		double r1 = rate / 0.8;
+		adjustSpeed(ad, 0.8);
+		ad.adjustSpeed(r1);
+		printf("%.2lf", r1);
+	}else if(rate <= 2){
+		double r1 = (rate - 1)/rate;
+		int overlapSize = blockSize * r1;
+		fast(ad, blockSize, overlapSize);
+	}else{
+		double r1 = rate / 2;
+		adjustSpeed(ad, 2);
+		ad.adjustSpeed(r1);
+	}
+}
+void audio::adjustPitch(audio &ad, double rate){
+	adjustSpeed(ad, rate);
+	ad.zoom(rate);
+}
+void audio::adjustSpeed(double rate){
+	audio ad;
+	adjustSpeed(ad, rate);
+	destory();
+	*this = ad;
+	ad.destory();
+}
+void audio::adjustPitch(double rate){
+	audio ad;
+	adjustPitch(ad, rate);
+	destory();
+	*this = ad;
+	ad.destory();
 }

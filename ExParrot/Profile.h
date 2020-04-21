@@ -17,6 +17,13 @@ public:
 	DWORD avatarColor1;
 	DWORD avatarThumbSize;
 	DWORD miniSecPerFrame;
+	DWORD audioBackColor;
+	DWORD channel1Color;
+	DWORD channel2Color;
+	DWORD volumeColor;
+	DWORD MP3defaultColor;
+	DWORD MP3quality;
+	DWORD useDefaultRecorder;
 public:
 	void defaultProfile();
 	void loadProfile();
@@ -36,5 +43,6 @@ public:
 	Koishi::color getMainColor();
 	Koishi::color getCanvasColor(int n);
 	Koishi::color getAvatarColor(int n);
+	Koishi::color getAudioColor(int n);
 };
 

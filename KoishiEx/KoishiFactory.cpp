@@ -40,8 +40,8 @@ bool NPKobject::load(const stream &in){
 	data.readDWord(count);
 	if(data.length < count*264 + 52)
 		return false;
-	queue offsetInEntry, sizeInEntry;
-	queue offsetInBlock, sizeInBlock;
+	queue offsetInEntry, sizeInEntry;		//条目内标注的偏移量和尺寸
+	queue offsetInBlock, sizeInBlock;		//数据块的偏移量和尺寸
 	entry.clear();
 	block.clear();
 	entry.reserve(count);
@@ -51,12 +51,12 @@ bool NPKobject::load(const stream &in){
 	sizeInEntry.reserve(count);
 	sizeInBlock.reserve(count);
 	for(int i = 0;i<count;i++){
-		stream sPath(0x100);
 		long num;
 		data.readInt(num);
 		offsetInEntry.push_back(num);
 		data.readInt(num);
 		sizeInEntry.push_back(num);
+		stream sPath(0x100);
 		data.readStream(sPath, 0x100);
 		sPath.nameMask();
 		entry.push_back(NPKentry((char*)sPath.begin(), -1));
@@ -1103,7 +1103,7 @@ bool IMGobject::PICreplace(long pos, const PICinfo &info, const stream &s){
 	}
 	return true;
 }
-bool IMGobject::PICextract(long pos, matrix &mat, long paletteID){
+bool IMGobject::PICextract(long pos, image &mat, long paletteID){
 	if(pos<0)
 		pos += indexCount;
 	if(pos<0)
@@ -1127,7 +1127,7 @@ bool IMGobject::PICextract(long pos, matrix &mat, long paletteID){
 		if(pi.comp <= 0X06){
 			PICgetData(pos, sMid);
 			if(pi.comp == COMP_ZLIB){
-				sMid.ZLIBuncompress(sPic, 4*pi.picSize.area());
+				sMid.ZLIBuncompress(sPic, 5*pi.picSize.area());
 			}else{
 				sPic = sMid;
 			}
@@ -1184,7 +1184,7 @@ bool IMGobject::PICextract(long pos, matrix &mat, long paletteID){
 			if(pi.TEXusing>=V5_TEXCount){
 				return false;
 			}
-			matrix mTemp;
+			image  mTemp;
 			TEXextract(pi.TEXusing,mTemp);
 			mTemp.clip(mat,
 				pi.TEXpointLT.Y,
@@ -1197,7 +1197,7 @@ bool IMGobject::PICextract(long pos, matrix &mat, long paletteID){
 	return true;
 }
 ///////////////////////////////////////////
-bool IMGobject::PICpreprocess(const matrix &mat, stream &s, PICinfo &info, colorFormat cf, long paletteID){
+bool IMGobject::PICpreprocess(const image &mat, stream &s, PICinfo &info, colorFormat cf, long paletteID){
 	if(cf == COLOR_UDEF){
 		if(version == V2 || version == V5){
 			cf = ARGB8888;
@@ -1279,7 +1279,7 @@ bool IMGobject::PICpreprocess(const matrix &mat, stream &s, PICinfo &info, color
 	}
 	return false;
 }
-bool IMGobject::PICextractIndexMatrix(long pos, matrix &mat){
+bool IMGobject::PICextractIndexImage(long pos, image &mat){
 	if(pos<0)
 		pos += indexCount;
 	if(pos<0)
@@ -1299,7 +1299,7 @@ bool IMGobject::PICextractIndexMatrix(long pos, matrix &mat){
 	if(pi.format == ARGB1555){
 		PICgetData(pos, sMid);
 		if(pi.comp == COMP_ZLIB){
-			sMid.ZLIBuncompress(sPic, 4*pi.picSize.area());
+			sMid.ZLIBuncompress(sPic, 5*pi.picSize.area());
 		}else{
 			sPic = sMid;
 		}
@@ -1322,7 +1322,7 @@ bool IMGobject::PICextractIndexMatrix(long pos, matrix &mat){
 	}
 	return true;
 }
-bool IMGobject::PICpreprocessIndexMatrix(const matrix &mat, stream &s, PICinfo &info){
+bool IMGobject::PICpreprocessIndexImage(const image &mat, stream &s, PICinfo &info){
 	long i;
 	stream sTemp;
 	sTemp.allocate(mat.getElemCount());
@@ -1492,7 +1492,7 @@ bool IMGobject::TEXreplace(long pos, const TEXinfo &info, const stream &s){
 	getData(1)->modifyInt(36, (long)V5_totalLength);
 	return true;
 }
-bool IMGobject::TEXextract(long pos, matrix &mat){
+bool IMGobject::TEXextract(long pos, image &mat){
 	if(version != V5)
 		return false;
 	if(pos<0)
@@ -1505,7 +1505,7 @@ bool IMGobject::TEXextract(long pos, matrix &mat){
 	stream sMid, sPic;
 	TEXgetInfo(pos, di);
 	TEXgetData(pos, sMid);
-	sMid.ZLIBuncompress(sPic, di.dataLength + 1000);
+	sMid.ZLIBuncompress(sPic, MAX(di.height * di.width * 5, di.dataLength + 1000));
 	if(di.format > LINK){
 		DDSobject d(sPic);
 		d.uncompress(mat);
@@ -1526,7 +1526,7 @@ bool IMGobject::TEXextract(long pos, matrix &mat){
 	}
 	return true;
 }
-bool IMGobject::TEXpreprocess(const matrix &mat, stream &s, TEXinfo &info, colorFormat cf){
+bool IMGobject::TEXpreprocess(const image &mat, stream &s, TEXinfo &info, colorFormat cf){
 	if(version != V5)
 		return false;
 	if(cf == DDS_DXT5){
@@ -1727,7 +1727,7 @@ bool IMGobject::convertToV2(std::vector<IMGobject> &newIOList, colorFormat cf){
 			if(pi.format == LINK){
 				newIO.PICpush(pi, NULL);
 			}else{
-				matrix mPic;
+				image mPic;
 				stream sPic;
 				PICextract(i, mPic, paletteID);
 				newIO.PICpreprocess(mPic, sPic, pi, cf);
@@ -1788,7 +1788,7 @@ bool IMGobject::convertToV4(std::vector<IMGobject> &newIOList, colorList useColo
 				if(pi.format == LINK){
 					newIO.PICpush(pi, NULL);
 				}else{
-					matrix mPic;
+					image mPic;
 					stream sPic;
 					PICextract(i, mPic, paletteID);
 					newIO.PICpreprocess(mPic, sPic, pi);
@@ -1828,7 +1828,7 @@ bool IMGobject::convertToV5(std::vector<IMGobject> &newIOList, colorFormat cf, c
 				if(makeTexture){
 					//制作纹理集
 					TEXinfo ti;
-					matrix mPic;
+					image mPic;
 					stream sPic;
 					PICextract(i, mPic, paletteID);
 					newIO.TEXpreprocess(mPic, sPic, ti, cf);
@@ -1844,7 +1844,7 @@ bool IMGobject::convertToV5(std::vector<IMGobject> &newIOList, colorFormat cf, c
 					pi.TEXpointRB = point(ti.width, ti.height);
 					newIO.PICpush(pi, NULL);
 				}else{
-					matrix mPic;
+					image mPic;
 					stream sPic;
 					PICextract(i, mPic, paletteID);
 					newIO.PICpreprocess(mPic, sPic, pi, cf);
@@ -1913,7 +1913,7 @@ bool IMGobject::convertToV6(std::vector<IMGobject> &newIOList, colorTable useCol
 			if(pi.format == LINK){
 				newIO.PICpush(pi, NULL);
 			}else{
-				matrix mPic;
+				image mPic;
 				stream sPic;
 				PICextract(i, mPic, paletteID);
 				newIO.PICpreprocess(mPic, sPic, pi);

@@ -3,7 +3,7 @@
 //
 #include "stdafx.h"
 #include "../KoishiEx/koishiex.h"
-#include "../KoishiEx//KoishiNeoplePack.h"
+#include "../KoishiEx/KoishiNeoplePack.h"
 
 #include "GoodListCtrl.h"
 #include "DialogNew.h"
@@ -33,10 +33,15 @@
 #include "ModalInsertImage.h"
 #include "Profile.h"
 #include "ModalPreference.h"
+#include "modalcopyinsert.h"
+#include "ModalCopyReplace.h"
+#include "ToolPatch.h"
 
 #pragma once
 
 #define DISC(x)
+
+#define VERSION_STR "恋恋のEx黑猫版.4.2"
 
 // CExRabbitDlg 对话框
 using namespace Koishi;
@@ -70,6 +75,7 @@ public:
 	NPKobject no;			//主编辑NPK
 	colorList cl;			//颜色表
 
+	NPKobject noClip;		//剪贴板IMG
 	IMGobject ioComp;		//对比用IMG
 	CString fileNPKname;	//NPK名字（全称）
 	CString fileIMGname;	//IMG名字（全称）
@@ -139,7 +145,7 @@ public:
 		point movePoint;						//记录鼠标移动时的坐标
 		point endPoint;							//记录鼠标移动后的坐标
 		std::vector<point> drawnPoint;			//记录画刷/画擦按住经过的轨迹
-		matrix oldMatrix;						//应用画刷时产生一个旧的矩阵用以撤销
+		image oldMatrix;						//应用画刷时产生一个旧的矩阵用以撤销
 		bool oldMatrixEnable;					//点击画刷左键的时候变为true，切换工具/帧的时候变为false
 	}canvasOperatePara;
 	//颜色操作
@@ -215,7 +221,7 @@ public:
 
 public:
 	CToolIMGSearch toolIMGSearch;
-	CToolAvatar toolAvatar;
+	ToolAvatar toolAvatar;
 	CToolDict toolDict;
 	CToolSPK toolSPK;
 	CToolForceEx toolForceEx;
@@ -416,6 +422,15 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnMenuImageInsertOther();
 	afx_msg void OnMenuImageInsertCopy();
-	afx_msg void OnMenuImageInsertLink();
 	afx_msg void OnMenuImageDelink();
+	afx_msg void OnMenuImagePutIntoClip();
+	afx_msg void OnMenuImageInsertClip();
+	afx_msg void OnMenuImageReplaceClip();
+	afx_msg void OnMenuImageReplaceCopy();
+	afx_msg void OnToolsPatchOperate();
+	afx_msg void OnToolsAvatarMark();
+	afx_msg void OnMenuImageMakeNPKandSave();
+	static UINT ThreadImageMakeNPKandSavePatch(void*context);
+	CString paraMakeNPKandSavePatch;
+	afx_msg void OnMenuImageMakeNPKandSavePatch();
 };

@@ -500,7 +500,7 @@ int stream::BZcompress(stream &dest){
 }
 //½øĞĞBZ2½âÑ¹
 int stream::BZuncompress(stream &dest){
-	unsigned int len = 1000*length;
+	unsigned int len = 100*length;
 	dest.allocate(len);
 	int i = BZ2_bzBuffToBuffDecompress((char*)dest.data, &len, (char*)data, length, 0, 0);
 	dest.length = len;

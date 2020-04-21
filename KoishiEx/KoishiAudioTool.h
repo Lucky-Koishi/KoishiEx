@@ -8,6 +8,12 @@
 using namespace Koishi;
 
 namespace KoishiAudioTool{
+	//极简单的快速傅里叶变换,inv = true为逆傅里叶变换，第二个返回实部长
+	static void FFT(complex*a, int n);
+	static void FFT(double*a, int n);
+	//绘制波形图
+	extern void makeWaveGraph(const audio &ad, int channels, image &mat, int width, int height);
+	extern void makeWaveGraphDB(const audio &ad, int channels, image &mat, int width, int height);
 	namespace WAV{
 		typedef struct WAVinfo{
 			char magic[5];
@@ -38,9 +44,6 @@ namespace KoishiAudioTool{
 			bool make(stream &s);
 		};
 	}
-	//绘制波形图
-	extern void makeWaveGraph(const audio &ad, int channels, matrix &mat, int width, int height);
-	extern void makeWaveGraphDB(const audio &ad, int channels, matrix &mat, int width, int height);
 	//音频设备，用来播放PCM裸流
 	class PCMdevice{
 	private:
@@ -57,6 +60,9 @@ namespace KoishiAudioTool{
 		volatile bool playing;
 		volatile bool working;
 		volatile bool recording;
+		volatile short energyLeft;
+		volatile short energyRight;
+		volatile double freq[16];
 		void initFormat(int channels, int bitPerSample, int sampleRate, int byteRate, int byteAlign, int cbSize);
 		bool initFormat(const WAV::WAVobject &PCMwavObject);
 		dword play(const stream &cPCMstream);
@@ -65,6 +71,8 @@ namespace KoishiAudioTool{
 		void stop();
 		bool getData(stream &cPCMstream);
 		longex getPos();
+		void resetEnergy();
+		void updateEnergy(LPWAVEHDR lpWaveHeader);
 	};
 	class PCMplayer{
 	public:
@@ -396,4 +404,120 @@ namespace KoishiAudioTool{
 	bool loadOGG(audio &ad, const str &fileName);
 	bool loadOGG(audio &ad, const stream &fileStream);
 	bool loadOGG(audio &ad, OGG::OGGobject &oo);
+
+	namespace MP3{
+		class MP3encoder{
+		public:
+			audio source;
+			str author;
+			str album;
+			str genre;
+			image pic;
+		public:
+			bool output(stream &outputStream);
+		};
+	}
+	//namespace MPEG{
+	//	enum MPEGversion{MPEG_2_5, MPEG_BAD, MPEG_2, MPEG_1};
+	//	enum MPEGlayer{LAYER_BAD, LAYER_3, LAYER_2, LAYER_1};
+	//	enum MPEGchannelMode{CHM_STEREO, CHM_JOINT_STEREO, CHM_DUAL, CHM_SINGLE};
+	//	enum MPEGextenedMode{EXM_NN, EXM_YN, EXM_NY, EXM_YY};
+	//	static int getBitRate(uchar bit, MPEGversion v, MPEGlayer l);
+	//	static int getSampleRate(uchar bit, MPEGversion v);
+	//	static int getFrameSize(int bitRate, int sampleRate, MPEGversion v, MPEGlayer l);		//注意：未包含padding位
+	//	class TagID3V1{
+	//	public:
+	//		bool valid;
+	//		str title;
+	//		str author;
+	//		str album;
+	//		str comment;
+	//		long year;
+	//		str genre;
+	//		bool load(const stream &s);
+	//	};
+	//	class TagID3V2frame{
+	//	public:
+	//		str type;
+	//		long length;
+	//		word flag;
+	//		stream data;
+	//	};
+	//	class TagID3V2{
+	//	public:
+	//		bool valid;
+	//		long version;
+	//		uchar flag;
+	//		long length;
+	//		std::vector<TagID3V2frame> frames;
+	//		bool load(const stream &s);
+	//	};
+	//	class MPEGframe{
+	//	public:
+	//		//帧头
+	//		struct{
+	//			int syncInfo;
+	//			MPEGversion version;
+	//			MPEGlayer layer;
+	//			int hasNotCRC;
+	//			int idBitRate;
+	//			int idSampleRate;
+	//			int padding;
+	//			int reserve;
+	//			MPEGchannelMode modeChannel;
+	//			MPEGextenedMode modeExtension;
+	//			int copyright;
+	//			int original;
+	//			int emphasis;
+	//		}headerInfo;
+	//		int frameLength;
+	//		int bitRate;
+	//		int sampleRate;
+	//		int channels;
+	//		//帧边
+	//		struct{
+	//			int mainDataOff;					//主数据偏移
+	//			int privateBits;					//无用的私有位
+	//			struct{
+	//				int scfsi;						//选择信息
+	//				struct{
+	//					int part23length;			//主数据位数
+	//					int bigValues;				//大值
+	//					int globalGain;				//全局增益
+	//					int scaleFacCompress;		//比例因子压缩
+	//					int flagWindowSwitch;		//窗切换标志
+	//					union{
+	//						struct{
+	//							int blockType;		//块类型
+	//							int mixedFlag;		//是否是混合块
+	//							int tableSelect[2];	//表选择
+	//							int subblockGain[3];//子块增益
+	//						}wMode1;
+	//						struct{
+	//							int tableSelect[3];	//表选择
+	//							int region0Count;	//区域0-计数
+	//							int region1Count;	//区域1-计数
+	//						}wMode0;
+	//					};
+	//					int preflag;				//预标志
+	//					int scaleFacScale;			//比例因子缩放
+	//					int count1TableSelect;		//计数1表选择
+	//				}gr[2];
+	//			}ch[2];
+	//		}sideInfo;
+	//		int mainDataBegin;
+	//		int mainDataEnd;
+	//		stream originData;
+	//	};
+	//	class MPEGobject{
+	//	public:
+	//		TagID3V2 info1;
+	//		TagID3V1 info2;
+	//		std::vector<MPEGframe> frames;
+	//		stream audioData;
+	//	public:
+	//		bool seekSync(stream &s);
+	//		bool load(const stream &s);
+	//	};
+	//}
 }

@@ -180,7 +180,7 @@ void CAdjustColorDlg::applyEffect(){
 		}
 	}
 	if(dlg->io.version == V2){
-		matrix mat = oldV2matrix;
+		image mat = oldV2matrix;
 		PICinfo pi;
 		stream s;
 		int ID = dlg->crtPICid;
@@ -233,7 +233,7 @@ void CAdjustColorDlg::OnBnClickedButton3(){
 	}
 
 	if(dlg->io.version == V2){
-		matrix mat = oldV2matrix;
+		image mat = oldV2matrix;
 		PICinfo pi;
 		stream s;
 		int ID = dlg->crtPICid;

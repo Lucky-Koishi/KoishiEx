@@ -23,7 +23,7 @@ public:
 
 	int H,S,V,R,G,B,a;
 	colorList oldCl;
-	matrix oldV2matrix;
+	image oldV2matrix;
 	void resetSlider();
 	void applyEffect();
 	afx_msg void OnNMCustomdrawSlider1(NMHDR *pNMHDR, LRESULT *pResult);

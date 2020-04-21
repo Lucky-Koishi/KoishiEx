@@ -162,7 +162,7 @@ void ModalInsertTexture::OnBnClickedOk(){
 	// TODO: 在此添加控件通知处理程序代码
 	GET_CTRL(CEdit, IDC_EDIT_RESOURCE)->GetWindowText(out.fileName);
 	//判断禁止事项
-	matrix mat;
+	image mat;
 	DDSobject dds;
 	if(out.inputFormat == 1){
 		if(!KoishiImageTool::loadPNG(mat, CStrToStr(out.fileName))){

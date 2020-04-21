@@ -47,4 +47,12 @@ public:
 	afx_msg void OnBnClickedButton20();
 	afx_msg void OnBnClickedButton22();
 	CEdit m_eKeyWord;
+	afx_msg void OnBnClickedButtonAddone();
+	afx_msg void OnBnClickedButtonAddall();
+	afx_msg void OnBnClickedButtonRemoveone();
+	afx_msg void OnBnClickedButtonRemoveall();
+	afx_msg void OnBnClickedButton4();
+
+	static UINT threadDownloadSPKpatch(PVOID para);
+	void downloadSPKpatch();
 };

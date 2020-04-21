@@ -191,8 +191,8 @@ void ModalGradient::drawScale(){
 	color clrLine(0xFF, 0, 0, 0);
 	int H = 25;
 	int W = rc.Width();
-	matrix canvas(H, W);
-	matrix gradients(H, W);
+	image canvas(H, W);
+	image gradients(H, W);
 	canvas.filledLattice(point(0,0), point(W-1, H-1), color(0xFF,0XFF,0XFF,0XFF),color(0xFF,0xCC,0xCC,0xCC), 5);
 	colorList keyColorList;
 	if(GET_CTRL(CButton, IDC_CHECK1)->GetCheck()){

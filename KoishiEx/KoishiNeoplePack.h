@@ -16,10 +16,8 @@ namespace KoishiNeoplePack{
 	enum IMGcomp:dword{
 		COMP_NONE =	5, COMP_ZLIB = 6, COMP_ZLIB_DUAL = 7, COMP_UDEF = 0
 	};
-	//////工厂类////////////////////////
 	class NPKobject;		//NPK对象
 	class IMGobject;		//IMG对象
-	////////////////////////////
 	class NPKentry{
 	public:
 		NPKentry(const str pathName, int blockID);
@@ -51,7 +49,6 @@ namespace KoishiNeoplePack{
 		bool push(const stream &sour, const str &pathName);
 		bool insert(long pos, const stream &sour, const str &pathName);
 		bool remove(long pos);
-		
 		bool replace(long pos, const stream &sour);		//将直接修改缓存里的数据·同引用的IMG将一同被修改
 		bool replace2(long pos, const stream &sour);			//将新数据插入缓存，同引用的其他IMG将不会修改，占空间
 		//映射操作
@@ -138,10 +135,10 @@ namespace KoishiNeoplePack{
 		bool PICinsert(long pos, const PICinfo &info, const stream &s);	//插入图片索引项
 		bool PICremove(long pos);										//删除图片
 		bool PICreplace(long pos, const PICinfo &info, const stream &s);//替换图片
-		bool PICextract(long pos, matrix &mat, long paletteID = 0);		//提取图片
-		bool PICpreprocess(const matrix &mat, stream &s, PICinfo &info, colorFormat cf = COLOR_UDEF, long paletteID = 0);//预处理图片
-		bool PICextractIndexMatrix(long pos, matrix &mat);									//提取的矩阵是索引数据
-		bool PICpreprocessIndexMatrix(const matrix &mat, stream &s, PICinfo &info);			//根据索引数据的矩阵对IMG进行预处理
+		bool PICextract(long pos, image &mat, long paletteID = 0);		//提取图片
+		bool PICpreprocess(const image &mat, stream &s, PICinfo &info, colorFormat cf = COLOR_UDEF, long paletteID = 0);//预处理图片
+		bool PICextractIndexImage(long pos, image &mat);									//提取的矩阵是索引数据
+		bool PICpreprocessIndexImage(const image &mat, stream &s, PICinfo &info);			//根据索引数据的矩阵对IMG进行预处理
 		bool PICempty(stream &s, PICinfo &info);						//以空帧预处理图片
 		bool PICsetInfoPara(long pos, long term, void *pval);		//设置索引项信息
 		//纹理集操作
@@ -154,8 +151,8 @@ namespace KoishiNeoplePack{
 		bool TEXinsert(long pos, const TEXinfo &info, const stream &s);
 		bool TEXremove(long pos);
 		bool TEXreplace(long pos, const TEXinfo &info, const stream &s);
-		bool TEXextract(long pos, matrix &mat);
-		bool TEXpreprocess(const matrix &mat, stream &s, TEXinfo &info, colorFormat cf = COLOR_UDEF);
+		bool TEXextract(long pos, image &mat);
+		bool TEXpreprocess(const image &mat, stream &s, TEXinfo &info, colorFormat cf = COLOR_UDEF);
 		//颜色操作
 		bool CLRpush(const color &clr, long paletteID = 0);
 		bool CLRinsert(long pos, const color &clr, long paletteID = 0);
@@ -204,13 +201,11 @@ namespace KoishiExpand{
 	//扩展功能
 	namespace KoishiMarkTool{
 		//图片内字体工具
-		extern void CharMat(char p, matrix &mat, color clr = color(0xff,0,0,0));
-		extern void StrMat(str s, matrix &mat, color clr = color(0xff,0,0,0));
-		extern void CharMatLarge(char p, matrix &mat, color clr = color(0xff,0,0,0));
-		extern void StrMatLarge(str s, matrix &mat, color clr = color(0xff,0,0,0));
-		extern bool MatrixMarking(const matrix &sourceMatrix, matrix &destMatrix, str codeString, point deltaPoint, color textColor);
+		extern void CharMatLarge(char p, image &mat, color clr = color(0xff,0,0,0));
+		extern void StrMatLarge(str s, image &mat, color clr = color(0xff,0,0,0));
+		extern bool ImageMarking(const image &sourceImage, image &destImage, str codeString, point deltaPoint, color textColor);
 		//PS画布风格
-		extern bool MatrixPSstyle(const matrix &sourceMatrix, matrix &destMatrix, color clrBound = color(0xFF, 0, 0, 0), color clrBG1 = color(0xFF, 0xFF, 0xFF, 0xFF), color clrBG2 = color(0xFF, 0xDD, 0xDD, 0xDD));
+		extern bool ImagePSstyle(const image &sourceImage, image &destImage, color clrBound = color(0xFF, 0, 0, 0), color clrBG1 = color(0xFF, 0xFF, 0xFF, 0xFF), color clrBG2 = color(0xFF, 0xDD, 0xDD, 0xDD));
 	}
 	namespace KoishiDownloadTool{
 		class SPKblock{
@@ -229,7 +224,7 @@ namespace KoishiExpand{
 		public:
 			//头部
 			unsigned long magic;			//应该是标识，均为0x1B111
-			unsigned char name[260];			//文件名
+			unsigned char name[260];		//文件名
 			unsigned long reserve1;			//所有SPK文件内此双字均为0xC8
 			unsigned long decompressed_len;	//压缩后文件大小
 			unsigned char hash[32];			//哈希32字节
@@ -332,9 +327,9 @@ namespace KoishiExpand{
 	public:
 		void clear();
 		void create(int width, int height);
-		bool putMatrix(const matrix &newMat, bool expanded = false);
+		bool putImage(const image &newMat, bool expanded = false);
 	public:
-		matrix canvas;		//大画布
+		image canvas;		//大画布
 	public:
 		//摆放方式1·先按行摆放，每行摆放完毕后·另起一行，新行的坐标为上一行坐标的下限
 		queue hList;				//每行的起始坐标(每行第一张图的y坐标)
@@ -354,110 +349,4 @@ namespace KoishiExpand{
 		static void binaryCompareFile(const stream &in1, const stream &in2, str fileName);	//输出文件
 	};
 	//////////////////////////////////////////////////////////////////////////////////////
-}
-
-namespace KoishiAvatar{
-	using namespace Koishi;
-	using namespace KoishiNeoplePack;
-	enum avatarCareer{ACAREER_UD, ACAREER_SM, ACAREER_SG, ACAREER_FT, ACAREER_FM, ACAREER_GN, ACAREER_GG, ACAREER_MG, ACAREER_MM, ACAREER_PR, ACAREER_PG, ACAREER_TH, ACAREER_KN, ACAREER_DL, ACAREER_GB, ACAREER_MAXCOUNT};
-	enum avatarPart{APART_UD, APART_CAP, APART_HAIR, APART_FACE, APART_NECK, APART_COAT, APART_PANTS, APART_BELT, APART_SHOES, APART_BODY, APART_MAXCOUNT, APART_WEAPON};
-	enum avatarLayer{ALAYER_UD, ALAYER_A, ALAYER_A1, ALAYER_A2, ALAYER_B, ALAYER_B1, ALAYER_B2, ALAYER_C, ALAYER_C1, ALAYER_C2, ALAYER_D, ALAYER_D1, ALAYER_D2,	ALAYER_E, ALAYER_E1, ALAYER_E2,	ALAYER_F, ALAYER_F1, ALAYER_F2,	ALAYER_G, ALAYER_G1, ALAYER_G2,	ALAYER_H, ALAYER_H1, ALAYER_H2, ALAYER_K, ALAYER_K1, ALAYER_K2, ALAYER_X, ALAYER_X1, ALAYER_X2, ALAYER_MAXCOUNT};
-	enum {TOTAL_LAYER_COUNT = 64};
-	extern bool isnum(uchar chars);
-	extern str shorten(const str &path);					//缩短路径名至最后一个节点
-	extern str imgAddV4Num(const str &imgName, long num);	//V6变成V4时使用
-	extern str getAvatarIDString(int i);					//将时装ID转为数字
-	extern str getCareerNPKName(avatarCareer cr);			//NPK文件名职业部分(gunner_at)
-	extern str getCareerIMGName(avatarCareer cr);			//IMG路径名职业部分(gg_)
-	extern str getAvatarPartNPKName(avatarPart pt);			//NPK文件名部件部分(skin)
-	extern str getAvatarPartIMGName(avatarPart pt);			//IMG路径名部件部分(body)
-	extern str getAvatarLayerName(avatarLayer ly);			//IMG路径名图层部分(a1,a2等)
-	extern str getAvatarNPKName(avatarCareer ch, avatarPart pt); //完整的NPK文件名
-	extern str getAvatarIMGName(avatarCareer ch, avatarPart pt); //IMG路径名的大部分(gg_body)
-	extern color getCareerColor(avatarCareer cr);						//获得职业的代表色
-	extern point getAvatarModelOffset(avatarCareer cr, avatarPart pt);	//获得展现职业部件的最佳中心点偏移量
-	extern long getCareerRepresentativeFrame(avatarCareer cr);			//代表帧
-	extern str getIconNPKName(avatarCareer cr);							//获得图标NPK
-	extern std::vector<str> getIconIMGName(avatarCareer cr, avatarPart pt);			//获得图标IMG
-	class avatar;
-	extern bool parseAvatarName(const str &avatarName, avatar &av, avatarLayer &al);
-	extern str makeAvatarName(avatar av, avatarLayer al);
-	//拼合相关数据
-	extern void getMQData(int order, avatarPart &part, avatarLayer &layer);
-	extern avatarPart getMQPart(int order);
-	extern avatarLayer getMQLayer(int order);
-	class avatar{
-	public:
-		avatar();
-	public:
-		//原数据
-		avatarCareer carrer;
-		avatarPart part;
-		long ID;
-		bool isTN;
-	public:
-		//辅助数据
-		int v6palette;
-		bool layer[ALAYER_MAXCOUNT];
-	};
-	typedef struct avatarBigram{
-		long ID;			//ID
-		bool isTN;			//TN
-		long paletteID;		//调色板ID
-		long originPos;		//对应的装扮在原Album中的位置
-	}avatarBigram;//装扮二元组(ID + 调色板ID)以及一些必要的信息
-	class avatarAlbum{
-	public:
-		bool valid;
-		avatarCareer career;
-		avatarPart part;
-		str resoucePath;
-		NPKobject sourceNPK;
-		std::vector<avatar> avatarList;						 //存储装扮信息
-		std::vector<std::vector<long>> avatarPos;			 //存储装扮对应的图层IMG在NPK中的位置
-		std::vector<std::vector<long>> avatarPosAtBigramList;//按照调色板进行全排列时，每个装扮所在的位置
-		std::vector<avatarBigram> bigramList;				 //按照调色板进行全排列序列
-	public:
-		int selected;							//当前选择
-		int selectedPalette;					//当前选择色板
-		int selectedFrame;						//当前选择帧
-		IMGobject layerIMG[ALAYER_MAXCOUNT];	//图层IMG
-		str layerIMGpath[ALAYER_MAXCOUNT];		//图层IMG路径列表
-		int layerIMGpos[ALAYER_MAXCOUNT];		//图层IMG在NPK中的位置，若-1则不存在
-		matrix layerMatrix[ALAYER_MAXCOUNT];	//图层IMG的矩阵
-	public:
-		avatarAlbum();
-		void clear();
-		bool loadNPK();
-		bool changeIMG(long selected);
-		bool changeIMGByID(long avatarID, bool isTN = false);
-		long findPosByID(long avatarID, bool isTN = false);
-		bool changePalette(long paletteID);
-		bool changeFrame(long frame);
-		bool updateMatrix();
-		bool getBasePoint(avatarLayer al, point &pt);
-		bool getMatrix(avatarLayer al, matrix &mat);
-	};
-	class avatarFactory{
-	public:
-		str resoucePath;			//导入文件路径
-		avatarCareer career;		//当前处理的角色
-		avatarAlbum partAlbum[APART_MAXCOUNT];
-		//设置
-		void clear();
-		void setPath(str pathStr);
-		void setCarrer(avatarCareer ac);
-		//操作NPK
-		bool loadNPK(avatarPart ap);
-		bool changeFrame(int newFrame);
-		bool changeIMG(avatarPart ap, long selected);
-		long changeIMGByID(avatarPart ap, long ID, bool isTN = false);	//ID个位数有余数则匹配V6格式的目标IMG，找不到返回-1
-		void updateMatrix(avatarPart ap);
-		//显示当前效果
-		void makeMatrix(point leftTopPos, size displaySize, matrix &mat);
-		void makeNPK(NPKobject &no);			//将当前选择的IMG都放入一个NPK里，且排好序
-		//其他
-		void makeModel(matrix &outputMat, color baseColor, size modelSize, avatarPart ap, int selected, int paletteID, point offsetPos, int frame, PICinfo *ptrModelPI, matrix *ptrModelMat);
-		void makeButton(matrix &outputMat, color baseColor, size modelSize, int iconCtrl);
-	};
 }

@@ -283,7 +283,7 @@ void ModalInsertPicture::OnBnClickedOk()
 			return;
 		}
 	}
-	matrix mat;
+	image mat;
 	DDSobject dds;
 	if(out.type == 2 && out.inputFormat == 1){
 		if(!KoishiImageTool::loadPNG(mat, CStrToStr(out.fileName))){

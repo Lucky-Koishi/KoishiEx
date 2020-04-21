@@ -8,7 +8,71 @@ using namespace KoishiAudioTool;
 using namespace KoishiAudioTool::OGG;
 using namespace KoishiAudioTool::WAV;
 
-void KoishiAudioTool::makeWaveGraph(const audio &ad, int channels, matrix &mat, int width, int height){
+//傅里叶变换
+void KoishiAudioTool::FFT(complex*a, int n){
+	int bit = 0;
+	while((1<<bit)<n)
+		bit ++;
+	int *rev = new int[n];
+	memset(rev, 0, sizeof(int)*n);
+	for(int i = 0;i<n;i++){
+		rev[i] = (rev[i>>1]>>1)|((i&1)<<(bit-1));
+		if(i<rev[i]){
+			complex a1 = a[i];
+			a[i] = a[rev[i]];
+			a[rev[i]] = a1;
+		}
+	}
+	for(int mid = 1;mid<n;mid*=2){
+		complex temp(cos(3.1415926536f / mid), /*(inv?-1:1)*/sin(3.1415926536f / mid));
+		for(int i = 0;i<n;i+=mid*2){
+			complex omega(1);
+			for(int j = 0;j<mid;j++,omega=omega*temp){
+				complex x = a[i+j];
+				complex y = omega*a[i+j+mid];
+				a[i+j] = x+y;
+				a[i+j+mid] = x-y;
+			}
+		}
+	}
+	delete[] rev;
+}
+void KoishiAudioTool::FFT(double*a, int n){
+	int bit = 0;
+	while((1<<bit)<n)
+		bit ++;
+	int *rev = new int[n];
+	memset(rev, 0, sizeof(int)*n);
+	for(int i = 0;i<n;i++){
+		rev[i] = (rev[i>>1]>>1)|((i&1)<<(bit-1));
+		if(i<rev[i]){
+			double a1 = a[i];
+			a[i] = a[rev[i]];
+			a[rev[i]] = a1;
+		}
+	}
+	complex*c = new complex[n];
+	for(int i = 0;i<n;i++)
+		c[i] = complex(a[i]);
+	for(int mid = 1;mid<n;mid*=2){
+		complex temp(cos(3.1415926536f / mid), /*(inv?-1:1)*/sin(3.1415926536f / mid));
+		for(int i = 0;i<n;i+=mid*2){
+			complex omega(1);
+			for(int j = 0;j<mid;j++,omega=omega*temp){
+				complex x = c[i+j];
+				complex y = omega*c[i+j+mid];
+				c[i+j] = x+y;
+				c[i+j+mid] = x-y;
+			}
+		}
+	}
+	for(int i = 0;i<n;i++)
+		a[i] = *c[i];
+	delete[] c;
+	delete[] rev;
+}
+//
+void KoishiAudioTool::makeWaveGraph(const audio &ad, int channels, image &mat, int width, int height){
 	audio cad = ad;
 	mat.create(height, width);
 	mat.fill(color(0xFF,0x66,0x99,0xFF));
@@ -29,7 +93,7 @@ void KoishiAudioTool::makeWaveGraph(const audio &ad, int channels, matrix &mat, 
 	mat.line(point(0,height/2), point(width-1,height/2),color(0xFF,0,0,0));
 	return;
 }
-void KoishiAudioTool::makeWaveGraphDB(const audio &ad, int channels, matrix &mat, int width, int height){
+void KoishiAudioTool::makeWaveGraphDB(const audio &ad, int channels, image &mat, int width, int height){
 	audio cad = ad;
 	mat.create(height, width);
 	mat.fill(color(0xFF,0x66,0x99,0xFF));
@@ -115,6 +179,43 @@ PCMdevice::PCMdevice(){
 	playing = false;
 	working = false;
 	recording = false;
+	energyLeft = 0;
+	energyRight = 0;
+	for(int i = 0;i<16;i++)
+		freq[i] = 0;
+}
+void PCMdevice::resetEnergy(){
+	energyLeft = 0;
+	energyRight = 0;
+	for(int i = 0;i<16;i++)
+		freq[i] = 0;
+}
+void PCMdevice::updateEnergy(LPWAVEHDR lpWaveHeader){
+	if(waveFormat.nChannels > 0 && lpWaveHeader->dwBufferLength >= 4){
+		int a = 0, b = 0;
+		for(int i = 0;i<lpWaveHeader->dwBufferLength-3;i+=2*waveFormat.nChannels){
+			short a1 = abs((short)(lpWaveHeader->lpData[i] | lpWaveHeader->lpData[i+1] << 8));
+			short b1 = abs((short)(lpWaveHeader->lpData[i+2] | lpWaveHeader->lpData[i+3] << 8));
+			a = a1 > a ? a1  : a;
+			b = b1 > b ? b1 : b;
+		}
+		energyLeft = a ;
+		energyRight = b ;
+		//频谱
+		int len = lpWaveHeader->dwBufferLength/2;
+		double *d = new double[MAXSIZE];
+		memset(d, 0, sizeof(double)*MAXSIZE);
+		for(int i = 0;i<len;i++)
+			d[i] = abs((short)(lpWaveHeader->lpData[2*i] | lpWaveHeader->lpData[2*i+1] << 8))/32767.f;
+		FFT(d, MAXSIZE);
+		for(int i = 0;i<16;i++){
+			freq[i] = 0;
+			for(int j = 0;j<MAXSIZE/32;j++){
+				freq[i] += d[MAXSIZE/32*i+j];
+			}
+		}
+		delete[] d;
+	}
 }
 void PCMdevice::initFormat(int channels, int bitPerSample, int sampleRate, int byteRate, int byteAlign, int cbSize){
 	ZeroMemory(&waveFormat, sizeof(WAVEFORMATEX));
@@ -142,6 +243,7 @@ bool PCMdevice::initFormat(const WAV::WAVobject &PCMwavObject){
 }
 dword PCMdevice::play(const stream &cPCMstream){
 	playing = true;
+	resetEnergy();
 	PCMstream = cPCMstream;
 	PCMstream.resetPosition();
 	waveOutOpen(&hWaveOut, WAVE_MAPPER, &waveFormat, (DWORD_PTR)callBackFuncO, (DWORD_PTR)this, CALLBACK_FUNCTION);//打开一个给定的波形音频输出装置来进行声音播放，方式为回调函数方式。如果是对话框程序，可以将第五个参数改为(DWORD)this，操作跟本Demo程序相似
@@ -154,6 +256,7 @@ dword PCMdevice::play(const stream &cPCMstream){
 	waveHeader2.dwBufferLength = PCMstream.read(waveHeader2.lpData, MAXSIZE);
 	waveHeader2.dwFlags = 0L;
 	working = true;
+	resetEnergy();
 	waveOutPrepareHeader(hWaveOut, &waveHeader, sizeof(WAVEHDR));//准备一个波形数据块用于播放
 	waveOutWrite(hWaveOut, &waveHeader, sizeof(WAVEHDR));//在音频媒体中播放第二个参数指定的数据，也相当于开启一个播放区的意
 	waveOutPrepareHeader(hWaveOut, &waveHeader2, sizeof(WAVEHDR));
@@ -162,6 +265,7 @@ dword PCMdevice::play(const stream &cPCMstream){
 		Sleep(500);
 	}
 	working = false;
+	resetEnergy();
 	waveOutUnprepareHeader(hWaveOut, &waveHeader, sizeof(WAVEHDR));//清理数据
 	waveOutUnprepareHeader(hWaveOut, &waveHeader2, sizeof(WAVEHDR));
 	delete []waveHeader.lpData;
@@ -170,6 +274,7 @@ dword PCMdevice::play(const stream &cPCMstream){
 	waveOutClose(hWaveOut);
 	PCMstream.release();
 	playing = false;
+	resetEnergy();
 	return 0U;
 }
 dword PCMdevice::play(const audio &ad){
@@ -187,9 +292,11 @@ void CALLBACK PCMdevice::callBackFuncO(HWAVEOUT hwo, dword uMsg, void* ins, void
 		if(pPCMstream->getPosition() + MAXSIZE > pPCMstream->length){
 			pWaveHeader->dwBufferLength = pPCMstream->length - pPCMstream->getPosition();
 			pPCMstream->read(pWaveHeader->lpData, pWaveHeader->dwBufferLength);
+			context->updateEnergy(pWaveHeader);
 		}else{
 			pWaveHeader->dwBufferLength = MAXSIZE;
 			pPCMstream->read(pWaveHeader->lpData, MAXSIZE);
+			context->updateEnergy(pWaveHeader);
 		}
 		if(pWaveHeader->dwBufferLength > 0){
 			waveOutPrepareHeader(hwo, pWaveHeader, sizeof(WAVEHDR));
@@ -199,6 +306,7 @@ void CALLBACK PCMdevice::callBackFuncO(HWAVEOUT hwo, dword uMsg, void* ins, void
 }
 dword PCMdevice::record(){
 	recording = true;
+	resetEnergy();
 	MMRESULT r = waveInOpen(&hWaveIn, WAVE_MAPPER, &waveFormat,(DWORD_PTR)callBackFuncI, (DWORD_PTR)this, CALLBACK_FUNCTION);
 	if(MMSYSERR_NOERROR != r){
 		recording = false;
@@ -218,6 +326,7 @@ dword PCMdevice::record(){
 	waveHeader2.dwUser = 0L;
 	waveHeader2.dwFlags = 0L;
 	working = true;
+	resetEnergy();
 	waveInPrepareHeader(hWaveIn, &waveHeader, sizeof(WAVEHDR));
 	waveInAddBuffer(hWaveIn, &waveHeader, sizeof (WAVEHDR));
 	waveInPrepareHeader(hWaveIn, &waveHeader2, sizeof(WAVEHDR));
@@ -231,11 +340,14 @@ void CALLBACK PCMdevice::callBackFuncI(HWAVEIN hwi, dword uMsg, void*ins, void* 
 		PCMdevice *context = (PCMdevice*)ins;
 		stream *pPCMstream = &(context->PCMstream);
 		Sleep(10);
-		printf("%d %d\n", pWaveHeader->dwBytesRecorded, pWaveHeader->dwBufferLength);
-		if(pWaveHeader->lpData)
+		//printf("%d %d\n", pWaveHeader->dwBytesRecorded, pWaveHeader->dwBufferLength);
+		if(pWaveHeader->lpData){
 			pPCMstream->push(pWaveHeader->lpData, pWaveHeader->dwBufferLength);
-		if(context->working)
+			context->updateEnergy(pWaveHeader);
+		}
+		if(context->working){
 			waveInAddBuffer(hwi, pWaveHeader, sizeof(WAVEHDR));
+		}
 	}
 }
 
@@ -245,7 +357,8 @@ void PCMdevice::stop(){
 	}else if(recording){
 		waveInUnprepareHeader(hWaveIn, &waveHeader, sizeof (WAVEHDR));
 		waveInUnprepareHeader(hWaveIn, &waveHeader2, sizeof (WAVEHDR));
-		working = false;	
+		working = false;
+		resetEnergy();
 		waveInStop(hWaveIn);
 		waveInReset(hWaveIn);	
 		waveInClose(hWaveIn);
@@ -254,6 +367,7 @@ void PCMdevice::stop(){
 		waveHeader2.lpData = NULL;
 		waveHeader.lpData = NULL;
 		recording = false;
+		resetEnergy();
 	}
 }
 bool PCMdevice::getData(stream &cPCMstream){
@@ -986,14 +1100,14 @@ bool VorbisCodeBook::buildFromData(stream &data){
 			long length = 0;
 			data.bitRead(&length, 5);
 			length ++;
-			for(dword i = 0;i<entryCount;i++){
+			for(dword i = 0;i<entryCount;){
 				long len = OGGsupport::ilog(entryCount - i);
 				long num = 0;
 				data.bitRead(&num, len);
-				for(dword j = 0;j<num;j++){
+				for(dword j = 0;j<num;j++,i++){
 					entryLen.push_back(length);
-					length ++;
 				}
+				length ++;
 			}
 		}
 		data.bitRead(&mappingType, 4);
@@ -1058,7 +1172,7 @@ long VorbisCodeBook::decodeValueIn(stream &sour){
 sequence VorbisCodeBook::decodeVectorIn(stream &sour, int vectorLen, bool interleaved){
 	sequence seq;
 	if(interleaved){
-		//间隔
+		//间隔·使用残差模型0的进行逆量化的时候会使用，使用残差模型1的话interleaved是false
 		int i, step = vectorLen / dimension;
 		std::vector<sequence> table;
 		for(i = 0;i<step;i++){
@@ -1090,6 +1204,7 @@ sequence VorbisCodeBook::decodeVectorIn(stream &sour, int vectorLen, bool interl
 	return seq;
 }
 std::vector<sequence> VorbisCodeBook::decodeMultVectorIn(stream &sour, int vectorLen, long offset, int ch){
+	//产生多个逆量化vector，残差模型2使用
 	std::vector<sequence> seqs;
 	int c;
 	for(c = 0;c<ch;c++)
@@ -1581,8 +1696,10 @@ bool OGGobject::load(stream &s){
 	codeBook.clear();
 	for(b = 0;b<codeBookCount;b++){
 		VorbisCodeBook vcb;
+		int st[2] = {packs[2].bitGetPosition() / 8};
 		if(!vcb.buildFromData(packs[2]))
 			return false;
+		st[1] = packs[2].bitGetPosition() / 8;
 		codeBook.push_back(vcb);
 	}
 	//读取时域信号（在Vorbis I并没有用）
@@ -2286,3 +2403,223 @@ bool KoishiAudioTool::loadOGG(audio &ad, OGGobject &oo){
 	ad.create(s, oo.info.channels, oo.info.sampleRate);
 	return true;
 }
+/////////////////////////////////////////////////////////////////////////
+//MPEG解码
+//int KoishiAudioTool::MPEG::getBitRate(uchar bit, MPEGversion v, MPEGlayer l){
+//	if(l == LAYER_BAD || v == MPEG_BAD)
+//		return -1;
+//	int t[6][16] ={
+//		{0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, -1},
+//		{0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, -1},
+//		{0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, -1},
+//		{0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256, -1},
+//		{0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, -1},
+//		{0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, -1}
+//	};
+//	if(v == MPEG_1 && l == LAYER_1)
+//		return t[0][bit & 0xF];
+//	if(v == MPEG_1 && l == LAYER_2)
+//		return t[1][bit & 0xF];
+//	if(v == MPEG_1 && l == LAYER_3)
+//		return t[2][bit & 0xF];
+//	if((v == MPEG_2 ||  v == MPEG_2_5) && l == LAYER_1)
+//		return t[3][bit & 0xF];
+//	if((v == MPEG_2 ||  v == MPEG_2_5) && l == LAYER_2)
+//		return t[4][bit & 0xF];
+//	if((v == MPEG_2 ||  v == MPEG_2_5) && l == LAYER_3)
+//		return t[5][bit & 0xF];
+//	return -1;
+//}
+//int KoishiAudioTool::MPEG::getSampleRate(uchar bit, MPEGversion v){
+//	if(v == MPEG_BAD)
+//		return -1;
+//	int t[3][4] = {
+//		{44100, 48000, 32000, -1},
+//		{22050, 24000, 16000, -1},
+//		{11025, 12000, 8000, -1}
+//	};
+//	if(v == MPEG_1)
+//		return t[0][bit & 0x3];
+//	if(v == MPEG_2)
+//		return t[1][bit & 0x3];
+//	if(v == MPEG_2_5)
+//		return t[2][bit & 0x3];
+//	return -1;
+//}
+//int KoishiAudioTool::MPEG::getFrameSize(int bitRate, int sampleRate, MPEGversion v, MPEGlayer l){
+//	int mult = 0;
+//	if(v == MPEG_1 && l == LAYER_1)
+//		mult = 48000;
+//	if(v == MPEG_1 && (l == LAYER_2 || l == LAYER_3))
+//		mult = 144000;
+//	if((v == MPEG_2 || v == MPEG_2_5) && l == LAYER_1)
+//		mult = 24000;
+//	if((v == MPEG_2 || v == MPEG_2_5) && (l == LAYER_2 || l == LAYER_3))
+//		mult = 72000;
+//	return mult * bitRate / sampleRate;
+//}
+//bool TagID3V1::load(const stream &s){
+//	stream data = s;
+//	if(data.readString(3) != "TAG")
+//		return valid = false;
+//	char cstr[120] = {0};
+//	data.read(cstr, 30);
+//	data.read(cstr + 30, 30);
+//	data.read(cstr + 60, 30);
+//	data.readInt(year);
+//	data.read(cstr + 90, 30);
+//	uchar c;
+//	data.readByte(c);
+//	str genreList[80] = {
+//		"Blues", "Classic Rock", "Country",
+//		"Dance", "Disco", "Funk", "Grunge",
+//		"Hip-Hop", "Jazz", "Metal", "New Age",
+//		"Oldies", "Other", "Pop", "R&B","Rap",
+//		"Reggae","Rock","Techno","Industrial",
+//		"Alternative","Ska","Death Metal","Pranks",
+//		"Soundtrack","Euro-Techno","Ambient","Trip-Hop",
+//		"Vocal","Jazz Funk","Fusion","Trance",
+//		"Classical","Instrumental","Acid","House",
+//		"Game","Sound Clip","Gospel","Noise",
+//		"Altern Rock","Bass","Soul","Punk",
+//		"Space","Meditative","Instrumental Pop",
+//		"Instrumental Rock","Ethic","Gothic",
+//		"Darkwave","Techno-Industrial","Electronic",
+//		"Pop-Folk","Eurodance","Dream","Southern Rock",
+//		"Comedy","Cult","Gangsta","Top 40",
+//		"Christian Rap","Pop-Funk","Jungle",
+//		"Native American","Cabaret","New Wave",
+//		"Psychadelic","Rave","Showtunes","Trailer",
+//		"Lo-Fi","Tribal","Acid Punk","Acid Jazz",
+//		"Polka","Retro","Musical","Rock&Roll","HardRock"
+//	};
+//	if(c >= 80){
+//		genre = "Unknown";
+//	}else{
+//		genre = genreList[c];
+//	}
+//	title = str(cstr);
+//	author = str(cstr + 30);
+//	album = str(cstr + 60);
+//	comment = str(cstr + 90);
+//	return valid = true;
+//}
+//bool TagID3V2::load(const stream &s){
+//	stream data = s;
+//	if(data.readString(3) != "ID3")
+//		return valid = false;
+//	version = 0;
+//	data.read(&version, 2);
+//	data.readByte(flag);
+//	data.readInt(length);
+//	length = (length  & 0x7F) << 21 | (length  & 0x7F00) << 6  |  (length & 0x7F0000) >> 9 | (length & 0x7F000000) >> 24;
+//	while(data.getPosition() < length + 10){
+//		TagID3V2frame newFrame;
+//		char ctype[5] = {0};
+//		data.read(&ctype, 4);
+//		newFrame.type = str(ctype);
+//		if(str(newFrame.type) == "")
+//			break;
+//		data.read(&newFrame.length, 4);
+//		newFrame.length = (newFrame.length & 0xFF) << 24 | (newFrame.length & 0xFF00) << 8 | (newFrame.length & 0xFF0000) >> 8 | (newFrame.length & 0xFF000000) >> 24;
+//		data.read(&newFrame.flag, 2);
+//		data.readStream(newFrame.data, newFrame.length);
+//		frames.push_back(newFrame);
+//	}
+//	return valid = true;			
+//}
+//bool MPEGobject::seekSync(stream &s){
+//	for(int i = s.getPosition();i<s.length - 1;i++){
+//		if(s[i] == 0xFF && (s[i+1] & 0xF0) == 0xF0){
+//			s.setPosition(i);
+//			return true;
+//		}
+//	}
+//	return false;
+//}
+//bool MPEGobject::load(const stream &s){
+//	stream data = s;
+//	//读取ID3V2帧
+//	data.resetPosition();
+//	if(info1.load(data)){
+//		data.setPosition(info1.length);
+//	}else{
+//		data.resetPosition();
+//	}
+//	audioData.allocate(1000);
+//	while(seekSync(data)){
+//		MPEGframe newFrame;
+//		memset(&newFrame.headerInfo, 0, sizeof(newFrame.headerInfo));
+//		data.bitAlignPosition();
+//		data.LFbitRead(&newFrame.headerInfo.syncInfo, 11);
+//		data.LFbitRead(&newFrame.headerInfo.version, 2);
+//		data.LFbitRead(&newFrame.headerInfo.layer, 2);
+//		data.LFbitRead(&newFrame.headerInfo.hasNotCRC, 1);
+//		data.LFbitRead(&newFrame.headerInfo.idBitRate, 4);
+//		data.LFbitRead(&newFrame.headerInfo.idSampleRate, 2);
+//		data.LFbitRead(&newFrame.headerInfo.padding, 1);
+//		data.LFbitRead(&newFrame.headerInfo.reserve, 1);
+//		data.LFbitRead(&newFrame.headerInfo.modeChannel, 2);
+//		data.LFbitRead(&newFrame.headerInfo.modeExtension, 2);
+//		data.LFbitRead(&newFrame.headerInfo.copyright, 1);
+//		data.LFbitRead(&newFrame.headerInfo.original, 1);
+//		data.LFbitRead(&newFrame.headerInfo.emphasis, 2);
+//		newFrame.bitRate = getBitRate(newFrame.headerInfo.idBitRate, newFrame.headerInfo.version, newFrame.headerInfo.layer);
+//		newFrame.sampleRate = getSampleRate(newFrame.headerInfo.idSampleRate, newFrame.headerInfo.version);
+//		newFrame.frameLength = getFrameSize(newFrame.bitRate, newFrame.sampleRate, newFrame.headerInfo.version, newFrame.headerInfo.layer) + newFrame.headerInfo.padding;
+//		newFrame.channels = newFrame.headerInfo.modeChannel == CHM_SINGLE ? 1 : 2;
+//		if(!newFrame.headerInfo.hasNotCRC){
+//			word CRC = 0;
+//			data.LFbitRead(&CRC, 16);
+//			//这里要检测CRC如果错了就要continue，然而懒得弄了。
+//		}
+//		memset(&newFrame.sideInfo, 0, sizeof(newFrame.sideInfo));
+//		data.LFbitRead(&newFrame.sideInfo.mainDataOff, 9);
+//		data.LFbitRead(&newFrame.sideInfo.privateBits, newFrame.channels == 1 ? 5 : 3);
+//		for(int ch = 0;ch < newFrame.channels;ch++){
+//			data.LFbitRead(&newFrame.sideInfo.ch[ch].scfsi, 4);
+//			for(int gr = 0;gr <2; gr ++){
+//				data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].part23length, 12);
+//				data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].bigValues, 9);
+//				data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].globalGain, 8);
+//				data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].scaleFacCompress, 4);
+//				data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].flagWindowSwitch, 1);
+//				if(newFrame.sideInfo.ch[ch].gr[gr].flagWindowSwitch){
+//					data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].wMode1.blockType, 2);
+//					data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].wMode1.mixedFlag, 1);
+//					for(int i = 0;i<2;i++)
+//						data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].wMode1.tableSelect[i], 5);
+//					for(int i = 0;i<3;i++)
+//						data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].wMode1.subblockGain[i], 3);
+//				}else{
+//					for(int i = 0;i<3;i++)
+//						data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].wMode0.tableSelect[i], 5);
+//					data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].wMode0.region0Count, 4);
+//					data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].wMode0.region1Count, 3);
+//				}
+//				data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].preflag, 1);
+//				data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].scaleFacScale, 1);
+//				data.LFbitRead(&newFrame.sideInfo.ch[ch].gr[gr].count1TableSelect, 1);
+//			}
+//		}
+//		data.readStream(newFrame.originData, newFrame.frameLength);
+//		newFrame.originData.deleteStream(0, 4 + (newFrame.channels == 1 ? 17 : 32));
+//		newFrame.mainDataBegin = audioData.length - newFrame.sideInfo.mainDataOff;
+//		newFrame.mainDataEnd = newFrame.mainDataBegin + newFrame.headerInfo.padding + ( 
+//			newFrame.sideInfo.ch[0].gr[0].part23length + newFrame.sideInfo.ch[0].gr[1].part23length + 
+//			newFrame.sideInfo.ch[1].gr[0].part23length + newFrame.sideInfo.ch[1].gr[1].part23length) / 8;
+//		audioData.pushStream(newFrame.originData, newFrame.originData.length);
+//		/*audioData.setPosition(newFrame.mainDataBegin);
+//		audioData.readStream(newFrame.originDataAdjusted, newFrame.headerInfo.padding + ( 
+//			newFrame.sideInfo.ch[0].gr[0].part23length + newFrame.sideInfo.ch[0].gr[1].part23length + 
+//			newFrame.sideInfo.ch[1].gr[0].part23length + newFrame.sideInfo.ch[1].gr[1].part23length) / 8);*/
+//		frames.push_back(newFrame);
+//	}
+//	if(data.length >= 128){
+//		stream data2;
+//		data.setPosition(data.length - 128);
+//		data.readStream(data2, 128);
+//		info2.load(data2);
+//	}
+//	return true;
+//}

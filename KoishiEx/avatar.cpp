@@ -1,796 +1,1472 @@
 #include "StdAfx.h"
 #include "KoishiEx.h"
 #include "KoishiNeoplePack.h"
+#include "avatar.h"
 
+using namespace Koishi;
+using namespace KoishiNeoplePack;
 using namespace KoishiAvatar;
 
+dword layerSequence[100][2] = {
+	{APART_SHOES,	'f'},
+	{APART_BELT,	'f'},
+	{APART_PANTS,	'f'},
+	{APART_COAT,	'f'},
+	{APART_NECK,	'f'},
+	{APART_FACE,	'f'},
+	{APART_CAP,		'f'},
+	{APART_BELT,	'e'},
+	{APART_NECK,	'e'|'f'<<8},
+	{APART_FACE,	'g'},
+	{APART_FACE,	'a'},
+	{APART_WEAPON,	'c'|'2'<<8},
+	{APART_WEAPON,	'c'|'1'<<8},
+	{APART_WEAPON,	'c'},
+	{APART_CAP,		'c'},
+	{APART_HAIR,	'c'},
+	{APART_NECK,	'e'},
+	{APART_COAT,	'c'}, 
+	{APART_NECK,	'g'},
+	{APART_NECK,	'c'|'f'<<8},
+	{APART_NECK,	'c'},
+	{APART_WEAPON,	'a'|'2'<<8},
+	{APART_WEAPON,	'a'|'1'<<8},
+	{APART_WEAPON,	'a'},
+	{APART_CAP,		'g'},
+	{APART_CAP,		'a'},
+	{APART_HAIR,	'a'},
+	{APART_WEAPON,	'e'|'2'<<8},
+	{APART_WEAPON,	'e'|'1'<<8},
+	{APART_WEAPON,	'e'},
+	{APART_NECK,	'x'|'f'<<8},
+	{APART_NECK,	'x'},
+	{APART_NECK,	'z'},
+	{APART_COAT,	'x'},
+	{APART_BELT,	'g'},
+	{APART_BELT,	'c'},
+	{APART_FACE,	'c'},
+	{APART_NECK,	'a'},
+	{APART_COAT,	'g'},
+	{APART_COAT,	'a'},
+	{APART_BELT,	'a'},
+	{APART_PANTS,	'c'},
+	{APART_SHOES,	'c'},
+	{APART_PANTS,	'g'},
+	{APART_PANTS,	'a'},
+	{APART_SHOES,	'g'},
+	{APART_SHOES,	'a'},
+	{APART_WEAPON,	'x'|'2'<<8},
+	{APART_WEAPON,	'x'|'1'<<8},
+	{APART_WEAPON,	'x'},
+	{APART_PANTS,	'b'},
+	{APART_SHOES,	'h'},
+	{APART_SHOES,	'b'},
+	{APART_PANTS,	'h'},
+	{APART_PANTS,	'd'},
+	{APART_BELT,	'b'},
+	{APART_NECK,	'b'|'f'<<8},
+	{APART_NECK,	'b'},
+	{APART_COAT,	'h'},
+	{APART_COAT,	'b'},
+	{APART_BELT,	'h'},
+	{APART_BELT,	'd'},
+	{APART_HAIR,	'b'},
+	{APART_CAP,		'h'},
+	{APART_CAP,		'b'},
+	{APART_WEAPON,	'b'|'2'<<8},
+	{APART_WEAPON,	'b'|'1'<<8},
+	{APART_WEAPON,	'b'},
+	{APART_NECK,	'd'|'f'<<8},
+	{APART_NECK,	'd'},
+	{APART_NECK,	'h'},
+	{APART_COAT,	'd'},
+	{APART_HAIR,	'd'},
+	{APART_CAP,		'd'},
+	{APART_NECK,	'k'|'f'<<8},
+	{APART_NECK,	'k'},
+	{APART_FACE,	'h'},
+	{APART_WEAPON,	'd'|'2'<<8},
+	{APART_WEAPON,	'd'|'1'<<8},
+	{APART_WEAPON,	'd'},
+	{APART_FACE,	'b'},
+	{APART_HAIR,	'f'|'1'<<8},
+	{APART_BODY,	0}
+};
+color modelColor[ACHARACTER_MAXCOUNT] = {
+	color(0xFF, 0x00, 0xCC, 0xFF),
+	color(0xFF, 0xCC, 0x55, 0x88),
+	color(0xFF, 0xFF, 0x99, 0x66),
+	color(0xFF, 0xFF, 0xEE, 0x99),
+	color(0xFF, 0xCC, 0x99, 0xEE),
+	color(0xFF, 0x99, 0xFF, 0xFF),
+	color(0xFF, 0xFF, 0xCC, 0xFF),
+	color(0xFF, 0xCC, 0xCC, 0xFF),
+	color(0xFF, 0xCC, 0xCC, 0xCC),
+	color(0xFF, 0xFF, 0xFF, 0xCC),
+	color(0xFF, 0xDD, 0x99, 0xEE),
+	color(0xFF, 0x99, 0xFF, 0x66),
+	color(0xFF, 0x77, 0x77, 0xFF),
+	color(0xFF, 0xDD, 0xCC, 0x88)
+};
+long modelFrame[ACHARACTER_MAXCOUNT] = {
+	176, 0, 113, 0, 0, 0, 12, 0, 150, 0, 0, 0, 0, 0
+};
 
-bool KoishiAvatar::isnum(Koishi::uchar chars){
-	return chars >= '0' && chars <= '9';
-}
-
-str KoishiAvatar::shorten(const str &path){
-	str path1,path2;
-	str::size_type st;
-	st = path.find_last_of('\\');
-	if(st != str::npos){
-		path1 = path.substr(st+1);
-	}else{
-		path1 = path;
+str avatarString[APART_MAXCOUNT] = {
+	"cap","hair","face","neck","coat","pants","belt","shoes","body"
+};
+str weaponString[AWEAPON_MAXCOUNT] = {
+	"lgswd","lswd","mswd","sswd","boneswd","gemswd","beamswd","club","katana","lkatana","lblade","sblade","coreswd",
+	"arm","tonfa","gauntlet","boneclaw","claw","boxglove","glove","knuckle",
+	"auto","bowgun","hcan","musket","rev",
+	"pole", "rod", "spear", "staff", "broom", "dagger", "twinswd", "wand", "chakraweapon", "halberd", "pike", "javelin", "beamspear",
+	"khakkhara", "rosary", "scythe", "totem", "axe", "cross"
+};
+WeaponType characterWeaponTable[ACHARACTER_MAXCOUNT][WEAPON_MAXCOUNT_PER_CHAR] = {
+	{AWEAPON_LSWD, AWEAPON_MSWD, AWEAPON_SSWD, AWEAPON_LGSWD, AWEAPON_BONESWD, AWEAPON_GEMSWD, AWEAPON_KATANA, AWEAPON_LKATANA, AWEAPON_CLUB, AWEAPON_BEAMSWD, AWEAPON_UD},
+	{AWEAPON_LSWD, AWEAPON_MSWD, AWEAPON_SSWD, AWEAPON_LGSWD, AWEAPON_BONESWD, AWEAPON_GEMSWD, AWEAPON_KATANA, AWEAPON_LKATANA, AWEAPON_CLUB, AWEAPON_BEAMSWD, AWEAPON_UD},
+	{AWEAPON_GAUNTLET, AWEAPON_ARM, AWEAPON_GLOVE, AWEAPON_KNUCKLE, AWEAPON_BOXGLOVE, AWEAPON_CLAW, AWEAPON_BONECLAW, AWEAPON_TONFA, AWEAPON_UD},
+	{AWEAPON_GAUNTLET, AWEAPON_ARM, AWEAPON_GLOVE, AWEAPON_KNUCKLE, AWEAPON_BOXGLOVE, AWEAPON_CLAW, AWEAPON_BONECLAW, AWEAPON_TONFA, AWEAPON_UD},
+	{AWEAPON_AUTO, AWEAPON_REV, AWEAPON_MUSKET, AWEAPON_BOWGUN, AWEAPON_HCAN,AWEAPON_UD},
+	{AWEAPON_AUTO, AWEAPON_REV, AWEAPON_MUSKET, AWEAPON_BOWGUN, AWEAPON_HCAN,AWEAPON_UD},
+	{AWEAPON_ROD, AWEAPON_STAFF, AWEAPON_POLE, AWEAPON_SPEAR, AWEAPON_BROOM, AWEAPON_UD},
+	{AWEAPON_ROD, AWEAPON_STAFF, AWEAPON_POLE, AWEAPON_SPEAR, AWEAPON_BROOM, AWEAPON_UD},
+	{AWEAPON_CROSS, AWEAPON_AXE, AWEAPON_SCYTHE, AWEAPON_TOTEM, AWEAPON_ROSARY, AWEAPON_UD},
+	{AWEAPON_CROSS, AWEAPON_AXE, AWEAPON_SCYTHE, AWEAPON_TOTEM, AWEAPON_ROSARY, AWEAPON_KHAKKHARA, AWEAPON_UD},
+	{AWEAPON_DAGGER, AWEAPON_TWINSWD, AWEAPON_WAND, AWEAPON_CHAKRAWEAPON, AWEAPON_UD},
+	{AWEAPON_LSWD, AWEAPON_MSWD, AWEAPON_SSWD, AWEAPON_LGSWD, AWEAPON_BONESWD, AWEAPON_GEMSWD, AWEAPON_KATANA, AWEAPON_LKATANA, AWEAPON_CLUB, AWEAPON_UD},
+	{AWEAPON_PIKE, AWEAPON_HALBERD, AWEAPON_JAVELIN, AWEAPON_BEAMSPEAR, AWEAPON_UD},
+	{AWEAPON_MSWD, AWEAPON_SBLADE, AWEAPON_LBLADE, AWEAPON_CORESWD, AWEAPON_UD}
+};
+WeaponSet characterWeaponList(const AvatarCharacter &character){
+	WeaponSet result;
+	for(int i = 0;i<WEAPON_MAXCOUNT_PER_CHAR;i++){
+		if(characterWeaponTable[character][i] == AWEAPON_UD)
+			return result;
+		result.push_back(characterWeaponTable[character][i]);
 	}
-	st = path1.find_last_of('/');
-	if(st != str::npos){
-		path2 = path1.substr(st+1);
-	}else{
-		path2 = path1;
-	}
-	return path2;
+	return result;
 }
-str KoishiAvatar::imgAddV4Num(const str &imgName, long num){
-	str newName = imgName;
+long characterWeaponListID(const AvatarCharacter &character, const WeaponType &type){
+	WeaponSet list = characterWeaponList(character);
+	for(int i = 0;i<list.size();i++){
+		if(list[i] == type)
+			return i;
+	}
+	return -1;
+}
+///////////////////////////////////////////////////////////////////////
+str formatID(int i){
+	if(i == 0){
+		return "0";
+	}
+	str result = "";
+	bool p = i < 0;
+	if(p)
+		i = -i;
+	while(i){
+		char d = '0' + i % 10;
+		result = d + result;
+		i /= 10;
+	}
+	if(p)
+		result = '-' + result;
+	return result;
+}
+str KoishiAvatar::formatAvatarID(int i){
+	str result = "";
+	if(i > 9999){
+		result.push_back('0' + i /10000);
+	}
+	result.push_back('0' + (i /1000)%10);
+	result.push_back('0' + (i /100)%10);
+	result.push_back('0' + (i /10)%10);
+	result.push_back('0' + i %10);
+	return result;
+}
+str KoishiAvatar::formatAvatarIDplusBy(const str &imgName, int num){
+	str result = imgName;
 	long i1 = num % 10;	//个位数
 	long i2 = num / 10 % 10;	//十位数
 	Koishi::uchar c1 = '0'+i1;
 	Koishi::uchar c2 = '0'+i2;
 	str::size_type pos = imgName.find_last_of('0');
 	if(pos != str::npos){
-		newName[pos] = c1;
-		newName[pos-1] = c2;
+		result[pos] = c1;
+		result[pos-1] = c2;
 	}
-	return newName;
+	return result;
 }
-
-
-str KoishiAvatar::getAvatarIDString(int i){
-	str s = "";
-	if(i>9999){
-		s.push_back('0'+i/10000);
-	}
-	s.push_back('0'+(i/1000)%10);
-	s.push_back('0'+(i/100)%10);
-	s.push_back('0'+(i/10)%10);
-	s.push_back('0'+i%10);
-	return s;
-}
-void KoishiAvatar::getMQData(int order, avatarPart &part, avatarLayer &layer){
-	int mixSeqList[TOTAL_LAYER_COUNT][2] = {
-		{APART_SHOES,	ALAYER_F},{APART_BELT,	ALAYER_F},{APART_PANTS,	ALAYER_F},{APART_COAT,	ALAYER_F},
-		{APART_NECK,	ALAYER_F},{APART_FACE,	ALAYER_F},{APART_CAP,	ALAYER_F},{APART_FACE,	ALAYER_G},
-		{APART_FACE,	ALAYER_A},{APART_WEAPON,ALAYER_C2},{APART_WEAPON,ALAYER_C1},{APART_WEAPON,	ALAYER_C},
-		{APART_CAP,		ALAYER_C},{APART_HAIR,	ALAYER_C},{APART_NECK,	ALAYER_E},{APART_COAT,	ALAYER_C},
-		{APART_NECK,	ALAYER_G},{APART_NECK,	ALAYER_C},{APART_WEAPON,ALAYER_A2},{APART_WEAPON,	ALAYER_A1},
-		{APART_WEAPON,	ALAYER_A},{APART_CAP,	ALAYER_G},{APART_CAP,	ALAYER_A},{APART_HAIR,	ALAYER_A},
-		{APART_NECK,	ALAYER_X},{APART_BELT,	ALAYER_G},{APART_BELT,	ALAYER_C},{APART_FACE,	ALAYER_C},
-		{APART_NECK,	ALAYER_A},{APART_COAT,	ALAYER_G},{APART_COAT,	ALAYER_A},{APART_BELT,	ALAYER_A},
-		{APART_SHOES,	ALAYER_C},{APART_PANTS,	ALAYER_G},{APART_PANTS,	ALAYER_A},{APART_SHOES,	ALAYER_G},
-		{APART_SHOES,	ALAYER_A},{APART_PANTS,	ALAYER_B},{APART_SHOES,	ALAYER_H},{APART_SHOES,	ALAYER_B},
-		{APART_PANTS,	ALAYER_H},{APART_PANTS,	ALAYER_D},{APART_BELT,	ALAYER_B},{APART_NECK,	ALAYER_B},
-		{APART_COAT,	ALAYER_H},{APART_COAT,	ALAYER_B},{APART_BELT,	ALAYER_D},{APART_HAIR,	ALAYER_B},
-		{APART_CAP,		ALAYER_H},{APART_CAP,	ALAYER_B},{APART_WEAPON,	ALAYER_B2},{APART_WEAPON,	ALAYER_B1},
-		{APART_WEAPON,	ALAYER_B},{APART_NECK,	ALAYER_D},{APART_NECK,	ALAYER_H},{APART_COAT,	ALAYER_D},
-		{APART_HAIR,	ALAYER_D},{APART_CAP,	ALAYER_D},{APART_WEAPON,	ALAYER_D2},{APART_WEAPON,	ALAYER_D1},
-		{APART_WEAPON,	ALAYER_D},{APART_FACE,	ALAYER_B},{APART_NECK,	ALAYER_K},{APART_BODY,	ALAYER_UD}
-	};
-	if(order>TOTAL_LAYER_COUNT-1)
-		order = TOTAL_LAYER_COUNT-1;
-	part = (avatarPart)mixSeqList[order][0];
-	layer = (avatarLayer)mixSeqList[order][1];
-}
-extern avatarPart KoishiAvatar::getMQPart(int order){
-	avatarPart ap;
-	avatarLayer al;
-	getMQData(order, ap, al);
-	return ap;
-}
-extern avatarLayer KoishiAvatar::getMQLayer(int order){
-	avatarPart ap;
-	avatarLayer al;
-	getMQData(order, ap, al);
-	return al;
-}
-extern str KoishiAvatar::getCareerNPKName(avatarCareer cr){
-	str fix[15] = {"","swordman_","swordman_at","fighter_","fighter_at","gunner_","gunner_at","mage_","mage_at","priest_","priest_at","thief_","knight_","demoniclancer_","gunblader_"};
-	return fix[cr];
-}
-extern str KoishiAvatar::getCareerIMGName(avatarCareer cr){
-	str fix[15] = {"","sm_","sg_","ft_","fm_","gn_","gg_","mg_","mm_","pr_","pg_","th_","kn_","dl_","gb_"};
-	return fix[cr];
-}
-extern str KoishiAvatar::getAvatarPartNPKName(avatarPart pt){
-	str fix[10] = {"","cap","hair","face","neck","coat","pants","belt","shoes","skin"};
-	return fix[pt];
-}
-extern str KoishiAvatar::getAvatarPartIMGName(avatarPart pt){
-	str fix[10] = {"","cap","hair","face","neck","coat","pants","belt","shoes","body"};
-	return fix[pt];
-}
-extern str KoishiAvatar::getAvatarLayerName(avatarLayer ly){
-	str fix[28] = {"","a","a1","a2","b","b1","b2","c","c1","c2","d","d1","d2","e","e1","e2","f","f1","f2","g","g1","g2","h","h1","h2","x","x1","x2"};
-	return fix[ly];
-}
-extern str KoishiAvatar::getAvatarNPKName(avatarCareer ch, avatarPart pt){
+str KoishiAvatar::NPK_avatar(AvatarCharacter ac, AvatarPart ap){
 	str fix1 = "sprite_character_";
 	str fix2 = "equipment_avatar_";
 	str fix3 = ".NPK";
-	return fix1 + getCareerNPKName(ch) + fix2 + getAvatarPartNPKName(pt) + fix3;
-}
-extern str KoishiAvatar::getAvatarIMGName(avatarCareer ch, avatarPart pt){
-	return getCareerIMGName(ch) + getAvatarPartIMGName(pt);
-}
-extern str KoishiAvatar::getIconNPKName(avatarCareer cr){
-	str fix[15] = {"","swordman","atswordman","fighter","atfighter","gunner","atgunner","mage","atmage","priest","atpriest","thief","knight","demoniclancer","gunblader"};
-	return "sprite_item_avatar_"+fix[cr]+".NPK";
-}
-extern std::vector<str> KoishiAvatar::getIconIMGName(avatarCareer cr, avatarPart pt){
-	std::vector<str> imgNameList;
-	if(pt == APART_BODY){
-		imgNameList.push_back(getCareerIMGName(cr) + "abody");
-		imgNameList.push_back(getCareerIMGName(cr) + "atong");
-	}else{
-		imgNameList.push_back(getCareerIMGName(cr) + "a" + getAvatarPartIMGName(pt));
+	str fixn1[ACHARACTER_MAXCOUNT] = {"swordman_","swordman_at","fighter_","fighter_at","gunner_","gunner_at","mage_","mage_at","priest_","priest_at","thief_","knight_","demoniclancer_","gunblader_"};
+	str fixn2[APART_MAXCOUNT] = {"cap","hair","face","neck","coat","pants","belt","shoes","skin"};
+	if(ap < APART_MAXCOUNT){
+		if(ac < ACHARACTER_MAXCOUNT)
+			return (fix1 + fixn1[ac] + fix2 + fixn2[ap] + fix3);
 	}
-	return imgNameList;
+	return "unexceptable";
 }
-extern color KoishiAvatar::getCareerColor(avatarCareer cr){
-	color clrList[15] = {
-		color(0xFF, 0xFF, 0xFF, 0xFF),
-		color(0xFF, 0x00, 0xCC, 0xFF),
-		color(0xFF, 0xCC, 0x55, 0x88),
-		color(0xFF, 0xFF, 0x99, 0x66),
-		color(0xFF, 0xFF, 0xEE, 0x99),
-		color(0xFF, 0xCC, 0x99, 0xEE),
-		color(0xFF, 0x99, 0xFF, 0xFF),
-		color(0xFF, 0xFF, 0xCC, 0xFF),
-		color(0xFF, 0xCC, 0xCC, 0xFF),
-		color(0xFF, 0xCC, 0xCC, 0xCC),
-		color(0xFF, 0xFF, 0xFF, 0xCC),
-		color(0xFF, 0xDD, 0x99, 0xEE),
-		color(0xFF, 0x99, 0xFF, 0x66),
-		color(0xFF, 0x77, 0x77, 0xFF),
-		color(0xFF, 0xDD, 0xCC, 0x88)
+
+str KoishiAvatar::IMG_avatar(AvatarCharacter ac, AvatarPart ap){
+	str fixn1[ACHARACTER_MAXCOUNT] = {"sm_","sg_","ft_","fm_","gn_","gg_","mg_","mm_","pr_","pg_","th_","kn_","dl_","gb_"};
+	str fixn2[APART_MAXCOUNT] = {"cap","hair","face","neck","coat","pants","belt","shoes","body"};
+	if(ap < APART_MAXCOUNT){
+		if(ac < ACHARACTER_MAXCOUNT)
+			return (fixn1[ac] + fixn2[ap]);
+	}
+	return "unexceptable";
+}
+str KoishiAvatar::NPK_weapon(AvatarCharacter ac, WeaponType wt){
+	str fix1 = "sprite_character_";
+	str fix2 = "equipment_weapon_";
+	str fix3 = ".NPK";
+	str fixn1[ACHARACTER_MAXCOUNT] = {"swordman_","swordman_at","fighter_","fighter_at","gunner_","gunner_at","mage_","mage_at","priest_","priest_at","thief_","knight_","demoniclancer_","gunblader_"};
+	str fixn2[AWEAPON_MAXCOUNT] = {"lgswd","lswd","mswd","sswd","boneswd","gemswd","beamswd","club","katana","lkatana","lblade","sblade","coreswd",
+		"arm","tonfa","gauntlet","boneclaw","claw","boxglove","glove","knuckle",
+		"auto","bowgun","hcan","musket","rev",
+		"pole", "rod", "spear", "staff", "broom", "dagger", "twinswd", "wand", "chakraweapon", "halberd", "pike", "javelin", "beamspear",
+		"khakkhara", "rosary", "scythe", "totem", "axe", "cross"
 	};
-	return clrList[cr];
+	if(wt < AWEAPON_MAXCOUNT){
+		if(ac < ACHARACTER_MAXCOUNT)
+			return (fix1 + fixn1[ac] + fix2 + fixn2[wt] + fix3);
+	}
+	return "unexceptable";
 }
-extern point KoishiAvatar::getAvatarModelOffset(avatarCareer cr, avatarPart pt){
-	point ptList[15][10] = {
-		{point(0,0), point(0,0),point(0,0),point(0,0),point(0,0),point(0,0),point(0,0),point(0,0),point(0,0)},
-		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
-		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
-		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
-		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
-		{point(0,0), point(0,-50),point(0,-40),point(0,-40),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,50),point(0,0)},
-		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
-		{point(0,0), point(0,-30),point(0,-30),point(0,-30),point(0,-10),point(0,-10),point(0,10),point(0,0),point(0,30),point(0,0)},
-		{point(0,0), point(0,-30),point(0,-30),point(0,-30),point(0,-10),point(0,-10),point(0,10),point(0,0),point(0,30),point(0,0)},
-		{point(0,0), point(-20,-50),point(-20,-40),point(-20,-40),point(-20,-20),point(-20,-10),point(-20,20),point(-20,0),point(-20,50),point(-20,0)},
-		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
-		{point(0,0), point(0,-40),point(0,-30),point(0,-30),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,40),point(0,0)},
-		{point(0,0), point(5,-30),point(5,-30),point(5,-30),point(5,-10),point(5,-10),point(5,10),point(5,0),point(5,30),point(5,0)},
-		{point(0,0), point(0,-50),point(0,-40),point(0,-40),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,50),point(0,0)},
-		{point(0,0), point(0,-50),point(0,-40),point(0,-40),point(0,-20),point(0,-10),point(0,20),point(0,0),point(0,50),point(0,0)},
-	};
-	return ptList[cr][pt];
+str KoishiAvatar::NPK_avatarIcon(AvatarCharacter ac){
+	str fix1 = "sprite_item_avatar_";
+	str fix2 = ".NPK";
+	str fixn1[ACHARACTER_MAXCOUNT] = {"swordman","atswordman","fighter","atfighter","gunner","atgunner","mage","atmage","priest","atpriest","thief","knight","demoniclancer","gunblader"};
+	if(ac < ACHARACTER_MAXCOUNT)
+		return (fix1 + fixn1[ac] + fix2 );
+	return "unexceptable";
 }
-extern long KoishiAvatar::getCareerRepresentativeFrame(avatarCareer cr){
-	long frameList[15] = {0, 176, 0, 113, 0, 0, 0, 12, 0, 150, 0, 0, 0, 0, 0};
-	return frameList[cr];
-}
-extern bool KoishiAvatar::parseAvatarName(const str &avatarName, avatar &av, avatarLayer &al){
-	str numstr = "";
-	Koishi::uchar p, q;
-	long i;
-	av.isTN = !(avatarName.find("(tn)") == str::npos);
-	if(avatarName.find("_mask1") != str::npos){
-		return false;
-	}
-	if(avatarName.size() <= 5){
-		return false;
-	}
-	i = avatarName.size()-5;
-	if(i<0)
-		return false;
-	p = avatarName[i-1];
-	q = avatarName[i];
-	al = ALAYER_UD;
-	if(q == 'a'){
-		al = ALAYER_A;
-		i --;
-	}
-	if(q == 'b'){
-		al = ALAYER_B;
-		i --;
-	}
-	if(q == 'c'){
-		al = ALAYER_C;
-		i --;
-	}
-	if(q == 'd'){
-		al = ALAYER_D;
-		i --;
-	}
-	if(q == 'e'){
-		al = ALAYER_E;
-		i --;
-	}
-	if(q == 'f'){
-		al = ALAYER_F;
-		i --;
-	}
-	if(q == 'g'){
-		al = ALAYER_G;
-		i --;
-	}
-	if(q == 'h'){
-		al = ALAYER_H;
-		i --;
-	}
-	if(q == 'k'){
-		al = ALAYER_K;
-		i --;
-	}
-	if(q == 'x'){
-		al = ALAYER_X;
-		i --;
-	}
-	if(p == 'a' && q == '1'){
-		al = ALAYER_A1;
-		i -= 2;
-	}
-	if(p == 'b' && q == '1'){
-		al = ALAYER_B1;
-		i -= 2;
-	}
-	if(p == 'c' && q == '1'){
-		al = ALAYER_C1;
-		i -= 2;
-	}
-	if(p == 'd' && q == '1'){
-		al = ALAYER_D1;
-		i -= 2;
-	}
-	if(p == 'e' && q == '1'){
-		al = ALAYER_E1;
-		i -= 2;
-	}
-	if(p == 'f' && q == '1'){
-		al = ALAYER_F1;
-		i -= 2;
-	}
-	if(p == 'g' && q == '1'){
-		al = ALAYER_G1;
-		i -= 2;
-	}
-	if(p == 'h' && q == '1'){
-		al = ALAYER_H1;
-		i -= 2;
-	}
-	if(p == 'k' && q == '1'){
-		al = ALAYER_K1;
-		i -= 2;
-	}
-	if(p == 'x' && q == '1'){
-		al = ALAYER_X2;
-		i -= 2;
-	}
-	if(p == 'a' && q == '2'){
-		al = ALAYER_A2;
-		i -= 2;
-	}
-	if(p == 'b' && q == '2'){
-		al = ALAYER_B2;
-		i -= 2;
-	}
-	if(p == 'c' && q == '2'){
-		al = ALAYER_C2;
-		i -= 2;
-	}
-	if(p == 'd' && q == '2'){
-		al = ALAYER_D2;
-		i -= 2;
-	}
-	if(p == 'e' && q == '2'){
-		al = ALAYER_E2;
-		i -= 2;
-	}
-	if(p == 'f' && q == '2'){
-		al = ALAYER_F2;
-		i -= 2;
-	}
-	if(p == 'g' && q == '2'){
-		al = ALAYER_G2;
-		i -= 2;
-	}
-	if(p == 'h' && q == '2'){
-		al = ALAYER_H2;
-		i -= 2;
-	}
-	if(p == 'k' && q == '2'){
-		al = ALAYER_K2;
-		i -= 2;
-	}
-	if(p == 'x' && q == '2'){
-		al = ALAYER_X2;
-		i -= 2;
-	}
-	if(i<0)
-		return false;
-	while(isnum(p = avatarName[i--])){
-		numstr.push_back(p);
-	}
-	if(numstr.length() == 0)
-		return false;
-	std::reverse(numstr.begin(), numstr.end());
-	av.ID = std::stoi(numstr);
-	if(avatarName.find("coat") != str::npos){
-		av.part = APART_COAT;
-	}else if(avatarName.find("pants") != str::npos){
-		av.part = APART_PANTS; 
-	}else if(avatarName.find("cap") != str::npos){
-		av.part = APART_CAP;
-	}else if(avatarName.find("hair") != str::npos){
-		av.part = APART_HAIR;
-	}else if(avatarName.find("face") != str::npos){
-		av.part = APART_FACE;
-	}else if(avatarName.find("neck") != str::npos){
-		av.part = APART_NECK;
-	}else if(avatarName.find("shoes") != str::npos){
-		av.part = APART_SHOES;
-	}else if(avatarName.find("belt") != str::npos){
-		av.part = APART_BELT;
-	}else if(avatarName.find("body") != str::npos){
-		av.part = APART_BODY;
-	}else{
-		return false;
-	}
-	if(avatarName.find("sm_") != str::npos){
-		av.carrer = ACAREER_SM;
-	}else if(avatarName.find("sg_") != str::npos){
-		av.carrer = ACAREER_SG; 
-	}else if(avatarName.find("ft_") != str::npos){
-		av.carrer = ACAREER_FT;
-	}else if(avatarName.find("fm_") != str::npos){
-		av.carrer = ACAREER_FM;
-	}else if(avatarName.find("gn_") != str::npos){
-		av.carrer = ACAREER_GN;
-	}else if(avatarName.find("gg_") != str::npos){
-		av.carrer = ACAREER_GG;
-	}else if(avatarName.find("mg_") != str::npos){
-		av.carrer = ACAREER_MG;
-	}else if(avatarName.find("mm_") != str::npos){
-		av.carrer = ACAREER_MM;
-	}else if(avatarName.find("pr_") != str::npos){
-		av.carrer = ACAREER_PR;
-	}else if(avatarName.find("pg_") != str::npos){
-		av.carrer = ACAREER_PG;
-	}else if(avatarName.find("th_") != str::npos){
-		av.carrer = ACAREER_TH;
-	}else if(avatarName.find("kn_") != str::npos){
-		av.carrer = ACAREER_KN;
-	}else if(avatarName.find("dl_") != str::npos){
-		av.carrer = ACAREER_DL;
-	}else if(avatarName.find("gb_") != str::npos){
-		av.carrer = ACAREER_GB;
-	}else{
-		return false;
-	}
-	return true;
-}
-extern str KoishiAvatar::makeAvatarName(avatar av, avatarLayer al){
-	str output = "";
-	if(av.isTN){
-		output += "(tn)";
-	}
-	output += getCareerIMGName(av.carrer);
-	output += getAvatarPartIMGName(av.part);
-	output += getAvatarIDString(av.ID);
-	output += getAvatarLayerName(al);
-	return output;
-}
-avatar::avatar(){
-	carrer = ACAREER_UD;
-	part = APART_UD;
-	ID = -1;
-	isTN = false;
-	v6palette = 0;
-	for(int i=0;i<ALAYER_MAXCOUNT;i++){
-		layer[i] = false;
-	}
-}
-avatarAlbum::avatarAlbum(){
-	valid = false;
-	selected = 0;
-	selectedPalette = 0;
-	selectedFrame = 0;
-}
-void avatarAlbum::clear(){
-	avatarList.clear();
-	avatarPos.clear();
-	sourceNPK.release();
-	avatarPosAtBigramList.clear();
-	bigramList.clear();
-	for(int i=0;i<ALAYER_MAXCOUNT;i++){
-		layerIMG[i].release();
-		layerIMGpath[i] = "";
-		layerIMGpos[i] = -1;
-		layerMatrix[i].destory();
-		selected = 0;
-		selectedPalette = 0;
-		selectedFrame = 0;
-	}
-	valid = false;
-}
-bool avatarAlbum::loadNPK(){
-	str fileName = resoucePath + ::getAvatarNPKName(career, part);
-	sourceNPK.release();
-	if(!sourceNPK.loadFile(fileName)){
-		valid = false;
-		return false;
-	}
-	//更新列表
-	for(int i = 0;i<sourceNPK.count;i++){
-		avatar av;
-		avatarLayer layer;
-		if(!::parseAvatarName(shorten(sourceNPK.entry[i].comment), av, layer))
-			continue;
-		bool isNew = true;
-		for(int j = 0;j<avatarList.size();j++){
-			if(avatarList[j].ID == av.ID && avatarList[j].isTN == av.isTN){
-				avatarList[j].layer[layer] = true;
-				avatarPos[j][layer] = i;
-				isNew = false;
-				break;
-			}
+str KoishiAvatar::IMG_avatarIcon(AvatarCharacter ac, AvatarPart ap){
+	str fix1 = "_a";
+	str fix2 = ".img";
+	str fixn1[ACHARACTER_MAXCOUNT] = {"sm","sg","ft","fm","gn","gg","mg","mm","pr","pg","th","kn","dl","gb"};
+	str fixn2[APART_MAXCOUNT] = {"cap","hair","face","neck","coat","pants","belt","shoes","body"};
+	if(ap < APART_MAXCOUNT){
+		if(ac < ACHARACTER_MAXCOUNT){
+			return fixn1[ac] + fix1 + fixn2[ap] + fix2;
 		}
-		if(isNew){
-			av.layer[layer] = true;
-			av.v6palette = sourceNPK.IMGgetPaletteCount(i);
-			std::vector<long> newi;
-			for(long j =0;j<ALAYER_MAXCOUNT;j++)
-				newi.push_back(-1);
-			newi[layer] = i;
-			avatarPos.push_back(newi);
-			avatarList.push_back(av);
-			/////////////////////////////////////
-			std::vector<long> newAvatarPosByBigram;
-			avatarBigram bigram;
-			bigram.ID = av.ID;
-			bigram.isTN = av.isTN;
-			bigram.originPos = avatarList.size() - 1;
-			if(av.v6palette == 0){
-				bigram.paletteID = 0;
-				bigramList.push_back(bigram);
-				newAvatarPosByBigram.push_back(bigramList.size() - 1);
-			}else{
-				for(int j = 0;j<av.v6palette;j++){
-					bigram.paletteID = j;
-					bigramList.push_back(bigram);
-					newAvatarPosByBigram.push_back(bigramList.size() - 1);
+	}
+	return "unexceptable";
+}
+str KoishiAvatar::IMG_avatarIcon(AvatarCharacter ac, str s){
+	str fix1 = "_a";
+	str fix2 = ".img";
+	str fixn1[ACHARACTER_MAXCOUNT] = {"sm","sg","ft","fm","gn","gg","mg","mm","pr","pg","th","kn","dl","gb"};
+	if(ac < ACHARACTER_MAXCOUNT){
+		return fixn1[ac] + fix1 + s + fix2;
+	}
+	return "unexceptable";
+}
+std::vector<str> KoishiAvatar::NPK_weaponIcon(AvatarCharacter ac){
+	str fix1 = "sprite_item_new_equipment_01_weapon_";
+	str fix2 = "_";
+	str fix3 = ".NPK";
+	str fixn1[ACHARACTER_MAXCOUNT] = {"swordman","swordman","fighter","fighter","gunner","gunner","mage","mage","priest","priest","thief","swordman","demoniclancer","gunblader"};
+	std::vector<str> fileList;
+	switch(ac){
+	case ACHARACTER_SM:
+	case ACHARACTER_SG:
+	case ACHARACTER_KN:
+		fileList.push_back(fix1 + "swordman" + fix2 + "lswd" + fix3);
+		fileList.push_back(fix1 + "swordman" + fix2 + "sswd" + fix3);
+		fileList.push_back(fix1 + "swordman" + fix2 + "club" + fix3);
+		fileList.push_back(fix1 + "swordman" + fix2 + "katana" + fix3);	
+		fileList.push_back(fix1 + "swordman" + fix2 + "beamswd" + fix3);
+		break;
+	case ACHARACTER_FT:
+	case ACHARACTER_FM:
+		fileList.push_back(fix1 + "fighter" + fix2 + "bglove" + fix3);
+		fileList.push_back(fix1 + "fighter" + fix2 + "claw" + fix3);
+		fileList.push_back(fix1 + "fighter" + fix2 + "gauntlet" + fix3);
+		fileList.push_back(fix1 + "fighter" + fix2 + "knuckle" + fix3);
+		fileList.push_back(fix1 + "fighter" + fix2 + "tonfa" + fix3);
+		break;
+	case ACHARACTER_GN:
+	case ACHARACTER_GG:
+		fileList.push_back(fix1 + "gunner" + fix2 + "automatic" + fix3);
+		fileList.push_back(fix1 + "gunner" + fix2 + "bowgun" + fix3);
+		fileList.push_back(fix1 + "gunner" + fix2 + "hcannon" + fix3);
+		fileList.push_back(fix1 + "gunner" + fix2 + "musket" + fix3);
+		fileList.push_back(fix1 + "gunner" + fix2 + "revolver" + fix3);
+		break;
+	case ACHARACTER_MG:
+	case ACHARACTER_MM:
+		fileList.push_back(fix1 + "mage" + fix2 + "broom" + fix3);
+		fileList.push_back(fix1 + "mage" + fix2 + "pole" + fix3);
+		fileList.push_back(fix1 + "mage" + fix2 + "rod" + fix3);
+		fileList.push_back(fix1 + "mage" + fix2 + "spear" + fix3);
+		fileList.push_back(fix1 + "mage" + fix2 + "staff" + fix3);
+		break;
+
+	case ACHARACTER_PR:
+	case ACHARACTER_PG:
+		fileList.push_back(fix1 + "priest" + fix2 + "axe" + fix3);
+		fileList.push_back(fix1 + "priest" + fix2 + "cross" + fix3);
+		fileList.push_back(fix1 + "priest" + fix2 + "rosary" + fix3);
+		fileList.push_back(fix1 + "priest" + fix2 + "scythe" + fix3);
+		fileList.push_back(fix1 + "priest" + fix2 + "totem" + fix3);
+		break;	
+	case ACHARACTER_TH:
+		fileList.push_back(fix1 + "thief" + fix2 + "chakraweapon" + fix3);
+		fileList.push_back(fix1 + "thief" + fix2 + "dagger" + fix3);
+		fileList.push_back(fix1 + "thief" + fix2 + "twinswd" + fix3);
+		fileList.push_back(fix1 + "thief" + fix2 + "wand" + fix3);
+		break;
+	case ACHARACTER_DL:
+		fileList.push_back(fix1 + "demoniclancer" + fix2 + "beamspear" + fix3);
+		fileList.push_back(fix1 + "demoniclancer" + fix2 + "halberd" + fix3);
+		fileList.push_back(fix1 + "demoniclancer" + fix2 + "javelin" + fix3);
+		fileList.push_back(fix1 + "demoniclancer" + fix2 + "pike" + fix3);
+		break;
+	case ACHARACTER_GB:
+		fileList.push_back(fix1 + "gunblader" + fix2 + "coreswd" + fix3);
+		fileList.push_back(fix1 + "gunblader" + fix2 + "sblade" + fix3);
+		fileList.push_back(fix1 + "gunblader" + fix2 + "lblade" + fix3);
+		fileList.push_back(fix1 + "gunblader" + fix2 + "mswd" + fix3);
+		break;
+	}
+	return fileList;
+}
+bool AvatarLayer::isGlowing() const{
+	return layer[0] == 'f' || layer[1] == 'f' || layer[2] == 'f' || layer[3] == 'f';
+}
+AvatarAlbum::AvatarAlbum(){
+	character = ACHARACTER_UD;
+	part = APART_UD;
+	currentSelect = -1;
+	currentFrame = 0;
+	TNenabled = false;
+	layerList.reserve(16);		//当前选择装扮各图层（存储在NPK内部的位置和调色板）
+	layerIMGlist.reserve(16);;	//当前选择装扮各图层的IMG
+	layerNameList.reserve(16);;			//当前选择装扮各图层的路径名
+	layerImageList.reserve(16);;		//当前选择装扮各图层的贴图数据
+	layerBasePointList.reserve(16);;	//当前选择装扮各图层的贴图基准点坐标
+	locked = 0;
+}
+bool AvatarAlbum::loadNPK(const str& NPKfileName){
+	if(!source.loadFile(NPKfileName))
+		return AERROR_NO_SUCH_FILE;
+	//开始解析IMG路径名
+	int IMGindex = 0;
+	content.clear();
+	for(IMGindex = 0; IMGindex < source.count; IMGindex++){
+		IMGversion IMGver = (IMGversion)source.IMGgetVersion(IMGindex);
+		if(IMGver <= 0 || IMGver > V6)
+			continue;
+		str IMGpath = source.entry[IMGindex].comment;
+		str::size_type st = IMGpath.find_last_of('/');
+		str IMGname = (st == str::npos) ? IMGpath:IMGpath.substr(st+1);
+		if(IMGname.size() < 6)
+			continue;
+		if(IMGname.find("awake") != str::npos)
+			continue;
+		if(IMGname.find("mask") != str::npos)
+			continue;
+		if(IMGname.find(".img") == str::npos)
+			continue;
+		//名称解析
+		long ID = 0;
+		bool isTN = false;
+		bool isFlow = false;
+		str mainStr;
+		str IDstr;
+		str layStr;
+		str::size_type is = 0;
+		if(IMGname.substr(0, 4) == "(tn)"){
+			isTN = true;
+			is += 4;
+		}
+		while(is < IMGname.size() && (IMGname[is] < '0' || IMGname[is] > '9')){
+			mainStr.push_back(IMGname[is]);
+			is ++;
+		}
+		while(is < IMGname.size() && IMGname[is] >= '0' && IMGname[is] <= '9'){
+			IDstr.push_back(IMGname[is]);
+			is ++;
+		}
+		while(is < IMGname.size() && IMGname[is] != '.'){
+			layStr.push_back(IMGname[is]);
+			is ++;
+		}
+		//主域解析
+		//blablabla..记得写武器解析.
+		if(IDstr.size() < 4)
+			continue;
+		//还要通过mainStr过滤掉本不属于该NPK的部件
+		///if(mainStr != IMG_avatar(character, part)[0]);
+		//	continue;
+		//图层信息不可能使用超过4个字符表示，mask除外
+		if(layStr.size() > 4)
+			continue;
+		//ID解析//图层解析
+		int paletteCount = source.IMGgetPaletteCount(IMGindex);
+		if(IMGver != V6)
+			paletteCount = 1;
+		long IDbase = std::stoi(IDstr);
+		for(int palette = 0;palette < paletteCount;palette++){
+			ID = IDbase + palette;
+			int searchID = 0;
+			bool IDexist = false;
+			for(; searchID < content.size(); searchID ++){
+				if(content[searchID].ID == ID){
+					IDexist = true;
+					break;
+				}else if(content[searchID].ID > ID){
+					break;
 				}
 			}
-			avatarPosAtBigramList.push_back(newAvatarPosByBigram);
-		}
-	}
-	valid = true;
-	if(part == APART_BODY || part == APART_COAT || part == APART_PANTS || part == APART_HAIR || part == APART_SHOES){
-		changeIMGByID(0);
-	}else{
-		changeIMG(-1);
-	}
-	return true;
-}
-bool avatarAlbum::changeIMG(long newSelect){
-	if(newSelect >= (long)avatarList.size() || newSelect < -1)
-		return false;
-	selected = newSelect;
-	selectedPalette = 0;
-	for(int i = 0;i<ALAYER_MAXCOUNT;i++){
-		if(selected == -1){
-			layerIMGpos[i] = -1;
-			layerIMG[i].release();
-			layerIMGpath[i] = "";
-		}else{
-			layerIMGpos[i] = avatarPos[selected][i];
-			layerIMG[i].release();
-			layerIMGpath[i] = "";
-			if(avatarPos[selected][i] != -1){
-				sourceNPK.IMGextract(avatarPos[selected][i], layerIMG[i]);
-				layerIMGpath[i] = sourceNPK.entry[avatarPos[selected][i]].comment;
+			AvatarLayer newLayer;
+			newLayer.paletteID = IMGver == V6 ? palette :-1;
+			newLayer.posInNPK = IMGindex;
+			memset(newLayer.layer, 0, sizeof(AvatarLayerFlag));
+			memcpy(newLayer.layer, layStr.data(), layStr.size());
+			if(IDexist){
+				if(isTN){
+					content[searchID].infoTN.push_back(newLayer);
+					content[searchID].layerCountTN ++;
+				}else{
+					content[searchID].info.push_back(newLayer);
+					content[searchID].layerCount ++;
+				}
+			}else{
+				Avatar newAvatar;
+				newAvatar.ID = ID;
+				newAvatar.layerCount = 0;
+				newAvatar.layerCountTN = 0;
+				if(isTN){
+					newAvatar.infoTN.push_back(newLayer);
+					newAvatar.layerCountTN ++;
+				}else{
+					newAvatar.info.push_back(newLayer);
+					newAvatar.layerCount ++;
+				}
+				content.insert(content.begin()+searchID, newAvatar);
 			}
 		}
 	}
-	updateMatrix();
 	return true;
 }
-bool avatarAlbum::changeIMGByID(long avatarID, bool isTN){
-	for(int i = 0;i<avatarList.size();i++){
-		if(avatarList[i].ID == avatarID && avatarList[i].isTN == isTN){
-			changeIMG(i);
-			updateMatrix();
-			return true;
-		}
-		if(avatarList[i].ID == avatarID /100 * 100 && avatarList[i].v6palette > (avatarID % 100) && avatarList[i].isTN == isTN){
-			changeIMG(i);
-			selectedPalette = avatarID % 100;
-			updateMatrix();
-			return true;
-		}
+
+bool AvatarAlbum::changeAvatar(const long &index){
+	if(index < 0){
+		currentSelect = -1;
+		layerList.clear();
+		return true;
 	}
-	return false;
+	if(index >= content.size())
+		return false;
+	currentSelect = index;
+	layerList = (TNenabled && content[index].layerCountTN > 0) ? content[index].infoTN : content[index].info;
+	updateIMG();
+	return true;
 }
-long avatarAlbum::findPosByID(long avatarID, bool isTN){
-	for(int i = 0;i<avatarList.size();i++){
-		if(avatarList[i].ID == avatarID && avatarList[i].isTN == isTN){
-			return i;
-		}
-		if(avatarList[i].ID == avatarID /100 * 100 && avatarList[i].v6palette > (avatarID % 100) && avatarList[i].isTN == isTN){
+long AvatarAlbum::findAvatarID(const long &newID){
+	if(newID < 0){
+		return -1;
+	}
+	long index = -1;
+	for(int i = 0;i<content.size();i++){
+		if(content[i].ID == newID){
 			return i;
 		}
 	}
 	return -1;
 }
-bool avatarAlbum::changePalette(long paletteID){
-	if(selected == -1)
-		return false;
-	if(paletteID >= avatarList[selected].v6palette)
-		return false;
-	selectedPalette = paletteID;
-	updateMatrix();
-	return true;
-}
-bool avatarAlbum::changeFrame(long frame){
-	selectedFrame = frame;
-	updateMatrix();
-	return true;
-}
-bool avatarAlbum::updateMatrix(){
-	for(int i = 0;i<ALAYER_MAXCOUNT;i++){
-		layerMatrix[i].destory();
-		getMatrix((avatarLayer)i, layerMatrix[i]);
+bool AvatarAlbum::changeAvatarByID(const long &newID){
+	if(newID < 0){
+		currentSelect = -1;
+		layerList.clear();
+		return true;
 	}
-	return true;
-}
-bool avatarAlbum::getBasePoint(avatarLayer al, point &pt){
-	if(layerIMGpos[al] == -1)
-		return false;
-	if(selectedFrame >= layerIMG[al].indexCount)
-		return false;
-	PICinfo pi;
-	layerIMG[al].PICgetInfo(layerIMG[al].linkFind(selectedFrame), pi);
-	pt = pi.basePt;
-	return true;
-}
-bool avatarAlbum::getMatrix(avatarLayer al, matrix &mat){
-	if(layerIMGpos[al] == -1)
-		return false;
-	if(selectedFrame >= layerIMG[al].indexCount)
-		return false;
-	return layerIMG[al].PICextract(selectedFrame, mat, selectedPalette);
-}
-///////////////////////////////////////////////
-void avatarFactory::clear(){
-	for(int i = 0;i<APART_MAXCOUNT;i++){
-		partAlbum[i].clear();
+	long index = -1;
+	for(int i = 0;i<content.size();i++){
+		if(content[i].ID == newID){
+			index = i;
+			break;
+		}
 	}
-}
-void avatarFactory::setPath(str pathStr){
-	resoucePath = pathStr;
-	for(int i = 0;i<APART_MAXCOUNT;i++){
-		partAlbum[i].resoucePath = pathStr;
+	if(index >= 0){
+		changeAvatar(index);
+		return true;
 	}
-}
-void avatarFactory::setCarrer(avatarCareer ac){
-	career = ac;
-	for(int i = 0;i<APART_MAXCOUNT;i++){
-		partAlbum[i].career = ac;
-	}
-}
-bool avatarFactory::loadNPK(avatarPart ap){
-	partAlbum[ap].part = ap;
-	return partAlbum[ap].loadNPK();
-}
-bool avatarFactory::changeFrame(int newFrame){
-	for(int i = 0;i<APART_MAXCOUNT;i++){
-		partAlbum[i].changeFrame(newFrame);
-	}
-	return true;
-}
-bool avatarFactory::changeIMG(avatarPart ap, long selected){
-	return partAlbum[ap].changeIMG(selected);
-}
-long avatarFactory::changeIMGByID(avatarPart ap, long ID, bool isTN){
-	return partAlbum[ap].changeIMGByID(ID, isTN);
+	return false;
 }
 
-void avatarFactory::makeNPK(NPKobject &no){
-	no.release();
-	no.create();
-	for(int i = 0;i<TOTAL_LAYER_COUNT;i++){
-		avatarPart ap;
-		avatarLayer al;
-		::getMQData(TOTAL_LAYER_COUNT - 1 - i, ap, al);
-		if(ap == APART_WEAPON)
-			continue;
-		if(partAlbum[ap].layerIMGpos[al] == -1)
-			continue;
-		if(partAlbum[ap].layerIMG[al].version == V6){
-			std::vector<IMGobject> ioList;
-			partAlbum[ap].layerIMG[al].convertToV4(ioList, colorList());
-			if(partAlbum[ap].selectedPalette > 0 && partAlbum[ap].selectedPalette < ioList.size()){
-				no.IMGpush(ioList[partAlbum[ap].selectedPalette], KoishiAvatar::imgAddV4Num(partAlbum[ap].layerIMGpath[al], partAlbum[ap].selectedPalette));
-			}else{
-				no.IMGpush(partAlbum[ap].layerIMG[al], partAlbum[ap].layerIMGpath[al]);
-			}
+bool AvatarAlbum::changeTN(bool TN){
+	TNenabled = TN;
+	if(currentSelect >= 0 && currentSelect<content.size()){
+		layerList = (TNenabled && content[currentSelect].layerCountTN > 0) ? content[currentSelect].infoTN : content[currentSelect].info;
+		updateIMG();
+	}
+	return true;
+}
+
+bool AvatarAlbum::changeFrame(const long &newFrame){
+	currentFrame = newFrame;
+	return true;
+}
+
+bool AvatarAlbum::updateIMG(){
+	layerIMGlist.clear();
+	layerNameList.clear();
+	for(int i = 0;i<layerList.size();i++){
+		IMGobject io;
+		source.IMGextract(layerList[i].posInNPK, io);
+		layerIMGlist.push_back(io);
+		layerNameList.push_back(source.entry[layerList[i].posInNPK].comment);
+	}
+	return true;
+}
+
+bool AvatarAlbum::updateImage(){
+	while(locked == 1);
+	locked = 1;
+	layerImageList.clear();
+	layerBasePointList.clear();
+	for(int i = 0;i<layerList.size();i++){
+		image im;
+		PICinfo pi;
+		if(currentFrame >= 0 && currentFrame < layerIMGlist[i].indexCount){
+			layerIMGlist[i].PICextract(currentFrame, im, layerList[i].paletteID);
+			layerIMGlist[i].PICgetInfo(layerIMGlist[i].linkFind(currentFrame), pi);
+			if(layerList[i].isGlowing())
+				im.loseBlack(3);
 		}else{
-			no.IMGpush(partAlbum[ap].layerIMG[al], partAlbum[ap].layerIMGpath[al]);
+			im.create(1,1);
+			pi.basePt = point(0,0);
+		}
+		if(im.getElemCount() == 0){
+			im.create(1,1);
+			pi.basePt = point(0,0);
+		}
+		layerBasePointList.push_back(pi.basePt);
+		layerImageList.push_back(im);
+	}
+	locked = 0;
+	return true;
+}
+WeaponAlbum::WeaponAlbum(){
+	//character = ACHARACTER_UD;
+	type = AWEAPON_UD;
+	currentSelect = -1;
+	currentFrame = 0;
+	TNenabled = false;
+	layerList.reserve(16);		//当前选择装扮各图层（存储在NPK内部的位置和调色板）
+	layerIMGlist.reserve(16);;	//当前选择装扮各图层的IMG
+	layerNameList.reserve(16);;			//当前选择装扮各图层的路径名
+	layerImageList.reserve(16);;		//当前选择装扮各图层的贴图数据
+	layerBasePointList.reserve(16);;	//当前选择装扮各图层的贴图基准点坐标
+	locked = 0;
+}
+bool WeaponAlbum::loadNPK(const str& NPKfileName){
+	if(!source.loadFile(NPKfileName))
+		return AERROR_NO_SUCH_FILE;
+	//开始解析IMG路径名
+	int IMGindex = 0;
+	content.clear();
+	for(IMGindex = 0; IMGindex < source.count; IMGindex++){
+		IMGversion IMGver = (IMGversion)source.IMGgetVersion(IMGindex);
+		if(IMGver <= 0 || IMGver > V6)
+			continue;
+		str IMGpath = source.entry[IMGindex].comment;
+		str::size_type st = IMGpath.find_last_of('/');
+		str IMGname = (st == str::npos) ? IMGpath:IMGpath.substr(st+1);
+		if(IMGname.size() < 6)
+			continue;
+		if(IMGname.find("mask") != str::npos)
+			continue;
+		if(IMGname.find("awake") != str::npos)
+			continue;
+		if(IMGname.find(".img") == str::npos)
+			continue;
+		//名称解析
+		long ID = 0;
+		bool isTN = false;
+		bool isFlow = false;
+		str mainStr;
+		str IDstr;
+		str layStr;
+		str::size_type is = 0;
+		if(IMGname.substr(0, 4) == "(tn)"){
+			isTN = true;
+			is += 4;
+		}
+		while(is < IMGname.size() && (IMGname[is] < '0' || IMGname[is] > '9')){
+			mainStr.push_back(IMGname[is]);
+			is ++;
+		}
+		while(is < IMGname.size() && IMGname[is] >= '0' && IMGname[is] <= '9'){
+			IDstr.push_back(IMGname[is]);
+			is ++;
+		}
+		while(is < IMGname.size() && IMGname[is] != '.'){
+			layStr.push_back(IMGname[is]);
+			is ++;
+		}
+		//主域解析
+		//blablabla..记得写武器解析.
+		if(IDstr.size() < 4)
+			continue;
+		//还要通过mainStr过滤掉本不属于该NPK的部件
+		///if(mainStr != IMG_avatar(character, part)[0]);
+		//	continue;
+		//图层信息不可能使用超过4个字符表示，mask除外
+		if(layStr.size() > 4)
+			continue;
+		//ID解析//图层解析
+		int paletteCount = source.IMGgetPaletteCount(IMGindex);
+		if(IMGver != V6)
+			paletteCount = 1;
+		long IDbase = std::stoi(IDstr);
+		for(int palette = 0;palette < paletteCount;palette++){
+			ID = IDbase + palette;
+			int searchID = 0;
+			bool IDexist = false;
+			for(; searchID < content.size(); searchID ++){
+				if(content[searchID].ID == ID){
+					IDexist = true;
+					break;
+				}else if(content[searchID].ID > ID){
+					break;
+				}
+			}
+			AvatarLayer newLayer;
+			newLayer.paletteID = IMGver == V6 ? palette :-1;
+			newLayer.posInNPK = IMGindex;
+			memset(newLayer.layer, 0, sizeof(AvatarLayerFlag));
+			memcpy(newLayer.layer, layStr.data(), layStr.size());
+			if(IDexist){
+				if(isTN){
+					content[searchID].infoTN.push_back(newLayer);
+					content[searchID].layerCountTN ++;
+				}else{
+					content[searchID].info.push_back(newLayer);
+					content[searchID].layerCount ++;
+				}
+			}else{
+				Avatar newAvatar;
+				newAvatar.ID = ID;
+				newAvatar.layerCount = 0;
+				newAvatar.layerCountTN = 0;
+				if(isTN){
+					newAvatar.infoTN.push_back(newLayer);
+					newAvatar.layerCountTN ++;
+				}else{
+					newAvatar.info.push_back(newLayer);
+					newAvatar.layerCount ++;
+				}
+				content.insert(content.begin()+searchID, newAvatar);
+			}
+		}
+	}
+	return true;
+}
+
+bool WeaponAlbum::changeWeapon(const long &index){
+	if(index < 0){
+		currentSelect = -1;
+		layerList.clear();
+		return true;
+	}
+	if(index >= content.size())
+		return false;
+	currentSelect = index;
+	layerList = (TNenabled && content[index].layerCountTN > 0) ? content[index].infoTN : content[index].info;
+	updateIMG();
+	return true;
+}
+long WeaponAlbum::findWeaponID(const long &newID){
+	if(newID < 0){
+		return -1;
+	}
+	long index = -1;
+	for(int i = 0;i<content.size();i++){
+		if(content[i].ID == newID){
+			return i;
+		}
+	}
+	return -1;
+}
+bool WeaponAlbum::changeWeaponByID(const long &newID){
+	if(newID < 0){
+		currentSelect = -1;
+		layerList.clear();
+		return true;
+	}
+	long index = -1;
+	for(int i = 0;i<content.size();i++){
+		if(content[i].ID == newID){
+			index = i;
+			break;
+		}
+	}
+	if(index >= 0){
+		changeWeapon(index);
+		return true;
+	}
+	return false;
+}
+
+bool WeaponAlbum::changeTN(bool TN){
+	TNenabled = TN;
+	layerList = (TNenabled && content[currentSelect].layerCountTN > 0) ? content[currentSelect].infoTN : content[currentSelect].info;
+	updateIMG();
+	return true;
+}
+
+bool WeaponAlbum::changeFrame(const long &newFrame){
+	currentFrame = newFrame;
+	return true;
+}
+
+bool WeaponAlbum::updateIMG(){
+	layerIMGlist.clear();
+	layerNameList.clear();
+	for(int i = 0;i<layerList.size();i++){
+		IMGobject io;
+		source.IMGextract(layerList[i].posInNPK, io);
+		layerIMGlist.push_back(io);
+		layerNameList.push_back(source.entry[layerList[i].posInNPK].comment);
+	}
+	return true;
+}
+
+bool WeaponAlbum::updateImage(){
+	while(locked == 1);
+	locked = 1;
+	layerImageList.clear();
+	layerBasePointList.clear();
+	for(int i = 0;i<layerList.size();i++){
+		image im;
+		PICinfo pi;
+		if(currentFrame >= 0 && currentFrame < layerIMGlist[i].indexCount){
+			layerIMGlist[i].PICextract(currentFrame, im, layerList[i].paletteID);
+			layerIMGlist[i].PICgetInfo(layerIMGlist[i].linkFind(currentFrame), pi);
+			if(layerList[i].isGlowing())
+				im.loseBlack(3);
+		}
+		if(im.getElemCount() == 0)
+			im.create(1,1);
+		layerBasePointList.push_back(pi.basePt);
+		layerImageList.push_back(im);
+	}
+	locked = 0;
+	return true;
+}
+AvatarFactory::AvatarFactory(){
+	album.clear();
+	weapon.clear();
+	weaponAlbum.clear();
+	currentWeapon = -1;
+	character = ACHARACTER_UD;
+
+	locked = false;
+}
+void AvatarFactory::initial(const AvatarCharacter &newCharacter, const str &newPath){
+	character = newCharacter;
+	resourcePath = newPath;
+	album.clear();
+	for(int i = 0;i<APART_MAXCOUNT;i++)
+		album.push_back(AvatarAlbum());
+	weapon.clear();
+	weapon = characterWeaponList(character);
+	weaponAlbum.clear();
+	for(int i = 0;i<weapon.size();i++)
+		weaponAlbum.push_back(WeaponAlbum());
+}
+void AvatarFactory::loadAvatar(const AvatarPart &part){
+	album[part].character = character;
+	album[part].part = part;
+	album[part].loadNPK(resourcePath + NPK_avatar(character, part));
+	album[part].changeAvatar(0);
+	album[part].changeFrame(modelFrame[character]);
+}
+void AvatarFactory::changeAvatar(const AvatarPart &part, const long &index){
+	album[part].changeAvatar(index);
+}
+void AvatarFactory::changeAvatarByID(const AvatarPart &part, const long &newID){
+	album[part].changeAvatarByID(newID);
+}
+void AvatarFactory::updateAvatarIMG(const AvatarPart &part){
+	album[part].updateIMG();
+}
+void AvatarFactory::updateAvatarImage(const AvatarPart &part){
+	album[part].updateImage();
+}
+void AvatarFactory::updateAvatarIMG(){
+	for(int p = 0;p<APART_MAXCOUNT;p++){
+		album[p].updateIMG();
+	}
+}
+void AvatarFactory::updateAvatarImage(){
+	for(int p = 0;p<APART_MAXCOUNT;p++){
+		album[p].updateImage();
+	}
+}
+void AvatarFactory::releaseAvatar(const AvatarPart &part){
+	album[part].source.release();
+}
+void AvatarFactory::loadWeapon(const int &weaponSetID){
+	weaponAlbum[weaponSetID].type = weapon[weaponSetID];
+	weaponAlbum[weaponSetID].loadNPK(resourcePath + NPK_weapon(character, weapon[weaponSetID]));
+	weaponAlbum[weaponSetID].changeWeapon(0);
+	weaponAlbum[weaponSetID].changeFrame(modelFrame[character]);
+}
+void AvatarFactory::changeWeaponType(const int &newCurrentWeapon){
+	if(newCurrentWeapon >= weapon.size())
+		return;
+	int oldFrame = currentWeapon == -1 ? 0 : weaponAlbum[currentWeapon].currentFrame;
+	currentWeapon = newCurrentWeapon;
+	weaponAlbum[currentWeapon].changeWeaponByID(0);
+	weaponAlbum[currentWeapon].changeFrame(oldFrame);
+}
+void AvatarFactory::changeWeaponTypeByEnum(const WeaponType &newWeaponType){
+	for(int i = 0;i<weapon.size();i++){
+		if(newWeaponType == weapon[i]){
+			changeWeaponType(i);
+			break;
 		}
 	}
 }
-void avatarFactory::updateMatrix(avatarPart ap){
-	partAlbum[ap].updateMatrix();
+void AvatarFactory::changeWeapon(const long &index){
+	weaponAlbum[currentWeapon].changeWeapon(index);
 }
-void avatarFactory::makeMatrix(point leftTopPos, size displaySize, matrix &mat){
+void AvatarFactory::changeWeaponByID(const long &newID){
+	weaponAlbum[currentWeapon].changeWeaponByID(newID);
+}
+void AvatarFactory::updateWeaponIMG(){
+	weaponAlbum[currentWeapon].updateIMG();
+}
+void AvatarFactory::updateWeaponImage(){
+	weaponAlbum[currentWeapon].updateImage();
+}
+void AvatarFactory::releaseWeapon(const int &weaponSetID){
+	weaponAlbum[weaponSetID].source.release();
+}
+void AvatarFactory::changeTN(bool TN){
+	for(int i = 0;i<APART_MAXCOUNT;i++){
+		album[i].changeTN(TN);
+	}
+	weaponAlbum[currentWeapon].changeTN(TN);
+}
+void AvatarFactory::changeFrame(const long &newFrame){
+	for(int i = 0;i<APART_MAXCOUNT;i++)
+		album[i].changeFrame(newFrame);
+	weaponAlbum[currentWeapon].changeFrame(newFrame);
+}
+void AvatarFactory::updateIMG(){
+	updateAvatarIMG();
+	updateWeaponIMG();
+}
+void AvatarFactory::updateImage(){
+	while(locked == 1);
+	locked = 1;
+	updateAvatarImage();
+	updateWeaponImage();
+	locked = 0;
+}
+void AvatarFactory::makeNPK(NPKobject &no){
+	no.release();
+	std::vector<queue> layerUsed;
+	queue weaponLayerUsed;
+	for(int p = 0;p<APART_MAXCOUNT;p++){
+		queue q;
+		for(int l = 0;l<album[p].layerList.size();l++){
+			q.push_back(0);
+		}
+		layerUsed.push_back(q);
+	}
+	for(int l = 0;l<weaponAlbum[currentWeapon].layerList.size();l++){
+		weaponLayerUsed.push_back(0);
+	}
+	int seq = 0;
+	while(true){
+		AvatarPart p = (AvatarPart)layerSequence[seq][0];
+		if(p == APART_WEAPON){
+			for(int l = 0;l<weaponAlbum[currentWeapon].layerList.size();l++){
+				if(*(dword*)weaponAlbum[currentWeapon].layerList[l].layer == layerSequence[seq][1]){
+					weaponLayerUsed[l] = 1;
+					if(weaponAlbum[currentWeapon].layerList[l].paletteID <= 0){
+						no.IMGpush(weaponAlbum[currentWeapon].layerIMGlist[l], weaponAlbum[currentWeapon].layerNameList[l]);
+					}else{
+						std::vector<IMGobject> ioList;
+						weaponAlbum[currentWeapon].layerIMGlist[l].convertToV4(ioList, colorList());
+						if(weaponAlbum[currentWeapon].layerList[l].paletteID < ioList.size()){
+							no.IMGpush(ioList[weaponAlbum[currentWeapon].layerList[l].paletteID], formatAvatarIDplusBy(weaponAlbum[currentWeapon].layerNameList[l], weaponAlbum[currentWeapon].layerList[l].paletteID));
+						}else{
+							no.IMGpush(weaponAlbum[currentWeapon].layerIMGlist[l], weaponAlbum[currentWeapon].layerNameList[l]);
+						}
+					}
+				}
+			}
+		}else{
+			for(int l = 0;l<album[p].layerList.size();l++){
+				if(*(dword*)album[p].layerList[l].layer == layerSequence[seq][1]){
+					layerUsed[p][l] = 1;
+					if(album[p].layerList[l].paletteID <= 0){
+						no.IMGpush(album[p].layerIMGlist[l], album[p].layerNameList[l]);
+					}else{
+						std::vector<IMGobject> ioList;
+						album[p].layerIMGlist[l].convertToV4(ioList, colorList());
+						if(album[p].layerList[l].paletteID < ioList.size()){
+							no.IMGpush(ioList[album[p].layerList[l].paletteID], formatAvatarIDplusBy(album[p].layerNameList[l], album[p].layerList[l].paletteID));
+						}else{
+							no.IMGpush(album[p].layerIMGlist[l], album[p].layerNameList[l]);
+						}
+					}
+				}
+			}
+		}
+		if(layerSequence[seq][0] == APART_BODY)
+			break;
+		seq ++;
+	}
+	//不在拼合表中的图层
+	for(int p = 0;p<APART_MAXCOUNT;p++){
+		for(int l = 0;l<album[p].layerList.size();l++){
+			if(!layerUsed[p][l]){
+				no.IMGpush(album[p].layerIMGlist[l], album[p].layerNameList[l]);
+			}
+		}
+	}
+	for(int l = 0;l<weaponAlbum[currentWeapon].layerList.size();l++){
+		if(!weaponLayerUsed[l]){
+			no.IMGpush(weaponAlbum[currentWeapon].layerIMGlist[l], weaponAlbum[currentWeapon].layerNameList[l]);
+		}
+	}
+}
+void AvatarFactory::makeImage(point leftTopPos, size displaySize, image &mat){
 	mat.create(displaySize);
-	for(int i = 0;i<TOTAL_LAYER_COUNT;i++){
-		avatarPart ap;
-		avatarLayer al;
-		::getMQData(TOTAL_LAYER_COUNT - 1 -i, ap, al);
-		if(ap == APART_WEAPON)
-			continue;
-		if(partAlbum[ap].layerIMGpos[al] == -1)
-			continue;
-		point basePt;
-		partAlbum[ap].getBasePoint(al, basePt);
-		mat.putFore(partAlbum[ap].layerMatrix[al], LAY, basePt - leftTopPos);
+	int seq = 0;
+	while(true){
+		AvatarPart p = (AvatarPart)layerSequence[seq][0];
+		if(p == APART_WEAPON){
+			for(int l = 0;l<weaponAlbum[currentWeapon].layerList.size();l++){
+				dword sol = 0;
+				memcpy(&sol, weaponAlbum[currentWeapon].layerList[l].layer, 4);
+				if(*(dword*)weaponAlbum[currentWeapon].layerList[l].layer == layerSequence[seq][1]){
+					mat.putBack(weaponAlbum[currentWeapon].layerImageList[l], LAY, weaponAlbum[currentWeapon].layerBasePointList[l] - leftTopPos);
+				}
+			}
+		}else{
+			for(int l = 0;l<album[p].layerList.size();l++){
+				dword sol = 0;
+				memcpy(&sol, album[p].layerList[l].layer, 4);
+				if(*(dword*)album[p].layerList[l].layer == layerSequence[seq][1]){
+					mat.putBack(album[p].layerImageList[l], LAY, album[p].layerBasePointList[l] - leftTopPos);
+				}
+			}
+		}
+		if(layerSequence[seq][0] == APART_BODY)
+			break;
+		seq ++;
 	}
 }
-void avatarFactory::makeModel(matrix &outputMat, color baseColor, size modelSize, avatarPart ap, int selected, int paletteID, point offsetPos, int frame, PICinfo *ptrModelPI, matrix *ptrModelMat){
-	long w = MAX(10, modelSize.W);
-	long h = MAX(30, modelSize.H);
-	outputMat.create(h, w);
-	uchar r = baseColor.R;
-	uchar g = baseColor.G;
-	uchar b = baseColor.B;
+void AvatarFactory::initialModelMaker(const size &outputSize, const point &ofPt, const long &fm, int bodyMode){
+	modelMaker.modelSize = outputSize;
+	long w = MAX(10, outputSize.W);
+	long h = MAX(30, outputSize.H);
+	uchar r = modelColor[character].R;
+	uchar g = modelColor[character].G;
+	uchar b = modelColor[character].B;
 	color color1 = color(0xFF-((0xFF-r)>>1), 0xFF-((0xFF-g)>>1), 0xFF-((0xFF-b)>>1));
-	color color2 = baseColor;
+	color color2 = color(r, g, b);
 	color color3 = color(r>>1, g>>1, b>>1);
-	outputMat.fill(baseColor);
-	outputMat.line(point(0,0), point(0, h-1), color1);
-	outputMat.line(point(0,0), point(w-1, 0), color1);
-	outputMat.line(point(1,1), point(1, h-2), color1);
-	outputMat.line(point(1,1), point(w-2, 1), color1);
-	outputMat.line(point(w-1,h-1), point(0, h-1), color3);
-	outputMat.line(point(w-1,h-1), point(w-1, 0), color3);
-	outputMat.line(point(w-2,h-2), point(1, h-2), color3);
-	outputMat.line(point(w-2,h-2), point(w-2, 1), color3);
-	outputMat.line(point(3,3), point(3, h-24), color3);
-	outputMat.line(point(3,3), point(w-4, 3), color3);
-	outputMat.line(point(w-4,h-24), point(3, h-24), color1);
-	outputMat.line(point(w-4,h-24), point(w-4, 3), color1);
-
-	matrix strMat;
-	if(selected >= 0){
-		KoishiExpand::KoishiMarkTool::StrMatLarge(KoishiAvatar::getAvatarIDString(partAlbum[ap].avatarList[selected].ID + paletteID), strMat);
-	}else{
-		KoishiExpand::KoishiMarkTool::StrMatLarge("NA", strMat);
+	modelMaker.backImage.destory();
+	modelMaker.backImage.create(h, w);
+	modelMaker.backImage.fill(color2);
+	modelMaker.backImage.line(point(0,0), point(0, h-1), color1);
+	modelMaker.backImage.line(point(0,0), point(w-1, 0), color1);
+	modelMaker.backImage.line(point(1,1), point(1, h-2), color1);
+	modelMaker.backImage.line(point(1,1), point(w-2, 1), color1);
+	modelMaker.backImage.line(point(w-1,h-1), point(0, h-1), color3);
+	modelMaker.backImage.line(point(w-1,h-1), point(w-1, 0), color3);
+	modelMaker.backImage.line(point(w-2,h-2), point(1, h-2), color3);
+	modelMaker.backImage.line(point(w-2,h-2), point(w-2, 1), color3);
+	modelMaker.backImage.line(point(3,3), point(3, h-24), color3);
+	modelMaker.backImage.line(point(3,3), point(w-4, 3), color3);
+	modelMaker.backImage.line(point(w-4,h-24), point(3, h-24), color1);
+	modelMaker.backImage.line(point(w-4,h-24), point(w-4, 3), color1);
+	modelMaker.frame = fm;
+	modelMaker.offset = ofPt;
+	//绘制BodyImage
+	modelMaker.bodyImage.destory();
+	if(album[APART_BODY].content.size() > 0){
+		IMGobject io;
+		PICinfo pi;
+		album[APART_BODY].source.IMGextract(album[APART_BODY].content[0].info[0].posInNPK, io);
+		if(modelMaker.frame  >= io.indexCount)
+			modelMaker.frame = 0;
+		io.PICgetInfo(io.linkFind(modelMaker.frame ), pi);
+		io.PICextract(modelMaker.frame, modelMaker.bodyImage);
+		modelMaker.bodyImage.turnShield();
+		modelMaker.bodyBasePt = pi.basePt;
 	}
-	outputMat.putFore(strMat, LAY, point(w/2-strMat.getWidth()/2, h-12-strMat.getHeight()/2));
-
-	matrix dispMat1;
-	dispMat1.create(h-28,w-8);
-	matrix dispMat;
-	IMGobject dispIO;
-	PICinfo dispPI;
-	point bodyDeltaPoint, bodyBasePoint;
-
-	bodyDeltaPoint = point((modelSize.W - ptrModelPI->picSize.W) / 2, (modelSize.H - ptrModelPI->picSize.H) / 2) - offsetPos;
-	bodyBasePoint = ptrModelPI->basePt;
-	dispMat1.putFore(*ptrModelMat, LAY, bodyDeltaPoint);
-	if(selected < 0)
+}
+void AvatarFactory::makeAvatarModel(image &outputImage, const AvatarPart &part, const long &index, bool isTN){
+	if(index < 0 || index >= album[part].content.size())
 		return;
-	for(int i = 0;i<partAlbum[ap].avatarPos[selected].size();i++){
-		if(partAlbum[ap].avatarPos[selected][i] == -1)
-			continue;
-		if(!partAlbum[ap].sourceNPK.IMGextract(partAlbum[ap].avatarPos[selected][i], dispIO))
-			continue;
-		if(!dispIO.PICgetInfo(dispIO.linkFind(frame), dispPI))
-			continue;
-		if(!dispIO.PICextract(frame, dispMat, paletteID))
-			continue;
-		dispMat1.putFore(dispMat, LAY, bodyDeltaPoint-bodyBasePoint+dispPI.basePt);
-		dispIO.release();
-		dispMat.destory();
+	outputImage.create(modelMaker.modelSize);
+	outputImage.putFore(modelMaker.backImage);
+
+	image strImage;
+	KoishiExpand::KoishiMarkTool::StrMatLarge(formatAvatarID(album[part].content[index].ID), strImage);
+	outputImage.putFore(strImage, LAY, point(outputImage.getWidth() / 2 - strImage.getWidth() / 2, outputImage.getHeight() - 12 - strImage.getHeight() / 2));
+	
+	image modelImage;
+	modelImage.create(size(modelMaker.modelSize.W - 8, modelMaker.modelSize.H - 28));
+	int seq = 0;
+	while(true){
+		AvatarPart p = (AvatarPart)layerSequence[seq][0];
+		if(p == part){
+			const std::vector<AvatarLayer> &info = (isTN && album[p].content[index].infoTN.size() > 0) ? album[p].content[index].infoTN : album[p].content[index].info;
+			for(int l = 0;l<info.size();l++){
+				dword sol = 0;
+				memcpy(&sol, info[l].layer, 4);
+				if(*(dword*)info[l].layer == layerSequence[seq][1]){
+					IMGobject io;
+					PICinfo pi;
+					image im;
+					album[p].source.IMGextract(info[l].posInNPK, io);
+					io.PICgetInfo(io.linkFind(modelMaker.frame), pi);
+					io.PICextract(modelMaker.frame, im, info[l].paletteID);
+					modelImage.putBack(im, LAY, point(
+						modelImage.getWidth() / 2 - modelMaker.bodyImage.getWidth() / 2 - modelMaker.bodyBasePt.X + pi.basePt.X,
+						modelImage.getHeight() / 2 - modelMaker.bodyImage.getHeight() / 2 - modelMaker.bodyBasePt.Y + pi.basePt.Y
+						) - modelMaker.offset);
+				}
+			}
+		}
+		if(layerSequence[seq][0] == APART_BODY)
+			break;
+		seq ++;
 	}
-	outputMat.putFore(dispMat1, LAY, point(4,4));
+	modelImage.putBack(modelMaker.bodyImage, LAY, point(
+		modelImage.getWidth() / 2 - modelMaker.bodyImage.getWidth() / 2,
+		modelImage.getHeight() / 2 - modelMaker.bodyImage.getHeight() / 2) - modelMaker.offset);
+	outputImage.putFore(modelImage, LAY, point(4,4));
 }
-void avatarFactory::makeButton(matrix &outputMat, color baseColor, size modelSize, int iconCtrl){
-	long w = MAX(10, modelSize.W);
-	long h = MAX(30, modelSize.H);
-	outputMat.create(h, w);
-	uchar r = baseColor.R;
-	uchar g = baseColor.G;
-	uchar b = baseColor.B;
-	color color1 = color(0xFF-((0xFF-r)>>1), 0xFF-((0xFF-g)>>1), 0xFF-((0xFF-b)>>1));
-	color color2 = baseColor;
-	color color3 = color(r>>1, g>>1, b>>1);
-	outputMat.fill(baseColor);
-	outputMat.line(point(0,0), point(0, h-1), color1);
-	outputMat.line(point(0,0), point(w-1, 0), color1);
-	outputMat.line(point(1,1), point(1, h-2), color1);
-	outputMat.line(point(1,1), point(w-2, 1), color1);
-	outputMat.line(point(w-1,h-1), point(0, h-1), color3);
-	outputMat.line(point(w-1,h-1), point(w-1, 0), color3);
-	outputMat.line(point(w-2,h-2), point(1, h-2), color3);
-	outputMat.line(point(w-2,h-2), point(w-2, 1), color3);
-	point centerPoint = point(w/2, h/2);
-	switch(iconCtrl){
-	case 0:
-		outputMat.line(centerPoint + point(0, -6), centerPoint + point(0, 7), color3);
-		outputMat.line(centerPoint + point(1, -5), centerPoint + point(1, 7), color3);
-		outputMat.line(centerPoint + point(2, -4), centerPoint + point(2, 7), color3);
-		outputMat.line(centerPoint + point(3, -3), centerPoint + point(3, 7), color3);
-		outputMat.line(centerPoint + point(4, -2), centerPoint + point(4, 0), color3);
-		outputMat.line(centerPoint + point(5, -1), centerPoint + point(5, 0), color3);
-		outputMat.line(centerPoint + point(6, 0), centerPoint + point(6, 0), color3);
-		outputMat.line(centerPoint + point(-1, -5), centerPoint + point(-1, 7), color3);
-		outputMat.line(centerPoint + point(-2, -4), centerPoint + point(-2, 7), color3);
-		outputMat.line(centerPoint + point(-3, -3), centerPoint + point(-3, 7), color3);
-		outputMat.line(centerPoint + point(-4, -2), centerPoint + point(-4, 0), color3);
-		outputMat.line(centerPoint + point(-5, -1), centerPoint + point(-5, 0), color3);
-		outputMat.line(centerPoint + point(-6, 0), centerPoint + point(-6, 0), color3);
-		break;
-	case 1:
-		outputMat.line(centerPoint + point(0, -7), centerPoint + point(0, 6), color3);
-		outputMat.line(centerPoint + point(1, -7), centerPoint + point(1, 5), color3);
-		outputMat.line(centerPoint + point(2, -7), centerPoint + point(2, 4), color3);
-		outputMat.line(centerPoint + point(3, -7), centerPoint + point(3, 3), color3);
-		outputMat.line(centerPoint + point(4, 0), centerPoint + point(4, 2), color3);
-		outputMat.line(centerPoint + point(5, 0), centerPoint + point(5, 1), color3);
-		outputMat.line(centerPoint + point(6, 0), centerPoint + point(6, 0), color3);
-		outputMat.line(centerPoint + point(-1, -7), centerPoint + point(-1, 5), color3);
-		outputMat.line(centerPoint + point(-2, -7), centerPoint + point(-2, 4), color3);
-		outputMat.line(centerPoint + point(-3, -7), centerPoint + point(-3, 3), color3);
-		outputMat.line(centerPoint + point(-4, 0), centerPoint + point(-4, 2), color3);
-		outputMat.line(centerPoint + point(-5, 0), centerPoint + point(-5, 1), color3);
-		outputMat.line(centerPoint + point(-6, 0), centerPoint + point(-6, 0), color3);
-		break;
-	case 2:
-		outputMat.line(centerPoint + point(-7, -7), centerPoint + point(7, 7), color3);
-		outputMat.line(centerPoint + point(-7, -6), centerPoint + point(6, 7), color3);
-		outputMat.line(centerPoint + point(-7, -5), centerPoint + point(5, 7), color3);
-		outputMat.line(centerPoint + point(-7, -4), centerPoint + point(4, 7), color3);
-		outputMat.line(centerPoint + point(-6, -7), centerPoint + point(7, 6), color3);
-		outputMat.line(centerPoint + point(-5, -7), centerPoint + point(7, 5), color3);
-		outputMat.line(centerPoint + point(-4, -7), centerPoint + point(7, 4), color3);
-		outputMat.line(centerPoint + point(-7, 7), centerPoint + point(7, -7), color3);
-		outputMat.line(centerPoint + point(-7, 6), centerPoint + point(6, -7), color3);
-		outputMat.line(centerPoint + point(-7, 5), centerPoint + point(5, -7), color3);
-		outputMat.line(centerPoint + point(-7, 4), centerPoint + point(4, -7), color3);
-		outputMat.line(centerPoint + point(-6, 7), centerPoint + point(7, -6), color3);
-		outputMat.line(centerPoint + point(-5, 7), centerPoint + point(7, -5), color3);
-		outputMat.line(centerPoint + point(-4, 7), centerPoint + point(7, -4), color3);
-		break;
-	case 3:
-		outputMat.line(centerPoint + point(3, -4), centerPoint + point(3, -4), color3);
-		outputMat.line(centerPoint + point(2, -3), centerPoint + point(2, -5), color3);
-		outputMat.line(centerPoint + point(1, -2), centerPoint + point(1, -6), color3);
-		outputMat.line(centerPoint + point(0, -1), centerPoint + point(0, -7), color3);
-		outputMat.line(centerPoint + point(-1, 0), centerPoint + point(-1, -8), color3);
-		outputMat.line(centerPoint + point(-2, -2), centerPoint + point(-2, -6), color3);
-		outputMat.line(centerPoint + point(-7, 2), centerPoint + point(-7, -2), color3);
-		outputMat.line(centerPoint + point(-6, 4), centerPoint + point(-6, -4), color3);
-		outputMat.line(centerPoint + point(-5, 5), centerPoint + point(-5, -5), color3);
-		outputMat.line(centerPoint + point(-4, 6), centerPoint + point(-4, -6), color3);
-		outputMat.line(centerPoint + point(-3, 6), centerPoint + point(-3, -6), color3);
-		outputMat.line(centerPoint + point(-2, 7), centerPoint + point(-2, 2), color3);
-		outputMat.line(centerPoint + point(-1, 7), centerPoint + point(-1, 3), color3);
-		outputMat.line(centerPoint + point(0, 7), centerPoint + point(0, 3), color3);
-		outputMat.line(centerPoint + point(1, 7), centerPoint + point(1, 3), color3);
-		outputMat.line(centerPoint + point(2, 7), centerPoint + point(2, 2), color3);
-		outputMat.line(centerPoint + point(3, 6), centerPoint + point(3, -1), color3);
-		outputMat.line(centerPoint + point(4, 6), centerPoint + point(4, -1), color3);
-		outputMat.line(centerPoint + point(5, 5), centerPoint + point(5, -1), color3);
-		outputMat.line(centerPoint + point(6, 4), centerPoint + point(6, -1), color3);
-		outputMat.line(centerPoint + point(7, 2), centerPoint + point(7, -1), color3);
-		break;
+void AvatarFactory::makeWeaponModel(image &outputImage, const long &weaponSetID, const long &index, bool isTN){
+	if(index < 0 || index >= weaponAlbum[weaponSetID].content.size())
+		return;
+	outputImage.create(modelMaker.modelSize);
+	outputImage.putFore(modelMaker.backImage);
+
+	image strImage;
+	KoishiExpand::KoishiMarkTool::StrMatLarge(formatAvatarID(weaponAlbum[weaponSetID].content[index].ID), strImage);
+	outputImage.putFore(strImage, LAY, point(outputImage.getWidth() / 2 - strImage.getWidth() / 2, outputImage.getHeight() - 12 - strImage.getHeight() / 2));
+	
+	image modelImage;
+	modelImage.create(size(modelMaker.modelSize.W - 8, modelMaker.modelSize.H - 28));
+	int seq = 0;
+	while(true){
+		AvatarPart p = (AvatarPart)layerSequence[seq][0];
+		if(p == APART_WEAPON){
+			const std::vector<AvatarLayer> &info = (isTN && weaponAlbum[weaponSetID].content[index].infoTN.size() > 0) ?
+				weaponAlbum[weaponSetID].content[index].infoTN : weaponAlbum[weaponSetID].content[index].info;
+			for(int l = 0;l<info.size();l++){
+				dword sol = 0;
+				memcpy(&sol, info[l].layer, 4);
+				if(*(dword*)info[l].layer == layerSequence[seq][1]){
+					IMGobject io;
+					PICinfo pi;
+					image im;
+					weaponAlbum[weaponSetID].source.IMGextract(info[l].posInNPK, io);
+					io.PICgetInfo(io.linkFind(modelMaker.frame), pi);
+					io.PICextract(modelMaker.frame, im, info[l].paletteID);
+					modelImage.putBack(im, LAY, point(
+						modelImage.getWidth() / 2 - modelMaker.bodyImage.getWidth() / 2 - modelMaker.bodyBasePt.X + pi.basePt.X,
+						modelImage.getHeight() / 2 - modelMaker.bodyImage.getHeight() / 2 - modelMaker.bodyBasePt.Y + pi.basePt.Y
+						) - modelMaker.offset);
+				}
+			}
+		}
+		if(layerSequence[seq][0] == APART_BODY)
+			break;
+		seq ++;
 	}
+	modelImage.putBack(modelMaker.bodyImage, LAY, point(
+		modelImage.getWidth() / 2 - modelMaker.bodyImage.getWidth() / 2,
+		modelImage.getHeight() / 2 - modelMaker.bodyImage.getHeight() / 2) - modelMaker.offset);
+	outputImage.putFore(modelImage, LAY, point(4,4));
+}
+void AvatarFactory::makeButtonImage(image &outputImage, const size &sz, const long &buttonUse){
+	// buttonUse:0 empty 1 refresh
+	outputImage.create(sz);
+	color bColor = modelColor[character];
+	uchar r = bColor.R;
+	uchar g = bColor.G;
+	uchar b = bColor.B;
+	color color1 = color(0xFF-((0xFF-r)>>1), 0xFF-((0xFF-g)>>1), 0xFF-((0xFF-b)>>1));
+	color color2 = bColor;
+	color color3 = color(r>>1, g>>1, b>>1);
+	long h = outputImage.getHeight();
+	long w = outputImage.getWidth();
+	point centerPoint = point(w/2, h/2);
+	outputImage.fill(color2);
+	outputImage.line(point(0,0), point(0, h-1), color1);
+	outputImage.line(point(0,0), point(w-1, 0), color1);
+	outputImage.line(point(1,1), point(1, h-2), color1);
+	outputImage.line(point(1,1), point(w-2, 1), color1);
+	outputImage.line(point(w-1,h-1), point(0, h-1), color3);
+	outputImage.line(point(w-1,h-1), point(w-1, 0), color3);
+	outputImage.line(point(w-2,h-2), point(1, h-2), color3);
+	outputImage.line(point(w-2,h-2), point(w-2, 1), color3);
+	if(1 == buttonUse){
+		outputImage.line(centerPoint + point(3, -4), centerPoint + point(3, -4), color3);
+		outputImage.line(centerPoint + point(2, -3), centerPoint + point(2, -5), color3);
+		outputImage.line(centerPoint + point(1, -2), centerPoint + point(1, -6), color3);
+		outputImage.line(centerPoint + point(0, -1), centerPoint + point(0, -7), color3);
+		outputImage.line(centerPoint + point(-1, 0), centerPoint + point(-1, -8), color3);
+		outputImage.line(centerPoint + point(-2, -2), centerPoint + point(-2, -6), color3);
+		outputImage.line(centerPoint + point(-7, 2), centerPoint + point(-7, -2), color3);
+		outputImage.line(centerPoint + point(-6, 4), centerPoint + point(-6, -4), color3);
+		outputImage.line(centerPoint + point(-5, 5), centerPoint + point(-5, -5), color3);
+		outputImage.line(centerPoint + point(-4, 6), centerPoint + point(-4, -6), color3);
+		outputImage.line(centerPoint + point(-3, 6), centerPoint + point(-3, -6), color3);
+		outputImage.line(centerPoint + point(-2, 7), centerPoint + point(-2, 2), color3);
+		outputImage.line(centerPoint + point(-1, 7), centerPoint + point(-1, 3), color3);
+		outputImage.line(centerPoint + point(0, 7), centerPoint + point(0, 3), color3);
+		outputImage.line(centerPoint + point(1, 7), centerPoint + point(1, 3), color3);
+		outputImage.line(centerPoint + point(2, 7), centerPoint + point(2, 2), color3);
+		outputImage.line(centerPoint + point(3, 6), centerPoint + point(3, -1), color3);
+		outputImage.line(centerPoint + point(4, 6), centerPoint + point(4, -1), color3);
+		outputImage.line(centerPoint + point(5, 5), centerPoint + point(5, -1), color3);
+		outputImage.line(centerPoint + point(6, 4), centerPoint + point(6, -1), color3);
+		outputImage.line(centerPoint + point(7, 2), centerPoint + point(7, -1), color3);;
+	}
+}
+///////////////////////////////////////////////////////////////////////////
+//装扮辞典
+///////////////////////////////////////////////////////////////////////////
+AvatarMapEntry::AvatarMapEntry(){
+	avatarID = -1;
+	iconName = "reserved";
+	avatarTitle = "untitled";
+}
+str AvatarMapEntry::output() const{
+	str outStr = "";
+	outStr += formatID(avatarID);
+	outStr += ",";
+	outStr += iconName;
+	outStr += ",";
+	outStr += avatarTitle;
+	return outStr;
+}
+void AvatarMapEntry::input(const str &line){
+	std::vector<str> strArray;
+	str::size_type st1 = 0, st2;
+	while(true){
+		st2 = line.find(",", st1);
+		if(st2 == str::npos){
+			strArray.push_back(line.substr(st1));
+			break;
+		}else{
+			strArray.push_back(line.substr(st1, st2 - st1));
+			st1 = st2 + 1;
+		}
+	}
+	avatarID = strArray.size() > 0 ? std::stoi(strArray[0]) : -1;
+	iconName = strArray.size() > 1 ? strArray[1] : "reserved";
+	avatarTitle = strArray.size() > 2 ? strArray[2] : "untitled";
+}
+AvatarSuitEntry::AvatarSuitEntry(){
+	suitName = "untitled";
+	for(int i = 0;i<APART_MAXCOUNT;i++)
+		avatarID[i] = -1;
+}
+str AvatarSuitEntry::output() const{
+	str outStr = "";
+	outStr += suitName;
+	outStr += ",";
+	for(int i = 0;i<APART_MAXCOUNT;i++){
+		outStr += formatID(avatarID[i]);
+		if(i<APART_MAXCOUNT-1)
+			outStr += ",";
+	}
+	return outStr;
+}
+void AvatarSuitEntry::input(const str &line){
+	std::vector<str> strArray;
+	str::size_type st1 = 0, st2;
+	while(true){
+		st2 = line.find(",", st1);
+		if(st2 == str::npos){
+			strArray.push_back(line.substr(st1));
+			break;
+		}else{
+			strArray.push_back(line.substr(st1, st2 - st1));
+			st1 = st2 + 1;
+		}
+	}
+	suitName = strArray.size() > 0 ? strArray[0] : "untitled";
+	for(int i = 0;i<APART_MAXCOUNT;i++){
+		avatarID[i] = (strArray.size() > 1 + i) ? std::stoi(strArray[1+i]):-1;
+	}
+}
+void AvatarMap::initial(const AvatarCharacter &newAvatarCharacter){
+	character = newAvatarCharacter;
+	avatarContent.clear();
+	for(int i = 0;i<APART_MAXCOUNT;i++)
+		avatarContent.push_back(std::vector<AvatarMapEntry>());
+	weapon = characterWeaponList(character);
+	weaponContent.clear();
+	for(int i = 0;i<weapon.size();i++)
+		weaponContent.push_back(std::vector<AvatarMapEntry>());
+	suitContent.clear();
+}
+void AvatarMap::load(str fileName){
+	stream sFile;
+	if(!sFile.loadFile(fileName))
+		return;
+	str myStr((const char*)sFile.begin());
+	str::size_type st1 = 0, st2;
+	int parsing = 0;	//解码suit/avatar/weapon
+	AvatarPart parsingPart = APART_UD;
+	WeaponType parsingType = AWEAPON_UD;
+	while(true){
+		st2 = myStr.find("\r\n", st1);
+		str lineStr;
+		if(st2 == str::npos){
+			lineStr = myStr.substr(st1);
+		}else{
+			lineStr = myStr.substr(st1, st2-st1);
+			st1 = st2 + 2;
+		}
+		if(lineStr.size() == 0){
+			if(st2 == str::npos){
+				break;
+			}
+			continue;
+		}
+		if(lineStr.size() > 0 && lineStr[0] == '['){
+			parsing = 0;
+			if(lineStr == "[suit]"){
+				parsing = 1;
+			}
+			if(lineStr.substr(0,7) == "[avatar"){
+				parsingPart = APART_UD;
+				for(int p = 0; p<APART_MAXCOUNT;p++){
+					if(lineStr.substr(8) == avatarString[p] + "]"){
+						parsingPart = (AvatarPart)p;
+					}
+				}
+				if(parsingPart != APART_UD){
+					parsing = 2;
+				}else{
+					parsing = 0;
+				}
+			}
+			if(lineStr.substr(0,7) == "[weapon"){
+				parsingType = AWEAPON_UD;
+				for(int p = 0; p<AWEAPON_MAXCOUNT;p++){
+					if(lineStr.substr(8) == weaponString[p] + "]"){
+						parsingType = (WeaponType)p;
+					}
+				}
+				if(parsingType != AWEAPON_UD){
+					parsing = 3;
+				}else{
+					parsing = 0;
+				}
+			}
+		}else{
+			switch(parsing){
+			case 1:
+				{
+					AvatarSuitEntry ase;
+					ase.input(lineStr);
+					if(ase.suitName.size() > 0)
+						suitContent.push_back(ase);
+				}
+				break;
+			case 2:
+				{
+					AvatarMapEntry ame;
+					ame.input(lineStr);
+					if(ame.avatarID >= 0)
+						avatarContent[parsingPart].push_back(ame);
+				}
+				break;
+			case 3:
+				{
+					AvatarMapEntry ame;
+					ame.input(lineStr);
+					if(ame.avatarID >= 0){
+						long weaponID = characterWeaponListID(character, parsingType);
+						if(weaponID >= 0)
+							weaponContent[weaponID].push_back(ame);
+					}
+				}
+			}
+		}
+		if(st2 == str::npos){
+			break;
+		}
+	}
+}
+void AvatarMap::save(str fileName){
+	stream sFile;
+	//计算分配空间
+	int allocateLen = 512 + 96 * suitContent.size();
+	for(int i = 0;i<avatarContent.size();i++)
+		allocateLen += 32 * avatarContent[i].size();
+	for(int i = 0;i<weaponContent.size();i++)
+		allocateLen += 32 * weaponContent[i].size();
+	sFile.allocate(allocateLen);
+	sFile.pushString("[suit]\r\n");
+	for(int i = 0;i<suitContent.size();i++){
+		sFile.pushString(suitContent[i].output());
+		sFile.pushString("\r\n");
+	}
+	for(int i = 0;i<avatarContent.size();i++){
+		sFile.pushString("[avatar,"+avatarString[i]+"]\r\n");
+		for(int j = 0;j<avatarContent[i].size();j++){
+			sFile.pushString(avatarContent[i][j].output());
+			sFile.pushString("\r\n");
+		}
+	}
+	for(int i = 0;i<weaponContent.size();i++){
+		sFile.pushString("[weapon,"+weaponString[weapon[i]]+"]\r\n");
+		for(int j = 0;j<weaponContent[i].size();j++){
+			sFile.pushString(weaponContent[i][j].output());
+			sFile.pushString("\r\n");
+		}
+	}
+	sFile.makeFile(fileName);
+}
+void AvatarMap::addAvatarEntry(const AvatarPart &part, const long &ID, const str &iconIMGname, const str &avatarName){
+	AvatarMapEntry ame;
+	ame.avatarID = ID;
+	ame.avatarTitle = avatarName;
+	ame.iconName = iconIMGname;
+	for(int i = 0 ;i<avatarContent[part].size();i++){
+		if(avatarContent[part][i].avatarID>ID){
+			avatarContent[part].insert(avatarContent[part].begin()+i, ame);
+			return;
+		}
+	}
+	avatarContent[part].push_back(ame);
+	return;
+}
+void AvatarMap::addWeaponEntry(const WeaponType &type, const long &ID, const str &iconIMGname, const str &avatarName){
+	long weaponTypeIndex = characterWeaponListID(character, type);
+	if(weaponTypeIndex == -1)
+		return;
+	AvatarMapEntry ame;
+	ame.avatarID = ID;
+	ame.avatarTitle = avatarName;
+	ame.iconName = iconIMGname;
+	for(int i = 0 ;i<weaponContent[weaponTypeIndex].size();i++){
+		if(weaponContent[weaponTypeIndex][i].avatarID>ID){
+			weaponContent[weaponTypeIndex].insert(weaponContent[weaponTypeIndex].begin()+i, ame);
+			return;
+		}
+	}
+	weaponContent[weaponTypeIndex].push_back(ame);
+	return;
+}
+void AvatarMap::addSuitEntry(const str &suitName, const long id[9]){
+	AvatarSuitEntry ase;
+	ase.suitName = suitName;
+	memcpy(ase.avatarID, id, sizeof(long)*9);
+	suitContent.push_back(ase);
+	return;
+}
+void AvatarMap::deleteAvatarEntry(const AvatarPart &part, const long &pos){
+	avatarContent[part].erase(avatarContent[part].begin() + pos);
+}
+void AvatarMap::deleteWeaponEntry(const WeaponType &type, const long &pos){
+	long weaponTypeIndex = characterWeaponListID(character, type);
+	if(weaponTypeIndex == -1)
+		return;
+	weaponContent[weaponTypeIndex].erase(weaponContent[weaponTypeIndex].begin() + pos);
+}
+void AvatarMap::deleteSuitEntry(const long &pos){
+	suitContent.erase(suitContent.begin() + pos);
+}
+queue AvatarMap::findAvatarPosByIcon(const AvatarPart &part, const str &iconName){
+	queue q;
+	for(int i = 0;i<avatarContent[part].size();i++){
+		if(avatarContent[part][i].iconName.find(iconName) != str::npos)
+			q.push_back(i);
+	}
+	return q;
+}
+queue AvatarMap::findAvatarPos(const AvatarPart &part, const long &ID){
+	queue q;
+	for(int i = 0;i<avatarContent[part].size();i++){
+		if(avatarContent[part][i].avatarID == ID)
+			q.push_back(i);
+	}
+	return q;
+}
+queue AvatarMap::findAvatarPosByName(const AvatarPart &part, const str &avatarName){
+	queue q;
+	for(int i = 0;i<avatarContent[part].size();i++){
+		if(avatarContent[part][i].avatarTitle.find(avatarName) != str::npos)
+			q.push_back(i);
+	}
+	return q;
+}
+queue AvatarMap::findWeaponPosByIcon(const WeaponType &type, const str &iconName){
+	long weaponTypeIndex = characterWeaponListID(character, type);
+	if(weaponTypeIndex == -1)
+		return queue();
+	queue q;
+	for(int i = 0;i<weaponContent[weaponTypeIndex].size();i++){
+		if(weaponContent[weaponTypeIndex][i].iconName.find(iconName) != str::npos)
+			q.push_back(i);
+	}
+	return q;
+}
+queue AvatarMap::findWeaponPos(const WeaponType &type, const long &ID){
+	long weaponTypeIndex = characterWeaponListID(character, type);
+	if(weaponTypeIndex == -1)
+		return queue();
+	queue q;
+	for(int i = 0;i<weaponContent[weaponTypeIndex].size();i++){
+		if(weaponContent[weaponTypeIndex][i].avatarID == ID)
+			q.push_back(i);
+	}
+	return q;
+}
+queue AvatarMap::findWeaponPosByName(const WeaponType &type, const str &avatarName){
+	long weaponTypeIndex = characterWeaponListID(character, type);
+	if(weaponTypeIndex == -1)
+		return queue();
+	queue q;
+	for(int i = 0;i<weaponContent[weaponTypeIndex].size();i++){
+		if(weaponContent[weaponTypeIndex][i].avatarTitle.find(avatarName) != str::npos)
+			q.push_back(i);
+	}
+	return q;
+}
+
+queue AvatarMap::findSuitPos(const AvatarPart &part, const int &avatarID){
+	queue q;
+	for(int i = 0;i<suitContent.size();i++){
+		if(suitContent[i].avatarID[part] == avatarID){
+			q.push_back(i);
+		}
+	}
+	return q;
+}
+
+queue AvatarMap::findSuitPos(const str &suitName){
+	queue q;
+	for(int i = 0;i<suitContent.size();i++){
+		if(suitContent[i].suitName == suitName){
+			q.push_back(i);
+		}
+	}
+	return q;
 }

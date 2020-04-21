@@ -270,7 +270,7 @@ void ModalAdjustColor::OnBnClickedCancel(){
 		}
 	}
 	if(dlg->io.version == V2){
-		matrix mat = in.oldV2matrix;
+		image mat = in.oldV2matrix;
 		PICinfo pi;
 		stream s;
 		int ID = dlg->crtPICid;
@@ -321,7 +321,7 @@ void ModalAdjustColor::applyEffect(){
 		}
 	}
 	if(in.version == V2){
-		matrix mat = in.oldV2matrix;
+		image mat = in.oldV2matrix;
 		PICinfo pi;
 		stream s;
 		int ID = dlg->crtPICid;

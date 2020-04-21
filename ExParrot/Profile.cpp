@@ -19,11 +19,20 @@ void Profile::defaultProfile(){
 	avatarColor1 = 0xCCCCFF;
 	avatarThumbSize = 1;
 	miniSecPerFrame = 100;
+	audioBackColor = 0;
+	channel1Color = 0xFFFF00;
+	channel1Color = 0x33FF00;
+	volumeColor = 0xFFFF00;
+	MP3defaultColor = 0xCCCCCC;
+	MP3quality = 3;
+	useDefaultRecorder = 1;
 }
 void Profile::loadProfile(){
 	CStdioFile file;
 	CString lineStr, termStr, valueStr;
+	TRACE(L"LOAD\n");
 	if(file.Open(L"profile.ini", CFile::modeRead)){
+		TRACE(L"OKLOAD\n");
 		char *old_locale = _strdup(setlocale(LC_CTYPE,NULL));
 		setlocale(LC_CTYPE, "chs");
 		while(file.ReadString(lineStr)){
@@ -65,11 +74,33 @@ void Profile::loadProfile(){
 			if(termStr == L"[GIF_MSPF]"){
 				miniSecPerFrame = _ttoi(valueStr);
 			}
+			if(termStr == L"[AUDIOBACK_COLOR]"){
+				audioBackColor = _ttoi(valueStr);
+			}
+			if(termStr == L"[CHANNEL1_COLOR]"){
+				channel1Color = _ttoi(valueStr);
+			}
+			if(termStr == L"[CHANNEL2_COLOR]"){
+				channel2Color = _ttoi(valueStr);
+			}
+			if(termStr == L"[VOLUME_COLOR]"){
+				volumeColor = _ttoi(valueStr);
+			}
+			if(termStr == L"[MP3_DEFAULT_COLOR]"){
+				MP3defaultColor = _ttoi(valueStr);
+			}
+			if(termStr == L"[MP3_QUALITY]"){
+				MP3quality = _ttoi(valueStr);
+			}
+			if(termStr == L"[USE_DEFAULT_RECORDER]"){
+				useDefaultRecorder = _ttoi(valueStr);
+			}
 		}
 		setlocale(LC_CTYPE, old_locale);
 		free(old_locale);
 		file.Close();
 	}else{
+		TRACE(L"FAILLOAD\n");
 		saveProfile();
 	}
 	generateFolder();
@@ -91,6 +122,13 @@ void Profile::saveProfile(){
 	file.WriteString(L"[AVATAR_COLOR1]" + NumToCStr(avatarColor1) + L"\n");
 	file.WriteString(L"[AVATAR_THUMBSIZE]" + NumToCStr(avatarThumbSize) + L"\n");
 	file.WriteString(L"[GIF_MSPF]" + NumToCStr(miniSecPerFrame) + L"\n");
+	file.WriteString(L"[AUDIOBACK_COLOR]" + NumToCStr(audioBackColor) + L"\n");
+	file.WriteString(L"[CHANNEL1_COLOR]" + NumToCStr(channel1Color) + L"\n");
+	file.WriteString(L"[CHANNEL2_COLOR]" + NumToCStr(channel2Color) + L"\n");
+	file.WriteString(L"[VOLUME_COLOR]" + NumToCStr(volumeColor) + L"\n");
+	file.WriteString(L"[MP3_DEFAULT_COLOR]" + NumToCStr(MP3defaultColor) + L"\n");
+	file.WriteString(L"[MP3_QUALITY]" + NumToCStr(MP3quality) + L"\n");
+	file.WriteString(L"[USE_DEFAULT_RECORDER]" + NumToCStr(useDefaultRecorder) + L"\n");
 	setlocale(LC_CTYPE, old_locale);
 	free(old_locale);
 	file.Close();
@@ -189,4 +227,8 @@ Koishi::color Profile::getCanvasColor(int n){
 Koishi::color Profile::getAvatarColor(int n){
 	DWORD avatarColorList[3] = {avatarColor0, avatarColor1};
 	return color(0xFF, (avatarColorList[n%2] & 0xFF0000)>> 16, (avatarColorList[n%2] & 0XFF00)>> 8, avatarColorList[n%2] & 0xFF);
+}
+Koishi::color Profile::getAudioColor(int n){
+	DWORD audioColorList[5] = {audioBackColor, channel1Color, channel2Color, volumeColor, MP3defaultColor};
+	return color(0xFF, audioColorList[n%5] & 0xFF, (audioColorList[n%5] & 0XFF00)>> 8, (audioColorList[n%5] & 0xFF0000)>> 16);
 }
