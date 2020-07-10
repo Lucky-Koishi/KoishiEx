@@ -1,7 +1,6 @@
 #pragma once
 #include "../KoishiEx/KoishiEx.h"
 #include "../KoishiEx/avatar.h"
-#include "Profile.h"
 #include "ToolAvatarModelConfig.h"
 
 // ToolAvatarLocalizer ¶Ô»°¿ò
@@ -28,11 +27,14 @@ public:
 	uchar localFlag;
 	volatile uchar established;
 	volatile uchar finished;
+	volatile long countAvatar;
+	volatile long countWeapon;
+	volatile long countIcon;
 	CEdit *cel[ACHARACTER_MAXCOUNT];
 	CProgressCtrl * cpl[ACHARACTER_MAXCOUNT];
 	CButton *cbl[ACHARACTER_MAXCOUNT];
 	std::vector<queue> ql;
-	static void localize(AvatarCharacter, Profile*,  CEdit*, CProgressCtrl*, uchar);
+	void localize(AvatarCharacter, Profile*,  CEdit*, CProgressCtrl*, uchar);
 public:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnBnClickedStart();

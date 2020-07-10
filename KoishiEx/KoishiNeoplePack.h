@@ -25,6 +25,9 @@ namespace KoishiNeoplePack{
 	public:
 		str comment;	//路径名
 		int link;		//映射到的数据块
+#if 1
+		int _st,_len;
+#endif
 	};
 	class NPKobject{
 	public:

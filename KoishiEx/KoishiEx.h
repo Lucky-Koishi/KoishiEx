@@ -33,7 +33,8 @@ namespace Koishi{
 	typedef std::vector<longex> queueex;
 	typedef std::vector<complex> compsequence;
 	enum colorFormat:dword{
-		ARGB8888 = 0x10, ARGB4444 = 0x0F, ARGB1555 = 0x0E, LINK = 0x11, DDS_DXT1 = 0x12, DDS_DXT3 = 0x13, DDS_DXT5 = 0x14, COLOR_UDEF = 0, INDEX_FMT_PALETTE
+		ARGB8888 = 0x10, ARGB4444 = 0x0F, ARGB1555 = 0x0E, LINK = 0x11, 
+		DDS_DXT1 = 0x12, DDS_DXT3 = 0x13, DDS_DXT5 = 0x14, COLOR_UDEF = 0, INDEX_FMT_PALETTE
 	};
 	enum colorMethod{
 		//颜色运算 覆盖·变暗·正片叠底·颜色加深·线性加深·变亮·滤色·颜色减淡·线性减淡·叠加·强光·柔光·亮光·线性光·点光·实色混合·插值·排除

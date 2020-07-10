@@ -42,7 +42,7 @@ BOOL ToolAvatarCharacterSelection::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
-	SetWindowPos(NULL,0,0,246,269,SWP_NOZORDER|SWP_NOMOVE);
+	SetWindowPos(NULL,0,0,256,278,SWP_NOZORDER|SWP_NOMOVE);
 	charImg[0].LoadBitmap(IDB_CHAR_0X);
 	charImg[1].LoadBitmap(IDB_CHAR_1X);
 	charImg[2].LoadBitmap(IDB_CHAR_2X);

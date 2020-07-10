@@ -41,8 +41,10 @@ BOOL ToolAvatarIO::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化
 	if(style == AVA_IMPORT){
+		SetWindowText(L"请输入共享码喵！");
 		GET_CTRL(CEdit, IDC_EDIT1)->SetWindowText(L"请在这里输入共享码。");
 	}else{
+		SetWindowText(L"请将文本框的内容复制给他人喵！");
 		GET_CTRL(CEdit, IDC_EDIT1)->SetWindowText(content);
 		GET_CTRL(CEdit, IDC_EDIT1)->SetReadOnly(TRUE);
 	}

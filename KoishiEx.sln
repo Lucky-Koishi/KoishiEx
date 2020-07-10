@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KoishiEx", "KoishiEx\KoishiEx.vcxproj", "{2DC5B43F-FE16-44DA-B7C4-5CE4F6A69B1C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExRabbit", "ExRabbit\ExRabbit.vcxproj", "{E10FBAE3-5A12-45EA-9B40-CDFC23D47763}"
@@ -8,6 +10,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExParrot", "ExParrot\ExParrot.vcxproj", "{D255A3E5-909C-46D2-8210-F40B17BACD5E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo", "Demo\Demo.vcxproj", "{39663A0B-53C3-4CCB-BB2B-9B9A884465B7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExJson", "ExJson\ExJson.vcxproj", "{93EB4EDF-E15B-4A31-B698-68D39301A746}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExTool", "ExTool\ExTool.vcxproj", "{073414D4-3968-4321-81D7-9C627F07D324}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +37,14 @@ Global
 		{39663A0B-53C3-4CCB-BB2B-9B9A884465B7}.Debug|Win32.Build.0 = Debug|Win32
 		{39663A0B-53C3-4CCB-BB2B-9B9A884465B7}.Release|Win32.ActiveCfg = Release|Win32
 		{39663A0B-53C3-4CCB-BB2B-9B9A884465B7}.Release|Win32.Build.0 = Release|Win32
+		{93EB4EDF-E15B-4A31-B698-68D39301A746}.Debug|Win32.ActiveCfg = Debug|Win32
+		{93EB4EDF-E15B-4A31-B698-68D39301A746}.Debug|Win32.Build.0 = Debug|Win32
+		{93EB4EDF-E15B-4A31-B698-68D39301A746}.Release|Win32.ActiveCfg = Release|Win32
+		{93EB4EDF-E15B-4A31-B698-68D39301A746}.Release|Win32.Build.0 = Release|Win32
+		{073414D4-3968-4321-81D7-9C627F07D324}.Debug|Win32.ActiveCfg = Debug|Win32
+		{073414D4-3968-4321-81D7-9C627F07D324}.Debug|Win32.Build.0 = Debug|Win32
+		{073414D4-3968-4321-81D7-9C627F07D324}.Release|Win32.ActiveCfg = Release|Win32
+		{073414D4-3968-4321-81D7-9C627F07D324}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,7 +3,6 @@
 #include "../KoishiEx/koishiex.h"
 #include "../KoishiEx/KoishiNeoplePack.h"
 #include "../KoishiEx/KoishiImageTool.h"
-#include "../KoishiEx//KoishiAudioTool.h"
 //////////////////////////////////////////////////////
 //Ö§³Ö
 //////////////////////////////////////////////////////
@@ -23,5 +22,6 @@ CString PtToCStr(point pt);
 CString SzToCStr(size pt);
 CString ClrToCStr(color clr);
 CString FmtToCStr(colorFormat cf, IMGversion iv);
+CString FmtToCStr(const PICinfo &pi, IMGversion iv);
 CString GetCurDir();
 int B16CStrToNum(CString b16cstr);

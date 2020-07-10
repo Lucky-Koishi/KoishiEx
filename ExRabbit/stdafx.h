@@ -64,5 +64,6 @@
 #endif
 #endif
 
-
-#include "Func.h"
+#include "../General/Func.h"
+#include "../General/GoodListCtrl.h"
+#include "../General/Profile.h"

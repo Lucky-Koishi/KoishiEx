@@ -5,7 +5,6 @@
 #include "ExRabbit.h"
 #include "ModalCopyReplace.h"
 #include "afxdialogex.h"
-#include "GoodListCtrl.h"
 
 // ModalCopyReplace 对话框
 
@@ -44,6 +43,8 @@ void ModalCopyReplace::OnBnClickedRadioOperate1(){
 	GET_CTRL(CButton, IDC_RADIO_OPERATE1)->SetCheck(1);
 	GET_CTRL(CButton, IDC_RADIO_OPERATE2)->SetCheck(0);
 	GET_CTRL(CButton, IDC_RADIO_OPERATE3)->SetCheck(0);
+	GET_CTRL(CButton, IDC_RADIO_INPUT1)->SetCheck(out.type == 1);
+	GET_CTRL(CButton, IDC_RADIO_INPUT2)->SetCheck(out.type == 2);
 	out.operate = 1;
 }
 
@@ -52,6 +53,8 @@ void ModalCopyReplace::OnBnClickedRadioOperate2(){
 	GET_CTRL(CButton, IDC_RADIO_OPERATE1)->SetCheck(0);
 	GET_CTRL(CButton, IDC_RADIO_OPERATE2)->SetCheck(1);
 	GET_CTRL(CButton, IDC_RADIO_OPERATE3)->SetCheck(0);
+	GET_CTRL(CButton, IDC_RADIO_INPUT1)->SetCheck(out.type == 1);
+	GET_CTRL(CButton, IDC_RADIO_INPUT2)->SetCheck(out.type == 2);
 	out.operate = 2;
 }
 
@@ -60,6 +63,8 @@ void ModalCopyReplace::OnBnClickedRadioOperate3(){
 	GET_CTRL(CButton, IDC_RADIO_OPERATE1)->SetCheck(0);
 	GET_CTRL(CButton, IDC_RADIO_OPERATE2)->SetCheck(0);
 	GET_CTRL(CButton, IDC_RADIO_OPERATE3)->SetCheck(1);
+	GET_CTRL(CButton, IDC_RADIO_INPUT1)->SetCheck(out.type == 1);
+	GET_CTRL(CButton, IDC_RADIO_INPUT2)->SetCheck(out.type == 2);
 	out.operate = 3;
 }
 
@@ -67,6 +72,9 @@ void ModalCopyReplace::OnBnClickedRadioOperate3(){
 void ModalCopyReplace::OnBnClickedRadioInput1(){
 	GET_CTRL(CButton, IDC_RADIO_INPUT1)->SetCheck(1);
 	GET_CTRL(CButton, IDC_RADIO_INPUT2)->SetCheck(0);
+	GET_CTRL(CButton, IDC_RADIO_OPERATE1)->SetCheck(out.operate == 1);
+	GET_CTRL(CButton, IDC_RADIO_OPERATE2)->SetCheck(out.operate == 2);
+	GET_CTRL(CButton, IDC_RADIO_OPERATE3)->SetCheck(out.operate == 3);
 	out.type = 1;
 }
 
@@ -74,6 +82,9 @@ void ModalCopyReplace::OnBnClickedRadioInput1(){
 void ModalCopyReplace::OnBnClickedRadioInput2(){
 	GET_CTRL(CButton, IDC_RADIO_INPUT1)->SetCheck(0);
 	GET_CTRL(CButton, IDC_RADIO_INPUT2)->SetCheck(1);
+	GET_CTRL(CButton, IDC_RADIO_OPERATE1)->SetCheck(out.operate == 1);
+	GET_CTRL(CButton, IDC_RADIO_OPERATE2)->SetCheck(out.operate == 2);
+	GET_CTRL(CButton, IDC_RADIO_OPERATE3)->SetCheck(out.operate == 3);
 	out.type = 2;
 }
 
@@ -100,7 +111,7 @@ BOOL ModalCopyReplace::OnInitDialog()
 	for(int i = 0;i<in.ptrNo->count;i++)
 		GET_CTRL(CGoodListCtrl, IDC_LIST1)->EasyInsertItem(GetTail(StrToCStr(in.ptrNo->entry[i].comment)));
 	OnBnClickedRadioOperate1();
-	OnBnClickedRadioOperate2();
+	OnBnClickedRadioInput2();
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }

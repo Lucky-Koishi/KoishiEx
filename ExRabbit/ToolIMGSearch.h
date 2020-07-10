@@ -1,5 +1,4 @@
 #pragma once
-#include "GoodListCtrl.h"
 
 // CToolIMGSearch ¶Ô»°¿ò
 

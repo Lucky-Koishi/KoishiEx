@@ -239,48 +239,6 @@
     <None Include="res\png1.png">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\char0.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char1.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char2.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char3.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char4.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char5.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char6.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char7.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char8.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char9.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char10.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char11.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char12.PNG">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\char13.PNG">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="res\part_button_0.bmp">
       <Filter>资源文件</Filter>
     </None>
@@ -401,6 +359,12 @@
     <None Include="res\avatar_char_reserved.bmp">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="res\pic_icon.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_PALETTE_CN.ico">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExRabbit.h">
@@ -418,13 +382,7 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Func.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="DialogNew.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgBar.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ToolIMGSearch.h">
@@ -496,9 +454,6 @@
     <ClInclude Include="ModalInsertImage.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Profile.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="ModalPreference.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -556,6 +511,24 @@
     <ClInclude Include="ToolAvatarIO.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ToolAvatarStageConfig.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatarDownload.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\General\Func.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\General\GoodListCtrl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\General\Profile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyFrame.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExRabbit.cpp">
@@ -567,13 +540,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Func.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="DialogNew.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgBar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ToolIMGSearch.cpp">
@@ -645,9 +612,6 @@
     <ClCompile Include="ModalInsertImage.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Profile.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="ModalPreference.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -703,6 +667,24 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ToolAvatarIO.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarStageConfig.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarDownload.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\General\Func.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\General\GoodListCtrl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\General\Profile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyFrame.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -857,6 +857,9 @@ void image::getElemHonzBound(dword &lower, dword &upper) const{
 			}
 		}
 	}
+	if(lower > upper) {
+		lower = upper = 0;
+	}
 }
 void image::getElemVertBound(dword &lower, dword &upper) const{
 	lower = row - 1;
@@ -874,6 +877,8 @@ void image::getElemVertBound(dword &lower, dword &upper) const{
 			}
 		}
 	}
+	if(lower > upper)
+		lower = upper = 0;
 }
 //²Ù×÷¾ØÕó
 long image::moveHonz(long dist, const color &surplus){

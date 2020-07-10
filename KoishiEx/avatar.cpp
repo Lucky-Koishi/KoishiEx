@@ -716,6 +716,8 @@ bool WeaponAlbum::changeWeaponByID(const long &newID){
 }
 
 bool WeaponAlbum::changeTN(bool TN){
+	if(currentSelect == -1)
+		return false;
 	TNenabled = TN;
 	layerList = (TNenabled && content[currentSelect].layerCountTN > 0) ? content[currentSelect].infoTN : content[currentSelect].info;
 	updateIMG();
@@ -1284,16 +1286,18 @@ void AvatarMap::load(str fileName){
 				{
 					AvatarSuitEntry ase;
 					ase.input(lineStr);
-					if(ase.suitName.size() > 0)
+					if(ase.suitName.size() > 0){
 						suitContent.push_back(ase);
+					}
 				}
 				break;
 			case 2:
 				{
 					AvatarMapEntry ame;
 					ame.input(lineStr);
-					if(ame.avatarID >= 0)
+					if(ame.avatarID >= 0){
 						avatarContent[parsingPart].push_back(ame);
+					}
 				}
 				break;
 			case 3:
@@ -1380,6 +1384,42 @@ void AvatarMap::addSuitEntry(const str &suitName, const long id[9]){
 	memcpy(ase.avatarID, id, sizeof(long)*9);
 	suitContent.push_back(ase);
 	return;
+}
+bool AvatarMap::checkAvatarEntry(const AvatarPart &part, const long &ID, const str &iconName, const str &avatarName){
+	queue q = findAvatarPos(part, ID);
+	for(int i = 0;i<q.size();i++){
+		if(iconName.find(avatarContent[part][q[i]].iconName) != str::npos && 
+			avatarName.find(avatarContent[part][q[i]].avatarTitle) != str::npos){
+				return true;
+		}
+	}
+	return false;
+}
+bool AvatarMap::checkWeaponEntry(const WeaponType &type, const long &ID, const str &iconName, const str &avatarName){
+	queue q = findWeaponPos(type, ID);
+	long weaponTypeIndex = characterWeaponListID(character, type);
+	for(int i = 0;i<q.size();i++){
+		if(iconName.find(weaponContent[weaponTypeIndex][q[i]].iconName) != str::npos && 
+			avatarName.find(weaponContent[weaponTypeIndex][q[i]].avatarTitle) != str::npos){
+				return true;
+		}
+	}
+	return false;
+}
+bool AvatarMap::checkSuitEntry(const str &suitName, const long id[9]){
+	queue q = findSuitPos(suitName);
+	for(int i = 0;i<q.size();i++){
+		bool allSame = true;
+		for(int j = 0;j<9;j++){
+			if(id[j] != suitContent[q[i]].avatarID[j]){
+				allSame = false;
+				break;
+			}
+		}
+		if(allSame)
+			return true;
+	}
+	return false;
 }
 void AvatarMap::deleteAvatarEntry(const AvatarPart &part, const long &pos){
 	avatarContent[part].erase(avatarContent[part].begin() + pos);

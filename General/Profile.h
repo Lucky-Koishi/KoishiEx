@@ -38,6 +38,8 @@ public:
 	CString getDownloadPath();
 	CString getModelPath(int modelSize, KoishiAvatar::AvatarCharacter ac);
 	CString getIconPath(KoishiAvatar::AvatarCharacter ac);
+	CString getAvatarStagePath();
+	CString getAvatarDownloadPath();
 	CString getAvatarMapPath();
 	CString getSupportPath();
 	CString getNPKdictPath();

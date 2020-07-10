@@ -9,7 +9,6 @@
 #include "../KoishiEx/KoishiImageTool.cpp"
 #include "../KoishiEx/KoishiAudioTool.cpp"
 #include "../KoishiEx/avatar.cpp"
-#include "goodlistctrl.cpp"
 #include "../koishiEx/bz2.cpp"
 
 void CStrToStr(CString cstr,str &str1)  
@@ -29,7 +28,18 @@ str CStrToStr(CString cstr){
 	return p;
 }
 CString StrToCStr(str str1){
+#if 1
 	return CString(str1.c_str());
+#else
+	//以下代码由网友m=0提供，可以解决显示乱码问题。
+	int size = MultiByteToWideChar(CP_UTF8, 0, str1.c_str(), -1, NULL, 0);
+	TCHAR *buffer = new TCHAR[size+1];
+	memset(buffer, 0, sizeof(TCHAR)*(size + 1));
+	MultiByteToWideChar(CP_UTF8, 0, str1.c_str(), -1, buffer, size);
+	CString temp(buffer);
+	delete[] buffer;
+	return temp;
+#endif
 }
 CString NumToCStr(int n){
 	CString s;
@@ -90,6 +100,48 @@ int B16CStrToNum(CString b16cstr){
 	CString tail = b16cstr.Right(1);
 	CString remain = b16cstr.Left(b16cstr.GetLength()-1);
 	return B16CStrToNum(remain)*16 + B16CStrToNum(tail);
+}
+CString FmtToCStr(const PICinfo &pi, IMGversion iv){
+	CString s;
+	switch(pi.format){
+	case ARGB8888:
+		s = L"ARGB8888";
+		break;
+	case ARGB4444:
+		if(iv == V4 || iv == V6){
+			s = L"索引颜色(改)";
+		}else{
+			s = L"ARGB4444";
+		}
+		break;
+	case ARGB1555:
+		if(iv == V2){
+			s = L"ARGB1555";
+		}else{
+			if(pi.comp == COMP_NONE && pi.dataSize == 2 * pi.picSize.area()){
+				s = L"ARGB1555";
+			}else{
+				s = L"索引颜色";
+			}
+		}
+		break;
+	case LINK:
+		s = L"指向帧号";
+		break;
+	case DDS_DXT1:
+		s = L"DXT1";
+		break;
+	case DDS_DXT3:
+		s = L"DXT3";
+		break;
+	case DDS_DXT5:
+		s = L"DXT5";
+		break;
+	default:
+		s = L"暂未定义";
+		break;
+	}
+	return s;
 }
 CString FmtToCStr(colorFormat cf, IMGversion iv){
 	CString s;

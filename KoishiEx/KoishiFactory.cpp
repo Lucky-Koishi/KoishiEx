@@ -60,6 +60,8 @@ bool NPKobject::load(const stream &in){
 		data.readStream(sPath, 0x100);
 		sPath.nameMask();
 		entry.push_back(NPKentry((char*)sPath.begin(), -1));
+		entry[entry.size()-1]._len = sizeInEntry[sizeInEntry.size()-1];
+		entry[entry.size()-1]._st = offsetInEntry[offsetInEntry.size()-1];
 	}
 	if(true){
 		stream checkCode;
@@ -1173,7 +1175,18 @@ bool IMGobject::PICextract(long pos, image &mat, long paletteID){
 						sPic[i] = 0;
 					}
 					if(paletteData[paletteID].size()>0){
-						mat.push(paletteData[paletteID][sPic[i]]);
+						if(pi.format == ARGB4444){
+							//国服特色
+							color c1 = paletteData[paletteID][sPic[i]];
+							color c2 = color(
+								(c1.alpha == 0xFF ? 0x8F:0x00) | c1.R >> 1, 
+								0x0F | c1.R >> 3 << 6 | c1.G >> 2, 
+								0x0F | c1.G >> 3 << 5 | c1.B >> 3, 
+								0x0F | c1.B << 1);
+							mat.push(c2);
+						}else{
+							mat.push(paletteData[paletteID][sPic[i]]);
+						}
 					}else{
 						mat.push(color(0));
 					}

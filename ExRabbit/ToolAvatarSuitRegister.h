@@ -1,6 +1,5 @@
 #pragma once
 #include "../KoishiEx/avatar.h"
-#include "Profile.h"
 
 // ToolAvatarSuitRegister ¶Ô»°¿ò
 using namespace Koishi;

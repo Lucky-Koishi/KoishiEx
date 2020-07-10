@@ -1,6 +1,5 @@
 #pragma once
 
-#include "GoodListCtrl.h"
 // CToolDict ¶Ô»°¿ò
 
 class CToolDict : public CDialogEx

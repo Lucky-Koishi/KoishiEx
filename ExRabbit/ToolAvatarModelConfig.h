@@ -1,7 +1,6 @@
 #pragma once
 #include "../KoishiEx/KoishiEx.h"
 #include "../KoishiEx/avatar.h"
-#include "Profile.h"
 
 using namespace Koishi;
 using namespace KoishiAvatar;

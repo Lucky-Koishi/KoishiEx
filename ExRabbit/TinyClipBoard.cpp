@@ -5,7 +5,6 @@
 #include "ExRabbit.h"
 #include "TinyClipBoard.h"
 #include "afxdialogex.h"
-#include "GoodListCtrl.h"
 
 // TinyClipBoard ¶Ô»°¿ò
 

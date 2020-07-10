@@ -1,13 +1,24 @@
 #pragma once
 #include "../KoishiEx/KoishiEx.h"
 #include "../KoishiEx/avatar.h"
-#include "Profile.h"
 #include "TinyBar.h"
 #include "ToolAvatarModelConfig.h"
-
+#include "ToolAvatarStageConfig.h"
 // ToolAvatar 对话框
 using namespace Koishi;
 using namespace KoishiAvatar;
+//防止播放时换装的崩溃
+#define PLAYING_PAUSE {\
+	bool alreadyPlaying = playing;\
+	playing = false;
+#define PLAYING_CONTINUE \
+	if(!alreadyPlaying){\
+	factory.updateImage();\
+	drawAvatar();\
+	}\
+	playing = alreadyPlaying;\
+}
+
 class ToolAvatar : public CDialogEx
 {
 	DECLARE_DYNAMIC(ToolAvatar)
@@ -66,6 +77,7 @@ public:
 		ANI_MAXCOUNT
 	};
 	void setAnimation(const long &aniID);
+	ToolAvatarStageConfig stage;
 public:
 	//展示图相关信息
 	struct{
@@ -167,4 +179,11 @@ public:
 	afx_msg void OnMenuAvatarmodelRegister();
 	afx_msg void OnBnClickedButtonTool12();
 	virtual void OnOK();
+	afx_msg void OnMenuLocalizeMapCombine();
+	afx_msg void OnMenuLocalizeMapResort();
+	afx_msg void OnMenuLocalizeSetResource();
+	afx_msg void OnMenuLocalizeOpenResource();
+	afx_msg void OnMenuLocalizeDownloadResource();
+	afx_msg void OnMenuSuitAnimation();
+	afx_msg void OnBnClickedButtonAframe();
 };

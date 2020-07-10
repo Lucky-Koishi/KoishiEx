@@ -249,6 +249,7 @@ BEGIN_MESSAGE_MAP(CExRabbitDlg, CDialogEx)
 	ON_COMMAND(ID_TOOLS_AVATAR_MARK, &CExRabbitDlg::OnToolsAvatarMark)
 	ON_COMMAND(ID_MENU_IMAGE_MAKE_NPK_AND_SAVE, &CExRabbitDlg::OnMenuImageMakeNPKandSave)
 	ON_COMMAND(ID_MENU_IMAGE_MAKE_NPK_AND_SAVE_PATCH, &CExRabbitDlg::OnMenuImageMakeNPKandSavePatch)
+	ON_WM_CLOSE()
 	END_MESSAGE_MAP()
 /////////
 
@@ -310,7 +311,7 @@ BOOL CExRabbitDlg::OnInitDialog(){
 	i_lIMG.Add(AfxGetApp()->LoadIconW(IDI_ICON6));
 	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetImageList(&i_lIMG, LVSIL_SMALL);
 
-	i_lPIC.Create(16,16, TRUE|ILC_COLOR24, 9, 1);
+	i_lPIC.Create(16,16, TRUE|ILC_COLOR24, 10, 1);
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON9));
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON1));
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON2));
@@ -320,6 +321,7 @@ BOOL CExRabbitDlg::OnInitDialog(){
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON6));
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON7));
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON8));
+	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON10));
 	GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetImageList(&i_lPIC, LVSIL_SMALL);
 	GET_CTRL(CGoodListCtrl, IDC_LIST_DDS)->SetImageList(&i_lPIC, LVSIL_SMALL);
 
@@ -579,7 +581,7 @@ void CExRabbitDlg::updatePIClist(){
 				updatePICterm(i);
 			}else{
 				cstr = NumToCStr(i) + L",";
-				cstr += FmtToCStr(io.PICcontent[i].format, io.version);
+				cstr += FmtToCStr(io.PICcontent[i], io.version);
 				if(io.PICcontent[i].format == LINK)
 					cstr += NumToCStr(io.PICcontent[i].linkTo);
 				cstr += L",";
@@ -589,7 +591,7 @@ void CExRabbitDlg::updatePIClist(){
 				if(io.version == V5){
 					cstr += L"纹理集"+NumToCStr(io.PICcontent[i].TEXusing)+L":"+PtToCStr(io.PICcontent[i].TEXpointLT)+L"-"+PtToCStr(io.PICcontent[i].TEXpointRB);
 				}
-				GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->EasyInsertItem(cstr,getIconPIC(io.PICcontent[i].format));
+				GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->EasyInsertItem(cstr,getIconPIC(io.PICcontent[i]));
 			}
 			i++;
 		}else{
@@ -612,10 +614,10 @@ void CExRabbitDlg::updatePICterm(int pos){
 	//只更新pos
 	CHECK_VALID(pos>=0);
 	CHECK_VALID(pos<io.indexCount);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItem(pos,0,LVIF_IMAGE,NULL,getIconPIC(io.PICcontent[pos].format),0,0,0);
+	GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItem(pos,0,LVIF_IMAGE,NULL,getIconPIC(io.PICcontent[pos]),0,0,0);
 	if(io.PICcontent[pos].format == LINK){
 		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 0, NumToCStr(pos));
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 1, FmtToCStr(io.PICcontent[pos].format, io.version) + NumToCStr(io.PICcontent[pos].linkTo));
+		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 1, FmtToCStr(io.PICcontent[pos], io.version) + NumToCStr(io.PICcontent[pos].linkTo));
 		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 2, L"");
 		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 3, L"");
 		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 4, L"");
@@ -624,7 +626,7 @@ void CExRabbitDlg::updatePICterm(int pos){
 		}
 	}else{
 		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 0, NumToCStr(pos));
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 1, FmtToCStr(io.PICcontent[pos].format, io.version));
+		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 1, FmtToCStr(io.PICcontent[pos], io.version));
 		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 2, PtToCStr(io.PICcontent[pos].basePt));
 		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 3, SzToCStr(io.PICcontent[pos].picSize));
 		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 4, SzToCStr(io.PICcontent[pos].frmSize));
@@ -1253,6 +1255,25 @@ void CExRabbitDlg::OnLvnKeydownListTex(NMHDR *pNMHDR, LRESULT *pResult)
 void CExRabbitDlg::OnDropFiles(HDROP hDropInfo)
 {
 	// TODO: 外部文件拖入
+	if(saveAlert) {
+		switch(MessageBox(L"这个IMG已经被你改动了喵，要保存喵？", L"提示喵", MB_YESNOCANCEL)) {
+		case IDYES:
+		{
+			OnModify01();
+			str fn;
+			CString fileName;
+			fileName = fileNPKname;
+			CStrToStr(fileName, fn);
+			no.saveFile(fn);
+			CDialogEx::OnClose();
+			break;
+		}
+		case IDNO:
+			break;
+		case IDCANCEL:
+			return;
+		}
+	}
 	WCHAR szPath[MAX_PATH] = L"" ;
 	UINT nChars=::DragQueryFile(hDropInfo,0,szPath ,MAX_PATH);    
 	CString fileName(szPath,nChars) ; 
@@ -1404,6 +1425,21 @@ int CExRabbitDlg::getIconPIC(colorFormat cf){
 		}
 	}
 	return iconList[cf%21];
+}
+int CExRabbitDlg::getIconPIC(const PICinfo &pi){
+	int iconList[21] = {0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0, 0, 3, 2, 1, 4, 6, 7, 8};
+	if(io.version == V4 || io.version == V5 ||io.version == V6){
+		if(pi.format == ARGB4444){
+			return 9;
+		}
+		if(pi.format == ARGB1555){
+			if(pi.comp == COMP_NONE && 2 * pi.picSize.area() == pi.dataSize){
+				return iconList[ARGB1555 % 21];
+			}
+			return 5;
+		}
+	}
+	return iconList[pi.format%21];
 }
 void CExRabbitDlg::getSelected(CGoodListCtrl *listCtrl, int highLine, int targetPara, std::vector<int> &selected){
 	selected.clear();
@@ -1614,7 +1650,8 @@ void CExRabbitDlg::OnMain05(){
 	dlg.modifiedProfile = profile;
 	if(IDOK == dlg.DoModal()){
 		profile = dlg.modifiedProfile;
-		MessageBox(L"软件配置被修改喵，请重启以生效。",L"提示喵");
+		MessageBox(L"软件配置修改完毕喵。",L"提示喵");
+		Invalidate();
 	}
 }
 void CExRabbitDlg::OnMain06()
@@ -3960,7 +3997,7 @@ UINT CExRabbitDlg::ThreadPictureCanvas(void*context){
 				x2 = para->enable[2] ? x2:(pInfo.picSize.W - 1);
 				y1 = para->enable[1] ? y1:0;
 				y2 = para->enable[3] ? y2:(pInfo.picSize.H - 1);
-				if(x1<x2){
+				if(x1<=x2){
 					mPic.clip(y1, y2+1, x1, x2+1);
 					pInfo.basePt = pInfo.basePt + point(x1, y1);
 					dlg->io.PICpreprocessIndexImage(mPic, sPic, pInfo);
@@ -3977,7 +4014,7 @@ UINT CExRabbitDlg::ThreadPictureCanvas(void*context){
 				x2 = para->enable[2] ? x2:(pInfo.picSize.W - 1);
 				y1 = para->enable[1] ? y1:0;
 				y2 = para->enable[3] ? y2:(pInfo.picSize.H - 1);
-				if(x1<x2){
+				if(x1<=x2){
 					mPic.clip(y1, y2+1, x1, x2+1);
 					pInfo.basePt = pInfo.basePt + point(x1, y1);
 					dlg->io.PICpreprocess(mPic, sPic, pInfo, pInfo.format);
@@ -5855,4 +5892,31 @@ BOOL CExRabbitDlg::PreTranslateMessage(MSG* pMsg)
 		m_ttc.RelayEvent(pMsg);
 	}
 	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+void CExRabbitDlg::OnClose() {
+	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	if(saveAlert) {
+		switch(MessageBox(L"这个IMG已经被你改动了喵，要保存喵？", L"提示喵", MB_YESNOCANCEL)) {
+		case IDYES:
+		{
+			OnModify01();
+			str fn;
+			CString fileName;
+			fileName = fileNPKname;
+			CStrToStr(fileName, fn);
+			no.saveFile(fn);
+			CDialogEx::OnClose();
+			break;
+		}
+		case IDNO:
+			CDialogEx::OnClose();
+			break;
+		case IDCANCEL:
+			break;
+		}
+	} else {
+		CDialogEx::OnClose();
+	}
 }

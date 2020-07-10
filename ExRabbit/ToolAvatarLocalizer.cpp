@@ -79,10 +79,12 @@ void ToolAvatarLocalizer::localize(AvatarCharacter ac, Profile *ppf, CEdit *ce, 
 					CString fileName = ppf->getModelPath(sizeMode, ac) + avatarCString[iPart] + NumToCStr(aa.content[cIndex].ID);
 					factory.makeAvatarModel(im, (AvatarPart)iPart, cIndex);
 					makePNG(im, CStrToStr(fileName)+".png");
+					countAvatar ++;
 					if(aa.content[cIndex].infoTN.size() > 0){
 						im.destory();
 						factory.makeAvatarModel(im, (AvatarPart)iPart, cIndex, true);
 						makePNG(im, CStrToStr(fileName)+"(TN).png");
+						countAvatar ++;
 					}
 				}
 				factory.releaseAvatar((AvatarPart)iPart);
@@ -114,10 +116,12 @@ void ToolAvatarLocalizer::localize(AvatarCharacter ac, Profile *ppf, CEdit *ce, 
 					CString fileName = ppf->getModelPath(sizeMode, ac) + weaponCString[factory.weapon[iWeaponTypeIndex]] + NumToCStr(wa.content[cIndex].ID);
 					factory.makeWeaponModel(im, iWeaponTypeIndex, cIndex);
 					makePNG(im, CStrToStr(fileName)+".png");
+					countWeapon ++;
 					if(wa.content[cIndex].infoTN.size() > 0){
 						im.destory();
 						factory.makeWeaponModel(im, iWeaponTypeIndex, cIndex, true);
 						makePNG(im, CStrToStr(fileName)+"(TN).png");
+						countWeapon ++;
 					}
 				}
 				factory.releaseWeapon(iWeaponTypeIndex);
@@ -143,6 +147,7 @@ void ToolAvatarLocalizer::localize(AvatarCharacter ac, Profile *ppf, CEdit *ce, 
 					io.PICextract(id, iconImage);
 					if(iconImage.width > 10/* == 28*/){
 						makePNG(iconImage, CStrToStr(ppf->getIconPath(ac) + iconCString[p] + NumToCStr(id) + L".png"));
+						countIcon ++;
 					}
 				}
 			}
@@ -156,6 +161,7 @@ void ToolAvatarLocalizer::localize(AvatarCharacter ac, Profile *ppf, CEdit *ce, 
 					io.PICextract(id, iconImage);
 					if(iconImage.width > 10/* == 28*/){
 						makePNG(iconImage, CStrToStr(ppf->getIconPath(ac) + iconCString[APART_BODY] + NumToCStr(108+id) + L".png"));
+						countIcon ++;
 					}
 				}
 			}
@@ -178,6 +184,7 @@ void ToolAvatarLocalizer::localize(AvatarCharacter ac, Profile *ppf, CEdit *ce, 
 				io.PICextract(id, iconImage);
 				if(iconImage.width > 10/* == 28*/){
 					makePNG(iconImage, CStrToStr(ppf->getIconPath(ac) + iconWeaponCString[ac][fileID] + NumToCStr(id) + L".png"));
+					countIcon ++;
 				}
 			}
 		}
@@ -267,7 +274,7 @@ unsigned LocalSub1(void *para){
 	}
 	TRACE(L"\n");
 	for(int i = 0;i<ql0.size();i++){
-		ToolAvatarLocalizer::localize((AvatarCharacter)ql0[i], &dlg->profile, dlg->cel[ql0[i]], dlg->cpl[ql0[i]], dlg->localFlag);
+		dlg->localize((AvatarCharacter)ql0[i], &dlg->profile, dlg->cel[ql0[i]], dlg->cpl[ql0[i]], dlg->localFlag);
 		Sleep(100);
 	}
 	dlg->finished ++;
@@ -286,12 +293,23 @@ unsigned Local1(void *para){
 	GET_DLG_CTRL(CButton, ID_START)->EnableWindow(1);
 	GET_DLG_CTRL(CButton, IDCANCEL)->EnableWindow(1);
 	GET_DLG_CTRL(CComboBox, IDC_COMBO1)->EnableWindow(1);
-	dlg->MessageBox(L"恭喜喵！本地化已完成喵！\r\n欢迎使用肥猫的试衣间！",L"提示喵");
+	if(dlg->countAvatar + dlg->countWeapon + dlg->countIcon == 0){
+		dlg->MessageBox(L"嗯喵？找不到任何资源喵！查看资源目录是否设置完毕喵！",L"提示喵");
+	}else{
+		CString statStr;
+		dlg->MessageBox(L"恭喜喵！本地化已完成喵！\r\n已生成装扮展示图" + 
+			NumToCStr(dlg->countAvatar) + L"个，武器展示图" + 
+			NumToCStr(dlg->countWeapon) + L"个，图标" + 
+			NumToCStr(dlg->countIcon) + L"个喵！\r\n欢迎使用肥猫的试衣间喵！",L"提示喵");
+	}
 	return 0U;
 }
 void ToolAvatarLocalizer::OnBnClickedStart()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	countAvatar = 0;
+	countWeapon = 0;
+	countIcon = 0;
 	GET_CTRL(CButton, ID_START)->EnableWindow(0);
 	GET_CTRL(CButton, IDCANCEL)->EnableWindow(0);
 	GET_CTRL(CComboBox, IDC_COMBO1)->EnableWindow(0);

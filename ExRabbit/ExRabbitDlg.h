@@ -5,10 +5,8 @@
 #include "../KoishiEx/koishiex.h"
 #include "../KoishiEx/KoishiNeoplePack.h"
 
-#include "GoodListCtrl.h"
 #include "DialogNew.h"
 #include "DialogAbout.h"
-#include "DlgBar.h"
 #include "TinyBar.h"
 #include "ToolIMGSearch.h"
 #include "ToolAvatar.h"
@@ -31,7 +29,6 @@
 #include "ModalTransform.h"
 #include "ModalRename.h"
 #include "ModalInsertImage.h"
-#include "Profile.h"
 #include "ModalPreference.h"
 #include "modalcopyinsert.h"
 #include "ModalCopyReplace.h"
@@ -41,7 +38,7 @@
 
 #define DISC(x)
 
-#define VERSION_STR "ÁµÁµ¤ÎExºÚÃ¨°æ.4.2"
+#define VERSION_STR "ÁµÁµ¤ÎExºÚÃ¨°æ.4.5"
 
 // CExRabbitDlg ¶Ô»°¿ò
 using namespace Koishi;
@@ -169,6 +166,7 @@ public:
 	//¸¨Öúº¯Êý
 	int getIconIMG(IMGversion iv);
 	int getIconPIC(Koishi::colorFormat cf);
+	int getIconPIC(const PICinfo &pi);
 	enum enum_selectType{SINGLE_SELECT, MULTI_SELECT, ALL_SELECT};
 	void getSelected(CGoodListCtrl *listCtrl, int highLine, int targetPara, std::vector<int> &selected);
 	void adjustWindow(int w, int h);
@@ -433,4 +431,5 @@ public:
 	static UINT ThreadImageMakeNPKandSavePatch(void*context);
 	CString paraMakeNPKandSavePatch;
 	afx_msg void OnMenuImageMakeNPKandSavePatch();
+	afx_msg void OnClose();
 };

@@ -1,21 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
-      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -29,6 +21,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -36,13 +29,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -53,21 +40,16 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetName>blackcat</TargetName>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>blackcat</TargetName>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
-    <TargetName>blackcat</TargetName>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -106,35 +88,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <ValidateAllParameters>true</ValidateAllParameters>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </Midl>
-    <ResourceCompile>
-      <Culture>0x0804</Culture>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-    </Link>
-    <Midl>
-      <MkTypLibCompatible>false</MkTypLibCompatible>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </Midl>
     <ResourceCompile>
@@ -191,20 +149,6 @@
     <None Include="res\avatar_tool_button_8.bmp" />
     <None Include="res\avatar_tool_button_9.bmp" />
     <None Include="res\bitmap5.bmp" />
-    <None Include="res\char0.PNG" />
-    <None Include="res\char1.PNG" />
-    <None Include="res\char10.PNG" />
-    <None Include="res\char11.PNG" />
-    <None Include="res\char12.PNG" />
-    <None Include="res\char13.PNG" />
-    <None Include="res\char2.PNG" />
-    <None Include="res\char3.PNG" />
-    <None Include="res\char4.PNG" />
-    <None Include="res\char5.PNG" />
-    <None Include="res\char6.PNG" />
-    <None Include="res\char7.PNG" />
-    <None Include="res\char8.PNG" />
-    <None Include="res\char9.PNG" />
     <None Include="res\cursor1.cur" />
     <None Include="res\cursor2.cur" />
     <None Include="res\cursor3.cur" />
@@ -221,6 +165,7 @@
     <None Include="res\icon_format_LINK.ico" />
     <None Include="res\icon_format_LINK2.ico" />
     <None Include="res\icon_format_PALETTE.ico" />
+    <None Include="res\icon_format_PALETTE_CN.ico" />
     <None Include="res\icon_main.ico" />
     <None Include="res\icon_unkown.ico" />
     <None Include="res\icon_version_1.ico" />
@@ -244,6 +189,7 @@
     <None Include="res\part_button_7.bmp" />
     <None Include="res\part_button_8.bmp" />
     <None Include="res\part_button_9.bmp" />
+    <None Include="res\pic_icon.ico" />
     <None Include="res\png1.png" />
     <None Include="res\QRCODE.bmp" />
     <None Include="res\tool_button_1.bmp" />
@@ -276,13 +222,14 @@
     <None Include="res\tool_button_9x.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\General\Func.h" />
+    <ClInclude Include="..\General\GoodListCtrl.h" />
+    <ClInclude Include="..\General\Profile.h" />
     <ClInclude Include="AdjustColorDlg.h" />
     <ClInclude Include="DialogAbout.h" />
     <ClInclude Include="DialogNew.h" />
-    <ClInclude Include="DlgBar.h" />
     <ClInclude Include="ExRabbit.h" />
     <ClInclude Include="ExRabbitDlg.h" />
-    <ClInclude Include="Func.h" />
     <ClInclude Include="ModalAddMark.h" />
     <ClInclude Include="ModalAdjustCanvas.h" />
     <ClInclude Include="ModalAdjustColor.h" />
@@ -303,7 +250,6 @@
     <ClInclude Include="ModalPreference.h" />
     <ClInclude Include="ModalRename.h" />
     <ClInclude Include="ModalTransform.h" />
-    <ClInclude Include="Profile.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -311,15 +257,18 @@
     <ClInclude Include="TinyBar.h" />
     <ClInclude Include="TinyClipBoard.h" />
     <ClInclude Include="TinyColorSelect.h" />
+    <ClInclude Include="TinyFrame.h" />
     <ClInclude Include="TinySetBrush.h" />
     <ClInclude Include="ToolAvatar.h" />
     <ClInclude Include="ToolAvatarCharacterSelection.h" />
+    <ClInclude Include="ToolAvatarDownload.h" />
     <ClInclude Include="ToolAvatarIO.h" />
     <ClInclude Include="ToolAvatarLocalizer.h" />
     <ClInclude Include="ToolAvatarMark.h" />
     <ClInclude Include="ToolAvatarModelConfig.h" />
     <ClInclude Include="ToolAvatarModelSet.h" />
     <ClInclude Include="ToolAvatarRegister.h" />
+    <ClInclude Include="ToolAvatarStageConfig.h" />
     <ClInclude Include="ToolAvatarSuit.h" />
     <ClInclude Include="ToolAvatarSuitRegister.h" />
     <ClInclude Include="ToolDict.h" />
@@ -329,13 +278,14 @@
     <ClInclude Include="ToolSPK.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\General\Func.cpp" />
+    <ClCompile Include="..\General\GoodListCtrl.cpp" />
+    <ClCompile Include="..\General\Profile.cpp" />
     <ClCompile Include="AdjustColorDlg.cpp" />
     <ClCompile Include="DialogAbout.cpp" />
     <ClCompile Include="DialogNew.cpp" />
-    <ClCompile Include="DlgBar.cpp" />
     <ClCompile Include="ExRabbit.cpp" />
     <ClCompile Include="ExRabbitDlg.cpp" />
-    <ClCompile Include="Func.cpp" />
     <ClCompile Include="ModalAddMark.cpp" />
     <ClCompile Include="ModalAdjustCanvas.cpp" />
     <ClCompile Include="ModalAdjustColor.cpp" />
@@ -356,25 +306,26 @@
     <ClCompile Include="ModalPreference.cpp" />
     <ClCompile Include="ModalRename.cpp" />
     <ClCompile Include="ModalTransform.cpp" />
-    <ClCompile Include="Profile.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TinyAddMark.cpp" />
     <ClCompile Include="TinyBar.cpp" />
     <ClCompile Include="TinyClipBoard.cpp" />
     <ClCompile Include="TinyColorSelect.cpp" />
+    <ClCompile Include="TinyFrame.cpp" />
     <ClCompile Include="TinySetBrush.cpp" />
     <ClCompile Include="ToolAvatar.cpp" />
     <ClCompile Include="ToolAvatarCharacterSelection.cpp" />
+    <ClCompile Include="ToolAvatarDownload.cpp" />
     <ClCompile Include="ToolAvatarIO.cpp" />
     <ClCompile Include="ToolAvatarLocalizer.cpp" />
     <ClCompile Include="ToolAvatarMark.cpp" />
     <ClCompile Include="ToolAvatarModelConfig.cpp" />
     <ClCompile Include="ToolAvatarModelSet.cpp" />
     <ClCompile Include="ToolAvatarRegister.cpp" />
+    <ClCompile Include="ToolAvatarStageConfig.cpp" />
     <ClCompile Include="ToolAvatarSuit.cpp" />
     <ClCompile Include="ToolAvatarSuitRegister.cpp" />
     <ClCompile Include="ToolDict.cpp" />

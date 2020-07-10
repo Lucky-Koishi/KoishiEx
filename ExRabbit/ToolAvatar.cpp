@@ -14,6 +14,8 @@
 #include "ToolAvatarSuit.h"
 #include "ToolAvatarSuitRegister.h"
 #include "ToolAvatarIO.h"
+#include "ToolAvatarDownload.h"
+#include "TinyFrame.h"
 
 //自定义预先变量
 
@@ -137,6 +139,13 @@ BEGIN_MESSAGE_MAP(ToolAvatar, CDialogEx)
 	ON_COMMAND(ID_MENU_AVATARMODEL_REFRESH, &ToolAvatar::OnMenuAvatarmodelRefresh)
 	ON_COMMAND(ID_MENU_AVATARMODEL_REGISTER, &ToolAvatar::OnMenuAvatarmodelRegister)
 	ON_BN_CLICKED(IDC_BUTTON_TOOL12, &ToolAvatar::OnBnClickedButtonTool12)
+	ON_COMMAND(ID_MENU_LOCALIZE_MAP_COMBINE, &ToolAvatar::OnMenuLocalizeMapCombine)
+	ON_COMMAND(ID_MENU_LOCALIZE_MAP_RESORT, &ToolAvatar::OnMenuLocalizeMapResort)
+	ON_COMMAND(ID_MENU_LOCALIZE_SET_RESOURCE, &ToolAvatar::OnMenuLocalizeSetResource)
+	ON_COMMAND(ID_MENU_LOCALIZE_OPEN_RESOURCE, &ToolAvatar::OnMenuLocalizeOpenResource)
+	ON_COMMAND(ID_MENU_LOCALIZE_DOWNLOAD_RESOURCE, &ToolAvatar::OnMenuLocalizeDownloadResource)
+	ON_COMMAND(ID_MENU_SUIT_ANIMATION, &ToolAvatar::OnMenuSuitAnimation)
+	ON_BN_CLICKED(IDC_BUTTON_AFRAME, &ToolAvatar::OnBnClickedButtonAframe)
 END_MESSAGE_MAP()
 
 
@@ -244,8 +253,9 @@ BOOL ToolAvatar::OnInitDialog()
 	SET_CTRL(CEdit, IDC_EDIT_SUIT, 10, 310, 220, 470);
 	
 	//画布区域 x:10-220 475-685
-	SET_CTRL(CButton, IDC_BUTTON_PFRAME, 10, 690, 55, 715);
-	SET_CTRL(CButton, IDC_BUTTON_NFRAME, 60, 690, 105, 715);
+	SET_CTRL(CButton, IDC_BUTTON_PFRAME, 10, 690, 39, 715);
+	SET_CTRL(CButton, IDC_BUTTON_AFRAME, 43, 690, 72, 715);
+	SET_CTRL(CButton, IDC_BUTTON_NFRAME, 76, 690, 105, 715);
 	SET_CTRL(CComboBox, IDC_COMBO_ACTION, 110, 690, 220, 715);
 
 	int buttonSize = 30;
@@ -366,6 +376,7 @@ unsigned loadResource1(void*para){
 	long modelFrame[ACHARACTER_MAXCOUNT] = {
 		176, 0, 113, 0, 0, 0, 12, 0, 150, 0, 0, 0, 0, 0
 	};
+	dlg->stage.load(dlg->profile.getAvatarStagePath());
 	dlg->factory.changeFrame(modelCFrame[dlg->character]);
 	dlg->factory.updateImage();
 	dlg->currentPart = APART_COAT;
@@ -391,7 +402,9 @@ unsigned loadResource1(void*para){
 	Sleep(50);
 	dlg->bar.hide();
 	dlg->loading = false;
-	//dlg->factory.initialModelMaker();
+	if(dlg->factory.album[APART_BODY].content.size() == 0){
+		dlg->MessageBox(L"未能读取到数据喵，请先设置好资源文件夹喵！", L"提示喵");
+	}
 	return 0U;
 }
 void ToolAvatar::loadResource(){
@@ -689,6 +702,10 @@ void ToolAvatar::drawModel(int indexInPage){
 void ToolAvatar::drawAvatar(){
 	image imageAvatar;
 	factory.makeImage(basePoint, size(210, 210), imageAvatar);
+	if(stage.loaded){
+		imageAvatar.putBack(stage.backLayer);
+		imageAvatar.putFore(stage.foreLayer);
+	}
 	drawImage(imageAvatar, point(10, 475));
 }
 unsigned ToolAvatar::p(void*para){
@@ -1085,30 +1102,26 @@ void ToolAvatar::OnLButtonDown(UINT nFlags, CPoint point)
 			if(currentPart == APART_WEAPON){
 				int clickIndex = checkSelected + currentPage * modelInfo.countPerPage;
 				if(clickIndex < factory.weaponAlbum[currentWeaponIndex].content.size()){
+					PLAYING_PAUSE;
 					factory.changeWeapon(clickIndex);
 					lbContent->SetCurSel(clickIndex+1); 
 					showAvatarInfo();
 					updateSuitInfo();
 					drawModel(checkSelected);
 					drawModel(lastSelected);
-					if(!playing){
-						factory.updateImage();
-						drawAvatar();
-					}
+					PLAYING_CONTINUE;
 				}
 			}else{
 				int clickIndex = checkSelected + currentPage * modelInfo.countPerPage;
 				if(clickIndex < factory.album[currentPart].content.size()){
+					PLAYING_PAUSE;
 					factory.changeAvatar(currentPart, clickIndex);
 					lbContent->SetCurSel(clickIndex+1); 
 					showAvatarInfo();
 					updateSuitInfo();
 					drawModel(checkSelected);
 					drawModel(lastSelected);
-					if(!playing){
-						factory.updateImage();
-						drawAvatar();
-					}
+					PLAYING_CONTINUE;
 				}
 			}
 		}else{
@@ -1116,6 +1129,7 @@ void ToolAvatar::OnLButtonDown(UINT nFlags, CPoint point)
 			if(currentPart == APART_WEAPON){
 				int clickIndex = checkSelected + currentPage * modelInfo.countPerPage;
 				if(iconEnabled[clickIndex]){
+					PLAYING_PAUSE;
 					currentIconSelect = clickIndex;
 					queue q = map.findWeaponPosByIcon(map.weapon[currentWeaponIndex], CStrToStr(weaponIconClassified[character][currentWeaponIndex]+NumToCStr(clickIndex)));
 					if(q.size() == 0){
@@ -1130,14 +1144,12 @@ void ToolAvatar::OnLButtonDown(UINT nFlags, CPoint point)
 					updateSuitInfo();
 					drawModel(checkSelected);
 					drawModel(lastSelected);
-					if(!playing){
-						factory.updateImage();
-						drawAvatar();
-					}
+					PLAYING_CONTINUE;
 				}
 			}else{
 				int clickIndex = checkSelected + currentPage * modelInfo.countPerPage;
 				if(iconEnabled[clickIndex]){
+					PLAYING_PAUSE;
 					currentIconSelect = clickIndex;
 					queue q = map.findAvatarPosByIcon(currentPart, CStrToStr(avatarCString[currentPart]+NumToCStr(clickIndex)));
 					if(q.size() == 0){
@@ -1152,10 +1164,7 @@ void ToolAvatar::OnLButtonDown(UINT nFlags, CPoint point)
 					updateSuitInfo();
 					drawModel(checkSelected);
 					drawModel(lastSelected);
-					if(!playing){
-						factory.updateImage();
-						drawAvatar();
-					}
+					PLAYING_CONTINUE;
 				}
 			}
 		}
@@ -1201,49 +1210,6 @@ void ToolAvatar::OnRButtonDown(UINT nFlags, CPoint point)
 			}
 		}else{
 			//图标模式
-			/*if(currentPart == APART_WEAPON){
-				int clickIndex = checkSelected + currentPage * modelInfo.countPerPage;
-				if(iconEnabled[clickIndex]){
-					currentIconSelect = clickIndex;
-					queue q = map.findWeaponPosByIcon(map.weapon[currentWeaponIndex], CStrToStr(weaponIconClassified[character][currentWeaponIndex]+NumToCStr(clickIndex)));
-					if(q.size() == 0){
-						factory.changeWeapon(-1);
-						lbContent->SetCurSel(0); 
-					}else{
-						long newID = factory.weaponAlbum[currentWeaponIndex].findWeaponID(map.weaponContent[currentWeaponIndex][q[0]].avatarID);
-						factory.changeWeapon(newID);
-						lbContent->SetCurSel(newID+1);
-					}
-					showAvatarInfo();
-					updateSuitInfo();
-					drawModel();
-					if(!playing){
-						factory.updateImage();
-						drawAvatar();
-					}
-				}
-			}else{
-				int clickIndex = checkSelected + currentPage * modelInfo.countPerPage;
-				if(iconEnabled[clickIndex]){
-					currentIconSelect = clickIndex;
-					queue q = map.findAvatarPosByIcon(currentPart, CStrToStr(avatarCString[currentPart]+NumToCStr(clickIndex)));
-					if(q.size() == 0){
-						factory.changeAvatar(currentPart, -1);
-						lbContent->SetCurSel(0); 
-					}else{
-						long newID = factory.album[currentPart].findAvatarID(map.avatarContent[currentPart][q[0]].avatarID);
-						factory.changeAvatar(currentPart, newID);
-						lbContent->SetCurSel(newID+1);
-					}
-					showAvatarInfo();
-					updateSuitInfo();
-					drawModel();
-					if(!playing){
-						factory.updateImage();
-						drawAvatar();
-					}
-				}
-			}*/
 		}
 		break;
 	}
@@ -1254,6 +1220,7 @@ void ToolAvatar::OnCbnSelchangeComboWeapon(){
 	// TODO: 在此添加控件通知处理程序代码
 	if(loading)
 		return;
+	PLAYING_PAUSE;
 	currentWeaponIndex = cbWeaponType->GetCurSel();
 	factory.changeWeaponType(currentWeaponIndex);
 	updateList();
@@ -1268,10 +1235,7 @@ void ToolAvatar::OnCbnSelchangeComboWeapon(){
 	updateSuitInfo();
 	showAvatarInfo();
 	drawModel(-1);
-	if(!playing){
-		factory.updateImage();
-		drawAvatar();
-	}
+	PLAYING_CONTINUE;
 }
 
 
@@ -1279,6 +1243,7 @@ void ToolAvatar::OnLbnSelchangeListContent(){
 	// TODO: 在此添加控件通知处理程序代码
 	if(loading)
 		return;
+	PLAYING_PAUSE;
 	if(currentPart == APART_WEAPON){
 		factory.changeWeapon(lbContent->GetCurSel() - 1);
 		if(!isIconic){
@@ -1303,10 +1268,7 @@ void ToolAvatar::OnLbnSelchangeListContent(){
 	};
 	updateSuitInfo();
 	showAvatarInfo();
-	if(!playing){
-		factory.updateImage();
-		drawAvatar();
-	}
+	PLAYING_CONTINUE;
 }
 
 
@@ -1319,6 +1281,7 @@ void ToolAvatar::OnBnClickedButtonPframe()
 		return;
 	if(currentFrame > 0 && !playing){
 		currentFrame--;
+		GET_CTRL(CButton, IDC_BUTTON_AFRAME)->SetWindowText(NumToCStr(currentFrame));
 		factory.changeFrame(currentFrame);
 		factory.updateImage();
 		drawAvatar();
@@ -1335,12 +1298,34 @@ void ToolAvatar::OnBnClickedButtonNframe()
 		return;
 	if(currentFrame < maxFrame - 1 && !playing){
 		currentFrame++;
+		GET_CTRL(CButton, IDC_BUTTON_AFRAME)->SetWindowText(NumToCStr(currentFrame));
 		factory.changeFrame(currentFrame);
 		factory.updateImage();
 		drawAvatar();
 	}
 }
 
+
+void ToolAvatar::OnBnClickedButtonAframe() {
+	// TODO:  在此添加控件通知处理程序代码
+	if(loading)
+		return;
+	if(playing)
+		return;
+	if(maxFrame < 0)
+		return;
+	TinyFrame dlg;
+	dlg.cur = currentFrame;
+	dlg.min = 0;
+	dlg.max = maxFrame - 1;
+	if(IDOK == dlg.DoModal()) {
+		currentFrame = dlg.output;
+		GET_CTRL(CButton, IDC_BUTTON_AFRAME)->SetWindowText(NumToCStr(currentFrame));
+		factory.changeFrame(currentFrame);
+		factory.updateImage();
+		drawAvatar();
+	}
+}
 
 void ToolAvatar::OnBnClickedButtonTool1()
 {
@@ -1417,16 +1402,14 @@ void ToolAvatar::OnBnClickedButtonTool5()
 	// TODO: 脱下装扮
 	if(loading)
 		return;
+	PLAYING_PAUSE;
 	if(currentPart == APART_WEAPON){
 		factory.changeWeapon(-1);
 	}else{
 		factory.changeAvatar(currentPart, -1);
 	}
 	updateSuitInfo();
-	if(!playing){
-		factory.updateImage();
-		drawAvatar();
-	}
+	PLAYING_CONTINUE;
 }
 
 
@@ -1774,6 +1757,52 @@ void ToolAvatar::buildMixedIMG(IMGobject &io){
 	newIO.convertToV4(outIOList, clrList, false);
 	io = outIOList[0];
 }
+unsigned buildGIF(void*para){
+	ToolAvatar* dlg = (ToolAvatar*)para;
+	IMGobject picIO;
+	dlg->buildMixedIMG(picIO);
+	std::vector<long> frameList;
+	if(!dlg->playing)
+		dlg->setAnimation(10);
+	for(int i = 0;i<~dlg->animation;i++)
+		frameList.push_back(dlg->animation[i]);
+	std::vector<image> matList;
+	long imgX1, imgX2, imgY1, imgY2;
+	picIO.PICgetTotalBound(imgX1, imgX2, imgY1, imgY2);
+	for(int i=0;i<frameList.size();i++){
+		dlg->bar.setInfo(L"正在处理第"+NumToCStr(frameList[i])+L"帧喵……",i);
+		image mOrigin, mExpanded;
+		PICinfo pInfo;
+		picIO.PICgetInfo(picIO.linkFind(frameList[i]), pInfo); 
+		picIO.PICextract(picIO.linkFind(frameList[i]), mOrigin, GET_DLG_CTRL(CComboBox, IDC_COMBO_PRO)->GetCurSel());
+		int x1old = pInfo.basePt.X;
+		int y1old = pInfo.basePt.Y;
+		int x2old = pInfo.basePt.X+pInfo.picSize.W-1;
+		int y2old = pInfo.basePt.Y+pInfo.picSize.H-1;
+		int x1new = imgX1;
+		int y1new = imgY1;
+		int x2new = imgX2;
+		int y2new = imgY2;
+		int x1 = min(x1old,x1new);
+		int x2 = max(x2old,x2new);
+		int y1 = min(y1old,y1new);
+		int y2 = max(y2old,y2new);
+		mExpanded.create(y2-y1+1,x2-x1+1);
+		mExpanded.putFore(mOrigin, LAY, point(x1old-x1, y1old-y1));
+		mExpanded.clip(y1new-y1, y2new-y1+1, x1new-x1, x2new-x1+1);
+		matList.push_back(mExpanded);
+		mOrigin.destory();
+		mExpanded.destory();
+	}
+	dlg->bar.setInfo(L"正在生成GIF喵……",frameList.size());
+	KoishiImageTool::GIF::GIFobject go;
+	go.input(matList, picIO.paletteData[0], dlg->profile.miniSecPerFrame);
+	CString fileName = dlg->profile.getAvatarMapPath()+careerName[dlg->character]+L"套装"+CTime::GetTickCount().Format(L"%H%M%S")+L".GIF";
+	go.makeFile(CStrToStr(fileName));
+	dlg->MessageBox(L"已保存为"+fileName+L"了喵。",L"提示喵");
+	dlg->bar.hide();
+	return 0U;
+}
 unsigned buildNPK1(void*para){
 	ToolAvatar* dlg = (ToolAvatar*)para;
 	CExRabbitDlg *parent = (CExRabbitDlg*)(dlg->context);
@@ -1783,6 +1812,10 @@ unsigned buildNPK1(void*para){
 	parent->no.release();
 	parent->no.create();
 	parent->no.IMGpush(picIO, "meow/本体图层.img");
+	if(dlg->factory.album[APART_COAT].layerNameList.size() == 0) {
+		dlg->MessageBox(L"制作错误喵，必须制定一个上衣部件作为本体喵！", L"提示喵");
+		return 0U;
+	}
 	parent->no.pushLink(0, dlg->factory.album[APART_COAT].layerNameList[0]);
 	parent->no.IMGpush(emptyIO, "meow/隐藏图层.img");
 	for(int iPart = 0;iPart<APART_MAXCOUNT;iPart++){
@@ -2071,10 +2104,276 @@ void ToolAvatar::OnCbnSelchangeComboAction()
 
 void ToolAvatar::OnMenuLocalizeMapEdit()
 {
-	// TODO: 在此添加命令处理程序代码
+	//打开映射表文件
 	ShellExecute(NULL, L"open", profile.getAvatarMapPath() + careerName[character] + L"装扮表.txt", NULL, NULL, SW_SHOWNORMAL);
 }
 
+
+void ToolAvatar::OnMenuLocalizeMapCombine()
+{
+	//合并其他映射表
+	if(IDYES != MessageBox(L"要先确认你要合并的映射表的职业跟当前职业一样。\r\n当前职业为："+careerName[character]+L"，确认喵？",L"提示喵", MB_YESNO))
+		return;
+	CString defExt = L"映射表文件(*.TXT)|*.TXT";
+	CString extFilter = L"映射表文件(*.TXT)|*.TXT||";
+	CFileDialog dlg(true, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
+	if(IDOK == dlg.DoModal()){
+		AvatarMap newMap;
+		newMap.initial(character);
+		newMap.load(CStrToStr(dlg.GetPathName()));
+		//导入套装信息
+		int count = 0;
+		int totalCount = 0;
+		for(int i = 0;i<newMap.suitContent.size();i++){
+			totalCount ++;
+			const AvatarSuitEntry &ase = newMap.suitContent[i];
+			if(map.checkSuitEntry(ase.suitName, ase.avatarID))
+				continue;
+			map.addSuitEntry(ase.suitName, ase.avatarID);
+			count ++;
+		}
+		for(int i = 0;i<newMap.weapon.size();i++){
+			const WeaponType &wt = newMap.weapon[i];
+			for(int j = 0;j<newMap.weaponContent[i].size();j++){
+				totalCount ++;
+				const AvatarMapEntry &ame = newMap.weaponContent[i][j];
+				if(map.checkWeaponEntry(wt, ame.avatarID, ame.iconName, ame.avatarTitle))
+					continue;
+				map.addWeaponEntry(wt, ame.avatarID, ame.iconName, ame.avatarTitle);
+				count ++;
+			}
+		}
+		for(int i = 0;i<newMap.avatarContent.size();i++){
+			for(int j = 0;j<newMap.avatarContent[i].size();j++){
+				totalCount ++;
+				const AvatarMapEntry &ame = newMap.avatarContent[i][j];
+				if(map.checkAvatarEntry((AvatarPart)i, ame.avatarID, ame.iconName, ame.avatarTitle))
+					continue;
+				map.addAvatarEntry((AvatarPart)i, ame.avatarID, ame.iconName, ame.avatarTitle);
+				count ++;
+			}
+		}
+		map.save(CStrToStr(profile.getAvatarMapPath() + careerName[character] + L"装扮表.txt"));
+		MessageBox(L"导入完毕喵！\r\n已成功导入："+NumToCStr(count) + L"条，跳过"+NumToCStr(totalCount - count) +L"条。",L"提示喵");
+		updateList();
+	}
+}
+
+
+void ToolAvatar::OnMenuLocalizeMapResort()
+{
+	//映射表去重复项
+	if(IDYES != MessageBox(L"即将搜寻并去除映射表中的重复项，确定喵？",L"提示喵", MB_YESNO))
+		return;
+	map.save(CStrToStr(profile.getAvatarMapPath() + careerName[character] + L"装扮表(清理前的).txt"));
+	long i, j;
+	std::vector<long> deleteList, deleteListSorted;
+	deleteList.clear();
+	deleteListSorted.clear();
+	int count = 0;
+	for(i = 0;i<map.suitContent.size();i++){
+		//先查看i是不是处在待删除的名单上
+		bool iIsDeleted = false;
+		for(int k = 0;k<deleteList.size();k++){
+			if(i == deleteList[k]){
+				iIsDeleted = true;
+				break;
+			}
+		}
+		if(iIsDeleted)
+			continue;
+		//以i做对比，寻找j
+		const AvatarSuitEntry &ase1 = map.suitContent[i];
+		for(j = i + 1;j<map.suitContent.size();j++){
+			//先查看j是不是处在待删除的名单上
+			bool jIsDeleted = false;
+			for(int k = 0;k<deleteList.size();k++){
+				if(j == deleteList[k]){
+					iIsDeleted = true;
+					break;
+				}
+			}
+			if(jIsDeleted)
+				continue;	
+			//二者都没删除，开始进行对比
+			const AvatarSuitEntry &ase2 = map.suitContent[j];
+			bool allSame = true;
+			for(int k = 0;k<9;k++){
+				if(ase1.avatarID[k] != ase2.avatarID[k]){
+					allSame = false;
+					break;
+				}
+			}
+			if(!allSame)
+				continue;
+			//如果套装ID完全一样，将名字长的塞进删除名单
+			if(ase2.suitName.find(ase1.suitName) != str::npos){
+				deleteList.push_back(j);
+			}else if(ase1.suitName.find(ase2.suitName) != str::npos){
+				deleteList.push_back(i);
+				break;
+			}
+		}
+	}
+	//对deleteList进行排序
+	for(i = 0;i<deleteList.size();i++){
+		bool hasFound = false;
+		for(j = 0;j<deleteListSorted.size();j++){
+			if(deleteListSorted[j] > deleteList[i]){
+				hasFound = true;
+				deleteListSorted.insert(deleteListSorted.begin() + j, deleteList[i]);
+				break;
+			}
+		}
+		if(!hasFound){
+			deleteListSorted.push_back(deleteList[i]);
+		}
+	}
+	for(i = 0;i<deleteListSorted.size();i++){
+		count ++;
+		map.deleteSuitEntry(deleteListSorted[deleteList.size() - i - 1]);
+	}
+
+
+	for(int p = 0;p<map.avatarContent.size();p++){
+		deleteList.clear();
+		deleteListSorted.clear();
+		for(i = 0;i<map.avatarContent[p].size();i++){
+			//先查看i是不是处在待删除的名单上
+			bool iIsDeleted = false;
+			for(int k = 0;k<deleteList.size();k++){
+				if(i == deleteList[k]){
+					iIsDeleted = true;
+					break;
+				}
+			}
+			if(iIsDeleted)
+				continue;
+			//以i做对比，寻找j
+			const AvatarMapEntry &ame1 = map.avatarContent[p][i];
+			for(j = i + 1;j<map.avatarContent[p].size();j++){
+				//先查看j是不是处在待删除的名单上
+				bool jIsDeleted = false;
+				for(int k = 0;k<deleteList.size();k++){
+					if(j == deleteList[k]){
+						jIsDeleted = true;
+						break;
+					}
+				}
+				if(jIsDeleted)
+					continue;	
+				//二者都没删除，开始进行对比
+				const AvatarMapEntry &ame2 = map.avatarContent[p][j];
+				bool allSame = true;
+				if(ame1.avatarID != ame2.avatarID)
+					allSame = false;
+				if(ame1.iconName.find(ame2.iconName) == str::npos)
+					allSame = false;
+				if(!allSame)
+					continue;
+				//如果套装ID完全一样，将名字长的塞进删除名单
+				if(ame2.avatarTitle.find(ame1.avatarTitle) != str::npos){
+					deleteList.push_back(j);
+				}else if(ame1.avatarTitle.find(ame2.avatarTitle) != str::npos){
+					deleteList.push_back(i);
+					break;
+				}
+			}
+		}
+		//对deleteList进行排序
+		for(i = 0;i<deleteList.size();i++){
+			bool hasFound = false;
+			for(j = 0;j<deleteListSorted.size();j++){
+				if(deleteListSorted[j] > deleteList[i]){
+					hasFound = true;
+					deleteListSorted.insert(deleteListSorted.begin() + j, deleteList[i]);
+					break;
+				}
+			}
+			if(!hasFound){
+				deleteListSorted.push_back(deleteList[i]);
+			}
+		}
+		for(i = 0;i<deleteListSorted.size();i++){
+			count ++;
+			map.deleteAvatarEntry((AvatarPart)p, deleteListSorted[deleteList.size() - i - 1]);
+		}
+	}
+
+
+	for(int h = 0;h<map.weaponContent.size();h++){
+		deleteList.clear();
+		deleteListSorted.clear();
+		for(i = 0;i<map.weaponContent[h].size();i++){
+			//先查看i是不是处在待删除的名单上
+			bool iIsDeleted = false;
+			for(int k = 0;k<deleteList.size();k++){
+				if(i == deleteList[k]){
+					iIsDeleted = true;
+					break;
+				}
+			}
+			if(iIsDeleted)
+				continue;
+			//以i做对比，寻找j
+			const AvatarMapEntry &ame1 = map.weaponContent[h][i];
+			for(j = i + 1;j<map.weaponContent[h].size();j++){
+				//先查看j是不是处在待删除的名单上
+				bool jIsDeleted = false;
+				for(int k = 0;k<deleteList.size();k++){
+					if(j == deleteList[k]){
+						jIsDeleted = true;
+						break;
+					}
+				}
+				if(jIsDeleted)
+					continue;	
+				//二者都没删除，开始进行对比
+				const AvatarMapEntry &ame2 = map.weaponContent[h][j];
+				bool allSame = true;
+				if(ame1.avatarID != ame2.avatarID)
+					allSame = false;
+				if(ame1.iconName.find(ame2.iconName) == str::npos)
+					allSame = false;
+				if(!allSame)
+					continue;
+				//如果套装ID完全一样，将名字长的塞进删除名单
+				if(ame2.avatarTitle.find(ame1.avatarTitle) != str::npos){
+					deleteList.push_back(j);
+				}else if(ame1.avatarTitle.find(ame2.avatarTitle) != str::npos){
+					deleteList.push_back(i);
+					break;
+				}
+			}
+		}
+		//对deleteList进行排序
+		for(i = 0;i<deleteList.size();i++){
+			bool hasFound = false;
+			for(j = 0;j<deleteListSorted.size();j++){
+				if(deleteListSorted[j] > deleteList[i]){
+					hasFound = true;
+					deleteListSorted.insert(deleteListSorted.begin() + j, deleteList[i]);
+					break;
+				}
+			}
+			if(!hasFound){
+				deleteListSorted.push_back(deleteList[i]);
+			}
+		}
+		WeaponType wt = map.weapon[h];
+		for(i = 0;i<deleteListSorted.size();i++){
+			count ++;
+			map.deleteWeaponEntry(wt, deleteListSorted[deleteList.size() - i - 1]);
+		}
+	}
+	if(count == 0){
+		MessageBox(L"已经清理不动了喵！",L"提示喵");
+	}else{
+		map.save(CStrToStr(profile.getAvatarMapPath() + careerName[character] + L"装扮表.txt"));
+		MessageBox(L"整理完毕，总共清除了"+NumToCStr(count)+L"个重复的条目喵！",L"提示喵");
+		updateList();
+	}
+}
 
 void ToolAvatar::OnMenuSuitList()
 {
@@ -2082,6 +2381,7 @@ void ToolAvatar::OnMenuSuitList()
 	ToolAvatarSuit dlg;
 	dlg.charInput = character;
 	if(IDOK == dlg.DoModal()){
+		PLAYING_PAUSE;
 		for(int p = 0;p<APART_MAXCOUNT;p++){
 			long index = factory.album[p].findAvatarID(dlg.outputID[p]);
 			factory.changeAvatar((AvatarPart)p, index);
@@ -2092,10 +2392,7 @@ void ToolAvatar::OnMenuSuitList()
 		}
 		updateSuitInfo();
 		drawModel(-1);
-		if(!playing){
-			factory.updateImage();
-			drawAvatar();
-		}
+		PLAYING_CONTINUE;
 	}
 }
 
@@ -2152,6 +2449,7 @@ void ToolAvatar::OnMenuSuitImport()
 		CString entryStr;
 		contentStr = contentStr.Left(contentStr.GetLength() - 1);
 		int np = 0;
+		PLAYING_PAUSE;
 		while(AfxExtractSubString(entryStr, contentStr, np, ',')){
 			np ++;
 			CString partStr, idStr;
@@ -2170,10 +2468,7 @@ void ToolAvatar::OnMenuSuitImport()
 		}
 		updateSuitInfo();
 		drawModel(-1);
-		if(!playing){
-			factory.updateImage();
-			drawAvatar();
-		}
+		PLAYING_CONTINUE;
 	}
 }
 
@@ -2239,7 +2534,7 @@ void ToolAvatar::OnBnClickedButtonTool12()
 	GET_CTRL(CEdit, IDC_EDIT_SEARCH)->GetWindowText(findStr);
 	if(findStr.GetLength() == 0)
 		return;
-	for(int i = 0;i<lbContent->GetCount();i++){
+	for(int i = lbContent->GetCurSel() + 1; i<lbContent->GetCount(); i++) {
 		CString cstr;
 		lbContent->GetText(i, cstr);
 		if(cstr.Find(findStr) != -1){
@@ -2257,4 +2552,63 @@ void ToolAvatar::OnOK()
 	// TODO: 在此添加专用代码和/或调用基类
 	//Do nothing
 	//CDialogEx::OnOK();
+}
+
+
+void ToolAvatar::OnMenuLocalizeSetResource()
+{
+	// TODO: 在此添加命令处理程序代码
+	HWND hwnd= GetSafeHwnd();
+	CString filePath= L"";
+	LPMALLOC pMalloc;
+	if(::SHGetMalloc(&pMalloc) == NOERROR){
+		BROWSEINFO bi;
+		TCHAR pszBuffer[MAX_PATH];
+		LPITEMIDLIST pidl;   
+		bi.hwndOwner = hwnd;
+		bi.pidlRoot	= NULL;
+		bi.pszDisplayName = pszBuffer;
+		bi.lpszTitle = _T("选择资源文件夹");
+		bi.ulFlags =  BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS | BIF_RETURNFSANCESTORS;
+		bi.lpfn = NULL;
+		bi.lParam = 0;
+		bi.iImage = 0;
+		if((pidl =::SHBrowseForFolder(&bi)) != NULL){  
+			if(::SHGetPathFromIDList(pidl, pszBuffer)){
+				filePath = pszBuffer;
+			}
+			pMalloc->Free(pidl);
+			if(filePath.GetLength()<=1){
+				MessageBox(L"并不是有效的文件夹喵！",L"提示喵");
+			}else{
+				profile.avatarPath = filePath;
+				profile.saveProfile();
+				MessageBox(L"已设置资源文件夹喵！");
+				chooseCharacter(character);
+			}
+		}
+		pMalloc->Release();
+	}
+}
+
+
+void ToolAvatar::OnMenuLocalizeOpenResource()
+{
+	// TODO: 在此添加命令处理程序代码
+	ShellExecute(NULL, L"open", profile.getAvatarPath(), NULL, NULL, SW_SHOWNORMAL);
+}
+
+
+void ToolAvatar::OnMenuLocalizeDownloadResource()
+{
+	// TODO: 在此添加命令处理程序代码
+	ToolAvatarDownload dlg;
+	dlg.DoModal();
+}
+
+
+void ToolAvatar::OnMenuSuitAnimation()
+{
+	// TODO: 在此添加命令处理程序代码
+	AfxBeginThread(buildGIF, this);
 }

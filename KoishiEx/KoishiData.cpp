@@ -2,7 +2,8 @@
 #include "KoishiEx.h"
 #include "sha256.h"
 
-#pragma comment(lib, "zlib.lib")
+#pragma comment(lib, "../general/zlibstat.lib")
+#define ZLIB_WINAPI
 #include "zlib.h"
 #include "bz2.h"
 

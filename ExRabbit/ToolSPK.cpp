@@ -247,7 +247,7 @@ INT CToolSPK::GetInternetFile(const CString strUrl,const CString strSavePath){
 	//Ìá½»ÇëÇó
 	try{
 		pHtFile->SendRequest();  
-	}catch(CException *e){
+	}catch(CException *){
 		intsess.Close();
 		delete pHtCon;pHtCon = NULL;  
 		delete pHtFile;pHtFile = NULL;  

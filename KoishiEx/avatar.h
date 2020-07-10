@@ -230,6 +230,11 @@ namespace KoishiAvatar{
 		void deleteWeaponEntry(const WeaponType &type, const long &pos);
 		void deleteSuitEntry(const long &pos);
 	public:
+		//≤È÷ÿ
+		bool checkAvatarEntry(const AvatarPart &part, const long &ID, const str &iconName, const str &avatarName);
+		bool checkWeaponEntry(const WeaponType &type, const long &ID, const str &iconName, const str &avatarName);
+		bool checkSuitEntry(const str &suitName, const long id[9]);
+	public:
 		//≤È—Ø
 		queue findAvatarPosByIcon(const AvatarPart &part, const str &iconName);
 		queue findAvatarPos(const AvatarPart &part, const long &ID);
