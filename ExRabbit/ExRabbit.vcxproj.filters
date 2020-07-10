@@ -394,9 +394,6 @@
     <ClInclude Include="DialogAbout.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ToolSPK.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="ToolForceEx.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -451,16 +448,7 @@
     <ClInclude Include="ModalRename.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ModalInsertImage.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="ModalPreference.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ModalImageHide.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ModalImageRemove.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ModalLock.h">
@@ -470,12 +458,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TinyClipBoard.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ModalCopyInsert.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ModalCopyReplace.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ToolPatch.h">
@@ -529,6 +511,27 @@
     <ClInclude Include="TinyFrame.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ToolDownload.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalAdvancedMix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyIMGSelect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalConflictWarning.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinySetName.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalSaveWarning.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolStat.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExRabbit.cpp">
@@ -550,9 +553,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="DialogAbout.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ToolSPK.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ToolForceEx.cpp">
@@ -609,16 +609,7 @@
     <ClCompile Include="ModalRename.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ModalInsertImage.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="ModalPreference.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ModalImageHide.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ModalImageRemove.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ModalLock.cpp">
@@ -628,12 +619,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TinyClipBoard.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ModalCopyInsert.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ModalCopyReplace.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ToolPatch.cpp">
@@ -687,10 +672,36 @@
     <ClCompile Include="TinyFrame.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ToolDownload.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalAdvancedMix.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyIMGSelect.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalConflictWarning.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinySetName.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalSaveWarning.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolStat.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ExRabbit.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\avatar_tool_button_12.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

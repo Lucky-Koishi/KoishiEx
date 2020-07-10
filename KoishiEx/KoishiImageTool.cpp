@@ -1111,7 +1111,7 @@ bool GIF::GIFobject::output(image &mat, int frameID){
 	}
 	for(int i = 0;i<mat.getElemCount();i++){
 		if(i < out.length){
-			mat.push(cl[out[i]]);
+			mat.setElem(i, cl[out[i]]);
 		}
 	}
 	return true;

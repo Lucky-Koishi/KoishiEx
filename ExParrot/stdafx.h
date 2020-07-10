@@ -38,27 +38,6 @@
 #include <afxcontrolbars.h>     // 功能区和控件条的 MFC 支持
 
 
-
-
-#define GET_CTRL(theClass, theID) (( theClass * )GetDlgItem( theID ))
-#define GET_DLG_CTRL(theClass, theID) (( theClass * )dlg->GetDlgItem( theID ))
-#define ENABLE_CTRL(theID, newStatus) (GetDlgItem( theID )->EnableWindow(newStatus))
-#define CHECK_CTRL(theID, newStatus) (GET_CTRL(CButton, theID)->SetCheck(newStatus))
-#define SET_CTRL(theClass, theID, left, top, right, bottom) GET_CTRL(theClass, theID)->SetWindowPos(NULL,left,top,(right)-(left),(bottom)-(top),SWP_NOZORDER)
-
-#define MOVEW(x) CRect rect;GetClientRect(&rect);ClientToScreen(&rect);x.SetWindowPos(this, rect.left+100, rect.top+100, 0, 0 , SWP_NOSIZE)
-#define CREATEW(x,y) x.Create(y,this);x.ShowWindow(SW_HIDE)
-
-#define CHECK_VALID(x)				if(!(x)){return;}			
-#define CHECK_VALID_RETURN(x)		if(!(x)){return 0;}
-#define CHECK_VALID_CONTINUE(x)		if(!(x)){continue;}
-#define CHECK_VALID_BREAK(x)		if(!(x)){break;}
-
-
-
-
-
-
 #ifdef _UNICODE
 #if defined _M_IX86
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -69,6 +48,6 @@
 #endif
 #endif
 
-
-
-#include "Func.h"
+#include "../General/Func.h"
+#include "../General/GoodListCtrl.h"
+#include "../General/Profile.h"

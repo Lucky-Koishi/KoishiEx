@@ -128,46 +128,69 @@
     <None Include="res\tool_button_9.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\General\Func.h" />
+    <ClInclude Include="..\General\GoodListCtrl.h" />
+    <ClInclude Include="..\General\Profile.h" />
     <ClInclude Include="ExParrot.h" />
     <ClInclude Include="ExParrotDlg.h" />
-    <ClInclude Include="Func.h" />
-    <ClInclude Include="GoodListCtrl.h" />
-    <ClInclude Include="ModalPreference2.h" />
-    <ClInclude Include="ModalRename.h" />
-    <ClInclude Include="ModalSoundHide.h" />
-    <ClInclude Include="ModalSoundInsert.h" />
-    <ClInclude Include="Profile.h" />
+    <ClInclude Include="ModalConflictWarning%28white%29.h" />
+    <ClInclude Include="ModalPreference%28white%29.h" />
+    <ClInclude Include="ModalRename%28white%29.h" />
+    <ClInclude Include="ModalSaveWarning%28white%29.h" />
+    <ClInclude Include="Music.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TinyAdjustSpeed.h" />
     <ClInclude Include="TinyAdjustVolume.h" />
-    <ClInclude Include="TinyBar.h" />
+    <ClInclude Include="TinyBar%28white%29.h" />
     <ClInclude Include="TinyEcho.h" />
+    <ClInclude Include="TinyNoteBar.h" />
+    <ClInclude Include="TinySNDSelect.h" />
+    <ClInclude Include="TinySetName%28white%29.h" />
     <ClInclude Include="TinyStretch.h" />
-    <ClInclude Include="ToolSPK2.h" />
+    <ClInclude Include="ToolDownload%28white%29.h" />
+    <ClInclude Include="ToolPiano.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\General\Func.cpp" />
+    <ClCompile Include="..\General\GoodListCtrl.cpp" />
+    <ClCompile Include="..\General\Profile.cpp" />
     <ClCompile Include="ExParrot.cpp" />
     <ClCompile Include="ExParrotDlg.cpp" />
-    <ClCompile Include="Func.cpp" />
-    <ClCompile Include="GoodListCtrl.cpp" />
-    <ClCompile Include="ModalPreference2.cpp" />
-    <ClCompile Include="ModalRename.cpp" />
-    <ClCompile Include="ModalSoundHide.cpp" />
-    <ClCompile Include="ModalSoundInsert.cpp" />
-    <ClCompile Include="Profile.cpp" />
+    <ClCompile Include="ModalConflictWarning%28white%29.cpp" />
+    <ClCompile Include="ModalPreference%28white%29.cpp" />
+    <ClCompile Include="ModalRename%28white%29.cpp" />
+    <ClCompile Include="ModalSaveWarning%28white%29.cpp" />
+    <ClCompile Include="Music.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TinyAdjustSpeed.cpp" />
     <ClCompile Include="TinyAdjustVolume.cpp" />
-    <ClCompile Include="TinyBar.cpp" />
+    <ClCompile Include="TinyBar%28white%29.cpp" />
     <ClCompile Include="TinyEcho.cpp" />
+    <ClCompile Include="TinyNoteBar.cpp" />
+    <ClCompile Include="TinySNDSelect.cpp" />
+    <ClCompile Include="TinySetName%28white%29.cpp" />
     <ClCompile Include="TinyStretch.cpp" />
-    <ClCompile Include="ToolSPK2.cpp" />
+    <ClCompile Include="ToolDownload%28white%29.cpp" />
+    <ClCompile Include="ToolPiano.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ExParrot.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\bitmap1.bmp" />
+    <Image Include="res\scroll_bar_down_1.bmp" />
+    <Image Include="res\scroll_bar_down_2.bmp" />
+    <Image Include="res\scroll_bar_down_3.bmp" />
+    <Image Include="res\scroll_bar_up_1.bmp" />
+    <Image Include="res\scroll_bar_up_2.bmp" />
+    <Image Include="res\scroll_bar_up_3.bmp" />
+    <Image Include="res\tool_button_14.bmp" />
+    <Image Include="res\tool_button_15.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -114,27 +114,6 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Func.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="GoodListCtrl.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Profile.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ModalRename.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ModalSoundHide.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ModalSoundInsert.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="TinyBar.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="TinyAdjustVolume.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -144,10 +123,49 @@
     <ClInclude Include="TinyEcho.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ToolSPK2.h">
+    <ClInclude Include="..\General\Func.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ModalPreference2.h">
+    <ClInclude Include="..\General\GoodListCtrl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\General\Profile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinySNDSelect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyBar%28white%29.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalConflictWarning%28white%29.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalRename%28white%29.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalSaveWarning%28white%29.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalPreference%28white%29.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinySetName%28white%29.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolDownload%28white%29.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyAdjustSpeed.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolPiano.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Music.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyNoteBar.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -161,27 +179,6 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Func.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Profile.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="GoodListCtrl.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ModalRename.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ModalSoundHide.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ModalSoundInsert.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="TinyBar.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="TinyAdjustVolume.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -191,10 +188,49 @@
     <ClCompile Include="TinyEcho.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ToolSPK2.cpp">
+    <ClCompile Include="..\General\Func.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ModalPreference2.cpp">
+    <ClCompile Include="..\General\GoodListCtrl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\General\Profile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinySNDSelect.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyBar%28white%29.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalConflictWarning%28white%29.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalPreference%28white%29.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalRename%28white%29.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalSaveWarning%28white%29.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinySetName%28white%29.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolDownload%28white%29.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyAdjustSpeed.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolPiano.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Music.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyNoteBar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -202,5 +238,34 @@
     <ResourceCompile Include="ExParrot.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\bitmap1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\tool_button_14.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\tool_button_15.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\scroll_bar_down_1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\scroll_bar_down_2.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\scroll_bar_down_3.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\scroll_bar_up_1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\scroll_bar_up_2.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\scroll_bar_up_3.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

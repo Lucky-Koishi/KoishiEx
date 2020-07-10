@@ -149,7 +149,7 @@ void KoishiExpand::KoishiMarkTool::CharMatLarge(char p, Koishi::image &mat, Kois
 	mat.create(10,10);
 	int i;
 	for(i=0;i<100;i++){
-		mat.push(tinyChar[situ][i] ? clr : color(0, 0, 0, 0));
+		mat.setElem(i, tinyChar[situ][i] ? clr : color(0, 0, 0, 0));
 	}
 }
 void KoishiExpand::KoishiMarkTool::StrMatLarge(str s, Koishi::image &mat, Koishi::color clr){
@@ -485,7 +485,8 @@ bool LSTobjectGF::load(const Koishi::str &fileName){
 	unsigned char n;
 	stream s,sSplit;
 	queueex pos, len;
-	s.loadFile(fileName);
+	if(!s.loadFile(fileName))
+		return false;
 	sSplit.allocate(20);
 	sSplit.pushString("ImagePacks2\\");
 	s.splitStream(sSplit, pos, len);
@@ -531,7 +532,8 @@ bool LSTobjectGF::load2(const Koishi::str &fileName){
 	unsigned char n;
 	stream s,sSplit;
 	queueex pos, len;
-	s.loadFile(fileName);
+	if(!s.loadFile(fileName))
+		return false;
 	sSplit.allocate(20);
 	sSplit.pushString("SoundPacks\\");
 	s.splitStream(sSplit, pos, len);
@@ -607,9 +609,7 @@ bool KoishiExpand::IMGobjectV1::load(Koishi::stream &s){
 		s.readInt(pi.picSize.H);
 		s.readDWord(pi.dataSize);
 		s.readInt(pi.basePt.X);
-		pi.basePt.X = (long)dwTemp;
 		s.readInt(pi.basePt.Y);
-		pi.basePt.Y = (long)dwTemp;
 		s.readInt(pi.frmSize.W);
 		s.readInt(pi.frmSize.H);
 		PICcontent.push_back(pi);

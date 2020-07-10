@@ -533,6 +533,9 @@ point point::operator / (const double mult) const{
 point point::operator ~ () const{
 	return point(Y, X);
 }
+char point::operator == (const point &other) const {
+	return X == other.X && Y == other.Y;
+}
 size::size(){
 	W = 0;
 	H = 0;
@@ -547,27 +550,27 @@ long size::area() const{
 image::image(){
 	column = 0;
 	row = 0;
-	pt = 0;
+	//pt = 0;
 	data = NULL;
 }
 image::image(dword _row, dword _column){
 	column = _column;
 	row = _row;
-	pt = 0;
+	//pt = 0;
 	data = new color[column*row+1000];
 	fill(0);
 }
 image::image(const size &_sz){
 	column = _sz.W;
 	row = _sz.H;
-	pt = 0;
+	//pt = 0;
 	data = new color[column*row+1000];
 	fill(0);
 }
 image::image(const image &_mat){
 	column = _mat.column;
 	row = _mat.row;
-	pt = 0;
+	//pt = 0;
 	data = new color[column*row+1000];
 	if(data)
 		memcpy(data, _mat.data, 4*column*row+1000);
@@ -583,7 +586,7 @@ image& image::operator = (const image &_mat){
 	column = _mat.column;
 	row = _mat.row;
 	data = new color[column*row+1000];
-	pt = 0;
+	//pt = 0;
 	if(data)
 		memcpy(data, _mat.data, 4*column*row+1000);
 	return *this;
@@ -597,7 +600,7 @@ void image::create(dword _row, dword _column){
 		row  = _row;
 		column = _column;
 		data = new color[row*column+1000];
-		pt = 0;
+		//pt = 0;
 		fill(0);
 	}
 }
@@ -606,7 +609,7 @@ void image::create(const size &_sz){
 		row  = _sz.H;
 		column = _sz.W;
 		data = new color[row*column+1000];
-		pt = 0;
+		//pt = 0;
 		fill(0);
 	}
 }
@@ -616,7 +619,7 @@ void image::destory(){
 		data = NULL;
 		column = 0;
 		row = 0;
-		pt = 0;
+		//pt = 0;
 	}
 }
 
@@ -625,42 +628,44 @@ void image::fill(color _clr){
 		data[i] = _clr;
 }
 
-void image::push(color _clr){
-	data[pt] = _clr;
-	if(pt != column*row - 1)
-		pt++;
-}
+//void image::push(color _clr){
+//	data[pt] = _clr;
+//	if(pt != column*row - 1)
+//		pt++;
+//}
 
-longex image::push(const stream &s, colorFormat cf){
+longex image::load(const stream &s, colorFormat cf){
 	dword len = s.length;
 	dword i = 0;
+	dword j = 0;
 	switch(cf){
 	case ARGB8888:
 		while(i+3<len){
-			push(color(s[i+3], s[i+2], s[i+1], s[i+0]));
-			i+=4;
+			setElem(j, color(s[i + 3], s[i + 2], s[i + 1], s[i + 0]));
+			//push(color(s[i+3], s[i+2], s[i+1], s[i+0]));
+			i+=4;j++;
 		}
 		break;
 	case ARGB4444:
 		while(i+1<len){
-			push(color(s[i+1]<<8 | s[i+0], ARGB4444));
-			i+=2;
+			setElem(j, color(s[i + 1] << 8 | s[i + 0], ARGB4444));
+			i += 2; j++;
 		}
 		break;
 	case ARGB1555:
 		while(i+1<len){
-			push(color(s[i+1]<<8 | s[i+0], ARGB1555));
-			i+=2;
+			setElem(j, color(s[i + 1] << 8 | s[i + 0], ARGB1555));
+			i += 2; j++;
 		}
 		break;
 	case INDEX_FMT_PALETTE:
 		while(i<len){
-			push(color(s[i], 0, 0, 0));
-			i++;
+			setElem(j, color(s[i], 0, 0, 0));
+			i++; j++;
 		}
 		break;
 	default:
-		return push(s, ARGB8888);
+		return load(s, ARGB8888);
 		break;
 	}
 	return i;
@@ -724,10 +729,10 @@ void image::clip(image &dest, dword rowStart, dword rowEnd, dword columnStart, d
 	if(columnStart>columnEnd)
 		columnStart = columnEnd;
 	dest.create(rowEnd-rowStart, columnEnd-columnStart);
-	dword i,j;
+	dword i,j,k = 0;
 	for(i=0;i<rowEnd-rowStart;i++){
 		for(j=0;j<columnEnd-columnStart;j++){
-			dest.push(data[columnStart+j+(rowStart+i)*column]);
+			dest.setElem(k++, data[columnStart+j+(rowStart+i)*column]);
 		}
 	}
 }
@@ -787,8 +792,11 @@ void image::zoom(double honzRatio, double vertRatio){
 	dest.destory();
 }
 //元素统计
-void image::setElem(dword _id, const color &_clr){
-	data[_id] = _clr;
+void image::setElem(dword id, const color &clr){
+	data[id] = clr;
+}
+void image::setElem(point pt, const color &clr) {
+	setElem(pt.Y, pt.X, clr);
 }
 void image::setElem(dword _row, dword _column, const color &_clr){
 	if(_row > row - 1 || _column > column - 1){
@@ -798,6 +806,9 @@ void image::setElem(dword _row, dword _column, const color &_clr){
 }
 color image::getElem(dword _id) const{
 	return data[_id];
+}
+color image::getElem(point pt) const {
+	return getElem(pt.Y, pt.X);
 }
 color image::getElem(dword _row, dword _column) const{
 	return data[_row*column+_column];
@@ -1001,6 +1012,14 @@ void image::loseBlack(uchar gamma){
 		}
 	}
 }
+void image::turnGray() {
+	dword i, j;
+	for(i = 0; i<row; i++) {
+		for(j = 0; j<column; j++) {
+			setElem(i, j, getElem(i, j).gray());
+		}
+	}
+}
 void image::getBrighten(){
 	dword i,j;
 	for(i = 0;i<row;i++){
@@ -1014,6 +1033,16 @@ void image::getDarken(){
 	for(i = 0;i<row;i++){
 		for(j = 0;j<column;j++){
 			setElem(i, j ,Koishi::color::getDarken(getElem(i,j)));
+		}
+	}
+}
+void image::getTransparented() {
+	dword i, j;
+	for(i = 0; i<row; i++) {
+		for(j = 0; j<column; j++) {
+			color clr = getElem(i, j);
+			clr.alpha >>= 1;
+			setElem(i, j, clr);
 		}
 	}
 }
@@ -1086,7 +1115,50 @@ void image::filledLattice(point p1, point p2, const color &clr1, const color &cl
 		}
 	}
 }
-
+void image::fill(point seedPt, const color &clr) {
+	color seedClr = getElem(seedPt);
+	if(seedClr == clr)
+		return;
+	int count = 0;
+	int index0 = 0;
+	int index1 = 0;
+	point *qPixel = new point[getElemCount()];
+	qPixel[index1++] = seedPt;
+	while(index1 > index0) {
+		for(int i = index0; i < index1; i++) {
+			point pt = qPixel[i];
+			setElem(pt.Y, pt.X, clr);
+			count++;
+			index0++;
+			//4个邻点
+			point neiborPt[4] = {
+				point(pt.X, pt.Y - 1), point(pt.X, pt.Y + 1),
+				point(pt.X - 1, pt.Y), point(pt.X + 1, pt.Y)
+			};
+			for(point newPt : neiborPt) {
+				//出界
+				if(newPt.X < 0 || newPt.X >= width)
+					continue;
+				if(newPt.Y < 0 || newPt.Y >= height)
+					continue;
+				if(getElem(newPt.Y, newPt.X) != seedClr)
+					continue;
+				//查重，检查新点是否在index0至index1这段区域里
+				bool found = false;
+				for(int j = index0; j < index1; j++) {
+					if(qPixel[j] == newPt) {
+						found = true;
+						break;
+					}
+				}
+				if(!found) {
+					qPixel[index1++] = newPt;
+				}
+			}
+		}
+	}
+	delete[] qPixel;
+}
 palette::palette(){
 	clear();
 }
@@ -2109,8 +2181,8 @@ void audio::adjustSpeed(audio &ad, double rate){
 	}
 }
 void audio::adjustPitch(audio &ad, double rate){
-	adjustSpeed(ad, rate);
-	ad.zoom(rate);
+	adjustSpeed(ad, 1.f/rate);
+	ad.zoom(1.f/rate);
 }
 void audio::adjustSpeed(double rate){
 	audio ad;

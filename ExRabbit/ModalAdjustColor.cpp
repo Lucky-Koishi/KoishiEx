@@ -250,7 +250,7 @@ void ModalAdjustColor::OnBnClickedOk()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CExRabbitDlg*dlg = (CExRabbitDlg*)GetParent();
-	dlg->saveAlert = true;
+	dlg->updateModified();
 	in.oldV2matrix.destory();
 	CDialogEx::OnOK();
 }
@@ -258,7 +258,7 @@ void ModalAdjustColor::OnBnClickedOk()
 void ModalAdjustColor::OnBnClickedCancel(){
 	// TODO: 在此添加控件通知处理程序代码
 	CExRabbitDlg*dlg = (CExRabbitDlg*)GetParent();
-	dlg->saveAlert = true;
+	dlg->updateModified();
 	for(int i = 0;i<in.oldCl.size();i++){
 		color clr = in.oldCl[i];
 		if(dlg->io.version == V4 || dlg->io.version == V5 || dlg->io.version == V6){

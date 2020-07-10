@@ -18,7 +18,6 @@
 
 #define MIN(a,b) ((a)>(b)?(b):(a))
 #define MAX(a,b) ((a)>(b)?(a):(b))
-
 namespace Koishi{
 	//定义基础数据
 	typedef std::string	str;
@@ -255,6 +254,7 @@ namespace Koishi{
 		point operator * (double mult) const;
 		point operator / (double mult) const;
 		point operator ~ () const;
+		char operator == (const point &other) const;
 	};
 	class size{
 	public:
@@ -265,7 +265,7 @@ namespace Koishi{
 		long area() const;
 	};
 	///////////////////////////////////////
-	//基本类:矩阵，当R=G=B=0时，可以用做索引矩阵用
+	//基本类:图像，当R=G=B=0时，可以用做索引矩阵用
 	///////////////////////////////////////
 	class image{
 	public:
@@ -284,7 +284,7 @@ namespace Koishi{
 		};
 	protected:
 		color *data;
-		dword pt;
+		//dword pt;
 	public:
 		//内存分配
 		bool valid();
@@ -292,8 +292,8 @@ namespace Koishi{
 		void create(const size &_sz);
 		void destory();
 		void fill(color clr);
-		void push(color clr);									//游标处颜色赋值并加1
-		longex push(const stream &_s, colorFormat cf = ARGB8888);	//以流填充，当cf为INDEX_FMT_PALEETE时作为索引矩阵处理
+		//void push(color clr);									//游标处颜色赋值并加1
+		longex load(const stream &_s, colorFormat cf = ARGB8888);	//以流填充，当cf为INDEX_FMT_PALEETE时作为索引矩阵处理
 		longex make(stream &s, colorFormat cf = ARGB8888) const;	//制作数据流，当cf为INDEX_FMT_PALEETE时作为索引矩阵处理
 	public:
 		//取值/行列
@@ -304,8 +304,10 @@ namespace Koishi{
 		//元素统计
 		void setElem(dword r, dword c, const color &clr);
 		void setElem(dword id, const color &clr);
+		void setElem(point pt, const color &clr);
 		color getElem(dword r, dword c) const;			//取像素点
 		color getElem(dword id) const;						//取像素点
+		color getElem(point pt) const;
 		long getElemCountNzero() const;						//统计实体像素个数
 		long getElemCountWhos(const color &whos) const;		//统计颜色值等于whos的像素个数
 		void getElemCountList(colorList &getColorList) const;			//统计所有出现的颜色
@@ -334,15 +336,18 @@ namespace Koishi{
 		void lose(uchar fine); //扔通道
 		void loseBit(uchar bit); //扔位
 		void loseBlack(uchar gamma); //去黑底
+		void turnGray();
 		void turnShield();			//将实色色部分变为1/2透明的白色
 		void getBrighten();
 		void getDarken();
+		void getTransparented();
 	public:
 		//绘制操作
 		void line(point p1, point p2, const color &clr);
 		void rectangle(point p1, point p2, const color &clr);
 		void filledRectangle(point p1, point p2, const color &clr);
 		void filledLattice(point p1, point p2, const color &clr1, const color &clr2, long size);
+		void fill(point seedPt, const color &clr);
 	};
 	//调色板
 	class palette{

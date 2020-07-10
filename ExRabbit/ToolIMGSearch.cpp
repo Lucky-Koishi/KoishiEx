@@ -150,7 +150,7 @@ void CToolIMGSearch::OnBnClickedButton10()
 		return;
 	}
 	dlg->fileNPKname = m_list.GetItemText(row, 0);
-	dlg->saveAlert = false;
+	dlg->IMGsaveAlert = false;
 	dlg->updateIMGlist();
 	if(dlg->no.count>0){
 		GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(0);

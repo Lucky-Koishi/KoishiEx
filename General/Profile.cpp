@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "Profile.h"
 
-
 Profile::Profile(void){
 	defaultProfile();
 }
@@ -175,6 +174,15 @@ CString Profile::getDownloadPath(){
 	savePathStr += L"\\Download";
 	::CreateDirectory(savePathStr, NULL);
 	return savePathStr+L"\\";
+}
+CString Profile::getDownloadPath(CString hostName) {
+	CString savePathStr = outputPath;
+	::CreateDirectory(savePathStr, NULL);
+	savePathStr += L"\\Download";
+	::CreateDirectory(savePathStr, NULL);
+	savePathStr += L"\\" + hostName;
+	::CreateDirectory(savePathStr, NULL);
+	return savePathStr + L"\\";
 }
 CString Profile::getModelPath(int modelSize, KoishiAvatar::AvatarCharacter ac){
 	CString careerName[KoishiAvatar::ACHARACTER_MAXCOUNT] = {L"鬼剑士(男)",L"鬼剑士(女)",L"格斗家(女)",L"格斗家(男)",L"神枪手(男)",L"神枪手(女)",L"魔法师(女)",L"魔法师(男)",L"圣职者(男)",L"圣职者(女)",L"暗夜使者",L"守护者",L"魔枪士",L"枪剑士"};

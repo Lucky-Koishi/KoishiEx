@@ -36,6 +36,7 @@ public:
 	CString getOutputPath(CString npkName, CString imgName);
 	CString getOutputPath(CString npkName, CString imgName, int clPro);
 	CString getDownloadPath();
+	CString getDownloadPath(CString hostName);
 	CString getModelPath(int modelSize, KoishiAvatar::AvatarCharacter ac);
 	CString getIconPath(KoishiAvatar::AvatarCharacter ac);
 	CString getAvatarStagePath();

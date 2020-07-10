@@ -233,13 +233,10 @@
     <ClInclude Include="ModalAddMark.h" />
     <ClInclude Include="ModalAdjustCanvas.h" />
     <ClInclude Include="ModalAdjustColor.h" />
+    <ClInclude Include="ModalAdvancedMix.h" />
     <ClInclude Include="ModalClearPicture.h" />
-    <ClInclude Include="ModalCopyInsert.h" />
-    <ClInclude Include="ModalCopyReplace.h" />
+    <ClInclude Include="ModalConflictWarning.h" />
     <ClInclude Include="ModalGradient.h" />
-    <ClInclude Include="ModalImageHide.h" />
-    <ClInclude Include="ModalImageRemove.h" />
-    <ClInclude Include="ModalInsertImage.h" />
     <ClInclude Include="ModalInsertPicture.h" />
     <ClInclude Include="ModalInsertPicturePatch.h" />
     <ClInclude Include="ModalInsertTexture.h" />
@@ -249,6 +246,7 @@
     <ClInclude Include="ModalPictureParameter.h" />
     <ClInclude Include="ModalPreference.h" />
     <ClInclude Include="ModalRename.h" />
+    <ClInclude Include="ModalSaveWarning.h" />
     <ClInclude Include="ModalTransform.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -258,7 +256,9 @@
     <ClInclude Include="TinyClipBoard.h" />
     <ClInclude Include="TinyColorSelect.h" />
     <ClInclude Include="TinyFrame.h" />
+    <ClInclude Include="TinyIMGSelect.h" />
     <ClInclude Include="TinySetBrush.h" />
+    <ClInclude Include="TinySetName.h" />
     <ClInclude Include="ToolAvatar.h" />
     <ClInclude Include="ToolAvatarCharacterSelection.h" />
     <ClInclude Include="ToolAvatarDownload.h" />
@@ -272,10 +272,11 @@
     <ClInclude Include="ToolAvatarSuit.h" />
     <ClInclude Include="ToolAvatarSuitRegister.h" />
     <ClInclude Include="ToolDict.h" />
+    <ClInclude Include="ToolDownload.h" />
     <ClInclude Include="ToolForceEx.h" />
     <ClInclude Include="ToolIMGSearch.h" />
     <ClInclude Include="ToolPatch.h" />
-    <ClInclude Include="ToolSPK.h" />
+    <ClInclude Include="ToolStat.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\General\Func.cpp" />
@@ -289,13 +290,10 @@
     <ClCompile Include="ModalAddMark.cpp" />
     <ClCompile Include="ModalAdjustCanvas.cpp" />
     <ClCompile Include="ModalAdjustColor.cpp" />
+    <ClCompile Include="ModalAdvancedMix.cpp" />
     <ClCompile Include="ModalClearPicture.cpp" />
-    <ClCompile Include="ModalCopyInsert.cpp" />
-    <ClCompile Include="ModalCopyReplace.cpp" />
+    <ClCompile Include="ModalConflictWarning.cpp" />
     <ClCompile Include="ModalGradient.cpp" />
-    <ClCompile Include="ModalImageHide.cpp" />
-    <ClCompile Include="ModalImageRemove.cpp" />
-    <ClCompile Include="ModalInsertImage.cpp" />
     <ClCompile Include="ModalInsertPicture.cpp" />
     <ClCompile Include="ModalInsertPicturePatch.cpp" />
     <ClCompile Include="ModalInsertTexture.cpp" />
@@ -305,6 +303,7 @@
     <ClCompile Include="ModalPictureParameter.cpp" />
     <ClCompile Include="ModalPreference.cpp" />
     <ClCompile Include="ModalRename.cpp" />
+    <ClCompile Include="ModalSaveWarning.cpp" />
     <ClCompile Include="ModalTransform.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -315,7 +314,9 @@
     <ClCompile Include="TinyClipBoard.cpp" />
     <ClCompile Include="TinyColorSelect.cpp" />
     <ClCompile Include="TinyFrame.cpp" />
+    <ClCompile Include="TinyIMGSelect.cpp" />
     <ClCompile Include="TinySetBrush.cpp" />
+    <ClCompile Include="TinySetName.cpp" />
     <ClCompile Include="ToolAvatar.cpp" />
     <ClCompile Include="ToolAvatarCharacterSelection.cpp" />
     <ClCompile Include="ToolAvatarDownload.cpp" />
@@ -329,13 +330,17 @@
     <ClCompile Include="ToolAvatarSuit.cpp" />
     <ClCompile Include="ToolAvatarSuitRegister.cpp" />
     <ClCompile Include="ToolDict.cpp" />
+    <ClCompile Include="ToolDownload.cpp" />
     <ClCompile Include="ToolForceEx.cpp" />
     <ClCompile Include="ToolIMGSearch.cpp" />
     <ClCompile Include="ToolPatch.cpp" />
-    <ClCompile Include="ToolSPK.cpp" />
+    <ClCompile Include="ToolStat.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ExRabbit.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\avatar_tool_button_12.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

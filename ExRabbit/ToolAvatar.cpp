@@ -16,6 +16,7 @@
 #include "ToolAvatarIO.h"
 #include "ToolAvatarDownload.h"
 #include "TinyFrame.h"
+#include "ModalSaveWarning.h"
 
 //自定义预先变量
 
@@ -146,6 +147,7 @@ BEGIN_MESSAGE_MAP(ToolAvatar, CDialogEx)
 	ON_COMMAND(ID_MENU_LOCALIZE_DOWNLOAD_RESOURCE, &ToolAvatar::OnMenuLocalizeDownloadResource)
 	ON_COMMAND(ID_MENU_SUIT_ANIMATION, &ToolAvatar::OnMenuSuitAnimation)
 	ON_BN_CLICKED(IDC_BUTTON_AFRAME, &ToolAvatar::OnBnClickedButtonAframe)
+	ON_BN_CLICKED(IDC_BUTTON_TOOL13, &ToolAvatar::OnBnClickedButtonTool13)
 END_MESSAGE_MAP()
 
 
@@ -175,6 +177,7 @@ BOOL ToolAvatar::OnInitDialog()
 	bTool[8] = GET_CTRL(CButton, IDC_BUTTON_TOOL9);
 	bTool[9] = GET_CTRL(CButton, IDC_BUTTON_TOOL10);
 	bTool[10] = GET_CTRL(CButton, IDC_BUTTON_TOOL11);
+	bTool[11] = GET_CTRL(CButton, IDC_BUTTON_TOOL13);
 	ePageInfo = GET_CTRL(CEdit, IDC_EDIT_PAGE);
 	bPFrame = GET_CTRL(CButton, IDC_BUTTON_PFRAME);
 	bNFrame = GET_CTRL(CButton, IDC_BUTTON_NFRAME);
@@ -191,6 +194,7 @@ BOOL ToolAvatar::OnInitDialog()
 	m_buttonPic[8].LoadBitmap(IDB_TOOL_AV9);
 	m_buttonPic[9].LoadBitmap(IDB_TOOL_AV10);
 	m_buttonPic[10].LoadBitmap(IDB_TOOL_AV11);
+	m_buttonPic[11].LoadBitmap(IDB_TOOL_AV12);
 	m_buttonPicX[0].LoadBitmap(IDB_TOOL_AV1);
 	m_buttonPicX[1].LoadBitmap(IDB_TOOL_AV2X);
 	m_buttonPicX[2].LoadBitmap(IDB_TOOL_AV3X);
@@ -202,6 +206,7 @@ BOOL ToolAvatar::OnInitDialog()
 	m_buttonPicX[8].LoadBitmap(IDB_TOOL_AV9);
 	m_buttonPicX[9].LoadBitmap(IDB_TOOL_AV10);
 	m_buttonPicX[10].LoadBitmap(IDB_TOOL_AV11);
+	m_buttonPicX[11].LoadBitmap(IDB_TOOL_AV12);
 	m_partPic[0].LoadBitmap(IDB_PART_0);
 	m_partPic[1].LoadBitmap(IDB_PART_1);
 	m_partPic[2].LoadBitmap(IDB_PART_2);
@@ -212,12 +217,14 @@ BOOL ToolAvatar::OnInitDialog()
 	m_partPic[7].LoadBitmap(IDB_PART_7);
 	m_partPic[8].LoadBitmap(IDB_PART_8);
 	m_partPic[9].LoadBitmap(IDB_PART_9);
-	CString ttipstr[11] = {
-		L"切换展示图尺寸", L"和谐开关",L"展示图模式",L"图标模式",L"脱下",L"更新",L"上一页",L"下一页",L"套装工具",L"补丁制作工具",L"本地化设置"
+	CString ttipstr[12] = {
+		L"切换展示图尺寸", L"和谐开关", L"展示图模式", L"图标模式", L"脱下", L"更新", L"上一页", L"下一页", L"套装工具", L"补丁制作工具", L"本地化设置", L"随机装扮"
 	};
 	m_ttc.Create(this);
-	for(int bi = 0;bi<11;bi++){
+	for(int bi = 0;bi<12;bi++){
 		bTool[bi]->SetBitmap(m_buttonPic[bi]);
+		CString sw;
+		bTool[bi]->GetWindowText(sw);
 		m_ttc.AddTool(bTool[bi], ttipstr[bi]);
 	}
 	//图标菜单区域 x:10-220 y:10-70
@@ -273,8 +280,9 @@ BOOL ToolAvatar::OnInitDialog()
 	SET_CTRL(CButton, IDC_BUTTON_TOOL10, 230 + 11 * (buttonSize + buttonGap), 10, 230 + buttonSize + 11 * (buttonSize + buttonGap), 10 + buttonSize);
 	SET_CTRL(CButton, IDC_BUTTON_TOOL11, 230 + 12 * (buttonSize + buttonGap), 10, 230 + buttonSize + 12 * (buttonSize + buttonGap), 10 + buttonSize);
 	SET_CTRL(CEdit, IDC_EDIT_SEARCH, 230  + 13 * (buttonSize + buttonGap), 10, 230 + buttonSize + 16 * (buttonSize + buttonGap), 10 + buttonSize);
-	SET_CTRL(CButton, IDC_BUTTON_TOOL12, 230  + 17 * (buttonSize + buttonGap), 10, 230 + buttonSize + 18 * (buttonSize + buttonGap), 10 + buttonSize);
-	
+	SET_CTRL(CButton, IDC_BUTTON_TOOL12, 230 + 17 * (buttonSize + buttonGap), 10, 230 + buttonSize + 18 * (buttonSize + buttonGap), 10 + buttonSize);
+	SET_CTRL(CButton, IDC_BUTTON_TOOL13, 230 + 19 * (buttonSize + buttonGap), 10, 230 + buttonSize + 19 * (buttonSize + buttonGap), 10 + buttonSize);
+
 	//展示图区域
 	//x:230-986 756
 	//y:40-712 672
@@ -1612,13 +1620,35 @@ void ToolAvatar::OnMenuLocalizeSet(){
 void ToolAvatar::OnMenuAvatarFunToEX(){
 	// TODO: 在此添加命令处理程序代码
 	CExRabbitDlg *dlg = (CExRabbitDlg *)context;
-	if(dlg->saveAlert){
-		if(IDNO == MessageBox(L"将覆盖你在EX中未保存的文件，确定喵？",L"提示喵",MB_YESNO)){
+	if(dlg->NPKsaveAlert) {
+		ModalSaveWarning ms;
+		ms.alertType = dlg->IMGsaveAlert ? ModalSaveWarning::MODIFIED_IMG_NPK : ModalSaveWarning::MODIFIED_NPK;
+		ms.DoModal();
+		switch(ms.returnType) {
+		case ModalSaveWarning::RETURN_CANCEL:
 			return;
+		case ModalSaveWarning::RETURN_NO_SAVE:
+			dlg->IMGsaveAlert = FALSE;
+			dlg->NPKsaveAlert = FALSE;
+			break;
+		case ModalSaveWarning::RETURN_SAVE:
+			dlg->no.saveFile(CStrToStr(dlg->fileNPKname));
+			dlg->IMGsaveAlert = FALSE;
+			dlg->NPKsaveAlert = FALSE;
+			dlg->updateInfo();
+			break;
+		case ModalSaveWarning::RETURN_ALL_SAVE:
+			dlg->no.IMGreplace(dlg->crtIMGid, dlg->io);
+			dlg->no.saveFile(CStrToStr(dlg->fileNPKname));
+			dlg->IMGsaveAlert = FALSE;
+			dlg->NPKsaveAlert = FALSE;
+			dlg->updateInfo();
+			break;
 		}
 	}
+	
 	dlg->fileNPKname = "mySuit.NPK";
-	dlg->saveAlert = false;
+	dlg->IMGsaveAlert = FALSE;
 	factory.makeNPK(dlg->no);
 	MessageBox(L"已导入到EX里了！",L"提示喵");
 	dlg->updateIMGlist();
@@ -1713,6 +1743,7 @@ void ToolAvatar::buildMixedIMG(IMGobject &io){
 		s.release();
 	}
 	///////////////////////////////////////
+#ifdef MAKE_ONE_STEP_V4
 	palette pal;
 	colorList clrList;
 	queue clrCount;
@@ -1756,6 +1787,9 @@ void ToolAvatar::buildMixedIMG(IMGobject &io){
 	std::vector<IMGobject> outIOList;
 	newIO.convertToV4(outIOList, clrList, false);
 	io = outIOList[0];
+#else
+	io = newIO;
+#endif
 }
 unsigned buildGIF(void*para){
 	ToolAvatar* dlg = (ToolAvatar*)para;
@@ -1888,13 +1922,34 @@ unsigned buildNPK3(void*para){
 void ToolAvatar::OnMenuAvatarFunMakeNPK(){
 	// TODO: 在此添加命令处理程序代码
 	CExRabbitDlg *dlg = (CExRabbitDlg *)context;
-	if(dlg->saveAlert){
-		if(IDNO == MessageBox(L"将覆盖你在EX中未保存的文件，确定喵？",L"提示喵",MB_YESNO)){
+	if(dlg->NPKsaveAlert) {
+		ModalSaveWarning ms;
+		ms.alertType = dlg->IMGsaveAlert ? ModalSaveWarning::MODIFIED_IMG_NPK : ModalSaveWarning::MODIFIED_NPK;
+		ms.DoModal();
+		switch(ms.returnType) {
+		case ModalSaveWarning::RETURN_CANCEL:
 			return;
+		case ModalSaveWarning::RETURN_NO_SAVE:
+			dlg->IMGsaveAlert = FALSE;
+			dlg->NPKsaveAlert = FALSE;
+			break;
+		case ModalSaveWarning::RETURN_SAVE:
+			dlg->no.saveFile(CStrToStr(dlg->fileNPKname));
+			dlg->IMGsaveAlert = FALSE;
+			dlg->NPKsaveAlert = FALSE;
+			dlg->updateInfo();
+			break;
+		case ModalSaveWarning::RETURN_ALL_SAVE:
+			dlg->no.IMGreplace(dlg->crtIMGid, dlg->io);
+			dlg->no.saveFile(CStrToStr(dlg->fileNPKname));
+			dlg->IMGsaveAlert = FALSE;
+			dlg->NPKsaveAlert = FALSE;
+			dlg->updateInfo();
+			break;
 		}
 	}
 	dlg->fileNPKname = "mySuit.NPK";
-	dlg->saveAlert = false;
+	dlg->IMGsaveAlert = FALSE;
 	AfxBeginThread(buildNPK1, this);
 }
 
@@ -1902,13 +1957,34 @@ void ToolAvatar::OnMenuAvatarFunMakeNPK(){
 void ToolAvatar::OnMenuAvatarFunMakeAntiNPK(){
 	// TODO: 在此添加命令处理程序代码
 	CExRabbitDlg *dlg = (CExRabbitDlg *)context;
-	if(dlg->saveAlert){
-		if(IDNO == MessageBox(L"将覆盖你在EX中未保存的文件，确定喵？",L"提示喵",MB_YESNO)){
+	if(dlg->NPKsaveAlert) {
+		ModalSaveWarning ms;
+		ms.alertType = dlg->IMGsaveAlert ? ModalSaveWarning::MODIFIED_IMG_NPK : ModalSaveWarning::MODIFIED_NPK;
+		ms.DoModal();
+		switch(ms.returnType) {
+		case ModalSaveWarning::RETURN_CANCEL:
 			return;
+		case ModalSaveWarning::RETURN_NO_SAVE:
+			dlg->IMGsaveAlert = FALSE;
+			dlg->NPKsaveAlert = FALSE;
+			break;
+		case ModalSaveWarning::RETURN_SAVE:
+			dlg->no.saveFile(CStrToStr(dlg->fileNPKname));
+			dlg->IMGsaveAlert = FALSE;
+			dlg->NPKsaveAlert = FALSE;
+			dlg->updateInfo();
+			break;
+		case ModalSaveWarning::RETURN_ALL_SAVE:
+			dlg->no.IMGreplace(dlg->crtIMGid, dlg->io);
+			dlg->no.saveFile(CStrToStr(dlg->fileNPKname));
+			dlg->IMGsaveAlert = FALSE;
+			dlg->NPKsaveAlert = FALSE;
+			dlg->updateInfo();
+			break;
 		}
 	}
 	dlg->fileNPKname = "mySuit.NPK";
-	dlg->saveAlert = false;
+	dlg->IMGsaveAlert = FALSE;
 	AfxBeginThread(buildNPK2, this);
 }
 
@@ -1916,13 +1992,34 @@ void ToolAvatar::OnMenuAvatarFunMakeAntiNPK(){
 void ToolAvatar::OnMenuAvatarFunMakeAllIn1NPK(){
 	// TODO: 在此添加命令处理程序代码
 	CExRabbitDlg *dlg = (CExRabbitDlg *)context;
-	if(dlg->saveAlert){
-		if(IDNO == MessageBox(L"将覆盖你在EX中未保存的文件，确定喵？",L"提示喵",MB_YESNO)){
+	if(dlg->NPKsaveAlert) {
+		ModalSaveWarning ms;
+		ms.alertType = dlg->IMGsaveAlert ? ModalSaveWarning::MODIFIED_IMG_NPK : ModalSaveWarning::MODIFIED_NPK;
+		ms.DoModal();
+		switch(ms.returnType) {
+		case ModalSaveWarning::RETURN_CANCEL:
 			return;
+		case ModalSaveWarning::RETURN_NO_SAVE:
+			dlg->IMGsaveAlert = FALSE;
+			dlg->NPKsaveAlert = FALSE;
+			break;
+		case ModalSaveWarning::RETURN_SAVE:
+			dlg->no.saveFile(CStrToStr(dlg->fileNPKname));
+			dlg->IMGsaveAlert = FALSE;
+			dlg->NPKsaveAlert = FALSE;
+			dlg->updateInfo();
+			break;
+		case ModalSaveWarning::RETURN_ALL_SAVE:
+			dlg->no.IMGreplace(dlg->crtIMGid, dlg->io);
+			dlg->no.saveFile(CStrToStr(dlg->fileNPKname));
+			dlg->IMGsaveAlert = FALSE;
+			dlg->NPKsaveAlert = FALSE;
+			dlg->updateInfo();
+			break;
 		}
 	}
 	dlg->fileNPKname = "mySuit.NPK";
-	dlg->saveAlert = false;
+	dlg->IMGsaveAlert = false;
 	AfxBeginThread(buildNPK3, this);
 }
 
@@ -2412,7 +2509,6 @@ void ToolAvatar::OnMenuSuitRegister()
 	if(IDOK == dlg.DoModal()){
 		str fileName = CStrToStr(profile.getAvatarMapPath() + careerName[character] + L"装扮表.txt");
 		map.load(fileName);
-		map.save(fileName);
 		updateSuitInfo();
 		showAvatarInfo();
 	}
@@ -2611,4 +2707,27 @@ void ToolAvatar::OnMenuSuitAnimation()
 {
 	// TODO: 在此添加命令处理程序代码
 	AfxBeginThread(buildGIF, this);
+}
+
+
+void ToolAvatar::OnBnClickedButtonTool13() {
+	// TODO:  在此添加控件通知处理程序代码
+	PLAYING_PAUSE;
+	srand(time(0));
+	for(int p = 0; p<APART_MAXCOUNT; p++) {
+		if(p == APART_BODY)
+			continue;
+		long index = -1;
+		if(factory.album[p].content.size() > 0)
+			index = rand() % factory.album[p].content.size();
+		factory.changeAvatar((AvatarPart)p, index);
+		if(p == currentPart) {
+			lbContent->SetCurSel(index + 1);
+			showAvatarInfo();
+		}
+		
+	}
+	updateSuitInfo();
+	drawModel(-1);
+	PLAYING_CONTINUE;
 }

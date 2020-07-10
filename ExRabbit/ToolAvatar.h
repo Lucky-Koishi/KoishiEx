@@ -128,7 +128,7 @@ public:
 	CListBox *lbContent;
 	CComboBox *cbWeaponType;
 	CEdit *eAvatarInfo, *eAvatarSuit;
-	CButton *bTool[11];
+	CButton *bTool[12];
 	CButton *bPFrame, *bNFrame;
 	CEdit *ePageInfo;
 	CComboBox *cbAction;
@@ -186,4 +186,5 @@ public:
 	afx_msg void OnMenuLocalizeDownloadResource();
 	afx_msg void OnMenuSuitAnimation();
 	afx_msg void OnBnClickedButtonAframe();
+	afx_msg void OnBnClickedButtonTool13();
 };

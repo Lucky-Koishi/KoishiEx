@@ -93,7 +93,7 @@ void CToolDict::OnBnClickedButton18()
 		dlg->no.release();
 		dlg->no.loadFile(fn);
 		dlg->fileNPKname = fileName;
-		dlg->saveAlert = false;
+		dlg->IMGsaveAlert = false;
 		MessageBox(L"已经打开所选文件喵！",L"提示喵");
 		dlg->updateIMGlist();
 		dlg->updateInfo();

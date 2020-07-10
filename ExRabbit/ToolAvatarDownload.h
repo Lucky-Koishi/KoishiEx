@@ -37,5 +37,4 @@ public:
 
 	static UINT threadDownloadSPKpatch(PVOID para);
 	void downloadSPKpatch();
-	INT GetInternetFile(const CString strUrl,const CString strSavePath);
 };

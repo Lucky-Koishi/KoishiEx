@@ -1136,7 +1136,7 @@ bool IMGobject::PICextract(long pos, image &mat, long paletteID){
 			switch(version){
 			case V2:
 				mat.create(pi.picSize);
-				mat.push(sPic, pi.format);
+				mat.load(sPic, pi.format);
 				break;
 			case V4:
 				if(sPic.length == pi.picSize.area()){
@@ -1145,12 +1145,12 @@ bool IMGobject::PICextract(long pos, image &mat, long paletteID){
 					for(i=0;i<sPic.length;i++){
 						if(sPic[i]>=paletteData[0].size())
 							sPic[i] = 0;
-						mat.push(paletteData[0][sPic[i]]);
+						mat.setElem(i, paletteData[0][sPic[i]]);
 					}
 				}else{
 					//非索引形式
 					mat.create(pi.picSize);
-					mat.push(sPic, pi.format);
+					mat.load(sPic, pi.format);
 				}
 				break;
 			case V5:
@@ -1160,12 +1160,12 @@ bool IMGobject::PICextract(long pos, image &mat, long paletteID){
 					for(i=0;i<sPic.length;i++){
 						if(sPic[i]>=paletteData[0].size())
 							sPic[i] = 0;
-						mat.push(paletteData[0][sPic[i]]);
+						mat.setElem(i, paletteData[0][sPic[i]]);
 					}
 				}else{
 					//非索引形式
 					mat.create(pi.picSize);
-					mat.push(sPic, pi.format);
+					mat.load(sPic, pi.format);
 				}
 				break;
 			case V6:
@@ -1183,12 +1183,12 @@ bool IMGobject::PICextract(long pos, image &mat, long paletteID){
 								0x0F | c1.R >> 3 << 6 | c1.G >> 2, 
 								0x0F | c1.G >> 3 << 5 | c1.B >> 3, 
 								0x0F | c1.B << 1);
-							mat.push(c2);
+							mat.setElem(i, c2);
 						}else{
-							mat.push(paletteData[paletteID][sPic[i]]);
+							mat.setElem(i, paletteData[paletteID][sPic[i]]);
 						}
 					}else{
-						mat.push(color(0));
+						mat.setElem(i, color(0));
 					}
 				}
 				break;
@@ -1320,7 +1320,7 @@ bool IMGobject::PICextractIndexImage(long pos, image &mat){
 		if(sPic.length == pi.picSize.area()){
 			mat.create(pi.picSize);
 			for(i=0;i<sPic.length;i++){
-				mat.push(color(sPic[i],0,0,0));
+				mat.setElem(i, color(sPic[i],0,0,0));
 			}
 			sMid.release();
 			sPic.release();
@@ -1530,11 +1530,11 @@ bool IMGobject::TEXextract(long pos, image &mat){
 				if(sPic[i]>=paletteData[0].size()){
 					sPic[i] = 0;
 				}
-				mat.push(paletteData[0][sPic[i]]);
+				mat.setElem(i, paletteData[0][sPic[i]]);
 			}
 		}else{
 			mat.create(di.height, di.width);
-			mat.push(sPic, di.format);
+			mat.load(sPic, di.format);
 		}
 	}
 	return true;

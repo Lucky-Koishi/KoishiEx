@@ -209,7 +209,7 @@ void CAdjustColorDlg::applyEffect(){
 void CAdjustColorDlg::OnBnClickedButton2(){
 	// TODO: 在此添加控件通知处理程序代码
 	CExRabbitDlg*dlg = (CExRabbitDlg*)GetParent();
-	dlg->saveAlert = true;
+	dlg->updateModified();
 	resetSlider();
 	oldV2matrix.destory();
 	CDialogEx::OnOK();
@@ -217,7 +217,7 @@ void CAdjustColorDlg::OnBnClickedButton2(){
 void CAdjustColorDlg::OnBnClickedButton3(){
 	// TODO: 在此添加控件通知处理程序代码
 	CExRabbitDlg*dlg = (CExRabbitDlg*)GetParent();
-	dlg->saveAlert = true;
+	dlg->updateModified();
 	resetSlider();
 	for(int i = 0;i<oldCl.size();i++){
 		if(dlg->colorOperatePara.isChosen[i]){
