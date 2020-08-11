@@ -16,8 +16,8 @@ EXAPI支持NPK、IMG等文件的大部分操作，支持的IMG类型包括V2、V
 Source Code of Koishi's EX API and BlackCat version and WhiteCat version.
 
 The folder "KoishiEx" is the source code of API made by myself.
-The folder "ExRabbit" is the source code of the BlackCat version, which has currently updated to BlackCat.4.8.
-The folder "ExParrot" is the source code of the WhiteCat version, which has currently updated to WhiteCat.2.1.
+The folder "ExRabbit" is the source code of the BlackCat version, which has currently updated to BlackCat.4.9.
+The folder "ExParrot" is the source code of the WhiteCat version, which has currently updated to WhiteCat.2.2.
 
 The API is completely opened and can be used freely(But you seem to setup your project for ZLIB and LIBPNG, such as the ignoring default library "libcmt.lib" when using the DEBUG mode, etc.). Please contact me if you find any bugs or have an idea for helping improve the API. Email: swablu@qq.com
 If your Visual Studio's version is VS2015 or higher, you need to recompile ZLIB and LIBPNG and replace the files in source code by the generated files.
