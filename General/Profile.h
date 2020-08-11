@@ -23,8 +23,8 @@ public:
 	DWORD channel2Color;
 	DWORD volumeColor;
 	DWORD MP3defaultColor;
-	DWORD MP3quality;
-	DWORD useDefaultRecorder;
+	DWORD outputQuality;
+	CString artist;
 public:
 	void defaultProfile();
 	void loadProfile();

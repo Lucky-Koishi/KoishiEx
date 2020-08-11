@@ -2,10 +2,11 @@
 #include "KoishiEx.h"
 #include "sha256.h"
 
-#pragma comment(lib, "../general/zlibstat.lib")
+#pragma comment(lib, "../general/lib_zlib/zlib.lib")
+#pragma comment(lib, "../general/lib_zlib/BZ2.lib")
 #define ZLIB_WINAPI
-#include "zlib.h"
-#include "bz2.h"
+#include "../general/lib_zlib/zlib.h"
+#include "../general/lib_zlib/bz2.h"
 
 using namespace Koishi;
 

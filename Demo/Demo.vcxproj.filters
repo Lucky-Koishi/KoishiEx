@@ -27,12 +27,6 @@
     <ClInclude Include="TestFunc.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\KoishiEx\zconf.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\KoishiEx\zlib.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

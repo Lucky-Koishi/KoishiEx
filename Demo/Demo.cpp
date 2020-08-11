@@ -24,8 +24,6 @@
 #include <locale.h>
 #include <thread>
 
-#include "../KoishiEx/BZ2.cpp"
-#include "../ExParrot/music.cpp"
 using namespace Koishi;
 using namespace KoishiAudioTool;
 
@@ -34,13 +32,9 @@ using namespace KoishiAudioTool;
 
 
 int _tmain(int argc, _TCHAR* argv[]){
-	NoteBar nb(3);
-	std::vector<Note> nv;
-	nv.push_back(Note(1));
-	nv.push_back(Note(2));
-	nb[0] = NoteBar(Note(1));
-	nb[1] = NoteBar(nv);
-	nb[2] = NoteBar(Note(3));
-	std::vector<NoteInfo> p = nb.serial();
+	IMGobject io;
+	image im;
+	io.loadFile("E:\\Source\\KoishiEx_Test\\font.IMG");
+	
 	return 0;
 }

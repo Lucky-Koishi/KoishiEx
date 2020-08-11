@@ -9,7 +9,7 @@
 #include "../KoishiEx/KoishiImageTool.cpp"
 #include "../KoishiEx/KoishiAudioTool.cpp"
 #include "../KoishiEx/avatar.cpp"
-#include "../koishiEx/bz2.cpp"
+
 #include <afxinet.h> 
 #include <cstring>
 
@@ -143,6 +143,9 @@ CString FmtToCStr(const PICinfo &pi, IMGversion iv){
 		s = L"‘›Œ¥∂®“Â";
 		break;
 	}
+	//CString pusheenStr;
+	//pusheenStr.Format(L"%02X%02X", pi.format, pi.comp);
+	//s += L"(" + pusheenStr + L")";
 	return s;
 }
 CString FmtToCStr(colorFormat cf, IMGversion iv){

@@ -148,6 +148,10 @@ BEGIN_MESSAGE_MAP(CExParrotDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_TOOL_BUTTON14, &CExParrotDlg::OnBnClickedToolButton14)
 	ON_BN_CLICKED(IDC_TOOL_BUTTON15, &CExParrotDlg::OnBnClickedToolButton15)
 	ON_COMMAND(ID_TOOLS_PIANO, &CExParrotDlg::OnToolsPiano)
+	ON_COMMAND(ID_MENU_SOUND_TRANSFORM_TO_WAV, &CExParrotDlg::OnMenuSoundTransformToWAV)
+	ON_COMMAND(ID_MENU_SOUND_TRANSFORM_TO_OGG, &CExParrotDlg::OnMenuSoundTransformToOGG)
+	ON_COMMAND(ID_MENU_SOUND_TRANSFORM_TO_WAV_PATCH, &CExParrotDlg::OnMenuSoundTransformToWAVPatch)
+	ON_COMMAND(ID_MENU_SOUND_TRANSFORM_TO_OGG_PATCH, &CExParrotDlg::OnMenuSoundTransformToOGGPatch)
 END_MESSAGE_MAP()
 
 
@@ -456,6 +460,37 @@ void CExParrotDlg::updateInfo(){
 	cstr += L"时长:" + DoubleToCStr(au.getLastTime() * 0.001f) + L"s";
 	GET_CTRL(CEdit, IDC_EDIT_SNDINFO)->SetWindowText(cstr);
 }
+void CExParrotDlg::updateCommentInfo(const SNDversion &ver) {
+	CString tempStr;
+	switch(ver) {
+	case SNDversion::VWAVE:
+		tempStr = L"类别: WAV音频(PCM流)\r\n";
+		break;
+	case SNDversion::VVORBIS:
+		tempStr = L"类别: Ogg音频\r\n编码器信息: \r\n" + StrToCStr(OGGcopyRight.vendorInfo) + L"\r\n";
+		tempStr += L"其他信息:" + NumToCStr(OGGcopyRight.userInfo.size()) + L"条\r\n";
+		if(OGGcopyRight.vendorInfo.size() > 0) {
+			for(int i = 0; i < OGGcopyRight.userInfo.size(); i++) {
+				CString userInfoStr = StrToCStr(OGGcopyRight.userInfo[i]);
+				userInfoStr.Replace(L"=", L": ");
+				tempStr += userInfoStr + L"\r\n";
+			}
+		}
+		break;
+	case SNDversion::VMP3:
+		tempStr = L"类别: MP3\r\n";
+		tempStr += L"MP3解码还没有写好喵。";
+		break;
+	case SNDversion::VIMAGE:
+		tempStr = L"类别: IMG对象\r\n";
+		tempStr += L"请使用恋恋のEx黑猫版打开这个对象喵。";
+		break;
+	default:
+		tempStr = L"类别: 未识别\r\n";
+		break;
+	}
+	GET_CTRL(CEdit, IDC_EDIT_SNDCOMMENT)->SetWindowText(tempStr);
+}
 void CExParrotDlg::updateMP3image(){
 	int i, j;
 	image mat;
@@ -477,6 +512,12 @@ void CExParrotDlg::updateMP3image(){
 	ReleaseDC(pDC);
 	//dlg->drawing = 0;
 	mat.destory();
+}
+void CExParrotDlg::resetBound() {
+	dispLeftBound = 0;
+	dispRightBound = MAX(1, au.length - 1);
+	leftBound = 0;
+	rightBound = 0;
 }
 /////////////////////
 DefineThreadFunc(CExParrotDlg, play, BOOL) {
@@ -525,13 +566,15 @@ DefineThreadFunc(CExParrotDlg, RecordFinish, BOOL) {
 	if(au.length == 0/*如果当前音效长度为0，即不存在，新建音效*/) {
 		au.destory();
 		au = newAd;
-		stream sWav;
-		makeWAV(newAd, sWav);
-		no.push(sWav, "new_record.ogg");
-		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->InsertItem(no.count, L"new_record.ogg", getIconSND(VWAVE));
+		stream sFile;
+		setCopyRight(CRO_CREATE);
+		encodeTo(sFile);
+		no.push(sFile, "new_record.ogg");
+		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->InsertItem(no.count, L"new_record.ogg", getIconSND(checkAudioFormat(sFile)));
 	} else if(rightBound - leftBound <= 0 /*未选择边界，默认替换完整音效*/) {
 		au.destory();
 		au = newAd;
+		setCopyRight(CRO_CREATE);
 	} else /*有选择边界，则替换选择边界内音效*/{
 		audio au1, au2, au3;
 		au.clip(au1, 0, leftBound);
@@ -556,61 +599,39 @@ DefineThreadFunc(CExParrotDlg, ReplaceSound, BOOL) {
 	if(IDOK != dlg.DoModal())
 		return;
 	CString fileName = dlg.GetPathName();
-	stream s, sPCM;
-	SNDversion sv;
-	if(!s.loadFile(CStrToStr(fileName))) {
+	stream sFile;
+	if(!sFile.loadFile(CStrToStr(fileName))) {
 		MessageBox(L"读取失败喵！", L"提示喵");
 		return;
 	}
-	long r;
-	s.resetPosition();
-	s.readInt(r);
-	s.resetPosition();
-	if(r == 0x5367674F) {
-		sv = VVORBIS;//OggS
-	} else if(r == 0x46464952) {
-		sv = VWAVE;//RIFF
-	} else if((r & 0xFFFFFF) == 0x334449 || (r & 0xF0FF) == 0xF0FF) {
-		MessageBox(L"暂不支持MP3解码喵！", L"提示喵");
-		return;
-	} else {
-		MessageBox(L"未能识别这个文件喵！", L"提示喵");
-		return;
-	}
+	SNDversion sv = checkAudioFormat(sFile);
 	audio newAd;
+	OGGvorbis::OGGobject newOo;
+	WAV::WAVobject newWo;
 	switch(sv) {
 	case VVORBIS:
-	{
 		bar.show(4);
 		bar.setInfo(L"正在解码喵……", 0);
-		OGG::OGGobject oo;
-		if(!oo.load(s)) {
+		if(!newOo.decodeAndMake(sFile, newAd)) {
 			bar.hide();
-			MessageBox(L"Ogg格式无效喵！", L"提示喵");
+			MessageBox(L"解码失败喵！", L"提示喵");
 			return;
 		}
-		if(!oo.initDecoder()) {
-			bar.hide();
-			MessageBox(L"Ogg解码失败喵！", L"提示喵");
-			return;
-		}
-		loadOGG(newAd, oo);
 		bar.hide();
 		break;
-	}
 	case VMP3:
 		MessageBox(L"暂不支持MP3解码喵！", L"提示喵");
 		return;
 	case VWAVE:
-	{
 		bar.show(4);
 		bar.setInfo(L"正在解码喵……", 0);
-		WAV::WAVobject wo;
-		wo.load(s);
-		loadWAV(newAd, wo);
+		if(!newWo.decodeAndMake(sFile, newAd)) {
+			bar.hide();
+			MessageBox(L"解码失败喵！", L"提示喵");
+			return;
+		}
 		bar.hide();
 		break;
-	}
 	default:
 		MessageBox(L"未能识别这个文件喵！", L"提示喵");
 		return;
@@ -719,80 +740,111 @@ DefineThreadFunc(CExParrotDlg, DrawPower, BOOL) {
 DefineThreadFunc(CExParrotDlg, DecodeAndPlay, BOOL) {
 	int id = crtSNDid;
 	stream s, sPCM;
+	OGGvorbis::OGGobject oo;
+	WAV::WAVobject wo;
 	switch(no.SNDgetVersion(id)) {
 	case VVORBIS:
-	{
 		bar.show(4);
 		bar.setInfo(L"正在解码喵……", 0);
-		OGG::OGGobject oo;
 		no.extract(crtSNDid, s);
 		fileSNDname = StrToCStr(no.entry[id].comment);
-		oo.load(s);
-		oo.initDecoder();
-		{
-			stream s;
-			oo.initPCM();
-			int i = 3;
-			int j = 0;
-			bar.setMax(oo.packs.size());
-			while(oo.packDecode(i++)) {
-				oo.makePCM(j++);
-				bar.setPos(i);
-			}
-			oo.makePCMstream(s);
-			au.create(s, oo.info.channels, oo.info.sampleRate);
+		if(!oo.decodeAndMake(s, au)) {
+			bar.hide();
+			GET_CTRL(CEdit, IDC_EDIT_SNDINFO)->SetWindowText(L"该对象无法被解码喵！");
+			updateCommentInfo(VSNDUKNOWN);
+			MessageBox(L"解码失败喵！", L"提示喵");
+			return;
 		}
-		dispLeftBound = 0;
-		dispRightBound = au.length - 1;
-		leftBound = 0;
-		rightBound = 0;
+		OGGcopyRight = oo.comment;
+		resetBound();
 		updateInfo();
-		CString tempStr = L"类别:Ogg音频\r\n编码器信息:\r\n" + StrToCStr(oo.comment.vendorInfo) + L"\r\n";
-		tempStr += L"其他信息:\r\n";
-		if(oo.comment.otherInfo.size() == 0) {
-			tempStr += L"无";
-		} else {
-			for(int i = 0; i<oo.comment.otherInfo.size(); i++)
-				tempStr += StrToCStr(oo.comment.otherInfo[i]) + L"\r\n";
-		}
-		GET_CTRL(CEdit, IDC_EDIT_SNDCOMMENT)->SetWindowText(tempStr);
+		updateCommentInfo(VVORBIS);
 		bar.hide();
 		draw();
 		player.play(au);
 		Sleep(10);
 		return;
-	}
 	case VMP3:
 		GET_CTRL(CEdit, IDC_EDIT_SNDINFO)->SetWindowText(L"MP3解码还没写好喵！");
-		GET_CTRL(CEdit, IDC_EDIT_SNDCOMMENT)->SetWindowText(L"MP3解码还没写好喵！");
+		updateCommentInfo(VMP3);
 		return;
 	case VWAVE:
-	{
 		bar.show(4);
 		bar.setInfo(L"正在解码喵……", 0);
-		WAV::WAVobject wo;
 		no.extract(crtSNDid, s);
 		fileSNDname = StrToCStr(no.entry[id].comment);
-		wo.load(s);
-		loadWAV(au, wo);
-		dispLeftBound = 0;
-		dispRightBound = au.length - 1;
-		leftBound = 0;
-		rightBound = 0;
+		if(!wo.decodeAndMake(s, au)) {
+			bar.hide();
+			GET_CTRL(CEdit, IDC_EDIT_SNDINFO)->SetWindowText(L"该对象无法被解码喵！");
+			updateCommentInfo(VSNDUKNOWN);
+			MessageBox(L"解码失败喵！", L"提示喵");
+			return;
+		}
+		resetBound();
 		updateInfo();
-		CString tempStr = L"类别:波形文件\r\n编码器信息:PCM\r\n";
-		GET_CTRL(CEdit, IDC_EDIT_SNDCOMMENT)->SetWindowText(tempStr);
+		updateCommentInfo(VWAVE);
 		bar.hide();
 		draw();
 		player.play(au);
 		Sleep(10);
 		return;
-	}
 	default:
 		GET_CTRL(CEdit, IDC_EDIT_SNDINFO)->SetWindowText(L"未能识别这个文件！");
 		GET_CTRL(CEdit, IDC_EDIT_SNDCOMMENT)->SetWindowText(L"类别:其他文件");
 		return;
 	}
+}
+/////////////////////
+BOOL CExParrotDlg::setCopyRight(enumCopyRightOpera opera) {
+	if(profile.artist.GetLength() == 0)
+		return FALSE;
+	if(profile.artist == L"noname")
+		return FALSE;
+	if(opera == CRO_NONE)
+		return FALSE;
+	if(opera == CRO_CLEAR) {
+		OGGcopyRight.clearInfo();
+		str localt = CStrToStr(CTime::GetTickCount().Format(L"%Y-%m-%d %H:%M:%S"));
+		OGGcopyRight.addInfo("created_date", localt);
+	}
+	if(opera == CRO_CREATE) {
+		OGGcopyRight.clearInfo();
+		str artist = CStrToStr(profile.artist);
+		str localt = CStrToStr(CTime::GetTickCount().Format(L"%Y-%m-%d %H:%M:%S"));
+		OGGcopyRight.addInfo_author(artist, localt);
+	}
+	if(opera == CRO_MODIFIED) {
+		str modifier = CStrToStr(profile.artist);
+		str localt = CStrToStr(CTime::GetTickCount().Format(L"%Y-%m-%d %H:%M:%S"));
+		OGGcopyRight.addInfo_modifier(modifier, localt);
+	}
+	return TRUE;
+}
+BOOL CExParrotDlg::encodeTo(stream &dest) {
+	return encodeTo(au, dest);
+}
+BOOL CExParrotDlg::encodeTo(const audio &newAd, stream &dest) {
+	dest.release();
+	if(profile.outputQuality == 0) {
+		WAV::WAVobject wo;
+		if(!wo.loadAndEncode(newAd, dest)) {
+			MessageBox(L"无法将其转换为WAV喵！", L"提示喵");
+			return FALSE;
+		}
+		return TRUE;
+	} else if(profile.outputQuality <= 5) {
+		OGGvorbis::OGGobject newOo;
+		newOo.comment = OGGcopyRight;
+		double dRate[5] = {-0.1, 0, 0.4, 0.7, 1};
+		if(!newOo.loadAndEncode(newAd, dest,
+			OGGvorbis::OGGencodeSetting('V', -1, dRate[profile.outputQuality - 1]))) {
+			MessageBox(L"编码错误喵！\r\n" + StrToCStr(newOo.errorMessage), L"提示喵");
+			return FALSE;
+		}
+		return TRUE;
+	}
+	MessageBox(L"无法从配置文件识别要转换的格式与品质喵！", L"提示喵");
+	return FALSE;
 }
 /////////////////////
 void CExParrotDlg::getSelected(CGoodListCtrl *listCtrl, int highLine, int targetPara, std::vector<int> &selected){
@@ -860,7 +912,8 @@ void CExParrotDlg::OnBnClickedButtonMenu2(){
 void CExParrotDlg::OnBnClickedButtonMenu3(){
 	// TODO: 在此添加控件通知处理程序代码
 	stream s;
-	makeWAV(au, s);
+	setCopyRight(CRO_MODIFIED);
+	encodeTo(s);
 	if(no.replace(crtSNDid, s)){
 		MessageBox(L"音效修改完毕喵！",L"提示喵！");
 		SNDsaveAlert = false;
@@ -881,7 +934,8 @@ void CExParrotDlg::OnMain01(){
 	au.channel = 1;
 	au.sampleRate = 44100;
 	stream s;
-	makeWAV(au, s);
+	setCopyRight(CRO_CREATE);
+	encodeTo(s);
 	no.push(s, "newSound.ogg");
 	updateInfo();
 	updateSNDlist();
@@ -949,7 +1003,8 @@ void CExParrotDlg::OnMain03(){
 			break;
 		case ModalSaveWarning::RETURN_SAVE:
 			stream s;
-			makeWAV(au, s);
+			setCopyRight(CRO_MODIFIED);
+			encodeTo(s);
 			no.replace(crtSNDid, s);
 			SNDsaveAlert = FALSE;
 			updateInfo();
@@ -981,7 +1036,8 @@ void CExParrotDlg::OnMain04(){
 			break;
 		case ModalSaveWarning::RETURN_SAVE:
 			stream s;
-			makeWAV(au, s);
+			setCopyRight(CRO_MODIFIED);
+			encodeTo(s);
 			no.replace(crtSNDid, s);
 			SNDsaveAlert = FALSE;
 			updateInfo();
@@ -1038,7 +1094,7 @@ void CExParrotDlg::OnNMClickListSnd(NMHDR *pNMHDR, LRESULT *pResult)
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	int row = pNMListView->iItem;
 	////////////////////////////
-	//切换IMG时提示保存
+	//切换OGG时提示保存
 	if(SNDsaveAlert) {
 		ModalSaveWarning ms;
 		ms.alertType = ModalSaveWarning::MODIFIED_SND;
@@ -1055,7 +1111,8 @@ void CExParrotDlg::OnNMClickListSnd(NMHDR *pNMHDR, LRESULT *pResult)
 			break;
 		case ModalSaveWarning::RETURN_SAVE:
 			stream s;
-			makeWAV(au, s);
+			setCopyRight(CRO_MODIFIED);
+			encodeTo(s);
 			no.replace(crtSNDid, s);
 			SNDsaveAlert = FALSE;
 			updateInfo();
@@ -1672,9 +1729,10 @@ DefineThreadFunc(CExParrotDlg, SoundInsertEmpty, DWORD) {
 	int insertPos = (para) ? no.count : crtSNDid;
 	audio newAu(44100, 1, 44100);
 	stream s;
-	makeWAV(newAu, s);
+	setCopyRight(CRO_CREATE);
+	encodeTo(newAu, s);
 	no.insert(insertPos, s, "new_sound.ogg");
-	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->InsertItem(insertPos, L"new_sound.ogg", getIconSND(VWAVE));
+	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->InsertItem(insertPos, L"new_sound.ogg", getIconSND(checkAudioFormat(s)));
 	s.release();
 	newAu.destory();
 	NPKsaveAlert = true;
@@ -2071,6 +2129,72 @@ DefineThreadFunc(CExParrotDlg, SoundSaveAsNPK, DWORD) {
 	}
 	processing = 0;
 }
+DefineThreadFunc(CExParrotDlg, SoundTransToWAV, DWORD) {
+	processing = 1;
+	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
+	bar.show(targetList.size() - 1);
+	int count = 0;
+	int skip = 0;
+	for(int i = 0; i < targetList.size(); i++) {
+		int id = targetList[i];
+		bar.setInfo(L"正在转换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		stream sour, dest;
+		if(no.SNDgetVersion(id) != VVORBIS) {
+			skip++;
+			continue;
+		}
+		no.extract(id, sour);
+		audio aTemp;
+		WAV::WAVobject wo;
+		OGGvorbis::OGGobject oo;
+		if(!oo.decodeAndMake(sour, aTemp))
+			continue;
+		if(!wo.loadAndEncode(aTemp, dest))
+			continue;
+		no.replace(id, dest);
+		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconSND(VWAVE), 0, 0, 0);
+		count++;
+	}
+	bar.hide();
+	NPKsaveAlert = true;
+	processing = 0;
+	MessageBox(L"尝试转换" + NumToCStr(targetList.size()) + L"个，成功" + NumToCStr(count) + L"个，跳过" + NumToCStr(skip) + L"个喵。", L"提示喵");
+}
+DefineThreadFunc(CExParrotDlg, SoundTransToOGG, DWORD) {
+	processing = 1;
+	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
+	bar.show(targetList.size() - 1);
+	int count = 0;
+	int skip = 0;
+	for(int i = 0; i < targetList.size(); i++) {
+		int id = targetList[i];
+		bar.setInfo(L"正在转换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		stream sour,dest;
+		if(no.SNDgetVersion(id) != VWAVE) {
+			skip++;
+			continue;
+		}
+		no.extract(id, sour);
+		audio aTemp;
+		WAV::WAVobject wo;
+		OGGvorbis::OGGobject oo;
+		if(!wo.decodeAndMake(sour, aTemp))
+			continue;
+		double dRate[6] = {0.4, -0.1, 0, 0.4, 0.7, 1};
+		str localt = CStrToStr(CTime::GetTickCount().Format(L"%Y-%m-%d %H:%M:%S"));
+		oo.comment.addInfo("created_date", localt);
+		if(!oo.loadAndEncode(aTemp, dest,
+			OGGvorbis::OGGencodeSetting('V', -1, dRate[profile.outputQuality])))
+			continue;
+		no.replace(id, dest);
+		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconSND(VVORBIS), 0, 0, 0);
+		count++;
+	}
+	bar.hide();
+	NPKsaveAlert = true;
+	processing = 0;
+	MessageBox(L"尝试转换" + NumToCStr(targetList.size()) + L"个，成功" + NumToCStr(count) + L"个，跳过" + NumToCStr(skip) + L"个喵。", L"提示喵");
+}
 DefineThreadFunc(CExParrotDlg, SoundDequote, DWORD) {
 	processing = 1;
 	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
@@ -2092,7 +2216,8 @@ DefineThreadFunc(CExParrotDlg, SoundHide, DWORD) {
 	bar.show(targetList.size() - 1);
 	audio emptyAu(1, 1);
 	stream s;
-	makeWAV(emptyAu, s);
+	setCopyRight(CRO_MODIFIED);
+	encodeTo(emptyAu, s);
 	for(int i = 0; i<targetList.size(); i++) {
 		int id = targetList[targetList.size() - 1 - i];
 		bar.setInfo(L"正在隐藏" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
@@ -2409,7 +2534,8 @@ void CExParrotDlg::OnClose() {
 			break;
 		case ModalSaveWarning::RETURN_ALL_SAVE:
 			stream s;
-			makeWAV(au, s);
+			setCopyRight(CRO_MODIFIED);
+			encodeTo(s);
 			no.replace(crtSNDid, s);
 			no.saveFile(CStrToStr(fileNPKname));
 			SNDsaveAlert = FALSE;
@@ -2578,4 +2704,28 @@ void CExParrotDlg::OnToolsPiano() {
 	// TODO:  在此添加命令处理程序代码
 	ToolPiano dlg;
 	dlg.DoModal();
+}
+
+
+void CExParrotDlg::OnMenuSoundTransformToWAV() {
+	// TODO:  在此添加命令处理程序代码
+	StartThreadFunc(SoundTransToWAV, 0);
+}
+
+
+void CExParrotDlg::OnMenuSoundTransformToOGG() {
+	// TODO:  在此添加命令处理程序代码
+	StartThreadFunc(SoundTransToOGG, 0);
+}
+
+
+void CExParrotDlg::OnMenuSoundTransformToWAVPatch() {
+	// TODO:  在此添加命令处理程序代码
+	StartThreadFunc(SoundTransToWAV, 1);
+}
+
+
+void CExParrotDlg::OnMenuSoundTransformToOGGPatch() {
+	// TODO:  在此添加命令处理程序代码
+	StartThreadFunc(SoundTransToOGG, 1);
 }

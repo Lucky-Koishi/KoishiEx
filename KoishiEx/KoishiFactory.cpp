@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "KoishiEx.h"
 #include "KoishiImageTool.h"
+#include "KoishiAudioTool.h"
 #include "KoishiNeoplePack.h"
 #include <assert.h>
 
@@ -330,24 +331,24 @@ bool NPKobject::IMGreplace(long pos, IMGobject &io){
 bool NPKobject::IMGrename(long pos, const str& newName){
 	return rename(pos, newName);
 }
-long NPKobject::IMGgetVersion(long pos){
+IMGversion NPKobject::IMGgetVersion(long pos) {
 	long r;
 	stream &s = block[entry[pos].link];
 	s.resetPosition();
 	s.readInt(r);
-	if(r == 0x706F654E){
+	if(r == 0x706F654E/*Neop*/){
 		s.movePosition(20);
 		s.readInt(r);
+		//目前已知的有1、2、4、5、6
 		if(r == 1 || r == 2 || r == 4 || r == 5 || r == 6){
-			return r;
+			return (IMGversion)r;
 		}
 		return VUKNOWN;
-	}else if(r == 0x5367674F){
-		return VSOUND;//OggS
-	}else if(r == 0x46464952){
-		return VSOUND;//RIFF
-	}else if((r & 0xFFFFFF) == 0x334449 || (r & 0xF0FF) == 0xF0FF){
-		return VSOUND;//MP3
+	} else {
+		SNDversion sv = SNDgetVersion(pos);
+		if(sv != VSNDUKNOWN && sv != VIMAGE) {
+			return VSOUND;
+		}
 	}
 	return VUDEF;		//根本就不是支持的文件
 }
@@ -366,21 +367,9 @@ long NPKobject::IMGgetPaletteCount(long pos){
 	s.readInt(r);
 	return r;
 }
-long NPKobject::SNDgetVersion(long pos){
-	long r;
-	stream &s = block[entry[pos].link];
-	s.resetPosition();
-	s.readInt(r);
-	if(r == 0x706F654E){
-		return VIMAGE;
-	}else if(r == 0x5367674F){
-		return VVORBIS;//OggS
-	}else if(r == 0x46464952){
-		return VWAVE;//RIFF
-	}else if((r & 0xFFFFFF) == 0x334449 || (r & 0xF0FF) == 0xF0FF){
-		return VMP3;//MP3
-	}
-	return VSNDUKNOWN;		//根本就不是支持的文件
+SNDversion NPKobject::SNDgetVersion(long pos) {
+	stream &sour = block[entry[pos].link];
+	return KoishiAudioTool::checkAudioFormat(sour);
 }
 //////////////////////////////////////////////////////////////////////////////////////
 PICinfo::PICinfo(){
@@ -551,6 +540,9 @@ bool IMGobject::load(stream &s){
 					//NODEF
 				}
 			}
+			//增加一条，对于较老版本V2来说，未压缩的1555和4444格式的数据大小表示的是转化为8888后的数据大小，因此要重置为1555和4444的大小
+			if(version == V2 && pi.comp == COMP_NONE && (pi.format == ARGB1555 || pi.format == ARGB4444))
+				pi.dataSize = pi.picSize.area() << 1;
 			PICcontent.push_back(pi);
 		}
 	}
@@ -1205,6 +1197,19 @@ bool IMGobject::PICextract(long pos, image &mat, long paletteID){
 				pi.TEXpointLT.X,
 				pi.TEXpointRB.X
 			);
+			if(pi.picSize.H != pi.picSize.W && pi.picSize.H == pi.TEXpointRB.X - pi.TEXpointLT.X) {
+				//如果图片不是方形尺寸，并且纹理集引用总宽等于图像高（即纹理集引用宽高与图片宽高相反）时，图像应该是顺时针旋转90度的
+				//应将mTemp逆时针旋转90度再提取
+				image imRotated;
+				imRotated.create(mat.width, mat.height);
+				for(int xp = 0; xp < mat.column; xp++) {
+					for(int yp = 0; yp < mat.row; yp++) {
+						imRotated[xp][yp] = mat[yp][mat.column - xp - 1];
+					}
+				}
+				mat.destory();
+				mat = imRotated;
+			}
 		}
 	}
 	return true;

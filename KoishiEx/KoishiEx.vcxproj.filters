@@ -31,12 +31,6 @@
     <ClInclude Include="sha256.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="zconf.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -47,9 +41,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="KoishiNeoplePack.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="BZ2.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="avatar.h">
@@ -82,9 +73,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="KoishiAudioTool.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="bz2.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

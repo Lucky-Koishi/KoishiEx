@@ -13,7 +13,7 @@
 
 #pragma once
 
-#define VERSION_STR "恋恋のEx白猫版.2.1"
+#define VERSION_STR "恋恋のEx白猫版.2.2"
 
 using namespace Koishi;
 using namespace KoishiNeoplePack;
@@ -45,6 +45,7 @@ public:
 public:
 	//基础变量
 	NPKobject no;
+	OGGvorbis::OGGcomment OGGcopyRight;
 	audio au;
 	CString fileNPKname;
 	CString fileSNDname;
@@ -107,8 +108,10 @@ public:
 	void updateSNDlist();
 	void updateSNDterm(int pos);
 	void updateInfo();
+	void updateCommentInfo(const SNDversion &ver);
 	void updateMP3image();
 	void updateModified();
+	void resetBound();
 	BOOL getMouseAxis(point &pt);
 	BOOL getMousePos(longex &pos);
 	CPoint getWinMouseAxis();
@@ -120,10 +123,20 @@ public:
 	DeclareThreadFunc(ReplaceSound,	BOOL);	//音频段替换线程，BOOL无意义
 	DeclareThreadFunc(Draw, BOOL);			//绘制时域图线程，BOOL无意义
 	DeclareThreadFunc(DrawPower, BOOL);		//绘制频域图线程，BOOL无意义
-	DeclareThreadFunc(DecodeAndPlay, BOOL);		//解码线程
+	DeclareThreadFunc(DecodeAndPlay, BOOL);	//解码线程
 	void draw();
 	void makeGraph(image &graphMat, int w, int h);
 	void decodeAndPlay();
+	enum enumCopyRightOpera {
+		CRO_NONE,
+		CRO_CREATE,
+		CRO_MODIFIED,
+		CRO_CLEAR		//从WAV等无版权格式的音频转换成有版权格式的音频时候采用，因为本来就没有任何版权
+	};
+	//编码，根据Profile里的outputQuality决定输出PCM还是OGG
+	BOOL setCopyRight(enumCopyRightOpera opera);
+	BOOL encodeTo(stream &dest);		
+	BOOL encodeTo(const audio &newAd, stream &dest);
 public:
 	//所需控件
 	TinyBar bar;
@@ -186,6 +199,8 @@ public:
 	DeclareThreadFunc(SoundReplaceExtern, DWORD);
 	DeclareThreadFunc(SoundReplaceLocal, DWORD);
 	DeclareThreadFunc(SoundReplaceQuote, DWORD);
+	DeclareThreadFunc(SoundTransToWAV, DWORD);
+	DeclareThreadFunc(SoundTransToOGG, DWORD);
 	DeclareThreadFunc(SoundRemove, DWORD);
 	DeclareThreadFunc(SoundExtract, DWORD);
 	DeclareThreadFunc(SoundSaveAsNPK, DWORD);
@@ -231,4 +246,8 @@ public:
 	afx_msg void OnBnClickedToolButton14();
 	afx_msg void OnBnClickedToolButton15();
 	afx_msg void OnToolsPiano();
+	afx_msg void OnMenuSoundTransformToWAV();
+	afx_msg void OnMenuSoundTransformToOGG();
+	afx_msg void OnMenuSoundTransformToWAVPatch();
+	afx_msg void OnMenuSoundTransformToOGGPatch();
 };

@@ -42,6 +42,7 @@ BEGIN_MESSAGE_MAP(ToolPiano, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON4, &ToolPiano::OnBnClickedButton4)
 	ON_BN_CLICKED(IDC_BUTTON5, &ToolPiano::OnBnClickedButton5)
 	ON_BN_CLICKED(IDC_BUTTON6, &ToolPiano::OnBnClickedButton6)
+	ON_BN_CLICKED(IDSTOP, &ToolPiano::OnBnClickedStop)
 END_MESSAGE_MAP()
 
 
@@ -50,6 +51,7 @@ BOOL ToolPiano::OnInitDialog() {
 	CDialogEx::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
+	
 	GET_CTRL(CEdit, IDC_EDIT_FILENAME)->SetWindowText(L"请选择一个音效");
 	GET_CTRL(CEdit, IDC_EDIT_ADJUST1)->SetWindowText(L"基音频率偏移");
 	GET_CTRL(CEdit, IDC_EDIT_ADJUST2)->SetWindowText(L"1");
@@ -62,6 +64,7 @@ BOOL ToolPiano::OnInitDialog() {
 
 	GET_CTRL(CEdit, IDC_EDIT_NOTES)->GetWindowRect(&rcStaff);
 	ScreenToClient(&rcStaff);
+	playing = FALSE;
 
 	CREATEW(bar, IDD_TINY_PROGRESSBAR);
 
@@ -116,19 +119,25 @@ void ToolPiano::OnBnClickedButton1() {
 		bar.setInfo(L"正在解码喵……", 0);
 		switch(noTemp.SNDgetVersion(0)) {
 		case VVORBIS:
-			if(KoishiAudioTool::loadOGG(originNote, auStream)) {
-				if(originNote.length > 0)
-					StartThreadFunc(playNotes, 1);
-			} else {
-				MessageBox(L"这个OGG文件解码失败喵。", L"提示喵");
+			{
+				KoishiAudioTool::OGGvorbis::OGGobject oo;
+				if(oo.decodeAndMake(auStream, originNote)) {
+					if(originNote.length > 0)
+						StartThreadFunc(playNotes, 1);
+				} else {
+					MessageBox(L"这个OGG文件解码失败喵。", L"提示喵");
+				}
 			}
 			break;
 		case VWAVE:
-			if(KoishiAudioTool::loadWAV(originNote, auStream)) {
-				if(originNote.length > 0)
-					StartThreadFunc(playNotes, 1);
-			} else {
-				MessageBox(L"这个WAV文件解码失败喵。", L"提示喵");
+			{
+				KoishiAudioTool::WAV::WAVobject wo;
+				if(wo.decodeAndMake(auStream, originNote)) {
+					if(originNote.length > 0)
+						StartThreadFunc(playNotes, 1);
+				} else {
+					MessageBox(L"这个WAV文件解码失败喵。", L"提示喵");
+				}
 			}
 			break;
 		}
@@ -345,6 +354,8 @@ void ToolPiano::OnBnClickedSave() {
 
 void ToolPiano::OnBnClickedCancel() {
 	// TODO:  在此添加控件通知处理程序代码
+	player.stop();
+	Sleep(5);
 	CDialogEx::OnCancel();
 }
 
@@ -371,8 +382,8 @@ void ToolPiano::showStaffText() {
 	GET_CTRL(CEdit, IDC_EDIT_NOTES)->SetWindowText(musStr);
 }
 DefineThreadFunc(ToolPiano, punchSave, int) {
-	CString defExt = _T("波形声音(*.WAV)|*.WAV");
-	CString extFilter = _T("波形声音(*.WAV)|*.WAV||");
+	CString defExt = _T("Ogg音效(*.ogg)|*.ogg|波形声音(*.wav)|*.wav");
+	CString extFilter = _T("Ogg音效(*.ogg)|*.ogg|波形声音(*.wav)|*.wav||");
 	CFileDialog dlg(false, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, extFilter, this);
 	if(dlg.DoModal() != IDOK)
 		return;
@@ -380,9 +391,22 @@ DefineThreadFunc(ToolPiano, punchSave, int) {
 	if(!graphicMode) {
 		staffFromText();
 	}
+	CString fileExt = dlg.GetFileExt().MakeUpper();
 	makeTrack();
-	KoishiAudioTool::makeWAV(track, CStrToStr(fileName));
-	MessageBox(L"已保存喵！", L"提示喵");
+	if(fileExt == L".WAV") {
+		KoishiAudioTool::WAV::WAVobject wo;
+		if(!wo.loadAndEncodeToFile(track, CStrToStr(fileName))) {
+			MessageBox(L"无法将其转换为WAV喵！", L"提示喵");
+		}
+	} else {
+		KoishiAudioTool::OGGvorbis::OGGobject oo;
+		Profile profile;
+		profile.loadProfile();
+		oo.comment.addInfo_author(CStrToStr(profile.artist), CStrToStr(CTime::GetTickCount().Format(L"%Y-%m-%d %H:%M:%S")));
+		if(!oo.loadAndEncodeToFile(track, CStrToStr(fileName))) {
+			MessageBox(L"编码错误喵！\r\n" + StrToCStr(oo.errorMessage), L"提示喵");
+		}
+	}
 }
 DefineThreadFunc(ToolPiano, punchPlay, int) {
 	if(!graphicMode) {
@@ -653,4 +677,10 @@ void ToolPiano::OnBnClickedButton6() {
 		file.Close();
 		return;
 	}
+}
+
+
+void ToolPiano::OnBnClickedStop() {
+	// TODO:  在此添加控件通知处理程序代码
+	player.stop();
 }

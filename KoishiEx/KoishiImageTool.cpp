@@ -1840,11 +1840,11 @@ bool DDSobject::load(const stream &s){
 	_s.readDWord(_v);
 	header.magic = _v;
 	if(_v != 0x20534444)
-		b = false;
+		return false;
 	_s.readDWord(_v);
 	header.headSize	= _v;
 	if(_v != 0x7C)
-		b = false;
+		return false;
 	_s.readDWord(_v);
 	header.flags = _v;
 	if(_v != 0x81007){
@@ -1893,7 +1893,7 @@ bool DDSobject::load(const stream &s){
 	if(header.flags & DDSD_MIPMAPCOUNT){
 		//mipmap¸ñÊ½
 		if(header.mipMapCount >= 15){
-		return false;
+			return false;
 		}
 		long len = 0;
 		long originWidth = header.width;

@@ -76,7 +76,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="avatar.h" />
-    <ClInclude Include="BZ2.h" />
     <ClInclude Include="KoishiAudioTool.h" />
     <ClInclude Include="KoishiEx.h" />
     <ClInclude Include="KoishiImageTool.h" />
@@ -85,12 +84,9 @@
     <ClInclude Include="sha256.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="zconf.h" />
-    <ClInclude Include="zlib.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="avatar.cpp" />
-    <ClCompile Include="bz2.cpp" />
     <ClCompile Include="KoishiAudioTool.cpp" />
     <ClCompile Include="KoishiBase.cpp" />
     <ClCompile Include="KoishiData.cpp" />

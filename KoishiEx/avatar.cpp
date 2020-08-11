@@ -1082,6 +1082,11 @@ void AvatarFactory::makeWeaponModel(image &outputImage, const long &weaponSetID,
 					PICinfo pi;
 					image im;
 					weaponAlbum[weaponSetID].source.IMGextract(info[l].posInNPK, io);
+					if(l == 1 && index == 42) {
+						int aa = 0;
+						aa++;
+						aa = aa + 1;
+					}
 					io.PICgetInfo(io.linkFind(modelMaker.frame), pi);
 					io.PICextract(modelMaker.frame, im, info[l].paletteID);
 					modelImage.putBack(im, LAY, point(

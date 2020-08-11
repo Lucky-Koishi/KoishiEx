@@ -2,6 +2,7 @@
 #include "../KoishiEx/KoishiAudioTool.h"
 #include "TinyBar(white).h"
 #include "Music.h"
+
 // ToolPiano ¶Ô»°¿ò
 
 class ToolPiano : public CDialogEx
@@ -32,6 +33,7 @@ public:
 	DeclareThreadFunc(punchSave, int);
 	DeclareThreadFunc(punchPlay, int);
 	BOOL graphicMode;
+	BOOL playing;
 	int offsetLine;
 	void staffFromText();
 	void showStaffText();
@@ -56,4 +58,5 @@ public:
 
 	int getBoardHit(const point &pt);
 	int getClickedBar(const point &pt, int lineCount, int barPerLine, int offset);
+	afx_msg void OnBnClickedStop();
 };

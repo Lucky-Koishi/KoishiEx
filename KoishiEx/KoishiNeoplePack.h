@@ -77,10 +77,10 @@ namespace KoishiNeoplePack{
 		bool IMGremove(long pos);
 		bool IMGreplace(long pos, IMGobject &obj);
 		bool IMGrename(long pos, const str &newName);
-		long IMGgetVersion(long pos);
+		IMGversion IMGgetVersion(long pos);
 		long IMGgetPaletteCount(long pos);
 		//音效接口
-		long SNDgetVersion(long pos);
+		SNDversion SNDgetVersion(long pos);
 	};
 	class PICinfo;			//IMG内部帧数据
 	class TEXinfo;			//IMG内部纹理集数据

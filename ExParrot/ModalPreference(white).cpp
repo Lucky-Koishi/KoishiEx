@@ -291,13 +291,10 @@ void ModalPreference2::OnBnClickedOk()
 		iTemp = 0;
 	if(iTemp > 3)
 		iTemp = 3;
-	modifiedProfile.MP3quality = iTemp;
+	modifiedProfile.outputQuality = iTemp;
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE11)->GetWindowText(sTemp);
-	if(sTemp == L"是" || sTemp == L"Y"){
-		modifiedProfile.useDefaultRecorder = 1;
-	}else{
-		modifiedProfile.useDefaultRecorder = 0;
-	}
+	modifiedProfile.artist = sTemp;
+	modifiedProfile.outputQuality = GET_CTRL(CComboBox, IDC_COMBO_PREFERENCE10)->GetCurSel();
 	modifiedProfile.saveProfile();
 	CDialogEx::OnOK();
 }
@@ -330,8 +327,17 @@ BOOL ModalPreference2::OnInitDialog()
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE7)->SetWindowText(NumToCStr(modifiedProfile.channel2Color));
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE8)->SetWindowText(NumToCStr(modifiedProfile.volumeColor));
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE9)->SetWindowText(NumToCStr(modifiedProfile.MP3defaultColor));
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE10)->SetWindowText(NumToCStr(modifiedProfile.MP3quality));
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE11)->SetWindowText(NumToCStr(modifiedProfile.useDefaultRecorder));
+	//GET_CTRL(CEdit, IDC_EDIT_PREFERENCE10)->SetWindowText(NumToCStr(modifiedProfile.outputQuality));
+	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE11)->SetWindowText(modifiedProfile.artist);
+	CComboBox *cb = GET_CTRL(CComboBox, IDC_COMBO_PREFERENCE10);
+	cb->ResetContent();
+	cb->AddString(L"WAV 无损音质，体积最大");
+	cb->AddString(L"OGG 品质较差，体积最小");
+	cb->AddString(L"OGG 品质一般，节约空间");
+	cb->AddString(L"OGG 品质与空间兼顾");
+	cb->AddString(L"OGG 品质出色，较占空间");
+	cb->AddString(L"OGG 品质流畅，很占空间");
+	cb->SetCurSel(MIN(5, modifiedProfile.outputQuality));
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }

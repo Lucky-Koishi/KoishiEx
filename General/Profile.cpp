@@ -23,8 +23,8 @@ void Profile::defaultProfile(){
 	channel1Color = 0x33FF00;
 	volumeColor = 0xFFFF00;
 	MP3defaultColor = 0xCCCC00;
-	MP3quality = 3;
-	useDefaultRecorder = 1;
+	outputQuality = 3;
+	artist = L"noname";
 }
 void Profile::loadProfile(){
 	CStdioFile file;
@@ -86,11 +86,11 @@ void Profile::loadProfile(){
 			if(termStr == L"[MP3_DEFAULT_COLOR]"){
 				MP3defaultColor = _ttoi(valueStr);
 			}
-			if(termStr == L"[MP3_QUALITY]"){
-				MP3quality = _ttoi(valueStr);
+			if(termStr == L"[OUTPUT_QUALITY]"){
+				outputQuality = _ttoi(valueStr);
 			}
-			if(termStr == L"[USE_DEFAULT_RECORDER]"){
-				useDefaultRecorder = _ttoi(valueStr);
+			if(termStr == L"[ARTIST]"){
+				artist = valueStr;
 			}
 		}
 		setlocale(LC_CTYPE, old_locale);
@@ -123,8 +123,8 @@ void Profile::saveProfile(){
 	file.WriteString(L"[CHANNEL2_COLOR]" + NumToCStr(channel2Color) + L"\n");
 	file.WriteString(L"[VOLUME_COLOR]" + NumToCStr(volumeColor) + L"\n");
 	file.WriteString(L"[MP3_DEFAULT_COLOR]" + NumToCStr(MP3defaultColor) + L"\n");
-	file.WriteString(L"[MP3_QUALITY]" + NumToCStr(MP3quality) + L"\n");
-	file.WriteString(L"[USE_DEFAULT_RECORDER]" + NumToCStr(useDefaultRecorder) + L"\n");
+	file.WriteString(L"[OUTPUT_QUALITY]" + NumToCStr(outputQuality) + L"\n");
+	file.WriteString(L"[ARTIST]" + artist + L"\n");
 	setlocale(LC_CTYPE, old_locale);
 	free(old_locale);
 	file.Close();

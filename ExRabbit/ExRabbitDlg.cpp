@@ -4624,7 +4624,10 @@ DefineThreadFunc(CExRabbitDlg, TextureInsert, ModalInsertTexture::OUTPUT) {
 		stream sOrigin, sCompressed;
 		sOrigin.loadFile(CStrToStr(para.fileName));
 		sOrigin.ZLIBcompress(sCompressed);
-		DDSHelper.load(sOrigin);
+		if(!DDSHelper.load(sOrigin)) {
+			MessageBox(L"不是有效的DDS文件喵！");
+			return;
+		}
 		tInfo.dataLength = sOrigin.length;
 		tInfo.compressedLength = sCompressed.length;
 		tInfo.format = (colorFormat)(DDS_DXT1 + ((DDSHelper.getHeader()->pixelFormat.fourCC - 0x31545844) >> 25));

@@ -33,7 +33,7 @@
 
 #pragma once
 
-#define VERSION_STR "ÁµÁµ¤ÎExºÚÃ¨°æ.4.8"
+#define VERSION_STR "ÁµÁµ¤ÎExºÚÃ¨°æ.4.9"
 
 // CExRabbitDlg ¶Ô»°¿ò
 using namespace Koishi;
