@@ -25,7 +25,6 @@ void CDialogNew::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_CHECK1, m_ch1);
-	DDX_Control(pDX, IDC_CHECK2, m_ch2);
 	DDX_Control(pDX, IDC_CHECK3, m_ch3);
 	DDX_Control(pDX, IDC_CHECK4, m_ch4);
 	DDX_Control(pDX, IDC_CHECK7, m_ch5);
@@ -36,7 +35,6 @@ void CDialogNew::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CDialogNew, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK1, &CDialogNew::OnBnClickedCheck1)
-	ON_BN_CLICKED(IDC_CHECK2, &CDialogNew::OnBnClickedCheck2)
 	ON_BN_CLICKED(IDC_CHECK3, &CDialogNew::OnBnClickedCheck3)
 	ON_BN_CLICKED(IDC_CHECK4, &CDialogNew::OnBnClickedCheck4)
 	ON_BN_CLICKED(IDC_CHECK7, &CDialogNew::OnBnClickedCheck7)
@@ -53,7 +51,6 @@ void CDialogNew::OnBnClickedCheck1()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	m_ch1.SetCheck(true);
-	m_ch2.SetCheck(false);
 	m_ch3.SetCheck(false);
 	m_ch4.SetCheck(false);
 	m_ch5.SetCheck(false);
@@ -63,28 +60,10 @@ void CDialogNew::OnBnClickedCheck1()
 	m_ed1.SetWindowText(info);
 }
 
-
-void CDialogNew::OnBnClickedCheck2()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	m_ch1.SetCheck(false);
-	m_ch2.SetCheck(true);
-	m_ch3.SetCheck(false);
-	m_ch4.SetCheck(false);
-	m_ch5.SetCheck(false);
-	m_ch6.SetCheck(false);
-	CString info = L"新建一个拼合方案。\r\n";
-	info += L"拼合方案是类似于NPK的一种结构，不同的是，系统将视其内部IMG为图层，从而按照IMG顺序显示所有贴图。\r\n";
-	info += L"您可以像IMG那样调整每个图层的信息，然后通过浏览来确定最后拼合的效果。\r\n";
-	m_ed1.SetWindowText(info);
-}
-
-
 void CDialogNew::OnBnClickedCheck3()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	m_ch1.SetCheck(false);
-	m_ch2.SetCheck(false);
 	m_ch3.SetCheck(true);
 	m_ch4.SetCheck(false);
 	m_ch5.SetCheck(false);
@@ -101,7 +80,6 @@ void CDialogNew::OnBnClickedCheck4()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	m_ch1.SetCheck(false);
-	m_ch2.SetCheck(false);
 	m_ch3.SetCheck(false);
 	m_ch4.SetCheck(true);
 	m_ch5.SetCheck(false);
@@ -118,15 +96,14 @@ void CDialogNew::OnBnClickedCheck7()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	m_ch1.SetCheck(false);
-	m_ch2.SetCheck(false);
 	m_ch3.SetCheck(false);
 	m_ch4.SetCheck(false);
 	m_ch5.SetCheck(true);
 	m_ch6.SetCheck(false);
 	CString info = L"新建一个版本号为5的IMG文件。\r\n";
-	info += L"V5是大部分技能特效适用的IMG文件，以DDS格式存储大图像并且以区域引用方式转换成每个图片帧的小图像。\r\n";
-	info += L"您可以使用V5文件进行DDS操作，建议您使用现成的DDS贴图进行添加、替换操作，本作支持将PNG贴图转化为DDS但会严重失真，应慎用。\r\n";
-	info += L"您即将建立一个V5的IMG文件，您需要自行添加DDS贴图，并通过设置引用DDS标号以及范围来创建普通的帧贴图。";
+	info += L"V5是大部分技能特效适用的IMG文件，以Tex格式存储大图像并且以区域引用方式转换成每个图片帧的小图像。\r\n";
+	info += L"您可以使用V5文件进行Tex操作，建议您使用现成的Tex贴图进行添加、替换操作，本作支持将PNG贴图转化为Tex但会严重失真，应慎用。\r\n";
+	info += L"您即将建立一个V5的IMG文件，您需要自行添加Tex贴图，并通过设置引用Tex标号以及范围来创建普通的帧贴图。";
 	m_ed1.SetWindowText(info);
 }
 
@@ -135,7 +112,6 @@ void CDialogNew::OnBnClickedCheck8()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	m_ch1.SetCheck(false);
-	m_ch2.SetCheck(false);
 	m_ch3.SetCheck(false);
 	m_ch4.SetCheck(false);
 	m_ch5.SetCheck(false);
@@ -155,96 +131,79 @@ void CDialogNew::OnBnClickedOk()
 	if(m_ch1.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
+		dlg->io.release();
+		dlg->io.create(V2);
+		dlg->fileIMGname = L"newV2.img";
 		dlg->fileNPKname = L"newNPK.npk";
-		dlg->fileOpen = true;
-		dlg->mixMode = false;
-		dlg->updateIMGlist();
-	}else if(m_ch2.GetCheck()){
-		//施工中
-		dlg->no.release();
-		dlg->no.create();
-		dlg->fileNPKname = L"new_mix_plan.mpl";
-		dlg->fileOpen = true;
-		dlg->mixMode = true;
-		dlg->updateIMGlist();
+		dlg->no.IMGpush("newV2.img", dlg->io);
+		dlg->switchIMGver(dlg->io.version);
+		dlg->IMGloadList();
+		dlg->PICloadList();
+		dlg->TEXloadList();
+		dlg->updateColorTable();
+		dlg->updateInfo();
 	}else if(m_ch3.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
-		dlg->io.Release();
-		dlg->io.Create(V2);
+		dlg->io.release();
+		dlg->io.create(V2);
 		dlg->fileIMGname = L"newV2.img";
 		dlg->fileNPKname = L"newNPK.npk";
-		dlg->fileOpen = true;
-		dlg->mixMode = false;
-		dlg->no.IMGpush(dlg->io, "new.img");
+		dlg->no.IMGpush("newV2.img", dlg->io);
 		dlg->switchIMGver(dlg->io.version);
-		dlg->updateIMGlist();
-		dlg->updatePIClist();
-		dlg->updateCLRlist();
-		dlg->updateDDSlist();
-		dlg->updateNPKInfo();
-		dlg->updateIMGInfo();
-		dlg->updatePICInfo();
+		dlg->IMGloadList();
+		dlg->PICloadList();
+		dlg->TEXloadList();
+		dlg->updateColorTable();
+		dlg->updateInfo();
 	}else if(m_ch4.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
-		dlg->io.Release();
-		dlg->io.Create(V4);
+		dlg->io.release();
+		dlg->io.create(V4);
 		dlg->fileIMGname = L"newV4.img";
 		dlg->fileNPKname = L"newNPK.npk";
-		dlg->fileOpen = true;
-		dlg->mixMode = false;
-		dlg->no.IMGpush(dlg->io, "new.img");
+		dlg->no.IMGpush("newV4.img", dlg->io);
 		dlg->switchIMGver(dlg->io.version);
-		dlg->updateIMGlist();
-		dlg->updatePIClist();
-		dlg->updateCLRlist();
-		dlg->updateDDSlist();
-		dlg->updateNPKInfo();
-		dlg->updateIMGInfo();
-		dlg->updatePICInfo();
+		dlg->IMGloadList();
+		dlg->PICloadList();
+		dlg->updateColorTable();
+		dlg->TEXloadList();
+		dlg->updateInfo();
 	}else if(m_ch5.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
-		dlg->io.Release();
-		dlg->io.Create(V5);
+		dlg->io.release();
+		dlg->io.create(V5);
 		dlg->fileIMGname = L"newV5.img";
 		dlg->fileNPKname = L"newNPK.npk";
-		dlg->fileOpen = true;
-		dlg->mixMode = false;
-		dlg->no.IMGpush(dlg->io, "new.img");
+		dlg->no.IMGpush("newV5.img", dlg->io);
 		dlg->switchIMGver(dlg->io.version);
-		dlg->updateIMGlist();
-		dlg->updatePIClist();
-		dlg->updateCLRlist();
-		dlg->updateDDSlist();
-		dlg->updateNPKInfo();
-		dlg->updateIMGInfo();
-		dlg->updatePICInfo();
+		dlg->IMGloadList();
+		dlg->PICloadList();
+		dlg->updateColorTable();
+		dlg->TEXloadList();
+		dlg->updateInfo();
 	}else if(m_ch6.GetCheck()){
 		dlg->no.release();
 		dlg->no.create();
-		dlg->io.Release();
-		dlg->io.Create(V6);
+		dlg->io.release();
+		dlg->io.create(V6);
 		dlg->fileIMGname = L"newV6.img";
 		dlg->fileNPKname = L"newNPK.npk";
-		dlg->fileOpen = true;
-		dlg->mixMode = false;
-		dlg->no.IMGpush(dlg->io, "new.img");
+		dlg->no.IMGpush("newV6.img", dlg->io);
 		dlg->io.CLRnewPalette();
 		dlg->switchIMGver(dlg->io.version);
-		dlg->m_cbPro.ResetContent();
-		dlg->m_cbPro.AddString(L"调色板方案0");
-		dlg->m_cbPro.SetCurSel(0);
-		dlg->updateIMGlist();
-		dlg->updatePIClist();
-		dlg->updateCLRlist();
-		dlg->updateDDSlist();
-		dlg->updateNPKInfo();
-		dlg->updateIMGInfo();
-		dlg->updatePICInfo();
+		GET_DLG_CTRL(CComboBox, IDC_COMBO_PRO)->ResetContent();
+		GET_DLG_CTRL(CComboBox, IDC_COMBO_PRO)->AddString(L"0");
+		GET_DLG_CTRL(CComboBox, IDC_COMBO_PRO)->SetCurSel(0);
+		dlg->IMGloadList();
+		dlg->PICloadList();
+		dlg->updateColorTable();
+		dlg->TEXloadList();
+		dlg->updateInfo();
 	}
-	dlg->m_lIMG.SetSelectionMark(0);
+	GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(0);
 	dlg->crtIMGid = 0;
 	ShowWindow(SW_HIDE);
 }
@@ -255,3 +214,4 @@ void CDialogNew::OnBnClickedCancel()
 	// TODO: 在此添加控件通知处理程序代码
 	ShowWindow(SW_HIDE);
 }
+

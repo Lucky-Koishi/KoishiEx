@@ -15,6 +15,7 @@
 
 BEGIN_MESSAGE_MAP(CExRabbitApp, CWinApp)
 	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
+	ON_COMMAND(ID_MENU_IMAGE_CLIPBOARD_COPY, &CExRabbitApp::OnMenuImageClipboardCopy)
 END_MESSAGE_MAP()
 
 
@@ -92,3 +93,8 @@ BOOL CExRabbitApp::InitInstance()
 	return FALSE;
 }
 
+
+
+void CExRabbitApp::OnMenuImageClipboardCopy() {
+	// TODO:  在此添加命令处理程序代码
+}

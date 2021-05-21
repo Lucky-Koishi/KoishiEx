@@ -27,6 +27,7 @@ public:
 // й╣ож
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnMenuImageClipboardCopy();
 };
 
 extern CExRabbitApp theApp;

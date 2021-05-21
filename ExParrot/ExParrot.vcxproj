@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D255A3E5-909C-46D2-8210-F40B17BACD5E}</ProjectGuid>
+    <RootNamespace>ExParrot</RootNamespace>
+    <Keyword>MFCProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>whitecat</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+    <None Include="res\ExParrot.ico" />
+    <None Include="res\ExParrot.rc2" />
+    <None Include="res\ico00001.ico" />
+    <None Include="res\ico00002.ico" />
+    <None Include="res\icon1.ico" />
+    <None Include="res\icon_main.ico" />
+    <None Include="res\icon_sou.ico" />
+    <None Include="res\icon_version_image.ico" />
+    <None Include="res\icon_version_link.ico" />
+    <None Include="res\icon_version_mp3.ico" />
+    <None Include="res\icon_version_NUL.ico" />
+    <None Include="res\icon_version_vorbis.ico" />
+    <None Include="res\icon_version_wave.ico" />
+    <None Include="res\LOGO2.bmp" />
+    <None Include="res\tool_button_1.bmp" />
+    <None Include="res\tool_button_10.bmp" />
+    <None Include="res\tool_button_11.bmp" />
+    <None Include="res\tool_button_12.bmp" />
+    <None Include="res\tool_button_13.bmp" />
+    <None Include="res\tool_button_2.bmp" />
+    <None Include="res\tool_button_3.bmp" />
+    <None Include="res\tool_button_4.bmp" />
+    <None Include="res\tool_button_5.bmp" />
+    <None Include="res\tool_button_6.bmp" />
+    <None Include="res\tool_button_7.bmp" />
+    <None Include="res\tool_button_8.bmp" />
+    <None Include="res\tool_button_9.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\General\Func.h" />
+    <ClInclude Include="..\General\GoodListCtrl.h" />
+    <ClInclude Include="..\General\Profile.h" />
+    <ClInclude Include="ExParrot.h" />
+    <ClInclude Include="ExParrotDlg.h" />
+    <ClInclude Include="ModalConflictWarning%28white%29.h" />
+    <ClInclude Include="ModalPreference%28white%29.h" />
+    <ClInclude Include="ModalRename%28white%29.h" />
+    <ClInclude Include="ModalSaveWarning%28white%29.h" />
+    <ClInclude Include="Music.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="TinyAdjustSpeed.h" />
+    <ClInclude Include="TinyAdjustVolume.h" />
+    <ClInclude Include="TinyBar.h" />
+    <ClInclude Include="TinyEcho.h" />
+    <ClInclude Include="TinyNoteBar.h" />
+    <ClInclude Include="TinySNDSelect.h" />
+    <ClInclude Include="TinySetName%28white%29.h" />
+    <ClInclude Include="TinyStretch.h" />
+    <ClInclude Include="ToolAudioMark.h" />
+    <ClInclude Include="ToolDownload.h" />
+    <ClInclude Include="ToolDownloadServerSelection.h" />
+    <ClInclude Include="ToolPiano.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\General\Func.cpp" />
+    <ClCompile Include="..\General\GoodListCtrl.cpp" />
+    <ClCompile Include="..\General\Profile.cpp" />
+    <ClCompile Include="ExParrot.cpp" />
+    <ClCompile Include="ExParrotDlg.cpp" />
+    <ClCompile Include="ModalConflictWarning%28white%29.cpp" />
+    <ClCompile Include="ModalPreference%28white%29.cpp" />
+    <ClCompile Include="ModalRename%28white%29.cpp" />
+    <ClCompile Include="ModalSaveWarning%28white%29.cpp" />
+    <ClCompile Include="Music.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="TinyAdjustSpeed.cpp" />
+    <ClCompile Include="TinyAdjustVolume.cpp" />
+    <ClCompile Include="TinyBar.cpp" />
+    <ClCompile Include="TinyEcho.cpp" />
+    <ClCompile Include="TinyNoteBar.cpp" />
+    <ClCompile Include="TinySNDSelect.cpp" />
+    <ClCompile Include="TinySetName%28white%29.cpp" />
+    <ClCompile Include="TinyStretch.cpp" />
+    <ClCompile Include="ToolAudioMark.cpp" />
+    <ClCompile Include="ToolDownload.cpp" />
+    <ClCompile Include="ToolDownloadServerSelection.cpp" />
+    <ClCompile Include="ToolPiano.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ExParrot.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\bitmap1.bmp" />
+    <Image Include="res\scroll_bar_down_1.bmp" />
+    <Image Include="res\scroll_bar_down_2.bmp" />
+    <Image Include="res\scroll_bar_down_3.bmp" />
+    <Image Include="res\scroll_bar_up_1.bmp" />
+    <Image Include="res\scroll_bar_up_2.bmp" />
+    <Image Include="res\scroll_bar_up_3.bmp" />
+    <Image Include="res\tool_button_14.bmp" />
+    <Image Include="res\tool_button_15.bmp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="ExParrot.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

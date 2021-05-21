@@ -19,44 +19,352 @@
     <None Include="res\ExRabbit.rc2">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\ExRabbit.ico">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="res\LOGO.png">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="res\LOGO.bmp">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\icon1.ico">
+    <None Include="..\BUGtrace.txt" />
+    <None Include="res\QRCODE.bmp">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\icon2.ico">
+    <None Include="res\cursor1.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_ARGB1555.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_ARGB4444.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_ARGB8888.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_DXT1.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_DXT3.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_DXT5.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_LINK.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_PALETTE.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_main.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_2.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_4.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_5.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_6.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_NUL.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_1.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_2.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_3.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_4.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_5.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_6.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_7.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_8.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_9.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_10.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_11.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_12.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_13.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_14.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_15.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\cursor2.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\cursor3.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\cursor4.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\cursor5.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\LOGO2.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_1.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_version_link.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_2X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_4x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_5x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_6x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_7x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_8x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_9x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_10x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_11x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_12x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_13x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_14x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\tool_button_15x.bmp">
       <Filter>资源文件</Filter>
     </None>
     <None Include="res\icon3.ico">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\icon4.ico">
+    <None Include="res\icon_unkown.ico">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\Folder_Blue_Rabbit_16px_511716_easyicon.net.ico">
+    <None Include="res\icon_version_audio.ico">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\Folder_White_Rabbit_16px_511717_easyicon.net.ico">
+    <None Include="res\icon_format_LINK2.ico">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="..\BUGtrace.txt" />
-    <None Include="res\icon5.ico">
+    <None Include="res\icon_version_3.ico">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\icon6.ico">
+    <None Include="res\bitmap5.bmp">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\iconud.ico">
+    <None Include="res\avatar_tool_button_1.bmp">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="..\mplserial.txt" />
+    <None Include="res\avatar_tool_button_2.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_tool_button_2x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_tool_button_3.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_tool_button_3x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_tool_button_4.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_tool_button_4x.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_tool_button_5.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_tool_button_6.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_tool_button_7.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_tool_button_8.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_tool_button_9.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_tool_button_10.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_tool_button_11.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\png1.png">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\part_button_0.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\part_button_1.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\part_button_2.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\part_button_3.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\part_button_4.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\part_button_5.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\part_button_6.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\part_button_7.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\part_button_8.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\part_button_9.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_0.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_0X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_1.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_1X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_2.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_2X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_3.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_3X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_4.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_4X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_5.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_5X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_6.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_6X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_7.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_7X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_8.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_8X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_9.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_9X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_10.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_10X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_11.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_11X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_12.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_12X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_13.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_13X.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_exit.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\avatar_char_reserved.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\pic_icon.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\icon_format_PALETTE_CN.ico">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExRabbit.h">
@@ -74,55 +382,160 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgInsert.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Func.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgRename.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DlgTrasform.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="DialogNew.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgInsert2.h">
+    <ClInclude Include="DialogAbout.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgSetpara.h">
+    <ClInclude Include="ToolForceEx.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgInsert3.h">
+    <ClInclude Include="AdjustColorDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgInsert4.h">
+    <ClInclude Include="ModalInsertPicture.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgHSV.h">
+    <ClInclude Include="ModalInsertPicturePatch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgSetXY.h">
+    <ClInclude Include="ModalAdjustCanvas.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgExpand.h">
+    <ClInclude Include="ModalPictureParameter.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgColor.h">
+    <ClInclude Include="ModalClearPicture.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgBar.h">
+    <ClInclude Include="ModalLoseBlackPicture.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgCanvas.h">
+    <ClInclude Include="ModalAdjustColor.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ToolIMGSearch.h">
+    <ClInclude Include="ModalAddMark.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalGradient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyBar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyColorSelect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalInsertTexture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyAddMark.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinySetBrush.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalTransform.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalRename.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalPreference.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalLock.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalLockInput.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyClipBoard.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolPatch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatarMark.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ToolAvatar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatarCharacterSelection.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatarLocalizer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatarModelConfig.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatarModelSet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatarSuit.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatarSuitRegister.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatarRegister.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatarIO.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatarStageConfig.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAvatarDownload.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\General\Func.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\General\GoodListCtrl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\General\Profile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyFrame.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolDownload.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalAdvancedMix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyIMGSelect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalConflictWarning.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinySetName.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalSaveWarning.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolStat.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolTeenSwitch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalPictureStretch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolNPKsource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolDownloadServerSelection.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -136,55 +549,160 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgInsert.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Func.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgRename.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgTrasform.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="DialogNew.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgInsert2.cpp">
+    <ClCompile Include="DialogAbout.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgSetpara.cpp">
+    <ClCompile Include="ToolForceEx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgInsert3.cpp">
+    <ClCompile Include="AdjustColorDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgInsert4.cpp">
+    <ClCompile Include="ModalInsertPicture.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgHSV.cpp">
+    <ClCompile Include="ModalInsertPicturePatch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgSetXY.cpp">
+    <ClCompile Include="ModalAdjustCanvas.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgExpand.cpp">
+    <ClCompile Include="ModalPictureParameter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgColor.cpp">
+    <ClCompile Include="ModalClearPicture.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgBar.cpp">
+    <ClCompile Include="ModalLoseBlackPicture.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DlgCanvas.cpp">
+    <ClCompile Include="ModalAdjustColor.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ToolIMGSearch.cpp">
+    <ClCompile Include="ModalAddMark.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalGradient.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyBar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyColorSelect.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalInsertTexture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyAddMark.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinySetBrush.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalTransform.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalRename.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalPreference.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalLock.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalLockInput.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyClipBoard.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolPatch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarMark.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ToolAvatar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarCharacterSelection.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarLocalizer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarModelConfig.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarModelSet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarSuit.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarSuitRegister.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarRegister.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarIO.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarStageConfig.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAvatarDownload.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\General\Func.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\General\GoodListCtrl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\General\Profile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyFrame.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolDownload.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalAdvancedMix.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyIMGSelect.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalConflictWarning.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinySetName.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalSaveWarning.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolStat.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolTeenSwitch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalPictureStretch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolNPKsource.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolDownloadServerSelection.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -192,5 +710,10 @@
     <ResourceCompile Include="ExRabbit.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\avatar_tool_button_12.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

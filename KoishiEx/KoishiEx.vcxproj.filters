@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
-    <None Include="..\概述.txt" />
+    <None Include="..\mplserial.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -31,16 +31,16 @@
     <ClInclude Include="sha256.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="zconf.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="zlib.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DDS.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="KoishiImageTool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="KoishiAudioTool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="KoishiNeoplePack.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="avatar.h">
@@ -63,10 +63,16 @@
     <ClCompile Include="sha256.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DDS.cpp">
+    <ClCompile Include="avatar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="avatar.cpp">
+    <ClCompile Include="KoishiExpand.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="KoishiImageTool.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="KoishiAudioTool.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
