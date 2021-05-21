@@ -1,6 +1,6 @@
 #pragma once
 #include "../KoishiEx/KoishiAudioTool.h"
-#include "TinyBar(white).h"
+#include "TinyBar.h"
 #include "Music.h"
 
 // ToolPiano ¶Ô»°¿ò
@@ -29,9 +29,9 @@ public:
 	std::vector<NoteBar> staff;
 	CRect rcBoard;
 	CRect rcStaff;
-	DeclareThreadFunc(playNotes, double);
-	DeclareThreadFunc(punchSave, int);
-	DeclareThreadFunc(punchPlay, int);
+	DeclareThreadFunc(ToolPiano, playNotes, double);
+	DeclareThreadFunc(ToolPiano, punchSave, int);
+	DeclareThreadFunc(ToolPiano, punchPlay, int);
 	BOOL graphicMode;
 	BOOL playing;
 	int offsetLine;

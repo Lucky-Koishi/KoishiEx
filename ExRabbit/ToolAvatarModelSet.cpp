@@ -50,7 +50,7 @@ BOOL ToolAvatarModelSet::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
-	Profile pf;
+	ProfileBlack pf;
 	pf.loadProfile();
 	mc.load(pf.getAvatarMapPath());
 	CComboBox *ccb = GET_CTRL(CComboBox, IDC_COMBO_CHAR);
@@ -76,7 +76,7 @@ BOOL ToolAvatarModelSet::OnInitDialog()
 void ToolAvatarModelSet::OnBnClickedButton1()
 {
 	// TODO: 打开配置文件
-	Profile pf;
+	ProfileBlack pf;
 	pf.loadProfile();
 	mc.load(pf.getAvatarMapPath());
 	ShellExecute(0, L"open", pf.getAvatarMapPath() +  L"模型生成设置.txt", 0, 0, SW_SHOWNORMAL);
@@ -86,7 +86,7 @@ void ToolAvatarModelSet::OnBnClickedButton1()
 void ToolAvatarModelSet::OnBnClickedButton4()
 {
 	// TODO: 重新读取
-	Profile pf;
+	ProfileBlack pf;
 	pf.loadProfile();
 	mc.load(pf.getAvatarMapPath());
 }
@@ -95,7 +95,7 @@ void ToolAvatarModelSet::OnBnClickedButton4()
 void ToolAvatarModelSet::OnCbnSelchangeComboChar()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	Profile pf;
+	ProfileBlack pf;
 	pf.loadProfile();
 	fc.initial((AvatarCharacter)GET_CTRL(CComboBox, IDC_COMBO_CHAR)->GetCurSel(), CStrToStr(pf.getAvatarPath()));
 	fc.loadAvatar(APART_BODY);

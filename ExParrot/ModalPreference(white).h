@@ -30,7 +30,7 @@ public:
 	afx_msg void OnBnClickedButtonSetpic1();
 	afx_msg void OnBnClickedButtonSetpic2();
 	afx_msg void OnBnClickedOk();
-	Profile modifiedProfile;
+	ProfileWhite modifiedProfile;
 	afx_msg void OnBnClickedButtonPreference10();
 	afx_msg void OnBnClickedButtonPreference11();
 	virtual BOOL OnInitDialog();

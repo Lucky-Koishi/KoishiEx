@@ -257,8 +257,7 @@ void ModalInsertPicture::OnBnClickedOk()
 	out.para[9] = _ttoi(numStr);
 	//判断禁止事项
 	CExRabbitDlg* dlg = (CExRabbitDlg*)GetParent();
-	std::vector<int> replacePos;
-	dlg->getSelected(GET_DLG_CTRL(CGoodListCtrl, IDC_LIST_PIC), 0, dlg->MULTI_SELECT, replacePos);
+	queue replacePos = dlg->PICgetChecked(MULTI_SELECT);
 	if(out.operate == 2 && replacePos.size() == 0){
 		MessageBox(L"没有勾选任何帧喵。",L"错误喵");
 		return;

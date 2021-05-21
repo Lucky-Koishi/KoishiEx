@@ -28,7 +28,7 @@ public:
 	AvatarPart partInput;
 	long weaponIndexInput;
 	long inputID;
-	Profile prof;
+	ProfileBlack prof;
 	AvatarMap map;
 	CString outputStr;
 	void load();

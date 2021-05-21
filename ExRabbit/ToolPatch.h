@@ -29,7 +29,7 @@ public:
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedStop();
 
-	Profile *p;
+	ProfileBlack *p;
 	void getPNG();
 	void getGIF();
 	void transToV2();

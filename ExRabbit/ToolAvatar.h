@@ -4,6 +4,7 @@
 #include "TinyBar.h"
 #include "ToolAvatarModelConfig.h"
 #include "ToolAvatarStageConfig.h"
+
 // ToolAvatar 对话框
 using namespace Koishi;
 using namespace KoishiAvatar;
@@ -41,7 +42,7 @@ public:
 	TinyBar bar;
 public:
 	//基本内容
-	Profile profile;
+	ProfileBlack profile;
 	AvatarFactory factory;
 	AvatarMap map;
 	AvatarCharacter character;
@@ -53,7 +54,7 @@ public:
 	bool loading;
 	bool TNmode;		//TN模式
 	bool playing;		//在播放动作
-	struct _ani{
+	/*struct _ani{
 		long frameLength;
 		long frame[255];
 		_ani();
@@ -75,9 +76,11 @@ public:
 		ANI_FALL,
 		ANI_FULLPLAY,
 		ANI_MAXCOUNT
-	};
+	};*/
 	void setAnimation(const long &aniID);
 	ToolAvatarStageConfig stage;
+	ToolAvatarAnimation animationList;
+	ToolAvatarAnimation::animation animation;
 public:
 	//展示图相关信息
 	struct{
@@ -123,6 +126,7 @@ public:
 	//红色叹号表示映射表中没有实际装扮与其对应
 	//蓝色叹号表示映射表中其他NPK有装扮与其对应，多见于武器装扮
 	void buildMixedIMG(IMGobject &io);
+	void buildMixedIMG4(IMGobject &io);	//虽然生成V2了但是GIF还得用V4
 public:
 	void *context;
 	CListBox *lbContent;

@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 
 // ModalPreference ¶Ô»°¿ò
 
@@ -25,12 +26,10 @@ public:
 	afx_msg void OnBnClickedButtonPreference5();
 	afx_msg void OnBnClickedButtonPreference6();
 	afx_msg void OnBnClickedButtonPreference7();
-	afx_msg void OnBnClickedButtonPreference8();
-	afx_msg void OnBnClickedButtonPreference9();
 	virtual BOOL OnInitDialog();
 
 public:
-	Profile modifiedProfile;
+	ProfileBlack modifiedProfile;
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedButtonSetpic1();
 	afx_msg void OnBnClickedButtonSetpic2();

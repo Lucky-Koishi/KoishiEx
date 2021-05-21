@@ -106,7 +106,7 @@ void ModalPreference2::OnBnClickedButtonPreference2(){
 				MessageBox(L"并不是有效的文件夹喵！",L"提示喵");
 			}else{
 				GET_CTRL(CEdit, IDC_EDIT_PREFERENCE2)->SetWindowText(filePath);
-				modifiedProfile.NPKdictPath = filePath;
+				modifiedProfile.sourcePath = filePath;
 			}
 		}
 		pMalloc->Release();
@@ -139,7 +139,7 @@ void ModalPreference2::OnBnClickedButtonPreference3(){
 				MessageBox(L"并不是有效的文件夹喵！",L"提示喵");
 			}else{
 				GET_CTRL(CEdit, IDC_EDIT_PREFERENCE3)->SetWindowText(filePath);
-				modifiedProfile.avatarPath = filePath;
+				modifiedProfile.videoPath = filePath;
 			}
 		}
 		pMalloc->Release();
@@ -319,8 +319,8 @@ BOOL ModalPreference2::OnInitDialog()
 	// TODO:  在此添加额外的初始化
 
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE1)->SetWindowText(modifiedProfile.outputPath);
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE2)->SetWindowText(modifiedProfile.NPKdictPath);
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE3)->SetWindowText(modifiedProfile.avatarPath);
+	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE2)->SetWindowText(modifiedProfile.sourcePath);
+	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE3)->SetWindowText(modifiedProfile.videoPath);
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE4)->SetWindowText(NumToCStr(modifiedProfile.mainColor));
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE5)->SetWindowText(NumToCStr(modifiedProfile.audioBackColor));
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE6)->SetWindowText(NumToCStr(modifiedProfile.channel1Color));

@@ -26,8 +26,6 @@
 
 #include <afxdisp.h>        // MFC 自动化类
 
-
-
 #ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>           // MFC 对 Internet Explorer 4 公共控件的支持
 #endif
@@ -53,3 +51,5 @@
 #include "../General/Func.h"
 #include "../General/GoodListCtrl.h"
 #include "../General/Profile.h"
+
+#define BLACK_CAT

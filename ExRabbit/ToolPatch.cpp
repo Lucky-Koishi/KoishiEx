@@ -165,20 +165,20 @@ void ToolPatch::getPNG(){
 			GET_CTRL(CEdit, IDC_EDIT2)->SetWindowText(L"正在提取"+GetTail(fileList[fileID])+L"中的贴图。");
 			NPKobject no;
 			if(no.loadFile(CStrToStr(pathList[fileID]))){
-				for(imgID = 0;imgID<no.count;imgID++){
-					GET_CTRL(CEdit, IDC_EDIT3)->SetWindowText(L"正在提取"+GetTail(StrToCStr(no.entry[imgID].comment))+L"中的贴图。");
+				for(imgID = 0;imgID<no.getCount();imgID++){
+					GET_CTRL(CEdit, IDC_EDIT3)->SetWindowText(L"正在提取"+GetTail(StrToCStr(no.content[imgID].comment))+L"中的贴图。");
 					IMGobject io;
 					if(no.IMGextract(imgID, io)){
 						for(frameID = 0;frameID<io.indexCount;frameID++){
 							if(io.version != V6){
-								CString fileName = p->getOutputPath(GetTail(fileList[fileID]),GetTail(StrToCStr(no.entry[imgID].comment)));
+								CString fileName = p->getOutputPath(GetTail(fileList[fileID]),GetTail(StrToCStr(no.content[imgID].comment)));
 								image mPic;
 								if(io.PICextract(frameID, mPic)){
 									KoishiImageTool::makePNG(mPic, CStrToStr(fileName+NumToCStr(frameID)+L".PNG"));
 								}
 							}else{
 								for(clrID = 0;clrID<io.paletteData.getCount();clrID++){
-									CString fileName = p->getOutputPath(GetTail(fileList[fileID]),GetTail(StrToCStr(no.entry[imgID].comment)), clrID);
+									CString fileName = p->getOutputPath(GetTail(fileList[fileID]),GetTail(StrToCStr(no.content[imgID].comment)), clrID);
 									image mPic;
 									if(io.PICextract(frameID, mPic, clrID)){
 										KoishiImageTool::makePNG(mPic, CStrToStr(fileName+NumToCStr(frameID)+L".PNG"));
@@ -187,7 +187,7 @@ void ToolPatch::getPNG(){
 							}
 						}
 					}
-					GET_CTRL(CProgressCtrl, IDC_PROGRESS2)->SetPos((imgID+1)*1000/no.count);
+					GET_CTRL(CProgressCtrl, IDC_PROGRESS2)->SetPos((imgID+1)*1000/no.getCount());
 				}
 			}
 		}
@@ -240,8 +240,8 @@ void ToolPatch::getGIF(){
 			GET_CTRL(CEdit, IDC_EDIT2)->SetWindowText(L"正在提取"+GetTail(fileList[fileID])+L"中的贴图。");
 			NPKobject no;
 			if(no.loadFile(CStrToStr(pathList[fileID]))){
-				for(imgID = 0;imgID<no.count;imgID++){
-					GET_CTRL(CEdit, IDC_EDIT3)->SetWindowText(L"正在提取"+GetTail(StrToCStr(no.entry[imgID].comment))+L"中的贴图。");
+				for(imgID = 0;imgID<no.getCount();imgID++){
+					GET_CTRL(CEdit, IDC_EDIT3)->SetWindowText(L"正在提取"+GetTail(StrToCStr(no.content[imgID].comment))+L"中的贴图。");
 					IMGobject io;
 					if(no.IMGextract(imgID, io)){
 						if(io.version != V6){
@@ -274,7 +274,7 @@ void ToolPatch::getGIF(){
 							}
 							KoishiImageTool::GIF::GIFobject gf;
 							gf.input(matList, p->miniSecPerFrame);
-							CString fileName = p->getOutputPath(fileList[fileID]) + GetTail(StrToCStr(no.entry[imgID].comment)) + ".GIF";
+							CString fileName = p->getOutputPath(fileList[fileID]) + GetTail(StrToCStr(no.content[imgID].comment)) + ".GIF";
 							gf.makeFile(CStrToStr(fileName));
 						}else{
 							for(clrID = 0;clrID<io.paletteData.getCount();clrID++){
@@ -307,12 +307,12 @@ void ToolPatch::getGIF(){
 								}
 								KoishiImageTool::GIF::GIFobject gf;
 								gf.input(matList, p->miniSecPerFrame);
-								CString fileName = p->getOutputPath(fileList[fileID]) + GetTail(StrToCStr(no.entry[imgID].comment)) + "_P"+ NumToCStr(clrID) + ".GIF";
+								CString fileName = p->getOutputPath(fileList[fileID]) + GetTail(StrToCStr(no.content[imgID].comment)) + "_P"+ NumToCStr(clrID) + ".GIF";
 								gf.makeFile(CStrToStr(fileName));
 							}
 						}
 					}
-					GET_CTRL(CProgressCtrl, IDC_PROGRESS2)->SetPos((imgID+1)*1000/no.count);
+					GET_CTRL(CProgressCtrl, IDC_PROGRESS2)->SetPos((imgID+1)*1000/no.getCount());
 				}
 			}
 		}
@@ -415,8 +415,8 @@ void ToolPatch::transToV2(){
 			GET_CTRL(CEdit, IDC_EDIT2)->SetWindowText(L"正在转换"+GetTail(fileList[fileID])+L"中的IMG文件。");
 			NPKobject no;
 			if(no.loadFile(CStrToStr(pathList[fileID]))){
-				for(imgID = no.count - 1;imgID>=0;imgID--){
-					GET_CTRL(CEdit, IDC_EDIT3)->SetWindowText(L"正在转换"+GetTail(StrToCStr(no.entry[imgID].comment))+L"。");
+				for(imgID = no.getCount() - 1;imgID>=0;imgID--){
+					GET_CTRL(CEdit, IDC_EDIT3)->SetWindowText(L"正在转换"+GetTail(StrToCStr(no.content[imgID].comment))+L"。");
 					IMGobject io;
 					if(no.IMGextract(imgID, io)){
 						std::vector<IMGobject> ioList;
@@ -425,12 +425,12 @@ void ToolPatch::transToV2(){
 							if(clrID == 0){
 								no.IMGreplace(imgID, ioList[0]);
 							}else{
-								str newName = KoishiAvatar::formatAvatarIDplusBy(no.entry[imgID].comment, clrID);
-								no.IMGinsert(imgID + clrID, ioList[clrID], newName);
+								str newName = KoishiAvatar::formatAvatarIDplusBy(no.content[imgID].comment, clrID);
+								no.IMGinsert(imgID + clrID, newName, ioList[clrID]);
 							}
 						}
 					}
-					GET_CTRL(CProgressCtrl, IDC_PROGRESS2)->SetPos((imgID+1)*1000/no.count);
+					GET_CTRL(CProgressCtrl, IDC_PROGRESS2)->SetPos((imgID+1)*1000/no.getCount());
 				}
 				CString newNPKFilePath = pathList[fileID].Left(pathList[fileID].GetLength()-4);
 				newNPKFilePath += L"(Transformed).npk";

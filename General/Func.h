@@ -72,17 +72,19 @@ int GetInternetFile(CString strUrl, CString strSavePath);
 ///////////////////////////////////////////////////////
 //线程函数声明宏
 ///////////////////////////////////////////////////////
-#define DeclareThreadFunc(funName, argType) \
+#define DeclareThreadFunc(theClass, funName, argType) \
 	void funName(argType);\
-	static void THREAD_##funName(void*, argType);
+	static void THREAD_##funName(void*context, argType para){\
+		((theClass*)context)->funName(para);\
+	}
 ///////////////////////////////////////////////////////
 //线程函数定义宏
 ///////////////////////////////////////////////////////
-#define DefineThreadFunc(theClass, funName, argType)\
-	void theClass::THREAD_##funName(void*context, argType para){\
-		((theClass*)context)->funName(para);\
-	}\
-	void theClass::funName(argType para)
+//#define DefineThreadFunc(theClass, funName, argType)\
+//	void theClass::THREAD_##funName(void*context, argType para){\
+//		((theClass*)context)->funName(para);\
+//	}\
+//	void theClass::funName(argType para)
 ///////////////////////////////////////////////////////
 //线程函数调用宏
 ///////////////////////////////////////////////////////
@@ -118,3 +120,38 @@ int GetInternetFile(CString strUrl, CString strSavePath);
 				cstrPara = GET_FOLDER_NAME;}}}\
 	pMalloc->Release();\
 }
+///////////////////////////////////////////////////////
+//事件枚举相关·仅被黑猫和白猫的MFC事件有关，与KoishiEx库无关
+///////////////////////////////////////////////////////
+
+typedef enum enum_software_type {
+	BLACK_CAT, WHITE_CAT
+}enumSoftwareType;
+typedef enum enum_select_type {
+	SINGLE_SELECT = 0x0000U,
+	MULTI_SELECT = 0x0001U,
+	ALL_SELECT = 0x0002U
+}enumSelectType;
+
+typedef enum enum_insert_or_replace {
+	IOR_REPLACE,
+	IOR_INSERT
+}enumInsertOrReplace;
+
+typedef enum enum_list_position {
+	LPOS_CURRENT,
+	LPOS_NEXT,
+	LPOS_END
+}enumListPosition;
+
+typedef struct server_info {
+	CString region;
+	CString name;
+	CString url;
+	BOOL isTCT;
+}SERVER_INFO, *PSERVER_INFO;
+
+typedef struct server_region {
+	CString region;
+	std::vector<SERVER_INFO> list;
+}SERVER_REGION, *PSERVER_REGION;

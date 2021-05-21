@@ -14,9 +14,11 @@
 #include "TinySNDSelect.h"
 #include "ModalConflictWarning(white).h"
 #include "ModalSaveWarning(white).h"
-#include "ToolDownload(white).h"
+#include "ToolDownload.h"
+#include "ToolDownloadServerSelection.h"
 #include <thread>
 #include "ToolPiano.h"
+#include "ToolAudioMark.h"
 #include "Music.h"
 
 #ifdef _DEBUG
@@ -152,6 +154,7 @@ BEGIN_MESSAGE_MAP(CExParrotDlg, CDialogEx)
 	ON_COMMAND(ID_MENU_SOUND_TRANSFORM_TO_OGG, &CExParrotDlg::OnMenuSoundTransformToOGG)
 	ON_COMMAND(ID_MENU_SOUND_TRANSFORM_TO_WAV_PATCH, &CExParrotDlg::OnMenuSoundTransformToWAVPatch)
 	ON_COMMAND(ID_MENU_SOUND_TRANSFORM_TO_OGG_PATCH, &CExParrotDlg::OnMenuSoundTransformToOGGPatch)
+	ON_COMMAND(ID_TOOLS_AUDIO_MARK, &CExParrotDlg::OnToolsAudioMark)
 END_MESSAGE_MAP()
 
 
@@ -421,39 +424,140 @@ void CExParrotDlg::adjustWindow(int w, int h){
 	GET_CTRL(CEdit, IDC_EDIT_RANGE2)->SetWindowPos(NULL,530+barPart1+barPart2*1/3,h-10-barHeight,barPart2/3,barHeight,SWP_NOZORDER);
 	GET_CTRL(CEdit, IDC_EDIT_RANGE3)->SetWindowPos(NULL,530+barPart1+barPart2*2/3,h-10-barHeight,barPart2/3,barHeight,SWP_NOZORDER);
 }
-int CExParrotDlg::getIconSND(dword ext){
-	dword d[5] = {3,4,5,2,0};
-	return d[ext];
+UINT CExParrotDlg::SNDiconID(SNDversion sv) {
+	switch(sv) {
+	case VWAVE:
+		return 3;
+	case VVORBIS:
+		return 4;
+	case VMP3:
+		return 5;
+	case VIMAGE:
+		return 2;
+	case VSNDQUOTE:
+		return 1;
+	default:
+		return 0;
+	}
+	return 0;
 }
-void CExParrotDlg::updateSNDlist(){
+void CExParrotDlg::SNDaddTerm(int pos, SNDversion sv, CString comment) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_SND);
+	if(pos == -1) {
+		ctl->InsertItem(ctl->GetItemCount(), comment, SNDiconID(sv));
+	} else {
+		ctl->InsertItem(pos, comment, SNDiconID(sv));
+	}
+}
+void CExParrotDlg::SNDdeleteTerm(int pos) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_SND);
+	ctl->DeleteItem(pos);
+}
+void CExParrotDlg::SNDmodifyTerm(int pos, SNDversion sv, CString comment) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_SND);
+	ctl->SetItemText(pos, 0, comment);
+	ctl->SetItem(pos, 0, LVIF_IMAGE, NULL, SNDiconID(sv), 0, 0, 0);
+}
+void CExParrotDlg::SNDmodifyIcon(int pos, SNDversion sv) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_SND);
+	ctl->SetItem(pos, 0, LVIF_IMAGE, NULL, SNDiconID(sv), 0, 0, 0);
+}
+void CExParrotDlg::SNDsetHighLine(int pos) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_SND);
+	if(pos >= 0) {
+		ctl->SetSelectionMark(pos);
+		ctl->SetItemState(pos, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+	}
+	if(crtSNDid >= 0) {
+		ctl->SetItemState(crtSNDid, 0, LVIS_SELECTED | LVIS_FOCUSED);
+	}
+	crtSNDid = pos;
+}
+void CExParrotDlg::SNDloadList() {
 	updateInfo();
-	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->DeleteAllItems();
-	for(int i = 0;i<no.count;i++){
-		int li = no.checkLink(i);
-		if(li == i){
-			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->EasyInsertItem(GetTail(StrToCStr(no.entry[i].comment)), getIconSND(no.SNDgetVersion(i)));
-		}else{
-			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->EasyInsertItem(GetTail(StrToCStr(no.entry[i].comment) + L"["+GetTail(StrToCStr(no.entry[li].comment))+L"]"), 1);
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_SND);
+	ctl->DeleteAllItems();
+	for(int i = 0; i < no.getCount(); i++) {
+		long qti = no.checkQuote(i);
+		if(i != qti) {
+			SNDaddTerm(-1, VSNDQUOTE,
+					   GetTail(StrToCStr(no.content[i].comment)) + L"->" +
+					   GetTail(StrToCStr(no.content[qti].comment)));
+		} else {
+			SNDaddTerm(-1, no.SNDgetVersion(i),
+					   GetTail(StrToCStr(no.content[i].comment)));
 		}
 	}
 }
-void CExParrotDlg::updateSNDterm(int pos) {
-	int li = no.checkLink(pos);
-	if(li == pos) {
-		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItem(pos, 0, LVIF_IMAGE, NULL, getIconSND(no.SNDgetVersion(pos)), 0, 0, 0);
-		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItemText(pos, 0, GetTail(StrToCStr(no.entry[pos].comment)));
+void CExParrotDlg::SNDupdateTerm(int pos) {
+	long qtPos = no.checkQuote(pos);
+	if(qtPos != pos) {
+		SNDmodifyTerm(pos, VSNDQUOTE,
+					  GetTail(StrToCStr(no.content[pos].comment)) + L"->" +
+					  GetTail(StrToCStr(no.content[qtPos].comment)));
 	} else {
-		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItem(pos, 0, LVIF_IMAGE, NULL, 1, 0, 0, 0);
-		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItemText(pos, 0, GetTail(StrToCStr(no.entry[pos].comment)) + L"[" + GetTail(StrToCStr(no.entry[li].comment)) + L"]");
+		SNDmodifyTerm(pos, no.SNDgetVersion(pos),
+					  GetTail(StrToCStr(no.content[pos].comment)));
 	}
+}
+void CExParrotDlg::SNDupdateList() {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_SND);
+	int nc = no.getCount();
+	int ic = ctl->GetItemCount();
+	for(int i = 0; i < max(nc, ic); i++) {
+		if(i < ic && i < nc) {
+			SNDupdateTerm(i);
+		}
+		if(i >= ic && i < nc) {
+			//当前NPK条目数目大于列表
+			long qti = no.checkQuote(i);
+			if(i != qti) {
+				SNDaddTerm(-1, VSNDQUOTE,
+						   GetTail(StrToCStr(no.content[i].comment)) + L"->" +
+						   GetTail(StrToCStr(no.content[qti].comment)));
+			} else {
+				SNDaddTerm(-1, no.SNDgetVersion(i),
+						   GetTail(StrToCStr(no.content[i].comment)));
+			}
+		}
+		if(i >= nc && i < ic) {
+			//当前列表条目数目大于NPK
+			SNDdeleteTerm(nc);
+		}
+	}
+}
+queue CExParrotDlg::SNDgetChecked(enumSelectType selectType) {
+	queue selected;
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_SND);
+	switch(selectType) {
+	case SINGLE_SELECT:
+		selected.push_back(crtSNDid);
+		return selected;
+	case MULTI_SELECT:
+		for(int k = 0; k<ctl->GetItemCount(); k++)
+			if(ctl->GetCheck(k))
+				selected.push_back(k);
+		return selected;
+	case ALL_SELECT:
+		for(int k = 0; k<ctl->GetItemCount(); k++)
+			selected.push_back(k);
+		return selected;
+	}
+	return selected;
 }
 void CExParrotDlg::updateInfo(){
 	CString cstr;
 	cstr = L"文件名："+GetTail(fileNPKname)+L"\r\n";
 	cstr += L"大小："+NumToCStr(no.getSize())+L"字节\r\n";
-	cstr += L"条目数："+NumToCStr(no.count);
-	cstr += (crtSNDid  == -1) ? L"" : ( L"/"  + NumToCStr(crtSNDid));
+	cstr += L"条目数：" + NumToCStr(no.getCount()) + L"\r\n";
+	cstr += L"实体数：" + NumToCStr(no.block.size()) + L"\r\n";
+	cstr += (crtSNDid == -1) ? L"当前条目：未选择" : (L"当前条目：" + (NumToCStr(crtSNDid)) + L"\r\n");
+	long qtCrtSNDid = no.checkQuote(crtSNDid);
+	if(qtCrtSNDid != crtSNDid) {
+		cstr += L"引用自：" + GetTail(StrToCStr(no.content[qtCrtSNDid].comment));
+	}
 	GET_CTRL(CEdit, IDC_EDIT_NPK)->SetWindowText(cstr);
+
 	cstr = SNDsaveAlert ? L"音效状态：已变动\r\n" : L"音效状态：未变动\r\n";
 	cstr += L"声道数:" + NumToCStr(au.channel) + L"\r\n";
 	cstr += L"采样频率:" + NumToCStr(au.sampleRate) + L"Hz\r\n";
@@ -520,7 +624,7 @@ void CExParrotDlg::resetBound() {
 	rightBound = 0;
 }
 /////////////////////
-DefineThreadFunc(CExParrotDlg, play, BOOL) {
+void CExParrotDlg::play(BOOL para) {
 	if((!para) || rightBound - leftBound <= 0) {
 		player.play(au);
 	} else {
@@ -529,7 +633,7 @@ DefineThreadFunc(CExParrotDlg, play, BOOL) {
 		player.play(ad);
 	}
 }
-DefineThreadFunc(CExParrotDlg, RecordStart, BOOL) {
+void CExParrotDlg::RecordStart(BOOL para) {
 	recorder.initFormat(2, 16, 44100, 88200, 4, 0);
 	if(!recorder.record()) {
 		MessageBox(L"没找到录音设备喵！无法录音喵！", L"提示喵");
@@ -538,7 +642,7 @@ DefineThreadFunc(CExParrotDlg, RecordStart, BOOL) {
 	recording = true;
 	GET_CTRL(CButton, IDC_BUTTON_CONTROL4)->SetWindowText(L"停止录音");
 }
-DefineThreadFunc(CExParrotDlg, RecordFinish, BOOL) {
+void CExParrotDlg::RecordFinish(BOOL para) {
 	stream s;
 	audio newAd;
 	if(processing)
@@ -569,8 +673,8 @@ DefineThreadFunc(CExParrotDlg, RecordFinish, BOOL) {
 		stream sFile;
 		setCopyRight(CRO_CREATE);
 		encodeTo(sFile);
-		no.push(sFile, "new_record.ogg");
-		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->InsertItem(no.count, L"new_record.ogg", getIconSND(checkAudioFormat(sFile)));
+		no.push("new_record.ogg", sFile);
+		SNDaddTerm(no.getCount(), checkAudioFormat(sFile), L"new_record.ogg");
 	} else if(rightBound - leftBound <= 0 /*未选择边界，默认替换完整音效*/) {
 		au.destory();
 		au = newAd;
@@ -592,7 +696,7 @@ DefineThreadFunc(CExParrotDlg, RecordFinish, BOOL) {
 	GET_CTRL(CButton, IDC_BUTTON_CONTROL4)->SetWindowText(L"录音");
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, ReplaceSound, BOOL) {
+void CExParrotDlg::ReplaceSound(BOOL para) {
 	if(rightBound - leftBound <= 0 && IDNO == MessageBox(L"当前未对音频段进行选择喵！如果继续的话，将会替换整个音频喵，确定喵？", L"提示喵"))
 		return;
 	CFileDialog dlg(true, L"支持的音效文件(*.WAV,*.OGG)|*.WAV;*.OGG", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, L"支持的音效文件(*.WAV,*.OGG)|*.WAV;*.OGG|vorbis音效(*.OGG)|*.OGG||", this);
@@ -655,7 +759,7 @@ DefineThreadFunc(CExParrotDlg, ReplaceSound, BOOL) {
 	updateModified();
 	updateInfo();
 }
-DefineThreadFunc(CExParrotDlg, Draw, BOOL) {
+void CExParrotDlg::Draw(BOOL para) {
 	int canw = width - 540;
 	int canh = height - 50;
 	image canvas;
@@ -678,7 +782,7 @@ DefineThreadFunc(CExParrotDlg, Draw, BOOL) {
 	ReleaseDC(pDC);
 	canvas.destory();
 }
-DefineThreadFunc(CExParrotDlg, DrawPower, BOOL) {
+void CExParrotDlg::DrawPower(BOOL para) {
 	long power[16] = {0};	//功率谱
 	long cur[2] = {0};		//左右声道当前能量
 	while(1) {
@@ -737,7 +841,7 @@ DefineThreadFunc(CExParrotDlg, DrawPower, BOOL) {
 		Sleep(4);
 	}
 }
-DefineThreadFunc(CExParrotDlg, DecodeAndPlay, BOOL) {
+void CExParrotDlg::DecodeAndPlay(BOOL para) {
 	int id = crtSNDid;
 	stream s, sPCM;
 	OGGvorbis::OGGobject oo;
@@ -747,7 +851,7 @@ DefineThreadFunc(CExParrotDlg, DecodeAndPlay, BOOL) {
 		bar.show(4);
 		bar.setInfo(L"正在解码喵……", 0);
 		no.extract(crtSNDid, s);
-		fileSNDname = StrToCStr(no.entry[id].comment);
+		fileSNDname = StrToCStr(no.content[id].comment);
 		if(!oo.decodeAndMake(s, au)) {
 			bar.hide();
 			GET_CTRL(CEdit, IDC_EDIT_SNDINFO)->SetWindowText(L"该对象无法被解码喵！");
@@ -772,7 +876,7 @@ DefineThreadFunc(CExParrotDlg, DecodeAndPlay, BOOL) {
 		bar.show(4);
 		bar.setInfo(L"正在解码喵……", 0);
 		no.extract(crtSNDid, s);
-		fileSNDname = StrToCStr(no.entry[id].comment);
+		fileSNDname = StrToCStr(no.content[id].comment);
 		if(!wo.decodeAndMake(s, au)) {
 			bar.hide();
 			GET_CTRL(CEdit, IDC_EDIT_SNDINFO)->SetWindowText(L"该对象无法被解码喵！");
@@ -847,47 +951,6 @@ BOOL CExParrotDlg::encodeTo(const audio &newAd, stream &dest) {
 	return FALSE;
 }
 /////////////////////
-void CExParrotDlg::getSelected(CGoodListCtrl *listCtrl, int highLine, int targetPara, std::vector<int> &selected){
-	selected.clear();
-	int k;
-	switch(targetPara){
-	case SINGLE_SELECT:
-		//单选
-		selected.push_back(highLine);
-		break;
-	case MULTI_SELECT:
-		//多选
-		for(k=0;k<listCtrl->GetItemCount();k++)
-			if(listCtrl->GetCheck(k))
-				selected.push_back(k);
-		break;
-	default:
-		//全选
-		for(k=0;k<listCtrl->GetItemCount();k++)
-			selected.push_back(k);
-		break;
-	}
-}
-std::vector<int> CExParrotDlg::getSelected(UINT listCtrlID, INT selectType) {
-	std::vector<int> selected;
-	CListCtrl *lc = GET_CTRL(CListCtrl, listCtrlID);
-	switch(selectType) {
-	case SINGLE_SELECT:
-		if(listCtrlID == IDC_LIST_SND)
-			selected.push_back(crtSNDid);
-		return selected;
-	case MULTI_SELECT:
-		for(int k = 0; k<lc->GetItemCount(); k++)
-			if(lc->GetCheck(k))
-				selected.push_back(k);
-		return selected;
-	case ALL_SELECT:
-		for(int k = 0; k<lc->GetItemCount(); k++)
-			selected.push_back(k);
-		return selected;
-	}
-	return selected;
-}
 void CExParrotDlg::OnBnClickedButtonMenu(){
 	CMenu menu, *pPopup;  
     menu.LoadMenu(IDR_MENU);  
@@ -936,9 +999,9 @@ void CExParrotDlg::OnMain01(){
 	stream s;
 	setCopyRight(CRO_CREATE);
 	encodeTo(s);
-	no.push(s, "newSound.ogg");
+	no.push("newSound.ogg", s);
 	updateInfo();
-	updateSNDlist();
+	SNDloadList();
 	s.release();
 	au.channel = 2;
 	au.sampleRate = 44100;
@@ -965,8 +1028,8 @@ void CExParrotDlg::OnMain02(){
 			}
 			fileNPKname = fileName;
 			SNDsaveAlert = false;
-			updateSNDlist();
-			if(no.count>0){
+			SNDloadList();
+			if(no.getCount()>0) {
 				GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetSelectionMark(0);
 				crtSNDid = 0;
 			}
@@ -980,8 +1043,8 @@ void CExParrotDlg::OnMain02(){
 			s.loadFile(fn);
 			fileName = GetTail(fileName);
 			CStrToStr(Slashing(fileName), fn);
-			no.push(s, fn);
-			updateSNDlist();
+			no.push(fn, s);
+			SNDloadList();
 			updateInfo();
 			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetSelectionMark(0);
 			crtSNDid = 0;
@@ -1711,7 +1774,14 @@ void CExParrotDlg::OnBnClickedButtonSNDsearch(){
 
 
 void CExParrotDlg::OnToolDownload(){
-	ToolDownload(this).DoModal();
+	ToolDownloadServerSelection dlg;
+	if(IDOK == dlg.DoModal()) {
+		ToolDownload dlg1;
+		dlg1.context = this;
+		dlg1.serverInfo = dlg.serverInfo;
+		dlg1.folderName = profile.getDownloadPath(dlg.serverInfo.region + L"-" + dlg.serverInfo.name);
+		dlg1.DoModal();
+	}
 }
 
 
@@ -1724,23 +1794,23 @@ BOOL CExParrotDlg::PreTranslateMessage(MSG* pMsg)
 	return CDialogEx::PreTranslateMessage(pMsg);
 }
 
-DefineThreadFunc(CExParrotDlg, SoundInsertEmpty, DWORD) {
+void CExParrotDlg::SoundInsertEmpty(DWORD para) {
 	processing = 1;
-	int insertPos = (para) ? no.count : crtSNDid;
+	int insertPos = (para) ? no.getCount() : crtSNDid;
 	audio newAu(44100, 1, 44100);
 	stream s;
 	setCopyRight(CRO_CREATE);
 	encodeTo(newAu, s);
-	no.insert(insertPos, s, "new_sound.ogg");
-	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->InsertItem(insertPos, L"new_sound.ogg", getIconSND(checkAudioFormat(s)));
+	no.insert(insertPos, "new_sound.ogg", s);
+	SNDaddTerm(insertPos, checkAudioFormat(s), L"new_sound.ogg");
 	s.release();
 	newAu.destory();
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, SoundInsertSND, DWORD) {
+void CExParrotDlg::SoundInsertSND(DWORD para) {
 	processing = 1;
-	int insertPos = (para) ? no.count : crtSNDid;
+	int insertPos = (para) ? no.getCount() : crtSNDid;
 	CFileDialog dlg(true, L"音效文件(*.WAV,*.OGG,*.MP3)|*.WAV;*.OGG;*.MP3", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, L"音效文件(*.WAV,*.OGG,*.MP3)|*.WAV;*.OGG;*.MP3||", this);
 	TinySetName dlgTiny(this);
 	if(IDOK != dlg.DoModal()) {
@@ -1759,14 +1829,14 @@ DefineThreadFunc(CExParrotDlg, SoundInsertSND, DWORD) {
 		processing = 0;
 		return;
 	}
-	no.insert(insertPos, newStream, CStrToStr(dlgTiny.name));
-	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->InsertItem(insertPos, GetTail(dlgTiny.name), getIconSND(no.SNDgetVersion(insertPos)));
+	no.insert(insertPos, CStrToStr(dlgTiny.name), newStream);
+	SNDaddTerm(insertPos, no.SNDgetVersion(insertPos), GetTail(dlgTiny.name));
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, SoundInsertNPK, DWORD) {
+void CExParrotDlg::SoundInsertNPK(DWORD para) {
 	processing = 1;
-	int insertPos = (para) ? no.count : crtSNDid;
+	int insertPos = (para) ? no.getCount() : crtSNDid;
 	int conflictMethod = 1;	// 0 替换 1 跳过(默认) 2 保留 3 保留并标记
 	BOOL noAlarm = FALSE;		//不再提示
 	CFileDialog dlg(true, L"NPK文件(*.NPK)|*.NPK", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, L"NPK文件(*.NPK)|*.NPK||", this);
@@ -1781,14 +1851,14 @@ DefineThreadFunc(CExParrotDlg, SoundInsertNPK, DWORD) {
 		processing = 0;
 		return;
 	}
-	bar.show(newNO.count);
+	bar.show(newNO.getCount());
 	int countFail = 0;
 	int countSkip = 0;
 	int countReplace = 0;
 	int countSuccess = 0;
 	int conflict = -1;		//查找冲突项
-	for(int i = 0; i < newNO.count; i++) {
-		bar.setInfo(L"当前插入" + GetTail(StrToCStr(newNO.entry[i].comment)) + L"喵……(成功" + NumToCStr(countSuccess) + L"个,跳过" + NumToCStr(countSkip) + L"个,替换" + NumToCStr(countReplace) + L"个,失败" + NumToCStr(countFail) + L"个)", i);
+	for(int i = 0; i < newNO.getCount(); i++) {
+		bar.setInfo(L"当前插入" + GetTail(StrToCStr(newNO.content[i].comment)) + L"喵……(成功" + NumToCStr(countSuccess) + L"个,跳过" + NumToCStr(countSkip) + L"个,替换" + NumToCStr(countReplace) + L"个,失败" + NumToCStr(countFail) + L"个)", i);
 		stream newStream;
 		if(!newNO.extract(i, newStream)) {
 			countFail++;
@@ -1797,9 +1867,9 @@ DefineThreadFunc(CExParrotDlg, SoundInsertNPK, DWORD) {
 		//检测冲突项
 		if(TRUE) {
 			conflict = -1;
-			for(int j = 0; j<no.count; j++) {
-				CString s1 = GetTail(StrToCStr(newNO.entry[i].comment));
-				CString s2 = GetTail(StrToCStr(no.entry[j].comment));
+			for(int j = 0; j<no.getCount(); j++) {
+				CString s1 = GetTail(StrToCStr(newNO.content[i].comment));
+				CString s2 = GetTail(StrToCStr(no.content[j].comment));
 				if(s1 == s2) {
 					conflict = j;
 					break;
@@ -1808,13 +1878,13 @@ DefineThreadFunc(CExParrotDlg, SoundInsertNPK, DWORD) {
 		}
 		if(!noAlarm && conflict > 0) {
 			ModalConflictWarning dlgWarning(this);
-			dlgWarning.conflictName = StrToCStr(newNO.entry[i].comment);
+			dlgWarning.conflictName = StrToCStr(newNO.content[i].comment);
 			dlgWarning.DoModal();
 			noAlarm = dlgWarning.noAlarm;
 			conflictMethod = dlgWarning.method;
 		}
 		if(conflict < 0) {
-			no.insert(insertPos + countSuccess, newStream, newNO.entry[i].comment);
+			no.insert(insertPos + countSuccess, newNO.content[i].comment, newStream);
 			countSuccess++;
 		} else {
 			switch(conflictMethod) {
@@ -1829,26 +1899,26 @@ DefineThreadFunc(CExParrotDlg, SoundInsertNPK, DWORD) {
 				break;
 			case 2:
 				//保留
-				no.insert(insertPos + countSuccess, newStream, newNO.entry[i].comment);
+				no.insert(insertPos + countSuccess, newNO.content[i].comment, newStream);
 				countSuccess++;
 				break;
 			case 3:
 				//保留并改名
-				no.insert(insertPos + countSuccess, newStream, newNO.entry[i].comment + "(new)");
+				no.insert(insertPos + countSuccess, newNO.content[i].comment + "(new)", newStream);
 				countSuccess++;
 				break;
 			}
 		}
 	}
-	MessageBox(L"导入完毕喵！总" + NumToCStr(newNO.count) + L"个,添加" + NumToCStr(countSuccess) + L"个,跳过" + NumToCStr(countSkip) + L"个,替换" + NumToCStr(countReplace) + L"个,失败" + NumToCStr(countFail) + L"个喵！", L"提示喵");
+	MessageBox(L"导入完毕喵！总" + NumToCStr(newNO.getCount()) + L"个,添加" + NumToCStr(countSuccess) + L"个,跳过" + NumToCStr(countSkip) + L"个,替换" + NumToCStr(countReplace) + L"个,失败" + NumToCStr(countFail) + L"个喵！", L"提示喵");
 	bar.hide();
-	updateSNDlist();
+	SNDloadList();
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, SoundInsertFolder, DWORD) {
+void CExParrotDlg::SoundInsertFolder(DWORD para) {
 	processing = 1;
-	int insertPos = (para) ? no.count : crtSNDid;
+	int insertPos = (para) ? no.getCount() : crtSNDid;
 	CFileFind fileFind;
 	std::vector<CString> fileList;
 	std::vector<CString> pathList;
@@ -1884,10 +1954,10 @@ DefineThreadFunc(CExParrotDlg, SoundInsertFolder, DWORD) {
 			int countReplace = 0;
 			int countSuccess = 0;
 			int conflict = -1;
-			bar.setMax(newNO.count);
-			for(int i = 0; i<newNO.count; i++) {
+			bar.setMax(newNO.getCount());
+			for(int i = 0; i<newNO.getCount(); i++) {
 				bar.setInfo(L"当前插入" + fileList[fileID] +
-							L"中的" + GetTail(StrToCStr(newNO.entry[i].comment)) +
+							L"中的" + GetTail(StrToCStr(newNO.content[i].comment)) +
 							L"喵……(成功" + NumToCStr(countSuccess) +
 							L"个,跳过" + NumToCStr(countSkip) +
 							L"个,替换" + NumToCStr(countReplace) +
@@ -1899,9 +1969,9 @@ DefineThreadFunc(CExParrotDlg, SoundInsertFolder, DWORD) {
 				}
 				if(TRUE) {
 					conflict = -1;
-					for(int j = 0; j<no.count; j++) {
-						CString s1 = GetTail(StrToCStr(newNO.entry[i].comment));
-						CString s2 = GetTail(StrToCStr(no.entry[j].comment));
+					for(int j = 0; j<no.getCount(); j++) {
+						CString s1 = GetTail(StrToCStr(newNO.content[i].comment));
+						CString s2 = GetTail(StrToCStr(no.content[j].comment));
 						if(s1 == s2) {
 							conflict = j;
 							break;
@@ -1910,13 +1980,13 @@ DefineThreadFunc(CExParrotDlg, SoundInsertFolder, DWORD) {
 				}
 				if(!noAlarm && conflict > 0) {
 					ModalConflictWarning dlgWarning(this);
-					dlgWarning.conflictName = StrToCStr(newNO.entry[i].comment);
+					dlgWarning.conflictName = StrToCStr(newNO.content[i].comment);
 					dlgWarning.DoModal();
 					noAlarm = dlgWarning.noAlarm;
 					conflictMethod = dlgWarning.method;
 				}
 				if(conflict < 0) {
-					no.insert(insertPos + totalSuccess, newStream, newNO.entry[i].comment);
+					no.insert(insertPos + totalSuccess, newNO.content[i].comment, newStream);
 					countSuccess++;
 					totalSuccess++;
 				} else {
@@ -1932,13 +2002,13 @@ DefineThreadFunc(CExParrotDlg, SoundInsertFolder, DWORD) {
 						break;
 					case 2:
 						//保留
-						no.insert(insertPos + countSuccess, newStream, newNO.entry[i].comment);
+						no.insert(insertPos + countSuccess, newNO.content[i].comment, newStream);
 						countSuccess++;
 						totalSuccess++;
 						break;
 					case 3:
 						//保留并改名
-						no.insert(insertPos + countSuccess, newStream, newNO.entry[i].comment + "(new)");
+						no.insert(insertPos + countSuccess, newNO.content[i].comment + "(new)", newStream);
 						countSuccess++;
 						totalSuccess++;
 						break;
@@ -1956,7 +2026,7 @@ DefineThreadFunc(CExParrotDlg, SoundInsertFolder, DWORD) {
 			}
 			bar.setInfo(L"当前插入" + fileList[fileID] + L"喵……", 0);
 			CString newPathName = Slashing(fileList[fileID]);
-			no.insert(insertPos + totalSuccess, newStream, CStrToStr(newPathName));
+			no.insert(insertPos + totalSuccess, CStrToStr(newPathName), newStream);
 			totalSuccess++;
 			newStream.release();
 			countSND++;
@@ -1964,25 +2034,25 @@ DefineThreadFunc(CExParrotDlg, SoundInsertFolder, DWORD) {
 	}
 	MessageBox(L"导入完毕喵！成功导入了" + NumToCStr(countSND) + L"个外部SND对象喵，并从" + NumToCStr(countNPK) + L"个NPK文件中导入了" + NumToCStr(countNPKSND) + L"个SND对象喵。", L"提示喵");
 	bar.hide();
-	updateSNDlist();
+	SNDloadList();
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, SoundInsertOther, DWORD) {
+void CExParrotDlg::SoundInsertOther(DWORD para) {
 	processing = 1;
-	int insertPos = (para) ? no.count : crtSNDid;
+	int insertPos = (para) ? no.getCount() : crtSNDid;
 	CFileDialog dlg(true, L"所有文件(*.*)|*.*", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, L"所有文件文件(*.*)|*.*||", this);
 	if(IDOK != dlg.DoModal()) {
 		processing = 0;
 		return;
 	}
 	CString fileName = dlg.GetPathName();
-	no.insert(insertPos, CStrToStr(fileName), CStrToStr(GetTail(fileName)));
-	updateSNDlist();
+	no.insertFile(insertPos, CStrToStr(GetTail(fileName)), CStrToStr(fileName));
+	SNDloadList();
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, SoundReplaceExtern, DWORD) {
+void CExParrotDlg::SoundReplaceExtern(DWORD para) {
 	processing = 1;
 	CFileDialog dlg(TRUE, L"音效文件(*.WAV,*.OGG,*.MP3)|*.WAV;*.OGG;*.MP3", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, L"音效文件(*.WAV,*.OGG,*.MP3)|*.WAV;*.OGG;*.MP3||", this);
 	if(IDOK != dlg.DoModal()) {
@@ -1995,13 +2065,13 @@ DefineThreadFunc(CExParrotDlg, SoundReplaceExtern, DWORD) {
 		processing = 0;
 		return;
 	}
-	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
+	queue targetList = SNDgetChecked(enumSelectType(para));
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
 		int id = targetList[i];
-		bar.setInfo(L"正在替换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		bar.setInfo(L"正在替换" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 		no.replace(id, s);
-		updateSNDterm(id);
+		SNDupdateTerm(id);
 	}
 	MessageBox(L"替换完毕喵！");
 	bar.hide();
@@ -2010,13 +2080,13 @@ DefineThreadFunc(CExParrotDlg, SoundReplaceExtern, DWORD) {
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, SoundReplaceLocal, DWORD) {
+void CExParrotDlg::SoundReplaceLocal(DWORD para) {
 	processing = 1;
 	TinySNDSelect dlg;
 	dlg.listStr.clear();
 	dlg.defaultSelected = 0;
-	for(int i = 0; i < no.count; i++)
-		dlg.listStr.push_back(no.entry[i].comment);
+	for(int i = 0; i < no.getCount(); i++)
+		dlg.listStr.push_back(no.content[i].comment);
 	if(IDOK != dlg.DoModal()) {
 		processing = 0;
 		return;
@@ -2027,13 +2097,13 @@ DefineThreadFunc(CExParrotDlg, SoundReplaceLocal, DWORD) {
 		processing = 0;
 		return;
 	}
-	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
+	queue targetList = SNDgetChecked(enumSelectType(para));
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
 		int id = targetList[i];
-		bar.setInfo(L"正在替换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
-		no.replace2(id, s);
-		updateSNDterm(id);
+		bar.setInfo(L"正在替换" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
+		no.subscribe(id, s);
+		SNDupdateTerm(id);
 	}
 	MessageBox(L"替换完毕喵！");
 	bar.hide();
@@ -2042,13 +2112,13 @@ DefineThreadFunc(CExParrotDlg, SoundReplaceLocal, DWORD) {
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, SoundReplaceQuote, DWORD) {
+void CExParrotDlg::SoundReplaceQuote(DWORD para) {
 	processing = 1;
 	TinySNDSelect dlg;
 	dlg.listStr.clear();
 	dlg.defaultSelected = 0;
-	for(int i = 0; i < no.count; i++)
-		dlg.listStr.push_back(no.entry[i].comment);
+	for(int i = 0; i < no.getCount(); i++)
+		dlg.listStr.push_back(no.content[i].comment);
 	if(IDOK != dlg.DoModal()) {
 		processing = 0;
 		return;
@@ -2059,13 +2129,13 @@ DefineThreadFunc(CExParrotDlg, SoundReplaceQuote, DWORD) {
 		processing = 0;
 		return;
 	}
-	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
+	queue targetList = SNDgetChecked(enumSelectType(para));
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
 		int id = targetList[i];
-		bar.setInfo(L"正在替换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
-		no.modifyLink(id, dlg.selected);
-		updateSNDterm(id);
+		bar.setInfo(L"正在替换" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
+		no.replaceQuote(id, dlg.selected);
+		SNDupdateTerm(id);
 	}
 	MessageBox(L"替换完毕喵！");
 	bar.hide();
@@ -2074,43 +2144,44 @@ DefineThreadFunc(CExParrotDlg, SoundReplaceQuote, DWORD) {
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, SoundRemove, DWORD) {
+void CExParrotDlg::SoundRemove(DWORD para) {
 	processing = 1;
-	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
+	queue targetList = SNDgetChecked(enumSelectType(para));
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
 		int id = targetList[targetList.size() - i - 1];
-		bar.setInfo(L"正在删除" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		bar.setInfo(L"正在删除" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 		no.remove(id);
-		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->DeleteItem(id);
+		SNDdeleteTerm(id);
 	}
 	bar.hide();
 	updateInfo();
-	crtSNDid = -1;
+	SNDupdateList();
+	SNDsetHighLine(-1);
 	draw();
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, SoundExtract, DWORD) {
+void CExParrotDlg::SoundExtract(DWORD para) {
 	processing = 1;
 	CString filePath = profile.getOutputPath(fileNPKname);
 	CString fileName;
-	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
+	queue targetList = SNDgetChecked(enumSelectType(para));
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
 		int id = targetList[i];
-		bar.setInfo(L"正在提取" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
-		fileName = filePath + Underlining(StrToCStr(no.entry[id].comment));
-		no.extract(id, CStrToStr(fileName));
+		bar.setInfo(L"正在提取" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
+		fileName = filePath + Underlining(StrToCStr(no.content[id].comment));
+		no.extractFile(id, CStrToStr(fileName));
 	}
 	MessageBox(L"全部提取完毕喵！已保存到" + profile.getOutputPath(fileNPKname) + L"了喵！", L"提示喵");
 	bar.hide();
 	updateInfo();
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, SoundSaveAsNPK, DWORD) {
+void CExParrotDlg::SoundSaveAsNPK(DWORD para) {
 	processing = 1;
-	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
+	queue targetList = SNDgetChecked(enumSelectType(para));
 	CFileDialog dlg(FALSE, L"NPK文件(*.NPK)|*.NPK", L"newNPK.NPK", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, L"NPK文件(*.NPK)|*.NPK||", this);
 	if(IDOK == dlg.DoModal()) {
 		NPKobject newNo;
@@ -2118,10 +2189,10 @@ DefineThreadFunc(CExParrotDlg, SoundSaveAsNPK, DWORD) {
 		bar.show(targetList.size() - 1);
 		for(int i = 0; i<targetList.size(); i++) {
 			int id = targetList[i];
-			bar.setInfo(L"正在提取" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+			bar.setInfo(L"正在提取" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 			stream tempStr;
 			no.extract(id, tempStr);
-			newNo.push(tempStr, no.entry[id].comment);
+			newNo.push(no.content[id].comment, tempStr);
 		}
 		newNo.saveFile(CStrToStr(dlg.GetPathName()));
 		bar.hide();
@@ -2129,15 +2200,15 @@ DefineThreadFunc(CExParrotDlg, SoundSaveAsNPK, DWORD) {
 	}
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, SoundTransToWAV, DWORD) {
+void CExParrotDlg::SoundTransToWAV(DWORD para) {
 	processing = 1;
-	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
+	queue targetList = SNDgetChecked(enumSelectType(para));
 	bar.show(targetList.size() - 1);
 	int count = 0;
 	int skip = 0;
 	for(int i = 0; i < targetList.size(); i++) {
 		int id = targetList[i];
-		bar.setInfo(L"正在转换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		bar.setInfo(L"正在转换" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 		stream sour, dest;
 		if(no.SNDgetVersion(id) != VVORBIS) {
 			skip++;
@@ -2152,7 +2223,7 @@ DefineThreadFunc(CExParrotDlg, SoundTransToWAV, DWORD) {
 		if(!wo.loadAndEncode(aTemp, dest))
 			continue;
 		no.replace(id, dest);
-		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconSND(VWAVE), 0, 0, 0);
+		SNDmodifyIcon(id, VWAVE);
 		count++;
 	}
 	bar.hide();
@@ -2160,15 +2231,15 @@ DefineThreadFunc(CExParrotDlg, SoundTransToWAV, DWORD) {
 	processing = 0;
 	MessageBox(L"尝试转换" + NumToCStr(targetList.size()) + L"个，成功" + NumToCStr(count) + L"个，跳过" + NumToCStr(skip) + L"个喵。", L"提示喵");
 }
-DefineThreadFunc(CExParrotDlg, SoundTransToOGG, DWORD) {
+void CExParrotDlg::SoundTransToOGG(DWORD para) {
 	processing = 1;
-	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
+	queue targetList = SNDgetChecked(enumSelectType(para));
 	bar.show(targetList.size() - 1);
 	int count = 0;
 	int skip = 0;
 	for(int i = 0; i < targetList.size(); i++) {
 		int id = targetList[i];
-		bar.setInfo(L"正在转换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		bar.setInfo(L"正在转换" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 		stream sour,dest;
 		if(no.SNDgetVersion(id) != VWAVE) {
 			skip++;
@@ -2187,7 +2258,7 @@ DefineThreadFunc(CExParrotDlg, SoundTransToOGG, DWORD) {
 			OGGvorbis::OGGencodeSetting('V', -1, dRate[profile.outputQuality])))
 			continue;
 		no.replace(id, dest);
-		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconSND(VVORBIS), 0, 0, 0);
+		SNDmodifyIcon(id, VVORBIS); 
 		count++;
 	}
 	bar.hide();
@@ -2195,24 +2266,24 @@ DefineThreadFunc(CExParrotDlg, SoundTransToOGG, DWORD) {
 	processing = 0;
 	MessageBox(L"尝试转换" + NumToCStr(targetList.size()) + L"个，成功" + NumToCStr(count) + L"个，跳过" + NumToCStr(skip) + L"个喵。", L"提示喵");
 }
-DefineThreadFunc(CExParrotDlg, SoundDequote, DWORD) {
+void CExParrotDlg::SoundDequote(DWORD para) {
 	processing = 1;
-	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
+	queue targetList = SNDgetChecked(enumSelectType(para));
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i < targetList.size(); i++) {
 		int id = targetList[i];
-		bar.setInfo(L"正在重新为" + GetTail(StrToCStr(no.entry[id].comment)) + L"分配数据喵……", i);
-		if(no.delink(id)) {
-			updateSNDterm(id);
+		bar.setInfo(L"正在重新为" + GetTail(StrToCStr(no.content[id].comment)) + L"分配数据喵……", i);
+		if(no.dequote(id)) {
+			SNDupdateTerm(id);
 		}
 	}
 	bar.hide();
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExParrotDlg, SoundHide, DWORD) {
+void CExParrotDlg::SoundHide(DWORD para) {
 	processing = 1;
-	std::vector<int> targetList = getSelected(IDC_LIST_SND, para);
+	queue targetList = SNDgetChecked(enumSelectType(para));
 	bar.show(targetList.size() - 1);
 	audio emptyAu(1, 1);
 	stream s;
@@ -2220,9 +2291,9 @@ DefineThreadFunc(CExParrotDlg, SoundHide, DWORD) {
 	encodeTo(emptyAu, s);
 	for(int i = 0; i<targetList.size(); i++) {
 		int id = targetList[targetList.size() - 1 - i];
-		bar.setInfo(L"正在隐藏" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		bar.setInfo(L"正在隐藏" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 		no.replace(id, s);
-		updateSNDterm(id);
+		SNDupdateTerm(id);
 	}
 	bar.hide();
 	updateInfo();
@@ -2299,7 +2370,7 @@ void CExParrotDlg::OnMenuSoundReplaceQuote() {
 
 
 void CExParrotDlg::OnMenuSoundInsertSndPatch() {
-	if(!getSelected(IDC_LIST_SND, MULTI_SELECT).size()) {
+	if(!SNDgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的音效对象喵！");
 		return;
 	}
@@ -2308,7 +2379,7 @@ void CExParrotDlg::OnMenuSoundInsertSndPatch() {
 
 
 void CExParrotDlg::OnMenuSoundReplaceCopyPatch() {
-	if(!getSelected(IDC_LIST_SND, MULTI_SELECT).size()) {
+	if(!SNDgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的音效对象喵！");
 		return;
 	}
@@ -2317,7 +2388,7 @@ void CExParrotDlg::OnMenuSoundReplaceCopyPatch() {
 
 
 void CExParrotDlg::OnMenuSoundReplaceQuotePatch() {
-	if(!getSelected(IDC_LIST_SND, MULTI_SELECT).size()) {
+	if(!SNDgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的音效对象喵！");
 		return;
 	}
@@ -2332,7 +2403,7 @@ void CExParrotDlg::OnMenuSoundRemove() {
 
 
 void CExParrotDlg::OnMenuSoundRemovePatch() {
-	if(!getSelected(IDC_LIST_SND, MULTI_SELECT).size()) {
+	if(!SNDgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的音效对象喵！");
 		return;
 	}
@@ -2345,7 +2416,7 @@ void CExParrotDlg::OnMenuSoundExtract() {
 }
 
 void CExParrotDlg::OnMenuSoundExtractPatch() {
-	if(!getSelected(IDC_LIST_SND, MULTI_SELECT).size()) {
+	if(!SNDgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的音效对象喵！");
 		return;
 	}
@@ -2356,9 +2427,9 @@ void CExParrotDlg::OnMenuSoundSave() {
 	CHECK_VALID(crtSNDid >= 0);
 	CString defExt = _T("所有文件(*.*)|*.*");
 	CString extFilter = _T("所有文件(*.*)|*.*||");
-	CFileDialog dlg(false, defExt, Underlining(StrToCStr(no.entry[crtSNDid].comment)), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, extFilter, this);
+	CFileDialog dlg(false, defExt, Underlining(StrToCStr(no.content[crtSNDid].comment)), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, extFilter, this);
 	if(dlg.DoModal() == IDOK) {
-		no.extract(crtSNDid, CStrToStr(dlg.GetPathName()));
+		no.extractFile(crtSNDid, CStrToStr(dlg.GetPathName()));
 		MessageBox(_T("保存完毕喵！"));
 	}
 }
@@ -2370,7 +2441,7 @@ void CExParrotDlg::OnMenuSoundSaveNPK() {
 
 
 void CExParrotDlg::OnMenuSoundSaveNPKPatch() {
-	if(!getSelected(IDC_LIST_SND, MULTI_SELECT).size()) {
+	if(!SNDgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的音效对象喵！");
 		return;
 	}
@@ -2382,28 +2453,31 @@ void CExParrotDlg::OnMenuSoundCopyResource() {
 	CHECK_VALID(crtSNDid >= 0);
 	stream sTemp;
 	no.extract(crtSNDid, sTemp);
-	no.insert(crtSNDid + 1, sTemp, no.entry[crtSNDid].comment + "(new)");
-	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->InsertItem(crtSNDid + 1, L"", getIconSND(0));
-	updateSNDterm(crtSNDid + 1);
+	no.insert(crtSNDid + 1, no.content[crtSNDid].comment, sTemp);
+	SNDaddTerm(crtSNDid + 1, no.SNDgetVersionEx(crtSNDid + 1), GetTail(StrToCStr(no.content[crtSNDid].comment)));
 	NPKsaveAlert = true;
 }
 
 
 void CExParrotDlg::OnMenuSoundCopyQuote() {
 	CHECK_VALID(crtSNDid >= 0);
-	no.insertLink(crtSNDid + 1, crtSNDid, no.entry[crtSNDid].comment + "(new)");
-	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->InsertItem(crtSNDid + 1, L"", getIconSND(0));
-	updateSNDterm(crtSNDid + 1);
+	no.insertQuote(crtSNDid + 1, no.content[crtSNDid].comment, crtSNDid);
+	SNDaddTerm(crtSNDid + 1, no.SNDgetVersionEx(crtSNDid + 1), GetTail(StrToCStr(no.content[crtSNDid].comment)) + GetTail(StrToCStr(no.content[crtSNDid].comment)));
 	NPKsaveAlert = true;
 }
 
 void CExParrotDlg::OnMenuSoundRename() {
 	CHECK_VALID(crtSNDid >= 0);
 	ModalRename dlg;
-	dlg.oldName = StrToCStr(no.entry[crtSNDid].comment);
+	dlg.oldName = StrToCStr(no.content[crtSNDid].comment);
 	if(IDOK == dlg.DoModal()) {
 		no.rename(crtSNDid, CStrToStr(dlg.newName));
-		GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItemText(crtSNDid, 0, GetTail(dlg.newName));
+		updateInfo();
+		SNDupdateTerm(crtSNDid);
+		for(int i = 1 + crtSNDid; i < no.getCount(); i++) {
+			if(no.checkQuote(i) == crtSNDid)
+				SNDupdateTerm(i);
+		}
 		fileSNDname = dlg.newName;
 		NPKsaveAlert = true;
 		updateInfo();
@@ -2418,7 +2492,7 @@ void CExParrotDlg::OnMenuSoundDequote() {
 
 
 void CExParrotDlg::OnMenuSoundDequotePatch() {
-	if(!getSelected(IDC_LIST_SND, MULTI_SELECT).size()) {
+	if(!SNDgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的音效对象喵！");
 		return;
 	}
@@ -2431,7 +2505,7 @@ void CExParrotDlg::OnMenuSoundHide() {
 }
 
 void CExParrotDlg::OnMenuSoundHidePatch() {
-	if(!getSelected(IDC_LIST_SND, MULTI_SELECT).size()) {
+	if(!SNDgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的音效对象喵！");
 		return;
 	}
@@ -2462,53 +2536,27 @@ void CExParrotDlg::OnMenuSoundSelectHighline() {
 void CExParrotDlg::OnMenuSoundMoveUp() {
 	int row = crtSNDid;
 	CHECK_VALID(row >= 1);
-	NPKentry ne = no.entry[row];
-	no.entry[row] = no.entry[row - 1];
-	no.entry[row - 1] = ne;
-	for(int i = 0; i <= 1; i++) {
-		int id = row - i;
-		int li = no.checkLink(id);
-		if(li == id) {
-			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItemText(id, 0, GetTail(StrToCStr(no.entry[id].comment)));
-			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconSND(no.SNDgetVersion(id)), 0, 0, 0);
-		} else {
-			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItemText(id, 0, GetTail(StrToCStr(no.entry[id].comment)
-				+ L"[" + GetTail(StrToCStr(no.entry[li].comment)) + L"]"));
-			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItem(id, 0, LVIF_IMAGE, NULL, 1, 0, 0, 0);
-		}
-	}
-	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetSelectionMark(row - 1);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItemState(row - 1, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItemState(row, 0, LVIS_SELECTED | LVIS_FOCUSED);
-	crtSNDid = row - 1;
-	NPKsaveAlert = true;
+	NPKentry ne = no.content[row];
+	no.content[row] = no.content[row - 1];
+	no.content[row - 1] = ne;
+	SNDupdateTerm(row);
+	SNDupdateTerm(row - 1);
+	SNDsetHighLine(row - 1);
 	updateInfo();
+	NPKsaveAlert = true;
 }
 
 
 void CExParrotDlg::OnMenuSoundMoveDown() {
 	int row = crtSNDid;
 	CHECK_VALID(row >= 0);
-	CHECK_VALID(row<no.count);
-	NPKentry ne = no.entry[row];
-	no.entry[row] = no.entry[row + 1];
-	no.entry[row + 1] = ne;
-	for(int i = 0; i <= 1; i++) {
-		int id = row + i;
-		int li = no.checkLink(id);
-		if(li == id) {
-			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItemText(id, 0, GetTail(StrToCStr(no.entry[id].comment)));
-			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconSND(no.SNDgetVersion(id)), 0, 0, 0);
-		} else {
-			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItemText(id, 0, GetTail(StrToCStr(no.entry[id].comment)
-				+ L"[" + GetTail(StrToCStr(no.entry[li].comment)) + L"]"));
-			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItem(id, 0, LVIF_IMAGE, NULL, 1, 0, 0, 0);
-		}
-	}
-	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetSelectionMark(row + 1);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItemState(row + 1, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetItemState(row, 0, LVIS_SELECTED | LVIS_FOCUSED);
-	crtSNDid = row + 1;
+	CHECK_VALID(row<no.getCount() - 1);
+	NPKentry ne = no.content[row];
+	no.content[row] = no.content[row + 1];
+	no.content[row + 1] = ne;
+	SNDupdateTerm(row);
+	SNDupdateTerm(row + 1);
+	SNDsetHighLine(row + 1);
 	NPKsaveAlert = true;
 	updateInfo();
 }
@@ -2597,10 +2645,9 @@ void CExParrotDlg::OnDropFiles(HDROP hDropInfo) {
 			return;
 		}
 		fileNPKname = fileName;
-		updateSNDlist();
-		if(no.count > 0) {
-			GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->SetSelectionMark(0);
-			crtSNDid = 0;
+		SNDloadList();
+		if(no.getCount() > 0) {
+			SNDsetHighLine(0);
 		}
 	} else if(fmt == L".OGG" || fmt == L".MP3" || fmt == L".WAV") {
 		int success = 0;
@@ -2616,9 +2663,9 @@ void CExParrotDlg::OnDropFiles(HDROP hDropInfo) {
 				if(!sTemp.loadFile(CStrToStr(fileName)))
 					continue;
 				CString path = Slashing(GetTail(fileName));
-				no.push(sTemp, CStrToStr(path));
+				no.push(CStrToStr(path), sTemp);
 				success++;
-				GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->InsertItem(GET_CTRL(CGoodListCtrl, IDC_LIST_SND)->GetItemCount(), GetTail(path), getIconSND(no.SNDgetVersion(no.count - 1)));
+				SNDaddTerm(-1, checkAudioFormat(sTemp), GetTail(path));
 				sTemp.release();
 			}
 			updateInfo();
@@ -2706,6 +2753,12 @@ void CExParrotDlg::OnToolsPiano() {
 	dlg.DoModal();
 }
 
+void CExParrotDlg::OnToolsAudioMark() {
+	// TODO:  在此添加命令处理程序代码
+	ToolAudioMark dlg;
+	dlg.DoModal();
+}
+
 
 void CExParrotDlg::OnMenuSoundTransformToWAV() {
 	// TODO:  在此添加命令处理程序代码
@@ -2721,11 +2774,20 @@ void CExParrotDlg::OnMenuSoundTransformToOGG() {
 
 void CExParrotDlg::OnMenuSoundTransformToWAVPatch() {
 	// TODO:  在此添加命令处理程序代码
+	if(!SNDgetChecked(MULTI_SELECT).size()) {
+		MessageBox(L"没有勾选的音效对象喵！");
+		return;
+	}
 	StartThreadFunc(SoundTransToWAV, 1);
 }
 
 
 void CExParrotDlg::OnMenuSoundTransformToOGGPatch() {
 	// TODO:  在此添加命令处理程序代码
+	if(!SNDgetChecked(MULTI_SELECT).size()) {
+		MessageBox(L"没有勾选的音效对象喵！");
+		return;
+	}
 	StartThreadFunc(SoundTransToOGG, 1);
 }
+

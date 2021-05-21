@@ -88,15 +88,15 @@ void ToolPiano::OnBnClickedButton1() {
 				MessageBox(L"不识别的NPK喵。", L"提示喵");
 				return;
 			}
-			if(no.count == 0) {
+			if(no.getCount() == 0) {
 				MessageBox(L"指定NPK里无内容喵。", L"提示喵");
 				return;
 			}
 			TinySNDSelect dlg2;
 			dlg2.listStr.clear();
 			dlg2.defaultSelected = 0;
-			for(int i = 0; i < no.count; i++)
-				dlg2.listStr.push_back(no.entry[i].comment);
+			for(int i = 0; i < no.getCount(); i++)
+				dlg2.listStr.push_back(no.content[i].comment);
 			if(IDOK != dlg2.DoModal()) {
 				return;
 			}
@@ -104,7 +104,7 @@ void ToolPiano::OnBnClickedButton1() {
 				MessageBox(L"无法提取的对象喵。", L"提示喵");
 				return;
 			}
-			GET_CTRL(CEdit, IDC_EDIT_FILENAME)->SetWindowText(StrToCStr(no.entry[dlg2.selected].comment));
+			GET_CTRL(CEdit, IDC_EDIT_FILENAME)->SetWindowText(StrToCStr(no.content[dlg2.selected].comment));
 		} else if(fmt == L".WAV" ||fmt == L".OGG"){
 			if(!auStream.loadFile(CStrToStr(fileName))) {
 				MessageBox(L"无法读取的文件喵。", L"提示喵");
@@ -114,7 +114,7 @@ void ToolPiano::OnBnClickedButton1() {
 		}
 		NPKobject noTemp;
 		noTemp.create();
-		noTemp.push(auStream, "temp");
+		noTemp.push("temp", auStream);
 		bar.show();
 		bar.setInfo(L"正在解码喵……", 0);
 		switch(noTemp.SNDgetVersion(0)) {
@@ -155,7 +155,7 @@ void ToolPiano::OnBnClickedButton2() {
 		//player.play(originNote);
 }
 
-DefineThreadFunc(ToolPiano, playNotes, double) {
+void ToolPiano::playNotes(double para) {
 	audio currentNote;
 	CString rateStr;
 	GET_CTRL(CEdit, IDC_EDIT_ADJUST2)->GetWindowText(rateStr);
@@ -381,7 +381,7 @@ void ToolPiano::showStaffText() {
 	}
 	GET_CTRL(CEdit, IDC_EDIT_NOTES)->SetWindowText(musStr);
 }
-DefineThreadFunc(ToolPiano, punchSave, int) {
+void ToolPiano::punchSave(int para) {
 	CString defExt = _T("Ogg音效(*.ogg)|*.ogg|波形声音(*.wav)|*.wav");
 	CString extFilter = _T("Ogg音效(*.ogg)|*.ogg|波形声音(*.wav)|*.wav||");
 	CFileDialog dlg(false, defExt, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, extFilter, this);
@@ -400,7 +400,7 @@ DefineThreadFunc(ToolPiano, punchSave, int) {
 		}
 	} else {
 		KoishiAudioTool::OGGvorbis::OGGobject oo;
-		Profile profile;
+		ProfileWhite profile;
 		profile.loadProfile();
 		oo.comment.addInfo_author(CStrToStr(profile.artist), CStrToStr(CTime::GetTickCount().Format(L"%Y-%m-%d %H:%M:%S")));
 		if(!oo.loadAndEncodeToFile(track, CStrToStr(fileName))) {
@@ -408,7 +408,7 @@ DefineThreadFunc(ToolPiano, punchSave, int) {
 		}
 	}
 }
-DefineThreadFunc(ToolPiano, punchPlay, int) {
+void ToolPiano::punchPlay(int) {
 	if(!graphicMode) {
 		staffFromText();
 	}

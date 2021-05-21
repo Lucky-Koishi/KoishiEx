@@ -23,7 +23,9 @@
 #include "ToolStat.h"
 #include "ModalAdvancedMix.h"
 #include "ModalSaveWarning.h"
-
+#include "ToolDownload.h"
+#include "ToolDownloadServerSelection.h"
+#include "ToolTeenSwitch.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -53,7 +55,6 @@ CExRabbitDlg::CExRabbitDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CExRabbitDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDI_ICON_MAIN);
-
 	profile.loadProfile();
 	width = 1210;
 	height = 650;
@@ -200,22 +201,6 @@ BEGIN_MESSAGE_MAP(CExRabbitDlg, CDialogEx)
 	ON_COMMAND(ID_MENU_PICTURE_INSERT2, &CExRabbitDlg::OnMenuPictureInsert2)
 	ON_COMMAND(ID_MENU_PICTURE_INSERT_PATCH2, &CExRabbitDlg::OnMenuPictureInsertPatch2)
 	ON_COMMAND(ID_MENU_TEXTURE_INSERT2, &CExRabbitDlg::OnMenuTextureInsert2)
-	/*ON_COMMAND(ID_MENU_IMAGE_SAVE, &CExRabbitDlg::OnMenuImageSave)
-	ON_COMMAND(ID_MENU_IMAGE_INSERT, &CExRabbitDlg::OnMenuImageInsert)
-	ON_COMMAND(ID_MENU_IMAGE_REPLACE, &CExRabbitDlg::OnMenuImageReplace)
-	ON_COMMAND(ID_MENU_IMAGE_DELETE, &CExRabbitDlg::OnMenuImageDelete)
-	ON_COMMAND(ID_MENU_IMAGE_DELETE_PATCH, &CExRabbitDlg::OnMenuImageDeletePatch)
-	ON_COMMAND(ID_MENU_IMAGE_RENAME, &CExRabbitDlg::OnMenuImageRename)
-	ON_COMMAND(ID_MENU_IMAGE_TRANSFORM, &CExRabbitDlg::OnMenuImageTransform)
-	ON_COMMAND(ID_MENU_IMAGE_CHOOSE_ALL, &CExRabbitDlg::OnMenuImageChooseAll)
-	ON_COMMAND(ID_MENU_IMAGE_CHOOSE_HIGHLINE, &CExRabbitDlg::OnMenuImageChooseHighline)
-	ON_COMMAND(ID_MENU_IMAGE_CHOOSE_REVERSE, &CExRabbitDlg::OnMenuImageChooseReverse)
-	ON_COMMAND(ID_MENU_IMAGE_MOVE_UP, &CExRabbitDlg::OnMenuImageMoveUp)
-	ON_COMMAND(ID_MENU_IMAGE_MOVE_DOWN, &CExRabbitDlg::OnMenuImageMoveDown)
-	ON_COMMAND(ID_MENU_IMAGE_AUTOSORT, &CExRabbitDlg::OnMenuImageAutoSort)
-	ON_COMMAND(ID_MENU_IMAGE_MIX, &CExRabbitDlg::OnMenuImageMix)
-	ON_COMMAND(ID_MENU_IMAGE_SET_COMPARE, &CExRabbitDlg::OnMenuImageSetCompare)
-	ON_COMMAND(ID_MENU_IMAGE_INSERT2, &CExRabbitDlg::OnMenuImageInsert2)*/
 	ON_COMMAND(ID_MENU_COLOR_TABLE_IMPORT, &CExRabbitDlg::OnMenuColorTableImport)
 	ON_COMMAND(ID_MENU_COLOR_TABLE_EXPORT, &CExRabbitDlg::OnMenuColorTableExport)
 	ON_COMMAND(ID_MENU_COLOR_PALETTE_NEW, &CExRabbitDlg::OnMenuColorPaletteNew)
@@ -224,7 +209,6 @@ BEGIN_MESSAGE_MAP(CExRabbitDlg, CDialogEx)
 	ON_COMMAND(ID_MENU_COLOR_PALETTE_DELETE, &CExRabbitDlg::OnMenuColorPaletteDelete)
 	ON_COMMAND(IDM_TOOL_AVATAR, &CExRabbitDlg::OnToolAvatar)
 	ON_COMMAND(IDM_TOOL_NPK_DICT, &CExRabbitDlg::OnToolNpkDict)
-	ON_COMMAND(IDM_TOOL_IMG_SEARCH, &CExRabbitDlg::OnToolImgSearch)
 	ON_COMMAND(IDM_TOOL_DOWNLOAD, &CExRabbitDlg::OnToolDownload)
 	ON_COMMAND(IDM_TOOL_FORCE_EXTRACT, &CExRabbitDlg::OnToolForceExtract)
 	ON_COMMAND(IDM_TOOL_OPEN_OUTPUT_FOLDER, &CExRabbitDlg::OnToolOpenOutputFolder)
@@ -296,6 +280,8 @@ BEGIN_MESSAGE_MAP(CExRabbitDlg, CDialogEx)
 	ON_COMMAND(ID_MENU_IMAGE_INERT_FOLDER_BLANK, &CExRabbitDlg::OnMenuImageInertFolderBlank)
 	ON_COMMAND(ID_MENU_IMAGE_INERT_OTHER_BLANK, &CExRabbitDlg::OnMenuImageInertOtherBlank)
 	ON_COMMAND(ID_TOOLS_STAT, &CExRabbitDlg::OnToolsStat)
+	ON_COMMAND(ID_TOOLS_TEEN_SWITCH, &CExRabbitDlg::OnToolsTeenSwitch)
+	ON_COMMAND(ID_MENU_PICTURE_STRETCH, &CExRabbitDlg::OnMenuPictureStretch)
 	END_MESSAGE_MAP()
 /////////
 
@@ -318,12 +304,9 @@ BOOL CExRabbitDlg::OnInitDialog(){
 	adjustWindow(rc.Width(), rc.Height());
 	// 控件大小调整
 	CREATEW(dNewFile,IDD_NEW_DIALOG);
-
 	CREATEW(bar, IDD_TINY_PROGRESSBAR);
-	CREATEW(toolIMGSearch,IDD_TOOL_IMGSEARCH);
 	CREATEW(toolAvatar,IDD_TOOL_AVATAR);
 	toolAvatar.context = this;
-	CREATEW(toolDict,IDD_TOOL_DICT);
 	CREATEW(toolForceEx, IDD_TOOL_FORCEEXTRACT);
 	
 
@@ -355,7 +338,6 @@ BOOL CExRabbitDlg::OnInitDialog(){
 	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetImageList(&i_lIMG, LVSIL_SMALL);
 
 	i_lPIC.Create(16,16, TRUE|ILC_COLOR24, 10, 1);
-	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON9));
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON1));
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON2));
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON3));
@@ -364,6 +346,7 @@ BOOL CExRabbitDlg::OnInitDialog(){
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON6));
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON7));
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON8));
+	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON9));
 	i_lPIC.Add(AfxGetApp()->LoadIconW(IDI_PIC_ICON10));
 	GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetImageList(&i_lPIC, LVSIL_SMALL);
 	GET_CTRL(CGoodListCtrl, IDC_LIST_DDS)->SetImageList(&i_lPIC, LVSIL_SMALL);
@@ -426,7 +409,7 @@ BOOL CExRabbitDlg::OnInitDialog(){
 #endif
 	no.create();
 	fileNPKname = L"newNPK.npk";
-	updateIMGlist();
+	IMGloadList();
 
 	m_ttc.Create(this);
 	m_ttc.AddTool(GET_CTRL(CButton, IDC_TOOL_BUTTON1), L"显示选项");
@@ -605,110 +588,351 @@ void CExRabbitDlg::switchIMGver(IMGversion ver){
 		break;
 	}
 }
-
-void CExRabbitDlg::updateIMGlist(){
-	// 更新IMG列表
-	/////////////////////////////
-	updateInfo();
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->DeleteAllItems();
-	for(int i = 0;i<no.count;i++){
-		int li = no.checkLink(i);
-		if(li == i){
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->EasyInsertItem(GetTail(StrToCStr(no.entry[i].comment)), getIconIMG((IMGversion)no.IMGgetVersion(i)));
-		}else{
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->EasyInsertItem(GetTail(StrToCStr(no.entry[i].comment) + L"["+GetTail(StrToCStr(no.entry[li].comment))+L"]"), 1);
-		}
+///////////////////////////////////////////////////////
+//列表控件的操作
+///////////////////////////////////////////////////////
+UINT CExRabbitDlg::IMGiconID(IMGversion iv) {
+//	auto imgIconList = OnInitDialog;
+	switch(iv) {
+	case V1:
+		return 4;
+	case V2:
+		return 5;
+	case V4:
+		return 7;
+	case V5:
+		return 8;
+	case V6:
+		return 9;
+	case VUKNOWN:
+		return 2;
+	case VSOUND:
+		return 3;
+	case VQUOTE:
+		return 1;
 	}
+	return 0;
 }
-void CExRabbitDlg::updateIMGterm(int pos) {
-	int li = no.checkLink(pos);
-	if(li == pos) {
-		GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(pos, 0, LVIF_IMAGE, NULL, getIconIMG((IMGversion)no.IMGgetVersion(pos)), 0, 0, 0);
-		GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(pos, 0, GetTail(StrToCStr(no.entry[pos].comment)));
+void CExRabbitDlg::IMGaddTerm(int pos, IMGversion iv, CString comment) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG);
+	if(pos == -1) {
+		ctl->InsertItem(ctl->GetItemCount(), comment, IMGiconID(iv));
 	} else {
-		GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(pos, 0, LVIF_IMAGE, NULL, 1, 0, 0, 0);
-		GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(pos, 0, GetTail(StrToCStr(no.entry[pos].comment)) + L"[" + GetTail(StrToCStr(no.entry[li].comment)) + L"]");
+		ctl->InsertItem(pos, comment, IMGiconID(iv));
 	}
 }
-void CExRabbitDlg::updatePIClist(){
-	// 更新帧列表
-	////////////////////////////////
-	CString cstr;
-	int currentCount = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->GetItemCount();
-	int i = 0;
-	while(TRUE){
-		if(i < io.indexCount){
-			if(i < currentCount){
-				updatePICterm(i);
-			}else{
-				cstr = NumToCStr(i) + L",";
-				cstr += FmtToCStr(io.PICcontent[i], io.version);
-				if(io.PICcontent[i].format == LINK)
-					cstr += NumToCStr(io.PICcontent[i].linkTo);
-				cstr += L",";
-				cstr += PtToCStr(io.PICcontent[i].basePt) + L",";
-				cstr += SzToCStr(io.PICcontent[i].picSize)+L",";
-				cstr += SzToCStr(io.PICcontent[i].frmSize)+L",";
-				if(io.version == V5){
-					cstr += L"纹理集"+NumToCStr(io.PICcontent[i].TEXusing)+L":"+PtToCStr(io.PICcontent[i].TEXpointLT)+L"-"+PtToCStr(io.PICcontent[i].TEXpointRB);
-				}
-				GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->EasyInsertItem(cstr,getIconPIC(io.PICcontent[i]));
-			}
-			i++;
-		}else{
-			if(i < currentCount){
-				GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->DeleteItem(i);
-				currentCount --;
-			}else{
-				break;
-			}
+void CExRabbitDlg::IMGdeleteTerm(int pos) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG);
+	ctl->DeleteItem(pos);
+}
+void CExRabbitDlg::IMGmodifyTerm(int pos, IMGversion iv, CString comment) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG);
+	ctl->SetItemText(pos, 0, comment);
+	ctl->SetItem(pos, 0, LVIF_IMAGE, NULL, IMGiconID(iv), 0, 0, 0);
+}
+void CExRabbitDlg::IMGmodifyIcon(int pos, IMGversion iv) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG);
+	ctl->SetItem(pos, 0, LVIF_IMAGE, NULL, IMGiconID(iv), 0, 0, 0);
+}
+void CExRabbitDlg::IMGsetHighLine(int pos) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG);
+	if(pos >= 0) {
+		ctl->SetSelectionMark(pos);
+		ctl->SetItemState(pos, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+	}
+	if(crtIMGid >= 0){
+		ctl->SetItemState(crtIMGid, 0, LVIS_SELECTED | LVIS_FOCUSED);
+	} 
+	crtIMGid = pos;
+}
+void CExRabbitDlg::IMGloadList() {
+	updateInfo();
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG);
+	ctl->DeleteAllItems();
+	for(int i = 0; i < no.getCount(); i++) {
+		long qti = no.checkQuote(i);
+		if(i != qti) {
+			IMGaddTerm(-1, VQUOTE,
+					   GetTail(StrToCStr(no.content[i].comment)) + L"->" +
+					   GetTail(StrToCStr(no.content[qti].comment)));
+		} else {
+			IMGaddTerm(-1, no.IMGgetVersion(i),
+					   GetTail(StrToCStr(no.content[i].comment)));
 		}
 	}
-	if(io.indexCount > 0){
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemState(0, LVIS_FOCUSED | LVIS_SELECTED,LVIS_FOCUSED | LVIS_SELECTED);   
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetSelectionMark(0);
+}
+void CExRabbitDlg::IMGupdateTerm(int pos) {
+	long qtPos = no.checkQuote(pos);
+	if(qtPos != pos) {
+		IMGmodifyTerm(pos, VQUOTE,
+					  GetTail(StrToCStr(no.content[pos].comment)) + L"->" +
+					  GetTail(StrToCStr(no.content[qtPos].comment)));
+	} else {
+		IMGmodifyTerm(pos, no.IMGgetVersion(pos),
+					  GetTail(StrToCStr(no.content[pos].comment)));
+	}
+}
+void CExRabbitDlg::IMGupdateList() {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG);
+	int nc = no.getCount();
+	int ic = ctl->GetItemCount();
+	for(int i = 0; i < max(nc, ic); i++) {
+		if(i < ic && i < nc) {
+			IMGupdateTerm(i);
+		}
+		if(i >= ic && i < nc) {
+			//当前NPK条目数目大于列表
+			long qti = no.checkQuote(i);
+			if(i != qti) {
+				IMGaddTerm(-1, VQUOTE,
+						   GetTail(StrToCStr(no.content[i].comment)) + L"->" +
+						   GetTail(StrToCStr(no.content[qti].comment)));
+			} else {
+				IMGaddTerm(-1, no.IMGgetVersion(i),
+						   GetTail(StrToCStr(no.content[i].comment)));
+			}
+		}
+		if(i >= nc && i < ic) {
+			//当前列表条目数目大于NPK
+			IMGdeleteTerm(nc);
+		}
+	}
+}
+queue CExRabbitDlg::IMGgetChecked(enumSelectType selectType) {
+	queue selected;
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG);
+	switch(selectType) {
+	case SINGLE_SELECT:
+		selected.push_back(crtIMGid);
+		return selected;
+	case MULTI_SELECT:
+		for(int k = 0; k<ctl->GetItemCount(); k++)
+			if(ctl->GetCheck(k))
+				selected.push_back(k);
+		return selected;
+	case ALL_SELECT:
+		for(int k = 0; k<ctl->GetItemCount(); k++)
+			selected.push_back(k);
+		return selected;
+	}
+	return selected;
+}
+UINT CExRabbitDlg::PICiconID(IMGversion iv, PICinfo pi) {
+	if(iv == V4 || iv == V5 || iv == V6) {
+		if(pi.format == ARGB4444) {
+			return 9;
+		}
+		if(pi.format == ARGB1555) {
+			if(pi.comp == COMP_NONE && 2 * pi.picSize.area() == pi.dataSize) {
+				//硬方法区分索引贴图和ARGB1555
+				return 2;
+			}
+			return 4;
+		}
+	}
+	switch(pi.format) {
+	case ARGB8888:
+		return 0;
+	case ARGB4444:
+		return 1;
+	case ARGB1555:
+		return 2;
+	case LINK:
+		return 3;
+	case DDS_DXT1:
+		return 5;
+	case DDS_DXT3:
+		return 6;
+	case DDS_DXT5:
+		return 7;
+	}
+	return 8;
+}
+void CExRabbitDlg::PICaddTerm(int pos, PICinfo pi) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC);
+	if(pos == -1) {
+		PICaddTerm(ctl->GetItemCount(), pi);
+	} else {
+		ctl->InsertItem(pos, NumToCStr(pos), PICiconID(io.version, pi));
+		PICmodifyTerm(pos, pi);
+	}
+}
+void CExRabbitDlg::PICdeleteTerm(int pos) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC);
+	ctl->DeleteItem(pos);
+}
+void CExRabbitDlg::PICmodifyTerm(int pos, PICinfo pi) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC);
+	if(pi.format == LINK) {
+		ctl->SetItemText(pos, 1, L"引用：" + NumToCStr(pi.linkTo));
+		ctl->SetItemText(pos, 2, L"");
+		ctl->SetItemText(pos, 3, L"");
+		ctl->SetItemText(pos, 4, L"");
+		if(io.version == V5) {
+			ctl->SetItemText(pos, 5, L"");
+		}
+	} else {
+		ctl->SetItemText(pos, 1, FmtToCStr(pi, io.version));
+		ctl->SetItemText(pos, 2, PtToCStr(pi.basePt));
+		ctl->SetItemText(pos, 3, SzToCStr(pi.picSize));
+		ctl->SetItemText(pos, 4, SzToCStr(pi.frmSize));
+		if(io.version == V5) {
+			ctl->SetItemText(pos, 5, L"纹理集" + NumToCStr(pi.TEXusing) + L":" + PtToCStr(pi.TEXpointLT) + L"-" + PtToCStr(pi.TEXpointRB));
+		}
+	}
+}
+void CExRabbitDlg::PICmodifyBasePoint(int pos) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC);
+	auto pi = io.PICcontent[pos];
+	if(pi.format == LINK) {
+		return;
+	} else {
+		ctl->SetItemText(pos, 2, PtToCStr(pi.basePt));
+	}
+}
+void CExRabbitDlg::PICloadList() {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC);
+	ctl->DeleteAllItems();
+	for(int i = 0; i < io.indexCount; i++) {
+		PICaddTerm(i, io.PICcontent[i]);
+	}
+	if(io.indexCount > 0)
+		PICsetHighLine(0);
+}
+void CExRabbitDlg::PICupdateList() {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC);
+	int nc = io.indexCount;
+	int ic = ctl->GetItemCount();
+	for(int i = 0; i < max(nc, ic); i++) {
+		if(i < ic && i < nc) {
+			PICupdateTerm(i);
+		}
+		if(i >= ic && i < nc) {
+			PICaddTerm(-1, io.PICcontent[i]);
+		}
+		if(i >= nc && i < ic) {
+			PICdeleteTerm(nc);
+		}
+	}
+	if(crtPICid >= io.indexCount) {
 		crtPICid = 0;
-		draw();
+		PICsetHighLine(0);
 	}
 }
-void CExRabbitDlg::updatePICterm(int pos){
-	//只更新pos
-	CHECK_VALID(pos>=0);
-	CHECK_VALID(pos<io.indexCount);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItem(pos,0,LVIF_IMAGE,NULL,getIconPIC(io.PICcontent[pos]),0,0,0);
-	if(io.PICcontent[pos].format == LINK){
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 0, NumToCStr(pos));
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 1, FmtToCStr(io.PICcontent[pos], io.version) + NumToCStr(io.PICcontent[pos].linkTo));
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 2, L"");
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 3, L"");
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 4, L"");
-		if(io.version == V5){
-			GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 5, L"");
-		}
-	}else{
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 0, NumToCStr(pos));
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 1, FmtToCStr(io.PICcontent[pos], io.version));
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 2, PtToCStr(io.PICcontent[pos].basePt));
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 3, SzToCStr(io.PICcontent[pos].picSize));
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 4, SzToCStr(io.PICcontent[pos].frmSize));
-		if(io.version == V5){
-			GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(pos, 5, L"纹理集"+NumToCStr(io.PICcontent[pos].TEXusing)+L":"+PtToCStr(io.PICcontent[pos].TEXpointLT)+L"-"+PtToCStr(io.PICcontent[pos].TEXpointRB));
-		}
+void CExRabbitDlg::PICupdateTerm(int pos) {
+	PICmodifyTerm(pos, io.PICcontent[pos]);
+}
+void CExRabbitDlg::PICrenumber() {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC);
+	for(int i = 0; i < ctl->GetItemCount(); i++)
+		ctl->SetItemText(i, 0, NumToCStr(i));
+}
+void CExRabbitDlg::PICsetHighLine(int pos) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC);
+	if(pos >= 0) {
+		ctl->SetSelectionMark(pos);
+		ctl->SetItemState(pos, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+	}
+	if(crtPICid >= 0) {
+		ctl->SetItemState(crtPICid, 0, LVIS_SELECTED | LVIS_FOCUSED);
+	}
+	crtPICid = pos;
+}
+queue CExRabbitDlg::PICgetChecked(enumSelectType selectType) {
+	queue selected;
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC);
+	switch(selectType) {
+	case SINGLE_SELECT:
+		selected.push_back(crtPICid);
+		return selected;
+	case MULTI_SELECT:
+		for(int k = 0; k<ctl->GetItemCount(); k++)
+			if(ctl->GetCheck(k))
+				selected.push_back(k);
+		return selected;
+	case ALL_SELECT:
+		for(int k = 0; k<ctl->GetItemCount(); k++)
+			selected.push_back(k);
+		return selected;
+	}
+	return selected;
+}
+void CExRabbitDlg::TEXloadList() {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_DDS);
+	ctl->DeleteAllItems();
+	for(int i = 0; i < io.V5_TEXCount; i++) {
+		TEXaddTerm(i, io.TEXcontent[i]);
+	}
+	if(io.V5_TEXCount > 0)
+		TEXsetHighLine(0);
+}
+void CExRabbitDlg::TEXaddTerm(int pos, TEXinfo ti) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_DDS);
+	if(pos == -1) {
+		TEXaddTerm(ctl->GetItemCount(), ti);
+	} else {
+		ctl->InsertItem(pos, NumToCStr(pos), TEXiconID(io.TEXcontent[pos]));
+		TEXmodifyTerm(pos, ti);
 	}
 }
-void CExRabbitDlg::updateTEXlist(){
-	//更新纹理集列表
-	////////////////////////////////
-	CString cstr;
-	GET_CTRL(CGoodListCtrl, IDC_LIST_DDS)->DeleteAllItems();
-	for(int i=0;i<io.TEXcontent.size();i++){
-		cstr = L"#" + NumToCStr(i) + L",";
-		cstr += FmtToCStr((colorFormat)(int)io.TEXcontent[i].format,V5)+L",";
-		cstr += NumToCStr(io.TEXcontent[i].width)+L"×";
-		cstr += NumToCStr(io.TEXcontent[i].height);
-		GET_CTRL(CGoodListCtrl, IDC_LIST_DDS)->EasyInsertItem(cstr,getIconPIC(io.TEXcontent[i].format));
-	}
+void CExRabbitDlg::TEXmodifyTerm(int pos, TEXinfo ti) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_DDS);
+	ctl->SetItemText(pos, 0, L"#" + NumToCStr(pos));
+	ctl->SetItemText(pos, 1, FmtToCStr((colorFormat)(int)io.TEXcontent[pos].format, V5));
+	ctl->SetItemText(pos, 2, NumToCStr(io.TEXcontent[pos].width) + L"×" + NumToCStr(io.TEXcontent[pos].height));
 }
+
+void CExRabbitDlg::TEXsetHighLine(int pos) {
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_DDS);
+	if(pos >= 0) {
+		ctl->SetSelectionMark(pos);
+		ctl->SetItemState(pos, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+	}
+	if(crtTEXid >= 0) {
+		ctl->SetItemState(crtTEXid, 0, LVIS_SELECTED | LVIS_FOCUSED);
+	}
+	crtTEXid = pos;
+}
+
+UINT CExRabbitDlg::TEXiconID(TEXinfo ti) {
+	switch(ti.format) {
+	case ARGB8888:
+		return 0;
+	case ARGB4444:
+		return 1;
+	case ARGB1555:
+		return (ti.dataLength == 2 * ti.height * ti.width) ? 2 : 4;
+	case LINK:
+		return 3;
+	case DDS_DXT1:
+		return 5;
+	case DDS_DXT3:
+		return 6;
+	case DDS_DXT5:
+		return 7;
+	}
+	return 8;
+}
+queue CExRabbitDlg::TEXgetChecked(enumSelectType selectType) {
+	queue selected;
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_DDS);
+	switch(selectType) {
+	case SINGLE_SELECT:
+		selected.push_back(crtTEXid);
+		return selected;
+	case MULTI_SELECT:
+		for(int k = 0; k<ctl->GetItemCount(); k++)
+			if(ctl->GetCheck(k))
+				selected.push_back(k);
+		return selected;
+	case ALL_SELECT:
+		for(int k = 0; k<ctl->GetItemCount(); k++)
+			selected.push_back(k);
+		return selected;
+	}
+	return selected;
+}
+
 void CExRabbitDlg::setDefaultColor(){
 	colorOperatePara.v2Color.clear();
 	colorOperatePara.v2Color.push_back(color(0,0,0,0));
@@ -780,8 +1004,13 @@ void CExRabbitDlg::updateInfo(){
 	CString cstr;
 	cstr = L"文件名："+GetTail(fileNPKname)+L"\r\n";
 	cstr += L"大小："+NumToCStr(no.getSize())+L"字节\r\n";
-	cstr += L"条目数："+NumToCStr(no.count);
-	cstr += (crtIMGid  == -1) ? L"" : ( L"/"  + NumToCStr(crtIMGid));
+	cstr += L"条目数：" + NumToCStr(no.getCount()) + L"\r\n";
+	cstr += L"实体数：" + NumToCStr(no.block.size()) + L"\r\n";
+	cstr += (crtIMGid == -1) ? L"当前条目：未选择" : (L"当前条目：" + (NumToCStr(crtIMGid)) + L"\r\n");
+	long qtCrtIMGid = no.checkQuote(crtIMGid);
+	if(qtCrtIMGid != crtIMGid) {
+		cstr += L"引用自：" + GetTail(StrToCStr(no.content[qtCrtIMGid].comment));
+	}
 	GET_CTRL(CEdit, IDC_EDIT_NPK)->SetWindowText(cstr);
 
 	cstr = IMGsaveAlert ? L"IMG状态：已变动\r\n" : L"IMG状态：未变动\r\n";
@@ -961,7 +1190,7 @@ void CExRabbitDlg::OnNMClickListImg(NMHDR *pNMHDR, LRESULT *pResult)
 				return;
 			}
 			no.IMGreplace(row, io);
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(row, 0, LVIF_IMAGE, NULL, getIconIMG(V2),0,0,0);
+			IMGmodifyIcon(row, V2);
 		}else{
 			io.release();
 			if(!no.IMGextract(row, io)) {
@@ -970,10 +1199,10 @@ void CExRabbitDlg::OnNMClickListImg(NMHDR *pNMHDR, LRESULT *pResult)
 				return;
 			}
 		}
-		fileIMGname = StrToCStr(no.entry[row].comment);
+		fileIMGname = StrToCStr(no.content[row].comment);
 		switchIMGver(io.version);
-		updatePIClist();
-		updateTEXlist();
+		PICloadList();
+		TEXloadList();
 		updateColorTable();
 	}
 	updateInfo();
@@ -1141,10 +1370,10 @@ void CExRabbitDlg::OnLvnKeydownListImg(NMHDR *pNMHDR, LRESULT *pResult)
 	if(row>=0){
 		io.release();
 		no.IMGextract(row, io);
-		fileIMGname = StrToCStr(no.entry[row].comment);
+		fileIMGname = StrToCStr(no.content[row].comment);
 		switchIMGver(io.version);
-		updatePIClist();
-		updateTEXlist();
+		PICloadList();
+		TEXloadList();
 		updateColorTable();
 	}
 	updateInfo();
@@ -1280,10 +1509,9 @@ void CExRabbitDlg::OnDropFiles(HDROP hDropInfo)
 			return;
 		}
 		fileNPKname = fileName;
-		updateIMGlist();
-		if(no.count > 0) {
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(0);
-			crtIMGid = 0;
+		IMGloadList();
+		if(no.getCount() > 0) {
+			IMGsetHighLine(0);
 		}
 	} else if(fmt == L".IMG") {
 		int success = 0;
@@ -1299,9 +1527,9 @@ void CExRabbitDlg::OnDropFiles(HDROP hDropInfo)
 				if(!ioTemp.loadFile(CStrToStr(fileName)))
 					continue;
 				CString path = Slashing(GetTail(fileName));
-				no.IMGpush(ioTemp, CStrToStr(path));
+				no.IMGpush(CStrToStr(path), ioTemp);
 				success++;
-				GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->InsertItem(GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetItemCount(), GetTail(path), getIconIMG(ioTemp.version));
+				IMGaddTerm(-1, ioTemp.version, GetTail(path));
 				ioTemp.release();
 			}
 			updateInfo();
@@ -1312,10 +1540,10 @@ void CExRabbitDlg::OnDropFiles(HDROP hDropInfo)
 		IMGobject ioNew;
 		ioNew.create(V2);
 		if(crtIMGid == -1) {
-			int id = no.count;
-			no.IMGpush(ioNew, "new_img.img");
+			int id = no.getCount();
+			no.IMGpush("new_img.img", ioNew);
 			io = ioNew;
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->InsertItem(id, L"new_img.img", getIconIMG(V2));
+			IMGaddTerm(-1, V2, L"new_img.img");
 			crtIMGid = id;
 		}
 		int success = 0;
@@ -1357,8 +1585,9 @@ void CExRabbitDlg::OnDropFiles(HDROP hDropInfo)
 				}
 				success++;
 				int itemCount = GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->GetItemCount();
-				GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->InsertItem(itemCount, L"", getIconPIC(pi));
-				updatePICterm(itemCount);
+				PICaddTerm(-1, pi);
+				//GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->InsertItem(itemCount, L"", getIconPIC(pi));
+				//updatePICterm(itemCount);
 			}
 		}
 		MessageBox(L"已添加了" + NumToCStr(success) + L"个贴图喵！", L"提示喵");
@@ -1428,95 +1657,82 @@ void CExRabbitDlg::OnStnClickedLogo()
 	MessageBox(s1+s2+s3+s4,L"提示喵！");
 }
 
-int CExRabbitDlg::getIconIMG(IMGversion iv){
-	if(iv == VUDEF)
-		return 0;
-	if(iv == VUKNOWN)
-		return 2;
-	if(iv == VSOUND)
-		return 3;
-	if(iv <= 6){
-		TRACE(NumToCStr(iv));
-		return iv + 3;
-	}
-	return 0;
-}
-int CExRabbitDlg::getIconPIC(colorFormat cf){
-	int iconList[21] = {0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0, 0, 3, 2, 1, 4, 6, 7, 8};
-	if(io.version == V4 || io.version == V5 ||io.version == V6){
-		if(cf == ARGB1555){
-			return 5;
-		}
-	}
-	return iconList[cf%21];
-}
-int CExRabbitDlg::getIconPIC(const PICinfo &pi){
-	int iconList[21] = {0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0, 0, 3, 2, 1, 4, 6, 7, 8};
-	if(io.version == V4 || io.version == V5 ||io.version == V6){
-		if(pi.format == ARGB4444){
-			return 9;
-		}
-		if(pi.format == ARGB1555){
-			if(pi.comp == COMP_NONE && 2 * pi.picSize.area() == pi.dataSize){
-				return iconList[ARGB1555 % 21];
-			}
-			return 5;
-		}
-	}
-	return iconList[pi.format%21];
-}
-void CExRabbitDlg::getSelected(CGoodListCtrl *listCtrl, int highLine, int targetPara, std::vector<int> &selected){
-	selected.clear();
-	int k;
-	switch(targetPara){
-	case SINGLE_SELECT:
-		//单选
-		selected.push_back(highLine);
-		break;
-	case MULTI_SELECT:
-		//多选
-		for(k=0;k<listCtrl->GetItemCount();k++)
-			if(listCtrl->GetCheck(k))
-				selected.push_back(k);
-		break;
-	default:
-		//全选
-		for(k=0;k<listCtrl->GetItemCount();k++)
-			selected.push_back(k);
-		break;
-	}
-}
-std::vector<int> CExRabbitDlg::getSelected(CGoodListCtrl *listCtrl) {
-	std::vector<int> selected;
-	for(int k = 0; k<listCtrl->GetItemCount(); k++)
-		if(listCtrl->GetCheck(k))
-			selected.push_back(k);
-	return selected;
-}
-std::vector<int> CExRabbitDlg::getSelected(UINT listCtrlID, INT selectType) {
-	std::vector<int> selected;
-	CListCtrl *lc = GET_CTRL(CListCtrl, listCtrlID);
-	switch(selectType) {
-	case SINGLE_SELECT:
-		if(listCtrlID == IDC_LIST_IMG)
-			selected.push_back(crtIMGid);
-		if(listCtrlID == IDC_LIST_PIC)
-			selected.push_back(crtPICid);
-		if(listCtrlID == IDC_LIST_DDS)
-			selected.push_back(crtTEXid);
-		return selected;
-	case MULTI_SELECT:
-		for(int k = 0; k<lc->GetItemCount(); k++)
-			if(lc->GetCheck(k))
-				selected.push_back(k);
-		return selected;
-	case ALL_SELECT:
-		for(int k = 0; k<lc->GetItemCount(); k++)
-			selected.push_back(k);
-		return selected;
-	}
-	return selected;
-}
+//int CExRabbitDlg::getIconPIC(colorFormat cf){
+//	int iconList[21] = {0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0, 0, 3, 2, 1, 4, 6, 7, 8};
+//	if(io.version == V4 || io.version == V5 ||io.version == V6){
+//		if(cf == ARGB1555){
+//			return 5;
+//		}
+//	}
+//	return iconList[cf%21];
+//}
+//int CExRabbitDlg::getIconPIC(const PICinfo &pi){
+//	int iconList[21] = {0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0, 0, 3, 2, 1, 4, 6, 7, 8};
+//	if(io.version == V4 || io.version == V5 ||io.version == V6){
+//		if(pi.format == ARGB4444){
+//			return 9;
+//		}
+//		if(pi.format == ARGB1555){
+//			if(pi.comp == COMP_NONE && 2 * pi.picSize.area() == pi.dataSize){
+//				return iconList[ARGB1555 % 21];
+//			}
+//			return 5;
+//		}
+//	}
+//	return iconList[pi.format%21];
+//}
+//void CExRabbitDlg::getSelected(CGoodListCtrl *listCtrl, int highLine, int targetPara, std::vector<int> &selected){
+//	selected.clear();
+//	int k;
+//	switch(targetPara){
+//	case SINGLE_SELECT:
+//		//单选
+//		selected.push_back(highLine);
+//		break;
+//	case MULTI_SELECT:
+//		//多选
+//		for(k=0;k<listCtrl->GetItemCount();k++)
+//			if(listCtrl->GetCheck(k))
+//				selected.push_back(k);
+//		break;
+//	default:
+//		//全选
+//		for(k=0;k<listCtrl->GetItemCount();k++)
+//			selected.push_back(k);
+//		break;
+//	}
+//}
+//std::vector<int> CExRabbitDlg::getSelected(CGoodListCtrl *listCtrl) {
+//	std::vector<int> selected;
+//	for(int k = 0; k<listCtrl->GetItemCount(); k++)
+//		if(listCtrl->GetCheck(k))
+//			selected.push_back(k);
+//	return selected;
+//}
+//std::vector<int> CExRabbitDlg::getSelected(UINT listCtrlID, INT selectType) {
+//	std::vector<int> selected;
+//	CListCtrl *lc = GET_CTRL(CListCtrl, listCtrlID);
+//	switch(selectType) {
+//	case SINGLE_SELECT:
+//		if(listCtrlID == IDC_LIST_IMG)
+//			selected.push_back(crtIMGid);
+//		if(listCtrlID == IDC_LIST_PIC)
+//			selected.push_back(crtPICid);
+//		if(listCtrlID == IDC_LIST_DDS)
+//			selected.push_back(crtTEXid);
+//		return selected;
+//	case MULTI_SELECT:
+//		for(int k = 0; k<lc->GetItemCount(); k++)
+//			if(lc->GetCheck(k))
+//				selected.push_back(k);
+//		return selected;
+//	case ALL_SELECT:
+//		for(int k = 0; k<lc->GetItemCount(); k++)
+//			selected.push_back(k);
+//		return selected;
+//	}
+//	return selected;
+//}
 //////////////////////////////////////////////
 /***********界面按钮处理事件*****************/
 //////////////////////////////////////////////
@@ -1548,29 +1764,30 @@ void CExRabbitDlg::OnBnClickedButtonImgsearch()
 {
 	// TODO: 查询路径名
 	CString str1,str2;
+	auto ctl = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG);
 	GET_CTRL(CEdit, IDC_EDIT_IMGSEARCH)->GetWindowText(str1);
 	int i;
-	for (i = fndIMGid;i<GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetItemCount();i++){
-		str2 = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetItemText(i,0);
+	for(i = fndIMGid; i<ctl->GetItemCount(); i++) {
+		str2 = ctl->GetItemText(i, 0);
 		if(str2.Find(str1) != -1){
 			fndIMGid = i;
-			int nItem = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetTopIndex(); 
+			int nItem = ctl->GetTopIndex();
 			CRect rc;
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetItemRect(nItem, rc, LVIR_BOUNDS);
+			ctl->GetItemRect(nItem, rc, LVIR_BOUNDS);
 			CSize sz(0, (fndIMGid - nItem)*rc.Height());
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->Scroll(sz);
+			ctl->Scroll(sz);
 			return;
 		}
 	}
 	for (i = 0;i<fndIMGid;i++){
-		str2 = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetItemText(i,0);
+		str2 = ctl->GetItemText(i, 0);
 		if(str2.Find(str1) != -1){
 			fndIMGid = i;
-			int nItem = GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetTopIndex(); 
+			int nItem = ctl->GetTopIndex();
 			CRect rc;
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->GetItemRect(nItem, rc, LVIR_BOUNDS);
+			ctl->GetItemRect(nItem, rc, LVIR_BOUNDS);
 			CSize sz(0, (fndIMGid - nItem)*rc.Height());
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->Scroll(sz);
+			ctl->Scroll(sz);
 			return;
 		}
 	}
@@ -1613,8 +1830,8 @@ void CExRabbitDlg::OnMain02()
 			}
 			fileNPKname = fileName;
 			IMGsaveAlert = FALSE;
-			updateIMGlist();
-			if(no.count>0){
+			IMGloadList();
+			if(no.getCount()>0){
 				GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(0);
 				crtIMGid = 0;
 			}
@@ -1643,11 +1860,11 @@ void CExRabbitDlg::OnMain02()
 			IMGsaveAlert = FALSE;
 			fileName = GetTail(fileName);
 			CStrToStr(Slashing(fileName), fn);
-			no.IMGpush(io, fn);
+			no.IMGpush(fn, io);
 			switchIMGver(io.version);
-			updateIMGlist();
-			updatePIClist();
-			updateTEXlist();
+			IMGloadList();
+			PICloadList();
+			TEXloadList();
 			updateColorTable();
 			updateInfo();
 			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(0);
@@ -1789,9 +2006,9 @@ void CExRabbitDlg::OnModify01()
 	MessageBox(L"IMG已保存完毕喵！",L"提示喵！");
 	IMGsaveAlert = FALSE;
 	updateInfo();
-	updateIMGlist();
-	updatePIClist();
-	updateTEXlist();
+	IMGloadList();
+	PICloadList();
+	TEXloadList();
 	updateColorTable();
 	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(crtIMGid);
 }
@@ -1802,11 +2019,11 @@ void CExRabbitDlg::OnModify02()
 	OnModify01();
 	CString defExt = _T("IMG文件(*.IMG)|*.IMG");
 	CString extFilter = _T("IMG文件(*.IMG)|*.IMG||");
-	CFileDialog dlg(FALSE, defExt, Underlining(StrToCStr(no.entry[crtIMGid].comment)), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
+	CFileDialog dlg(FALSE, defExt, Underlining(StrToCStr(no.content[crtIMGid].comment)), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,extFilter, this);
 	CString fileName1;
 	if(dlg.DoModal() == IDOK){
 		fileName1 = dlg.GetPathName();
-		if(no.extract(crtIMGid, CStrToStr(fileName1))){
+		if(no.extractFile(crtIMGid, CStrToStr(fileName1))){
 			MessageBox(_T("保存完毕喵！"),L"提示喵");
 		}else{
 			MessageBox(_T("保存失败喵！"),L"提示喵");
@@ -1814,7 +2031,7 @@ void CExRabbitDlg::OnModify02()
 	}
 }
 
-DefineThreadFunc(CExRabbitDlg, Draw, BOOL) {
+void CExRabbitDlg::Draw(BOOL para) {
 	if(drawing)
 		return;
 	//TRACE("draw\n");
@@ -2054,7 +2271,7 @@ DefineThreadFunc(CExRabbitDlg, Draw, BOOL) {
 	canvas.destory();
 }
 
-DefineThreadFunc(CExRabbitDlg, DrawColor, PVOID) {
+void CExRabbitDlg::DrawColor(PVOID para) {
 	CHECK_VALID(!drawingColor);
 	drawingColor = 1;
 	int i, j;
@@ -2154,23 +2371,23 @@ DefineThreadFunc(CExRabbitDlg, DrawColor, PVOID) {
 	ReleaseDC(pDC);
 	drawingColor = 0;
 }
-DefineThreadFunc(CExRabbitDlg, Play, PVOID) {
+void CExRabbitDlg::Play(PVOID para) {
 	int localFrame = 0;
 	while(TRUE) {
 		if(playing) {
-			std::vector<int> frameList;
-			getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC), 0, MULTI_SELECT, frameList);
+			queue frameList = PICgetChecked(MULTI_SELECT);
 			if(frameList.size() == 0) {
-				getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC), 0, ALL_SELECT, frameList);
+				frameList = PICgetChecked(ALL_SELECT);
 			}
 			for(localFrame = 0; localFrame<frameList.size(); localFrame++) {
 				int row = frameList[localFrame];
 				if(row >= io.indexCount)
 					break;
-				GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemState(row - 1, 0, LVIS_FOCUSED | LVIS_SELECTED);
-				GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemState(row, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);
-				GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetSelectionMark(row);
-				crtPICid = row;
+				PICsetHighLine(row);
+				//GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemState(row - 1, 0, LVIS_FOCUSED | LVIS_SELECTED);
+				//GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemState(row, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);
+				//GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetSelectionMark(row);
+				//crtPICid = row;
 				updateInfo();
 				draw();
 				Sleep(100);
@@ -2182,7 +2399,7 @@ DefineThreadFunc(CExRabbitDlg, Play, PVOID) {
 		Sleep(10);
 	}
 }
-DefineThreadFunc(CExRabbitDlg, Lazy, PVOID) {
+void CExRabbitDlg::Lazy(PVOID para) {
 	//延时线程
 	while(m_hWnd) {
 		Sleep(10);
@@ -2560,7 +2777,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 			canvasOperatePara.currentCursor = 2;
 			canvasOperatePara.endPoint = canvasOperatePara.oldBasePoint + (mousePt - canvasOperatePara.startPoint)/drawPara.zoomRate;
 			io.PICsetInfoPara(crtPICid, 1, &canvasOperatePara.endPoint);
-			updatePICterm(crtPICid);
+			PICupdateTerm(crtPICid);
 			draw();
 			break;
 		case CANVAS_MOUSE_LEFT_RELEASE:
@@ -2570,7 +2787,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 		case CANVAS_MOUSE_RIGHT_PRESS:
 			canvasOperatePara.endPoint= mousePt - drawPara.basePoint/drawPara.zoomRate;
 			io.PICsetInfoPara(crtPICid, 1, &canvasOperatePara.endPoint);
-			updatePICterm(crtPICid);
+			PICupdateTerm(crtPICid);
 			updateModified();
 			draw();
 			break;
@@ -2753,7 +2970,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 				}
 				pi.basePt = point(x1new, y1new);
 				io.PICreplace(crtPICid, pi, s);
-				updatePICterm(crtPICid);
+				PICupdateTerm(crtPICid);
 				s.release();
 				matNew.destory();
 				matOld.destory();
@@ -3226,7 +3443,7 @@ void CExRabbitDlg::OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, p
 						io.PICpreprocessIndexImage(mat, s, pi);
 					}
 					io.PICreplace(crtPICid, pi, s);
-					updatePICterm(crtPICid);
+					PICupdateTerm(crtPICid);
 					s.release();
 					mat.destory();
 					draw();
@@ -3620,10 +3837,10 @@ void CExRabbitDlg::OnMenuPictureInsertPatch2(){
 	// TODO: 在此添加命令处理程序代码
 	OnMenuPictureInsertPatch();
 }
-DefineThreadFunc(CExRabbitDlg, PictureInsert, ModalInsertPicture::OUTPUT) {
+void CExRabbitDlg::PictureInsert(ModalInsertPicture::OUTPUT para) {
 	processing = 1;
 	int insertPos;
-	std::vector<int> replacePos;
+	queue replacePos;
 	image mPic;
 	stream sPic;
 	PICinfo pInfo;
@@ -3634,7 +3851,7 @@ DefineThreadFunc(CExRabbitDlg, PictureInsert, ModalInsertPicture::OUTPUT) {
 		replacePos.push_back(crtPICid);
 		break;
 	case 2:
-		getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC), 0, MULTI_SELECT, replacePos);
+		replacePos = PICgetChecked(MULTI_SELECT);
 		break;
 	case 3:
 		insertPos = crtPICid;
@@ -3701,12 +3918,12 @@ DefineThreadFunc(CExRabbitDlg, PictureInsert, ModalInsertPicture::OUTPUT) {
 			bar.setInfo(L"正在插入第" + NumToCStr(i) + L"帧喵……", i);
 			bar.setMax(replacePos.size() - 1);
 			io.PICreplace(replacePos[i], pInfo, sPic);
-			updatePICterm(replacePos[i]);
+			PICupdateTerm(replacePos[i]);
 		}
 		bar.hide();
 	} else {
 		io.PICinsert(insertPos, pInfo, sPic);
-		updatePIClist();
+		PICloadList();
 	}
 	sPic.release();
 	mPic.destory();
@@ -3726,7 +3943,7 @@ void CExRabbitDlg::OnMenuPictureInsertPatch(){
 		StartThreadFunc(PictureInsertPatch, dlg.out);
 	}
 }
-DefineThreadFunc(CExRabbitDlg, PictureInsertPatch, ModalInsertPicturePatch::OUTPUT) {
+void CExRabbitDlg::PictureInsertPatch(ModalInsertPicturePatch::OUTPUT para) {
 	processing = 1;
 	image mPic;
 	stream sPic;
@@ -3812,7 +4029,7 @@ DefineThreadFunc(CExRabbitDlg, PictureInsertPatch, ModalInsertPicturePatch::OUTP
 		}
 		bar.hide();
 	}
-	updatePIClist();
+	PICloadList();
 	processing = 0;
 	bar.hide();
 	updateInfo();
@@ -3824,9 +4041,8 @@ void CExRabbitDlg::OnMenuPictureDelete(){
 	// TODO: 删除帧(&R)
 	int i, row = crtPICid;
 	io.PICremove(row);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->DeleteItem(row);
-	for(i=0;i<GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->GetItemCount();i++)
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(i,0,NumToCStr(i));//更新序号
+	PICdeleteTerm(row);
+	PICrenumber();
 	updateModified();
 	updateInfo();
 }
@@ -3838,11 +4054,10 @@ void CExRabbitDlg::OnMenuPictureDeletePatch(){
 	for(i=io.indexCount-1;i>=0;i--){
 		if(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->GetCheck(i)){
 			io.PICremove(i);
-			GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->DeleteItem(i);
+			PICdeleteTerm(i);
 		}
 	}
-	for(i=0;i<GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->GetItemCount();i++)
-		GET_CTRL(CGoodListCtrl, IDC_LIST_PIC)->SetItemText(i,0,NumToCStr(i));//更新序号
+	PICrenumber();
 	updateModified();
 	updateInfo();
 }
@@ -3861,10 +4076,9 @@ void CExRabbitDlg::OnMenuPictureAxisModify(){
 		StartThreadFunc(PictureAxisModify, dlg.out);
 	}
 }
-DefineThreadFunc(CExRabbitDlg, PictureAxisModify, ModalPictureParameter::OUTPUT) {
+void CExRabbitDlg::PictureAxisModify(ModalPictureParameter::OUTPUT para) {
 	processing = 1;
-	std::vector<int> targetList;
-	getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC), crtPICid, para.target - 1, targetList);
+	queue targetList = PICgetChecked((enumSelectType)(para.target - 1));
 	bar.show(targetList.size()-1);
 	for(int i = 0;i<targetList.size();i++){
 		int id = targetList[i];
@@ -3881,7 +4095,7 @@ DefineThreadFunc(CExRabbitDlg, PictureAxisModify, ModalPictureParameter::OUTPUT)
 				para.enable[0] ? para.para[0] : 0,
 				para.enable[1] ? para.para[1] : 0);
 			io.PICsetInfoPara(id, 1, &newPt);
-			updatePICterm(id);
+			PICupdateTerm(id);
 			break;
 		case 2:
 			//统一基准点
@@ -3889,7 +4103,7 @@ DefineThreadFunc(CExRabbitDlg, PictureAxisModify, ModalPictureParameter::OUTPUT)
 				para.enable[0] ? para.para[0] : pInfo.basePt.X,
 				para.enable[1] ? para.para[1] : pInfo.basePt.Y);
 			io.PICsetInfoPara(id, 1, &newPt);
-			updatePICterm(id);
+			PICupdateTerm(id);
 			break;
 		case 3:
 			//对齐坐标
@@ -3897,7 +4111,7 @@ DefineThreadFunc(CExRabbitDlg, PictureAxisModify, ModalPictureParameter::OUTPUT)
 				para.enable[0] ? para.para[0] : pInfo.frmSize.W,
 				para.enable[1] ? para.para[1] : pInfo.frmSize.H);
 			io.PICsetInfoPara(id, 2, &newSz);
-			updatePICterm(id);
+			PICupdateTerm(id);
 			break;
 		}
 	}
@@ -3927,10 +4141,29 @@ void CExRabbitDlg::OnMenuPictureCanvas(){
 	}
 }
 
-DefineThreadFunc(CExRabbitDlg, PictureCanvas, ModalAdjustCanvas::OUTPUT) {
+void CExRabbitDlg::OnMenuPictureStretch() {
+	// TODO:  在此添加命令处理程序代码
+	if(io.version == V5) {
+		MessageBox(L"此功能不适用于V5喵！", L"提示喵");
+		return;
+	}
+	ModalPictureStretch dlg;
+	PICinfo pi;
+	io.PICgetTotalBound(dlg.in.imgX1, dlg.in.imgX2, dlg.in.imgY1, dlg.in.imgY2);
+	io.PICgetInfo(io.linkFind(crtPICid), pi);
+	dlg.in.curX1 = pi.basePt.X;
+	dlg.in.curX2 = pi.basePt.X + pi.picSize.W - 1;
+	dlg.in.curY1 = pi.basePt.Y;
+	dlg.in.curY2 = pi.basePt.Y + pi.picSize.H - 1;
+	if(IDOK == dlg.DoModal()) {
+		StartThreadFunc(PictureStretch, dlg.out);
+	}
+}
+
+
+void CExRabbitDlg::PictureCanvas(ModalAdjustCanvas::OUTPUT para) {
 	processing = 1;
-	std::vector<int> targetList;
-	getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC), crtPICid, para.target - 1, targetList);
+	queue targetList = PICgetChecked((enumSelectType)(para.target - 1)); 
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
 		int id = targetList[i];
@@ -3967,12 +4200,13 @@ DefineThreadFunc(CExRabbitDlg, PictureCanvas, ModalAdjustCanvas::OUTPUT) {
 				pInfo.basePt = pInfo.basePt - point(
 					para.enable[0] ? para.para[0] : 0,
 					para.enable[1] ? para.para[1] : 0);
+				
 				io.PICpreprocess(mPic, sPic, pInfo, pInfo.format);
 				io.PICreplace(id, pInfo, sPic);
 				mPic.destory();
 				sPic.release();
 			}
-			updatePICterm(id);
+			PICupdateTerm(id);
 			break;
 		case 2:
 			//裁切
@@ -4005,7 +4239,7 @@ DefineThreadFunc(CExRabbitDlg, PictureCanvas, ModalAdjustCanvas::OUTPUT) {
 				mPic.destory();
 				sPic.release();
 			}
-			updatePICterm(id);
+			PICupdateTerm(id);
 			break;
 		case 3:
 			//对齐坐标
@@ -4058,7 +4292,7 @@ DefineThreadFunc(CExRabbitDlg, PictureCanvas, ModalAdjustCanvas::OUTPUT) {
 				mNew.destory();
 				sPic.release();
 			}
-			updatePICterm(id);
+			PICupdateTerm(id);
 			break;
 		case 4:
 			//修整
@@ -4097,7 +4331,132 @@ DefineThreadFunc(CExRabbitDlg, PictureCanvas, ModalAdjustCanvas::OUTPUT) {
 				mPic.destory();
 				sPic.release();
 			}
-			updatePICterm(id);
+			PICupdateTerm(id);
+			break;
+		}
+	}
+	updateModified();
+	draw();
+	processing = 0;
+	bar.hide();
+}
+
+
+void CExRabbitDlg::PictureStretch(ModalPictureStretch::__output para) {
+	processing = 1;
+	queue targetList = PICgetChecked(para.target);
+	bar.show(targetList.size() - 1);
+	for(int i = 0; i < 4; i++) {
+		if(!para.enable[i]) {
+			para.para[i] = 0;
+		}
+	}
+	for(int i = 0; i<targetList.size(); i++) {
+		int id = targetList[i];
+		bar.setInfo(L"正在处理第" + NumToCStr(id) + L"帧喵……", i);
+		PICinfo pInfo;
+		image mPic;
+		stream sPic;
+		io.PICgetInfo(id, pInfo);
+		CHECK_VALID_CONTINUE(pInfo.format != LINK);
+		switch(para.mode) {
+		case ModalPictureStretch::PIXEL_MODE:
+			//像素
+			if(io.version == V4 || io.version == V6) {
+				io.PICextractIndexImage(id, mPic);
+				long oriWidth = mPic.width;
+				long oriHeight = mPic.height;
+				long offWidth = para.para[0];
+				long offHeight = para.para[1];
+				long modWidth = oriWidth + para.para[0] + para.para[2];
+				long modHeight = oriHeight + para.para[1] + para.para[3];
+				CHECK_VALID_CONTINUE(modWidth > 0 && modHeight > 0);
+				image mDest;
+				stream sDest;
+				mDest.create(modHeight, modWidth);
+				mDest.fill(0);
+				double wRatio = (double)modWidth / oriWidth;
+				double hRatio = (double)modHeight / oriHeight;
+				mPic.zoom(wRatio, hRatio);
+				mDest.putBack(mPic);
+				pInfo.basePt = pInfo.basePt - point(offWidth, offHeight);
+				io.PICpreprocessIndexImage(mDest, sPic, pInfo);
+				io.PICreplace(id, pInfo, sPic);
+				mPic.destory();
+				sPic.release();
+			} else {
+				io.PICextract(id, mPic);
+				long oriWidth = mPic.width;
+				long oriHeight = mPic.height;
+				long offWidth = para.para[0];
+				long offHeight = para.para[1];
+				long modWidth = oriWidth + para.para[0] + para.para[2];
+				long modHeight = oriHeight + para.para[1] + para.para[3];
+				CHECK_VALID_CONTINUE(modWidth > 0 && modHeight > 0);
+				image mDest;
+				stream sDest;
+				mDest.create(modHeight, modWidth);
+				mDest.fill(0);
+				double wRatio = modWidth / oriWidth;
+				double hRatio = modHeight / oriHeight;
+				mPic.zoom(wRatio, hRatio);
+				mDest.putBack(mPic);
+				pInfo.basePt = pInfo.basePt - point(offWidth, offHeight);
+				io.PICpreprocess(mDest, sPic, pInfo);
+				io.PICreplace(id, pInfo, sPic);
+				mPic.destory();
+				sPic.release();
+			}
+			PICupdateTerm(id);
+			break;
+		case ModalPictureStretch::RATIO_MODE:
+			//像素
+			if(io.version == V4 || io.version == V6) {
+				io.PICextractIndexImage(id, mPic);
+				long oriWidth = mPic.width;
+				long oriHeight = mPic.height;
+				long offWidth = para.para[0];
+				long offHeight = para.para[1];
+				long modWidth = oriWidth * (1 + para.para[0] * .01f + para.para[2] * .01f);
+				long modHeight = oriHeight * (1+ para.para[1] * .01f + para.para[3] * .01f);
+				CHECK_VALID_CONTINUE(modWidth > 0 && modHeight > 0);
+				image mDest;
+				stream sDest;
+				mDest.create(modHeight, modWidth);
+				mDest.fill(0);
+				double wRatio = (double)modWidth / oriWidth;
+				double hRatio = (double)modHeight / oriHeight;
+				mPic.zoom(wRatio, hRatio);
+				mDest.putBack(mPic);
+				pInfo.basePt = pInfo.basePt - point(offWidth, offHeight);
+				io.PICpreprocessIndexImage(mDest, sPic, pInfo);
+				io.PICreplace(id, pInfo, sPic);
+				mPic.destory();
+				sPic.release();
+			} else {
+				io.PICextract(id, mPic);
+				long oriWidth = mPic.width;
+				long oriHeight = mPic.height;
+				long offWidth = para.para[0];
+				long offHeight = para.para[1];
+				long modWidth = oriWidth * (1 + para.para[0] * .01f + para.para[2] * .01f);
+				long modHeight = oriHeight * (1 + para.para[1] * .01f + para.para[3] * .01f);
+				CHECK_VALID_CONTINUE(modWidth > 0 && modHeight > 0);
+				image mDest;
+				stream sDest;
+				mDest.create(modHeight, modWidth);
+				mDest.fill(0);
+				double wRatio = modWidth / oriWidth;
+				double hRatio = modHeight / oriHeight;
+				mPic.zoom(wRatio, hRatio);
+				mDest.putBack(mPic);
+				pInfo.basePt = pInfo.basePt - point(offWidth, offHeight);
+				io.PICpreprocess(mDest, sPic, pInfo);
+				io.PICreplace(id, pInfo, sPic);
+				mPic.destory();
+				sPic.release();
+			}
+			PICupdateTerm(id);
 			break;
 		}
 	}
@@ -4119,10 +4478,9 @@ void CExRabbitDlg::OnMenuPictureClear(){
 	}
 }
 
-DefineThreadFunc(CExRabbitDlg, PictureClear, ModalClearPicture::OUTPUT) {
+void CExRabbitDlg::PictureClear(ModalClearPicture::OUTPUT para) {
 	processing = 1;
-	std::vector<int> targetList;
-	getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC), crtPICid, para.target - 1, targetList);
+	queue targetList = PICgetChecked((enumSelectType)(para.target - 1));
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
 		int id = targetList[i];
@@ -4148,7 +4506,7 @@ DefineThreadFunc(CExRabbitDlg, PictureClear, ModalClearPicture::OUTPUT) {
 				mPic.destory();
 				sPic.release();
 			}
-			updatePICterm(id);
+			PICupdateTerm(id);
 			break;
 		case 2:
 			//保留坐标，画布缩为0,0
@@ -4165,7 +4523,7 @@ DefineThreadFunc(CExRabbitDlg, PictureClear, ModalClearPicture::OUTPUT) {
 				mPic.destory();
 				sPic.release();
 			}
-			updatePICterm(id);
+			PICupdateTerm(id);
 			break;
 		}
 	}
@@ -4186,10 +4544,9 @@ void CExRabbitDlg::OnMenuPictureLoseblack(){
 		StartThreadFunc(PictureLoseBlack, dlg.out);
 	}
 }
-DefineThreadFunc(CExRabbitDlg, PictureLoseBlack, ModalLoseBlackPicture::OUTPUT) {
+void CExRabbitDlg::PictureLoseBlack(ModalLoseBlackPicture::OUTPUT para) {
 	processing = 1;
-	std::vector<int> targetList;
-	getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC), crtPICid, para.target - 1, targetList);
+	queue targetList = PICgetChecked((enumSelectType)(para.target - 1));
 	if(io.version == V4 || io.version == V6) {
 		color clr;
 		bar.show(targetList.size() - 1);
@@ -4240,13 +4597,12 @@ void CExRabbitDlg::OnMenuPictureGradient(){
 	}
 }
 
-DefineThreadFunc(CExRabbitDlg, PictureGradient, ModalGradient::OUTPUT) {
+void CExRabbitDlg::PictureGradient(ModalGradient::OUTPUT para) {
 	processing = 1;
 	colorList keyColorList;
 	keyColorList.push_back(para.keyColor2);
 	keyColorList.push_back(para.keyColor1);
-	std::vector<int> targetList;
-	getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC), crtPICid, para.target - 1, targetList);
+	queue targetList = PICgetChecked((enumSelectType)(para.target - 1));
 	if(io.version == V2) {
 		bar.show(targetList.size() - 1);
 		for(int i = 0; i<targetList.size(); i++) {
@@ -4311,10 +4667,9 @@ void CExRabbitDlg::OnMenuPictureColor(){
 	}
 }
 
-DefineThreadFunc(CExRabbitDlg, PictureColor, ModalAdjustColor::OUTPUT) {
+void CExRabbitDlg::PictureColor(ModalAdjustColor::OUTPUT para) {
 	processing = 1;
-	std::vector<int> targetList;
-	getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC), crtPICid, para.target - 1, targetList);
+	queue targetList = PICgetChecked((enumSelectType)(para.target - 1));
 	//V2处理线程
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
@@ -4367,10 +4722,9 @@ void CExRabbitDlg::OnMenuPictureMark(){
 	}
 }
 
-DefineThreadFunc(CExRabbitDlg, PictureMark, ModalAddMark::OUTPUT) {
+void CExRabbitDlg::PictureMark(ModalAddMark::OUTPUT para) {
 	processing = 1;
-	std::vector<int> targetList;
-	getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC), crtPICid, para.target - 1, targetList);
+	queue targetList = PICgetChecked((enumSelectType)(para.target - 1));
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
 		int id = targetList[i];
@@ -4416,7 +4770,7 @@ DefineThreadFunc(CExRabbitDlg, PictureMark, ModalAddMark::OUTPUT) {
 				markString += NumToCStr(id);
 			}
 			if(subString.Left(1) == L"I") {
-				markString += GetTail(StrToCStr(no.entry[crtIMGid].comment));
+				markString += GetTail(StrToCStr(no.content[crtIMGid].comment));
 			}
 			if(subString.Left(1) == L"X") {
 				markString += NumToCStr(pInfo.basePt.X);
@@ -4455,7 +4809,7 @@ DefineThreadFunc(CExRabbitDlg, PictureMark, ModalAddMark::OUTPUT) {
 		oldPic.destory();
 		newPic.destory();
 		sPic.release();
-		updatePICterm(id);
+		PICupdateTerm(id);
 	}
 	updateModified();
 	updateColorTable();
@@ -4475,10 +4829,9 @@ void CExRabbitDlg::OnMenuPictureGetPngPatch(){
 	StartThreadFunc(PictureGetPNG, MULTI_SELECT);
 }
 
-DefineThreadFunc(CExRabbitDlg, PictureGetPNG, INT) {
+void CExRabbitDlg::PictureGetPNG(enumSelectType para) {
 	processing = 1;
-	std::vector<int> targetList;					//待转换目标列表
-	getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC), crtPICid, para, targetList);
+	queue targetList = PICgetChecked(para);
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
 		bar.setInfo(L"正在提取第" + NumToCStr(targetList[i]) + L"帧喵……", i);
@@ -4502,10 +4855,9 @@ void CExRabbitDlg::OnMenuPictureGetGIF(){
 	StartThreadFunc(PictureGetGIF, nullptr);
 }
 
-DefineThreadFunc(CExRabbitDlg, PictureGetGIF, PVOID){
+void CExRabbitDlg::PictureGetGIF(PVOID para){
 	processing = 1;
-	std::vector<int> targetList;					//待转换目标列表
-	getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_PIC), crtPICid, MULTI_SELECT, targetList);
+	queue targetList = PICgetChecked(MULTI_SELECT);
 	if(targetList.size() < 1){
 		MessageBox(L"请勾选一些帧喵。",L"提示喵");
 		processing = 0;
@@ -4542,7 +4894,7 @@ DefineThreadFunc(CExRabbitDlg, PictureGetGIF, PVOID){
 	}
 	bar.setInfo(L"正在生成GIF喵……",targetList.size());
 	KoishiImageTool::GIF::GIFobject go;
-	go.input(matList, profile.miniSecPerFrame, no.entry[crtIMGid].comment, targetList);
+	go.input(matList, profile.miniSecPerFrame);
 	CString fileName = profile.getOutputPath(fileNPKname,fileIMGname)+NumToCStr(targetList[0])+L".GIF";
 	go.makeFile(CStrToStr(fileName));
 	processing = 0;
@@ -4591,7 +4943,7 @@ void CExRabbitDlg::OnMenuTextureInsert2(){
 	}
 }
 
-DefineThreadFunc(CExRabbitDlg, TextureInsert, ModalInsertTexture::OUTPUT) {
+void CExRabbitDlg::TextureInsert(ModalInsertTexture::OUTPUT para) {
 	processing = 1;
 	int insertPos;
 	int replacePos;
@@ -4643,7 +4995,7 @@ DefineThreadFunc(CExRabbitDlg, TextureInsert, ModalInsertTexture::OUTPUT) {
 		}
 		sOrigin.release();
 		sCompressed.release();
-		updateTEXlist();
+		TEXloadList();
 	} else {
 		//转化为PNG再插入
 		switch(para.inputFormat) {
@@ -4669,7 +5021,7 @@ DefineThreadFunc(CExRabbitDlg, TextureInsert, ModalInsertTexture::OUTPUT) {
 			tInfo.ID = insertPos;
 			io.TEXinsert(insertPos, tInfo, sPic);
 		}
-		updateTEXlist();
+		TEXloadList();
 	}
 	sPic.release();
 	mPic.destory();
@@ -4723,10 +5075,9 @@ void CExRabbitDlg::OnMenuTextureGetOriginPatch(){
 	// TODO: 在此添加命令处理程序代码
 	StartThreadFunc(TextureGetOrigin, MULTI_SELECT);
 }
-DefineThreadFunc(CExRabbitDlg, TextureGetPNG, INT) {
+void CExRabbitDlg::TextureGetPNG(enumSelectType para) {
 	processing = 1;
-	std::vector<int> targetList;					//待转换目标列表
-	getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_DDS), crtTEXid, para, targetList);
+	queue targetList  = TEXgetChecked(para);
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
 		bar.setInfo(L"正在提取第" + NumToCStr(targetList[i]) + L"纹理集喵……", i);
@@ -4741,10 +5092,9 @@ DefineThreadFunc(CExRabbitDlg, TextureGetPNG, INT) {
 	bar.hide();
 }
 
-DefineThreadFunc(CExRabbitDlg, TextureGetOrigin, INT) {
+void CExRabbitDlg::TextureGetOrigin(enumSelectType para) {
 	processing = 1;
-	std::vector<int> targetList;					//待转换目标列表
-	getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_DDS), crtTEXid, para, targetList);
+	queue targetList = TEXgetChecked(para);
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
 		bar.setInfo(L"正在提取第" + NumToCStr(targetList[i]) + L"纹理集喵……", i);
@@ -4775,22 +5125,22 @@ void CExRabbitDlg::OnToolAvatar(){
 }
 
 
-void CExRabbitDlg::OnToolNpkDict(){
-	MOVEW(toolDict);
-	toolDict.ShowWindow(SW_SHOW);
-	toolDict.contentDir = profile.getSupportPath();
-	toolDict.resourceDir = profile.getNPKdictPath();
-}
-
-
-void CExRabbitDlg::OnToolImgSearch(){
-	MOVEW(toolIMGSearch);
-	toolIMGSearch.ShowWindow(SW_SHOW);
+void CExRabbitDlg::OnToolNpkDict() {
+	ToolNPKsource dlg;
+	dlg.context = this;
+	dlg.DoModal();
 }
 
 
 void CExRabbitDlg::OnToolDownload(){
-	ToolDownload(this).DoModal();
+	ToolDownloadServerSelection dlg;
+	if(IDOK == dlg.DoModal()) {
+		ToolDownload dlg1;
+		dlg1.context = this;
+		dlg1.serverInfo = dlg.serverInfo;
+		dlg1.folderName = profile.getDownloadPath(dlg.serverInfo.region + L"-" + dlg.serverInfo.name);
+		dlg1.DoModal();
+	}
 }
 
 
@@ -4984,7 +5334,7 @@ void CExRabbitDlg::OnMenuColorTableExtractAllFrame()
 	}
 }
 
-DefineThreadFunc(CExRabbitDlg, PickColorFromFrame, PVOID) {
+void CExRabbitDlg::PickColorFromFrame(PVOID para) {
 	image mat;
 	palette pal;
 	colorList clrList;
@@ -5043,7 +5393,7 @@ DefineThreadFunc(CExRabbitDlg, PickColorFromFrame, PVOID) {
 	bar.hide();
 }
 
-DefineThreadFunc(CExRabbitDlg, PickColorFromImage, PVOID){
+void CExRabbitDlg::PickColorFromImage(PVOID para){
 	palette pal;
 	colorList clrList;
 	queue clrCount;
@@ -5147,19 +5497,19 @@ void CExRabbitDlg::OnClose() {
 	CDialogEx::OnClose();
 }
 
-DefineThreadFunc(CExRabbitDlg, ImageInsertEmpty, DWORD) {
+void CExRabbitDlg::ImageInsertEmpty(DWORD para) {
 	processing = 1;
-	int insertPos = (para) ? no.count : crtIMGid;
+	int insertPos = (para) ? no.getCount() : crtIMGid;
 	IMGobject newIO;
 	newIO.create(V2);
-	no.IMGinsert(insertPos, newIO, "new_img.img");
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->InsertItem(insertPos, L"new_img.img", getIconIMG(V2));
+	no.IMGinsert(insertPos, "new_img.img", newIO);
+	IMGaddTerm(insertPos, V2, L"new_img.img");
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExRabbitDlg, ImageInsertIMG, DWORD) {
+void CExRabbitDlg::ImageInsertIMG(DWORD para) {
 	processing = 1;
-	int insertPos = (para) ? no.count : crtIMGid;
+	int insertPos = (para) ? no.getCount() : crtIMGid;
 	CFileDialog dlg(true, L"IMG文件(*.IMG)|*.IMG", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, L"IMG文件(*.IMG)|*.IMG||", this);
 	TinySetName dlgTiny(this);
 	if(IDOK != dlg.DoModal()) {
@@ -5178,14 +5528,14 @@ DefineThreadFunc(CExRabbitDlg, ImageInsertIMG, DWORD) {
 		processing = 0;
 		return;
 	}
-	no.IMGinsert(insertPos, newIO, CStrToStr(dlgTiny.name));
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->InsertItem(insertPos, GetTail(dlgTiny.name), getIconIMG(newIO.version));
+	no.IMGinsert(insertPos, CStrToStr(dlgTiny.name), newIO);
+	IMGaddTerm(insertPos, newIO.version, GetTail(dlgTiny.name));
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExRabbitDlg, ImageInsertNPK, DWORD) {
+void CExRabbitDlg::ImageInsertNPK(DWORD para) {
 	processing = 1;
-	int insertPos = (para) ? no.count : crtIMGid;
+	int insertPos = (para) ? no.getCount() : crtIMGid;
 	int conflictMethod = 1;	// 0 替换 1 跳过(默认) 2 保留 3 保留并标记
 	BOOL noAlarm = FALSE;		//不再提示
 	CFileDialog dlg(true, L"NPK文件(*.NPK)|*.NPK", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, L"NPK文件(*.NPK)|*.NPK||", this);
@@ -5194,31 +5544,31 @@ DefineThreadFunc(CExRabbitDlg, ImageInsertNPK, DWORD) {
 		return;
 	}
 	CString fileName = dlg.GetPathName();
-	NPKobject newNO;
-	if(!newNO.loadFile(CStrToStr(fileName))) {
+	NPKobject newNo;
+	if(!newNo.loadFile(CStrToStr(fileName))) {
 		MessageBox(L"这个NPK文件无法识别喵！", L"提示喵");
 		processing = 0;
 		return;
 	}
-	bar.show(newNO.count);
+	bar.show(newNo.getCount());
 	int countFail = 0;
 	int countSkip = 0;
 	int countReplace = 0;
 	int countSuccess = 0;
 	int conflict = -1;		//查找冲突项
-	for(int i = 0; i < newNO.count; i++) {
-		bar.setInfo(L"当前插入" + GetTail(StrToCStr(newNO.entry[i].comment)) + L"喵……(成功" + NumToCStr(countSuccess) + L"个,跳过" + NumToCStr(countSkip) + L"个,替换" + NumToCStr(countReplace) + L"个,失败" + NumToCStr(countFail) + L"个)", i);
+	for(int i = 0; i < newNo.getCount(); i++) {
+		bar.setInfo(L"当前插入" + GetTail(StrToCStr(newNo.content[i].comment)) + L"喵……(成功" + NumToCStr(countSuccess) + L"个,跳过" + NumToCStr(countSkip) + L"个,替换" + NumToCStr(countReplace) + L"个,失败" + NumToCStr(countFail) + L"个)", i);
 		IMGobject newIO;
-		if(!newNO.IMGextract(i, newIO)) {
+		if(!newNo.IMGextract(i, newIO)) {
 			countFail++;
 			continue;
 		}
 		//检测冲突项
 		if(TRUE) {
 			conflict = -1;
-			for(int j = 0; j<no.count; j++) {
-				CString s1 = GetTail(StrToCStr(newNO.entry[i].comment));
-				CString s2 = GetTail(StrToCStr(no.entry[j].comment));
+			for(int j = 0; j<no.getCount(); j++) {
+				CString s1 = GetTail(StrToCStr(newNo.content[i].comment));
+				CString s2 = GetTail(StrToCStr(no.content[j].comment));
 				if(s1 == s2) {
 					conflict = j;
 					break;
@@ -5227,13 +5577,13 @@ DefineThreadFunc(CExRabbitDlg, ImageInsertNPK, DWORD) {
 		}
 		if(!noAlarm && conflict > 0) {
 			ModalConflictWarning dlgWarning(this);
-			dlgWarning.conflictName = StrToCStr(newNO.entry[i].comment);
+			dlgWarning.conflictName = StrToCStr(newNo.content[i].comment);
 			dlgWarning.DoModal();
 			noAlarm = dlgWarning.noAlarm;
 			conflictMethod = dlgWarning.method;
 		}
 		if(conflict < 0) {
-			no.IMGinsert(insertPos + countSuccess, newIO, newNO.entry[i].comment);
+			no.IMGinsert(insertPos + countSuccess, newNo.content[i].comment, newIO);
 			countSuccess++;
 		} else {
 			switch(conflictMethod) {
@@ -5248,26 +5598,26 @@ DefineThreadFunc(CExRabbitDlg, ImageInsertNPK, DWORD) {
 				break;
 			case 2:
 				//保留
-				no.IMGinsert(insertPos + countSuccess, newIO, newNO.entry[i].comment);
+				no.IMGinsert(insertPos + countSuccess, newNo.content[i].comment, newIO);
 				countSuccess++;
 				break;
 			case 3:
 				//保留并改名
-				no.IMGinsert(insertPos + countSuccess, newIO, newNO.entry[i].comment + "(new)");
+				no.IMGinsert(insertPos + countSuccess, newNo.content[i].comment + "(new)", newIO);
 				countSuccess++;
 				break;
 			}
 		}
 	}
-	MessageBox(L"导入完毕喵！总" + NumToCStr(newNO.count) + L"个,添加" + NumToCStr(countSuccess) + L"个,跳过" + NumToCStr(countSkip) + L"个,替换" + NumToCStr(countReplace) + L"个,失败" + NumToCStr(countFail) + L"个喵！", L"提示喵");
+	MessageBox(L"导入完毕喵！总" + NumToCStr(newNo.getCount()) + L"个,添加" + NumToCStr(countSuccess) + L"个,跳过" + NumToCStr(countSkip) + L"个,替换" + NumToCStr(countReplace) + L"个,失败" + NumToCStr(countFail) + L"个喵！", L"提示喵");
 	bar.hide();
-	updateIMGlist();
+	IMGloadList();
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExRabbitDlg, ImageInsertFolder, DWORD) {
+void CExRabbitDlg::ImageInsertFolder(DWORD para) {
 	processing = 1;
-	int insertPos = (para) ? no.count : crtIMGid;
+	int insertPos = (para) ? no.getCount() : crtIMGid;
 	CFileFind fileFind;
 	std::vector<CString> fileList;
 	std::vector<CString> pathList;
@@ -5284,7 +5634,7 @@ DefineThreadFunc(CExRabbitDlg, ImageInsertFolder, DWORD) {
 		fileList.push_back(fileFind.GetFileName());
 		pathList.push_back(fileFind.GetFilePath());
 	}
-	NPKobject newNO;
+	NPKobject newNo;
 	IMGobject newIO;
 	int countNPK = 0;
 	int countNPKIMG = 0;
@@ -5295,7 +5645,7 @@ DefineThreadFunc(CExRabbitDlg, ImageInsertFolder, DWORD) {
 	bar.show(100);
 	for(int fileID = 0; fileID<pathList.size(); fileID++) {
 		if(fileList[fileID].Right(4) == L".npk" || fileList[fileID].Right(4) == L".NPK") {
-			if(!newNO.loadFile(CStrToStr(pathList[fileID]))) {
+			if(!newNo.loadFile(CStrToStr(pathList[fileID]))) {
 				continue;
 			}
 			int countFail = 0;
@@ -5303,24 +5653,24 @@ DefineThreadFunc(CExRabbitDlg, ImageInsertFolder, DWORD) {
 			int countReplace = 0;
 			int countSuccess = 0;
 			int conflict = -1;
-			bar.setMax(newNO.count);
-			for(int i = 0; i<newNO.count; i++) {
+			bar.setMax(newNo.getCount());
+			for(int i = 0; i<newNo.getCount(); i++) {
 				bar.setInfo(L"当前插入" + fileList[fileID] +
-							L"中的" + GetTail(StrToCStr(newNO.entry[i].comment)) +
+							L"中的" + GetTail(StrToCStr(newNo.content[i].comment)) +
 							L"喵……(成功" + NumToCStr(countSuccess) +
 							L"个,跳过" + NumToCStr(countSkip) +
 							L"个,替换" + NumToCStr(countReplace) +
 							L"个,失败" + NumToCStr(countFail) +
 							L"个)", i);
-				if(!newNO.IMGextract(i, newIO)) {
+				if(!newNo.IMGextract(i, newIO)) {
 					countFail++;
 					continue;
 				}
 				if(TRUE) {
 					conflict = -1;
-					for(int j = 0; j<no.count; j++) {
-						CString s1 = GetTail(StrToCStr(newNO.entry[i].comment));
-						CString s2 = GetTail(StrToCStr(no.entry[j].comment));
+					for(int j = 0; j<no.getCount(); j++) {
+						CString s1 = GetTail(StrToCStr(newNo.content[i].comment));
+						CString s2 = GetTail(StrToCStr(no.content[j].comment));
 						if(s1 == s2) {
 							conflict = j;
 							break;
@@ -5329,13 +5679,13 @@ DefineThreadFunc(CExRabbitDlg, ImageInsertFolder, DWORD) {
 				}
 				if(!noAlarm && conflict > 0) {
 					ModalConflictWarning dlgWarning(this);
-					dlgWarning.conflictName = StrToCStr(newNO.entry[i].comment);
+					dlgWarning.conflictName = StrToCStr(newNo.content[i].comment);
 					dlgWarning.DoModal();
 					noAlarm = dlgWarning.noAlarm;
 					conflictMethod = dlgWarning.method;
 				}
 				if(conflict < 0) {
-					no.IMGinsert(insertPos + totalSuccess, newIO, newNO.entry[i].comment);
+					no.IMGinsert(insertPos + totalSuccess, newNo.content[i].comment, newIO);
 					countSuccess++;
 					totalSuccess++;
 				} else {
@@ -5351,13 +5701,13 @@ DefineThreadFunc(CExRabbitDlg, ImageInsertFolder, DWORD) {
 						break;
 					case 2:
 						//保留
-						no.IMGinsert(insertPos + countSuccess, newIO, newNO.entry[i].comment);
+						no.IMGinsert(insertPos + countSuccess, newNo.content[i].comment, newIO);
 						countSuccess++;
 						totalSuccess++;
 						break;
 					case 3:
 						//保留并改名
-						no.IMGinsert(insertPos + countSuccess, newIO, newNO.entry[i].comment + "(new)");
+						no.IMGinsert(insertPos + countSuccess, newNo.content[i].comment + "(new)", newIO);
 						countSuccess++;
 						totalSuccess++;
 						break;
@@ -5365,7 +5715,7 @@ DefineThreadFunc(CExRabbitDlg, ImageInsertFolder, DWORD) {
 				}
 				newIO.release();
 			}
-			newNO.release();
+			newNo.release();
 			countNPK++;
 			countNPKIMG += countSuccess;
 		}
@@ -5375,7 +5725,7 @@ DefineThreadFunc(CExRabbitDlg, ImageInsertFolder, DWORD) {
 			}
 			bar.setInfo(L"当前插入" + fileList[fileID] + L"喵……", 0);
 			CString newPathName = Slashing(fileList[fileID]);
-			no.IMGinsert(insertPos + totalSuccess, newIO, CStrToStr(newPathName));
+			no.IMGinsert(insertPos + totalSuccess, CStrToStr(newPathName), newIO);
 			totalSuccess++;
 			newIO.release();
 			countIMG++;
@@ -5383,26 +5733,26 @@ DefineThreadFunc(CExRabbitDlg, ImageInsertFolder, DWORD) {
 	}
 	MessageBox(L"导入完毕喵！成功导入了" + NumToCStr(countIMG) + L"个外部IMG对象喵，并从" + NumToCStr(countNPK) + L"个NPK文件中导入了" + NumToCStr(countNPKIMG) + L"个IMG对象喵。", L"提示喵");
 	bar.hide();
-	updateIMGlist();
+	IMGloadList();
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExRabbitDlg, ImageInsertOther, DWORD) {
+void CExRabbitDlg::ImageInsertOther(DWORD para) {
 	processing = 1;
-	int insertPos = (para) ? no.count : crtIMGid;
+	int insertPos = (para) ? no.getCount() : crtIMGid;
 	CFileDialog dlg(true, L"所有文件(*.*)|*.*", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, L"所有文件文件(*.*)|*.*||", this);
 	if(IDOK != dlg.DoModal()) {
 		processing = 0;
 		return;
 	}
 	CString fileName = dlg.GetPathName();
-	no.insert(insertPos, CStrToStr(fileName), CStrToStr(GetTail(fileName)));
-	updateIMGlist();
+	no.insertFile(insertPos, CStrToStr(GetTail(fileName)), CStrToStr(fileName));
+	IMGloadList();
 	NPKsaveAlert = true;
 	processing = 0;
 }
 
-DefineThreadFunc(CExRabbitDlg, ImageReplaceExtern, DWORD) {
+void CExRabbitDlg::ImageReplaceExtern(enumSelectType para) {
 	processing = 1;
 	CFileDialog dlg(TRUE, L"IMG文件(*.IMG) | *.IMG", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, L"IMG文件(*.IMG)|*.IMG||", this);
 	if(IDOK != dlg.DoModal()) {
@@ -5415,13 +5765,13 @@ DefineThreadFunc(CExRabbitDlg, ImageReplaceExtern, DWORD) {
 		processing = 0;
 		return;
 	}
-	std::vector<int> targetList = getSelected(IDC_LIST_IMG, para);
+	queue targetList = IMGgetChecked(para);
 	bar.show(targetList.size() - 1);
 	for(int i=0;i<targetList.size();i++) {
 		int id = targetList[i];
-		bar.setInfo(L"正在替换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		bar.setInfo(L"正在替换" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 		no.replace(id, s);
-		updateIMGterm(id);
+		IMGupdateTerm(id);
 	}
 	MessageBox(L"替换完毕喵！");
 	bar.hide();
@@ -5430,13 +5780,13 @@ DefineThreadFunc(CExRabbitDlg, ImageReplaceExtern, DWORD) {
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExRabbitDlg, ImageReplaceLocal, DWORD) {
+void CExRabbitDlg::ImageReplaceLocal(enumSelectType para) {
 	processing = 1;
 	TinyIMGSelect dlg;
 	dlg.listStr.clear();
 	dlg.defaultSelected = 0;
-	for(int i = 0; i < no.count; i++) 
-		dlg.listStr.push_back(no.entry[i].comment);
+	for(int i = 0; i < no.getCount(); i++) 
+		dlg.listStr.push_back(no.content[i].comment);
 	if(IDOK != dlg.DoModal()) {
 		processing = 0;
 		return;
@@ -5447,13 +5797,13 @@ DefineThreadFunc(CExRabbitDlg, ImageReplaceLocal, DWORD) {
 		processing = 0;
 		return;
 	}
-	std::vector<int> targetList = getSelected(IDC_LIST_IMG, para);
+	queue targetList = IMGgetChecked(para); 
 	bar.show(targetList.size() - 1);
 	for(int i=0;i<targetList.size();i++) {
 		int id = targetList[i];
-		bar.setInfo(L"正在替换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
-		no.replace2(id, s);
-		updateIMGterm(id);
+		bar.setInfo(L"正在替换" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
+		no.subscribe(id, s);
+		IMGupdateTerm(id);
 	}
 	MessageBox(L"替换完毕喵！");
 	bar.hide();
@@ -5462,13 +5812,13 @@ DefineThreadFunc(CExRabbitDlg, ImageReplaceLocal, DWORD) {
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExRabbitDlg, ImageReplaceQuote, DWORD) {
+void CExRabbitDlg::ImageReplaceQuote(enumSelectType para) {
 	processing = 1;
 	TinyIMGSelect dlg;
 	dlg.listStr.clear();
 	dlg.defaultSelected = 0;
-	for(int i = 0; i < no.count; i++) 
-		dlg.listStr.push_back(no.entry[i].comment);
+	for(int i = 0; i < no.getCount(); i++) 
+		dlg.listStr.push_back(no.content[i].comment);
 	if(IDOK != dlg.DoModal()) {
 		processing = 0;
 		return;
@@ -5479,13 +5829,13 @@ DefineThreadFunc(CExRabbitDlg, ImageReplaceQuote, DWORD) {
 		processing = 0;
 		return;
 	}
-	std::vector<int> targetList = getSelected(IDC_LIST_IMG, para);
+	queue targetList = IMGgetChecked(para);
 	bar.show(targetList.size() - 1);
 	for(int i=0;i<targetList.size();i++) {
 		int id = targetList[i];
-		bar.setInfo(L"正在替换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
-		no.modifyLink(id, dlg.selected);
-		updateIMGterm(id);
+		bar.setInfo(L"正在替换" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
+		no.replaceQuote(id, dlg.selected);
+		IMGupdateTerm(id);
 	}
 	MessageBox(L"替换完毕喵！");
 	bar.hide();
@@ -5495,35 +5845,36 @@ DefineThreadFunc(CExRabbitDlg, ImageReplaceQuote, DWORD) {
 	processing = 0;
 }
 
-DefineThreadFunc(CExRabbitDlg, ImageRemove, DWORD) {
+void CExRabbitDlg::ImageRemove(enumSelectType para) {
 	processing = 1;
-	std::vector<int> targetList = getSelected(IDC_LIST_IMG, para);
+	queue targetList = IMGgetChecked(para);
 	bar.show(targetList.size() - 1);
 	for(int i=0;i<targetList.size();i++) {
 		int id = targetList[targetList.size() - i - 1];
-		bar.setInfo(L"正在删除" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		bar.setInfo(L"正在删除" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 		no.IMGremove(id);
-		GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->DeleteItem(id);
+		IMGdeleteTerm(id);
 	}
+	IMGupdateList();
+	IMGsetHighLine(-1);
 	bar.hide();
 	updateInfo();
-	crtIMGid = -1;
 	draw();
 	NPKsaveAlert = true;
 	processing = 0;
 }
 
-DefineThreadFunc(CExRabbitDlg, ImageExtract, DWORD) {
+void CExRabbitDlg::ImageExtract(enumSelectType para) {
 	processing = 1;
 	CString filePath = profile.getOutputPath(fileNPKname);
 	CString fileName;
-	std::vector<int> targetList = getSelected(IDC_LIST_IMG, para);
+	queue targetList = IMGgetChecked(para);
 	bar.show(targetList.size() - 1);
 	for(int i=0;i<targetList.size();i++) {
 		int id = targetList[i];
-		bar.setInfo(L"正在提取" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
-		fileName = filePath + Underlining(StrToCStr(no.entry[id].comment));
-		no.extract(id, CStrToStr(fileName));
+		bar.setInfo(L"正在提取" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
+		fileName = filePath + Underlining(StrToCStr(no.content[id].comment));
+		no.extractFile(id, CStrToStr(fileName));
 	}
 	MessageBox(L"全部提取完毕喵！已保存到" + profile.getOutputPath(fileNPKname) + L"了喵！", L"提示喵");
 	bar.hide();
@@ -5532,9 +5883,9 @@ DefineThreadFunc(CExRabbitDlg, ImageExtract, DWORD) {
 }
 
 
-DefineThreadFunc(CExRabbitDlg, ImageMakeNPKandSavePatch, DWORD) {
+void CExRabbitDlg::ImageMakeNPKandSavePatch(enumSelectType para) {
 	processing = 1;
-	std::vector<int> targetList = getSelected(IDC_LIST_IMG, para);
+	queue targetList = IMGgetChecked(para);
 	CFileDialog dlg(FALSE, L"NPK文件(*.NPK)|*.NPK", L"newNPK.NPK", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, L"NPK文件(*.NPK)|*.NPK||", this);
 	if(IDOK == dlg.DoModal()) {
 		NPKobject newNo;
@@ -5542,10 +5893,10 @@ DefineThreadFunc(CExRabbitDlg, ImageMakeNPKandSavePatch, DWORD) {
 		bar.show(targetList.size() - 1);
 		for(int i = 0; i<targetList.size(); i++) {
 			int id = targetList[i];
-			bar.setInfo(L"正在提取" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+			bar.setInfo(L"正在提取" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 			stream tempStr;
 			no.extract(id, tempStr);
-			newNo.push(tempStr, no.entry[id].comment);
+			newNo.push(no.content[id].comment, tempStr);
 		}
 		newNo.saveFile(CStrToStr(dlg.GetPathName()));
 		bar.hide();
@@ -5553,28 +5904,28 @@ DefineThreadFunc(CExRabbitDlg, ImageMakeNPKandSavePatch, DWORD) {
 	}
 	processing = 0;
 }
-DefineThreadFunc(CExRabbitDlg, ImageDequote, DWORD) {
+void CExRabbitDlg::ImageDequote(enumSelectType para) {
 	processing = 1;
-	std::vector<int> targetList = getSelected(IDC_LIST_IMG, para);
+	queue targetList = IMGgetChecked(para);
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i < targetList.size(); i++) {
 		int id = targetList[i];
-		bar.setInfo(L"正在重新为" + GetTail(StrToCStr(no.entry[id].comment)) + L"分配数据喵……", i);
-		if(no.delink(id)) {
-			updateIMGterm(id);
+		bar.setInfo(L"正在重新为" + GetTail(StrToCStr(no.content[id].comment)) + L"分配数据喵……", i);
+		if(no.dequote(id)) {
+			IMGupdateTerm(id);
 		}
 	}
 	bar.hide();
 	NPKsaveAlert = true;
 	processing = 0;
 }
-DefineThreadFunc(CExRabbitDlg, ImageHide, DWORD) {
+void CExRabbitDlg::ImageHide(enumSelectType para) {
 	processing = 1;
-	std::vector<int> targetList = getSelected(IDC_LIST_IMG, para);
+	queue targetList = IMGgetChecked(para);
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i<targetList.size(); i++) {
 		int id = targetList[targetList.size() - 1 - i];
-		bar.setInfo(L"正在隐藏" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		bar.setInfo(L"正在隐藏" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 		IMGobject oldIO, newIO;
 		if(!no.IMGextract(id, oldIO)) {
 			continue;
@@ -5588,13 +5939,13 @@ DefineThreadFunc(CExRabbitDlg, ImageHide, DWORD) {
 	processing = 0;
 }
 
-DefineThreadFunc(CExRabbitDlg, ImageTransToV2, DWORD) {
+void CExRabbitDlg::ImageTransToV2(enumSelectType para) {
 	processing = 1;
-	std::vector<int> targetList = getSelected(IDC_LIST_IMG, para);
+	queue targetList = IMGgetChecked(para);
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i < targetList.size(); i++) {
 		int id = targetList[targetList.size() - 1 - i];
-		bar.setInfo(L"正在转换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		bar.setInfo(L"正在转换" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 		std::vector<IMGobject> ioOutList;
 		IMGobject ioIn;
 		if(!no.IMGextract(id, ioIn))
@@ -5603,11 +5954,11 @@ DefineThreadFunc(CExRabbitDlg, ImageTransToV2, DWORD) {
 		for(int p = 0; p < ioOutList.size(); p++) {
 			if(p == 0) {
 				no.IMGreplace(id, ioOutList[p]);
-				GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconIMG(V2), 0, 0, 0);
+				IMGmodifyIcon(id, V2);
 			} else {
-				str newName = KoishiAvatar::formatAvatarIDplusBy(no.entry[id].comment, p);
-				no.IMGinsert(id + p, ioOutList[p], newName);
-				GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->InsertItem(id + p, GetTail(StrToCStr(newName)), getIconIMG(V2));
+				str newName = KoishiAvatar::formatAvatarIDplusBy(no.content[id].comment, p);
+				no.IMGinsert(id + p, newName, ioOutList[p]);
+				IMGaddTerm(id + p, V2, GetTail(StrToCStr(newName)));
 			}
 		}
 	}
@@ -5615,19 +5966,19 @@ DefineThreadFunc(CExRabbitDlg, ImageTransToV2, DWORD) {
 	io.release();
 	no.IMGextract(crtIMGid, io);
 	switchIMGver(io.version);
-	updatePIClist();
+	PICloadList();
 	updateInfo();
 	NPKsaveAlert = true;
 	processing = 0;
 }
 
-DefineThreadFunc(CExRabbitDlg, ImageV6TransToV4, DWORD) {
+void CExRabbitDlg::ImageV6TransToV4(enumSelectType para) {
 	processing = 1;
-	std::vector<int> targetList = getSelected(IDC_LIST_IMG, para);
+	queue targetList = IMGgetChecked(para);
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i < targetList.size(); i++) {
 		int id = targetList[targetList.size() - 1 - i];
-		bar.setInfo(L"正在转换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		bar.setInfo(L"正在转换" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 		std::vector<IMGobject> ioOutList;
 		IMGobject ioIn;
 		if(!no.IMGextract(id, ioIn))
@@ -5638,11 +5989,11 @@ DefineThreadFunc(CExRabbitDlg, ImageV6TransToV4, DWORD) {
 		for(int p = 0; p < ioOutList.size(); p++) {
 			if(p == 0) {
 				no.IMGreplace(id, ioOutList[p]);
-				GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconIMG(V4), 0, 0, 0);
+				IMGmodifyIcon(id, V4);
 			} else {
-				str newName = KoishiAvatar::formatAvatarIDplusBy(no.entry[id].comment, p);
-				no.IMGinsert(id + p, ioOutList[p], newName);
-				GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->InsertItem(id + p, GetTail(StrToCStr(newName)), getIconIMG(V4));
+				str newName = KoishiAvatar::formatAvatarIDplusBy(no.content[id].comment, p);
+				no.IMGinsert(id + p, newName, ioOutList[p]);
+				IMGaddTerm(id + p, V4, GetTail(StrToCStr(newName)));
 			}
 		}
 	}
@@ -5650,7 +6001,7 @@ DefineThreadFunc(CExRabbitDlg, ImageV6TransToV4, DWORD) {
 	io.release();
 	no.IMGextract(crtIMGid, io);
 	switchIMGver(io.version);
-	updatePIClist();
+	PICloadList();
 	GET_CTRL(CComboBox, IDC_COMBO_PRO)->SetCurSel(0);
 	updateColorTable();
 	updateInfo();
@@ -5658,14 +6009,13 @@ DefineThreadFunc(CExRabbitDlg, ImageV6TransToV4, DWORD) {
 	processing = 0;
 }
 
-DefineThreadFunc(CExRabbitDlg, ImageTransform, ModalTransform::OUTPUT) {
+void CExRabbitDlg::ImageTransform(ModalTransform::OUTPUT para) {
 	processing = 1;
-	std::vector<int> targetList;
-	getSelected(GET_CTRL(CGoodListCtrl, IDC_LIST_IMG), crtIMGid, para.target - 1, targetList);
+	queue targetList = IMGgetChecked((enumSelectType)(para.target-1));
 	bar.show(targetList.size() - 1);
 	for(int i = 0; i < targetList.size(); i++) {
 		int id = targetList[targetList.size() - 1 - i];
-		bar.setInfo(L"正在转换" + GetTail(StrToCStr(no.entry[id].comment)) + L"喵……", i);
+		bar.setInfo(L"正在转换" + GetTail(StrToCStr(no.content[id].comment)) + L"喵……", i);
 		std::vector<IMGobject> ioOutList;
 		IMGobject ioIn;
 		if(!no.IMGextract(id, ioIn)) {
@@ -5688,11 +6038,11 @@ DefineThreadFunc(CExRabbitDlg, ImageTransform, ModalTransform::OUTPUT) {
 		for(int p = 0; p < ioOutList.size(); p++) {
 			if(p == 0) {
 				no.IMGreplace(id, ioOutList[p]);
-				GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconIMG(para.version), 0, 0, 0);
+				IMGmodifyIcon(id, para.version);
 			} else {
-				str newName = KoishiAvatar::formatAvatarIDplusBy(no.entry[id].comment, p);
-				no.IMGinsert(id + p, ioOutList[p], newName);
-				GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->InsertItem(id + p, GetTail(StrToCStr(newName)), getIconIMG(para.version));
+				str newName = KoishiAvatar::formatAvatarIDplusBy(no.content[id].comment, p);
+				no.IMGinsert(id + p, newName, ioOutList[p]);
+				IMGaddTerm(id + p, para.version, GetTail(StrToCStr(newName)));
 			}
 		}
 	}
@@ -5700,8 +6050,8 @@ DefineThreadFunc(CExRabbitDlg, ImageTransform, ModalTransform::OUTPUT) {
 	io.release();
 	no.IMGextract(crtIMGid, io);
 	switchIMGver(io.version);
-	updatePIClist();
-	updateTEXlist();
+	PICloadList();
+	TEXloadList();
 	if(para.version == V4 || para.version == V5 || para.version == V6) {
 		GET_CTRL(CComboBox, IDC_COMBO_PRO)->SetCurSel(0);
 		updateColorTable();
@@ -5711,16 +6061,16 @@ DefineThreadFunc(CExRabbitDlg, ImageTransform, ModalTransform::OUTPUT) {
 	processing = 0;
 }
 
-DefineThreadFunc(CExRabbitDlg, ImageAutoSort, PVOID) {
+void CExRabbitDlg::ImageAutoSort(PVOID para) {
 	int i, j;
 	queue wList1, wList2, qList;
-	std::vector<NPKentry> oldEntry = no.entry;
+	std::vector<NPKentry> oldEntry = no.content;
 	//计算每个部件的权重
 	extern dword layerSequence[100][2];
-	for(i = 0; i<no.count; i++) {
+	for(i = 0; i<no.getCount(); i++) {
 		AvatarPart ap;
 		AvatarLayerFlag layer;
-		str IMGpath = no.entry[i].comment;
+		str IMGpath = no.content[i].comment;
 		str::size_type st = IMGpath.find_last_of('/');
 		str IMGname = (st == str::npos) ? IMGpath : IMGpath.substr(st + 1);
 		if(IMGname.size() < 6) {
@@ -5830,16 +6180,16 @@ DefineThreadFunc(CExRabbitDlg, ImageAutoSort, PVOID) {
 		}
 	}
 	for(i = 0; i<qList.size(); i++)
-		no.entry[i] = oldEntry[qList[qList.size() - 1 - i]];
-	updateIMGlist();
+		no.content[i] = oldEntry[qList[qList.size() - 1 - i]];
+	IMGloadList();
 	updateInfo();
 	NPKsaveAlert = true;
 }
 
-DefineThreadFunc(CExRabbitDlg, ImageMix, ModalAdvancedMix::OUTPUT) {
+void CExRabbitDlg::ImageMix(ModalAdvancedMix::OUTPUT para) {
 	int i, k;
 	int imgCount = 0;
-	std::vector<int> mixLayer = getSelected(IDC_LIST_IMG, MULTI_SELECT);						//勾选图层
+	queue mixLayer = IMGgetChecked(MULTI_SELECT);						//勾选图层
 	imgCount = mixLayer.size();
 	if(imgCount == 0) {
 		MessageBox(L"没有勾选任何图层喵", L"提示喵");
@@ -5988,11 +6338,10 @@ DefineThreadFunc(CExRabbitDlg, ImageMix, ModalAdvancedMix::OUTPUT) {
 		matf.destory();
 		s.release();
 	}
-	no.IMGpush(newIO, "mixed.img");
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->InsertItem(imgCount, L"mixed.img", getIconIMG(newIO.version));
+	no.IMGpush("mixed.img", newIO);
+	IMGaddTerm(imgCount, newIO.version, L"mixed.img");
 	bar.hide();
 	updateInfo();
-	updateIMGlist();
 	NPKsaveAlert = true;
 	delete[] ioList;
 }
@@ -6059,7 +6408,7 @@ void CExRabbitDlg::OnMenuImageReplaceQuote() {
 
 
 void CExRabbitDlg::OnMenuImageReplaceImgPatch() {
-	if(!getSelected(IDC_LIST_IMG, MULTI_SELECT).size()) {
+	if(!IMGgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的IMG对象喵！");
 		return;
 	}
@@ -6068,7 +6417,7 @@ void CExRabbitDlg::OnMenuImageReplaceImgPatch() {
 
 
 void CExRabbitDlg::OnMenuImageReplaceCopyPatch() {
-	if(!getSelected(IDC_LIST_IMG, MULTI_SELECT).size()) {
+	if(!IMGgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的IMG对象喵！");
 		return;
 	}
@@ -6077,7 +6426,7 @@ void CExRabbitDlg::OnMenuImageReplaceCopyPatch() {
 
 
 void CExRabbitDlg::OnMenuImageReplaceQuotePatch() {
-	if(!getSelected(IDC_LIST_IMG, MULTI_SELECT).size()) {
+	if(!IMGgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的IMG对象喵！");
 		return;
 	}
@@ -6092,7 +6441,7 @@ void CExRabbitDlg::OnMenuImageRemove() {
 
 
 void CExRabbitDlg::OnMenuImageRemovePatch() {
-	if(!getSelected(IDC_LIST_IMG, MULTI_SELECT).size()) {
+	if(!IMGgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的IMG对象喵！");
 		return;
 	}
@@ -6107,7 +6456,7 @@ void CExRabbitDlg::OnMenuImageExtract() {
 
 
 void CExRabbitDlg::OnMenuImageExtractPatch() {
-	if(!getSelected(IDC_LIST_IMG, MULTI_SELECT).size()) {
+	if(!IMGgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的IMG对象喵！");
 		return;
 	}
@@ -6119,9 +6468,9 @@ void CExRabbitDlg::OnMenuImageSave() {
 	CHECK_VALID(crtIMGid >= 0);
 	CString defExt = _T("所有文件(*.*)|*.*");
 	CString extFilter = _T("所有文件(*.*)|*.*||");
-	CFileDialog dlg(FALSE, defExt, Underlining(StrToCStr(no.entry[crtIMGid].comment)), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, extFilter, this);
+	CFileDialog dlg(FALSE, defExt, Underlining(StrToCStr(no.content[crtIMGid].comment)), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, extFilter, this);
 	if(dlg.DoModal() == IDOK) {
-		no.extract(crtIMGid, CStrToStr(dlg.GetPathName()));
+		no.extractFile(crtIMGid, CStrToStr(dlg.GetPathName()));
 		MessageBox(_T("保存完毕喵！"));
 	}
 }
@@ -6135,7 +6484,7 @@ void CExRabbitDlg::OnMenuImageSaveNPK() {
 
 void CExRabbitDlg::OnMenuImageSaveNPKPatch() {
 	// TODO:  在此添加命令处理程序代码
-	if(!getSelected(IDC_LIST_IMG, MULTI_SELECT).size()) {
+	if(!IMGgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的IMG对象喵！");
 		return;
 	}
@@ -6148,9 +6497,8 @@ void CExRabbitDlg::OnMenuImageCopyResource() {
 	CHECK_VALID(crtIMGid >= 0);
 	stream sTemp;
 	no.extract(crtIMGid, sTemp);
-	no.insert(crtIMGid + 1, sTemp, no.entry[crtIMGid].comment + "(new)");
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->InsertItem(crtIMGid + 1, L"", getIconIMG(V2));
-	updateIMGterm(crtIMGid + 1);
+	no.insert(crtIMGid + 1, no.content[crtIMGid].comment, sTemp);
+	IMGaddTerm(crtIMGid + 1, no.IMGgetVersionEx(crtIMGid + 1), GetTail(StrToCStr(no.content[crtIMGid].comment)));
 	NPKsaveAlert = true;
 }
 
@@ -6158,9 +6506,8 @@ void CExRabbitDlg::OnMenuImageCopyResource() {
 void CExRabbitDlg::OnMenuImageCopyQuote() {
 	// TODO:  在此添加命令处理程序代码
 	CHECK_VALID(crtIMGid >= 0);
-	no.insertLink(crtIMGid + 1, crtIMGid, no.entry[crtIMGid].comment + "(new)");
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->InsertItem(crtIMGid + 1, L"", getIconIMG(V2));
-	updateIMGterm(crtIMGid + 1);
+	no.insertQuote(crtIMGid + 1, no.content[crtIMGid].comment, crtIMGid);
+	IMGaddTerm(crtIMGid + 1, no.IMGgetVersionEx(crtIMGid + 1), GetTail(StrToCStr(no.content[crtIMGid].comment)) + L"->" + GetTail(StrToCStr(no.content[crtIMGid].comment)));
 	NPKsaveAlert = true;
 }
 
@@ -6168,11 +6515,15 @@ void CExRabbitDlg::OnMenuImageCopyQuote() {
 void CExRabbitDlg::OnMenuImageRename() {
 	CHECK_VALID(crtIMGid >= 0);
 	ModalRename dlg;
-	dlg.oldName = StrToCStr(no.entry[crtIMGid].comment);
+	dlg.oldName = StrToCStr(no.content[crtIMGid].comment);
 	if(IDOK == dlg.DoModal()){
 		no.rename(crtIMGid,  CStrToStr(dlg.newName));
 		updateInfo();
-		GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(crtIMGid, 0, GetTail(dlg.newName));
+		IMGupdateTerm(crtIMGid);
+		for(int i = 1 + crtIMGid; i < no.getCount(); i++) {
+			if(no.checkQuote(i) == crtIMGid) 
+				IMGupdateTerm(i);
+		}
 		fileIMGname = dlg.newName;
 		NPKsaveAlert = true;
 	}
@@ -6186,7 +6537,7 @@ void CExRabbitDlg::OnMenuImageDequote() {
 
 
 void CExRabbitDlg::OnMenuImageDequotePatch() {
-	if(!getSelected(IDC_LIST_IMG, MULTI_SELECT).size()) {
+	if(!IMGgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的IMG对象喵！");
 		return;
 	}
@@ -6207,7 +6558,7 @@ void CExRabbitDlg::OnMenuImageTransformTo4() {
 
 
 void CExRabbitDlg::OnMenuImageTransformTo2Patch() {
-	if(!getSelected(IDC_LIST_IMG, MULTI_SELECT).size()) {
+	if(!IMGgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的IMG对象喵！");
 		return;
 	}
@@ -6216,7 +6567,7 @@ void CExRabbitDlg::OnMenuImageTransformTo2Patch() {
 
 
 void CExRabbitDlg::OnMenuImageTransformTo4Patch() {
-	if(!getSelected(IDC_LIST_IMG, MULTI_SELECT).size()) {
+	if(!IMGgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的IMG对象喵！");
 		return;
 	}
@@ -6247,7 +6598,7 @@ void CExRabbitDlg::OnMenuImageHideContent() {
 
 
 void CExRabbitDlg::OnMenuImageHidePatch() {
-	if(!getSelected(IDC_LIST_IMG, MULTI_SELECT).size()) {
+	if(!IMGgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的IMG对象喵！");
 		return;
 	}
@@ -6256,7 +6607,7 @@ void CExRabbitDlg::OnMenuImageHidePatch() {
 
 
 void CExRabbitDlg::OnMenuImageHideContentPatch() {
-	if(!getSelected(IDC_LIST_IMG, MULTI_SELECT).size()) {
+	if(!IMGgetChecked(MULTI_SELECT).size()) {
 		MessageBox(L"没有勾选的IMG对象喵！");
 		return;
 	}
@@ -6268,7 +6619,7 @@ void CExRabbitDlg::OnMenuImageClipboardCopy() {
 	CHECK_VALID(crtIMGid >= 0);
 	stream sTemp;
 	if(no.extract(crtIMGid, sTemp)){
-		noClip.push(sTemp, no.entry[crtIMGid].comment);
+		noClip.push(no.content[crtIMGid].comment, sTemp);
 		MessageBox(L"已将该IMG插入到剪辑库中喵！",L"提示喵");
 	}else{
 		MessageBox(L"无法插入剪辑库中喵！",L"提示喵");
@@ -6278,7 +6629,7 @@ void CExRabbitDlg::OnMenuImageClipboardCopy() {
 
 void CExRabbitDlg::OnMenuImageClipboardInsert() {
 	CHECK_VALID(crtIMGid >= 0);
-	if(noClip.count == 0){
+	if(noClip.getCount() == 0){
 		MessageBox(L"剪辑库里还没有IMG喵！",L"提示喵");
 		return;
 	}
@@ -6287,8 +6638,8 @@ void CExRabbitDlg::OnMenuImageClipboardInsert() {
 	dlg.ptrClipNo = &noClip;
 	if(IDOK == dlg.DoModal()){
 		noClip.extract(dlg.selectID, sTemp);
-		no.insert(crtIMGid, sTemp, noClip.entry[dlg.selectID].comment);
-		updateIMGlist();
+		no.insert(crtIMGid, noClip.content[dlg.selectID].comment, sTemp);
+		IMGloadList();
 		NPKsaveAlert = true;
 	}
 }
@@ -6296,7 +6647,7 @@ void CExRabbitDlg::OnMenuImageClipboardInsert() {
 
 void CExRabbitDlg::OnMenuImageClipboardReplace() {
 	CHECK_VALID(crtIMGid >= 0);
-	if(noClip.count == 0){
+	if(noClip.getCount() == 0) {
 		MessageBox(L"剪辑库里还没有IMG喵！",L"提示喵");
 		return;
 	}
@@ -6342,25 +6693,12 @@ void CExRabbitDlg::OnMenuImageSelectHighline() {
 void CExRabbitDlg::OnMenuImageMoveUp() {
 	int row = crtIMGid;
 	CHECK_VALID(row>=1);
-	NPKentry ne = no.entry[row];
-	no.entry[row] = no.entry[row - 1];
-	no.entry[row - 1] = ne;
-	for(int i = 0;i<=1;i++){
-		int id = row - i;
-		int li = no.checkLink(id);
-		if(li == id){
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(id, 0, GetTail(StrToCStr(no.entry[id].comment)));
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconIMG((IMGversion)no.IMGgetVersion(id)),0,0,0);
-		}else{
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(id, 0, GetTail(StrToCStr(no.entry[id].comment)
-				+ L"["+GetTail(StrToCStr(no.entry[li].comment))+L"]"));
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(id, 0, LVIF_IMAGE, NULL, 1, 0,0,0);
-		}
-	}
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(row - 1);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemState(row - 1,LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemState(row ,0, LVIS_SELECTED|LVIS_FOCUSED);
-	crtIMGid = row - 1;
+	NPKentry ne = no.content[row];
+	no.content[row] = no.content[row - 1];
+	no.content[row - 1] = ne;
+	IMGupdateTerm(row);
+	IMGupdateTerm(row - 1);
+	IMGsetHighLine(row - 1);
 	updateInfo();
 	NPKsaveAlert = true;
 }
@@ -6369,26 +6707,13 @@ void CExRabbitDlg::OnMenuImageMoveUp() {
 void CExRabbitDlg::OnMenuImageMoveDown() {
 	int row = crtIMGid;
 	CHECK_VALID(row>=0);
-	CHECK_VALID(row<no.count - 1);
-	NPKentry ne = no.entry[row];
-	no.entry[row] = no.entry[row + 1];
-	no.entry[row + 1] = ne;
-	for(int i = 0;i<=1;i++){
-		int id = row + i;
-		int li = no.checkLink(id);
-		if(li == id){
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(id, 0, GetTail(StrToCStr(no.entry[id].comment)));
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(id, 0, LVIF_IMAGE, NULL, getIconIMG((IMGversion)no.IMGgetVersion(id)),0,0,0);
-		}else{
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemText(id, 0, GetTail(StrToCStr(no.entry[id].comment)
-				+ L"["+GetTail(StrToCStr(no.entry[li].comment))+L"]"));
-			GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItem(id, 0, LVIF_IMAGE, NULL, 1, 0,0,0);
-		}
-	}
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetSelectionMark(row + 1);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemState(row + 1,LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
-	GET_CTRL(CGoodListCtrl, IDC_LIST_IMG)->SetItemState(row ,0, LVIS_SELECTED|LVIS_FOCUSED);
-	crtIMGid = row + 1;
+	CHECK_VALID(row<no.getCount() - 1);
+	NPKentry ne = no.content[row];
+	no.content[row] = no.content[row + 1];
+	no.content[row + 1] = ne;
+	IMGupdateTerm(row);
+	IMGupdateTerm(row+1);
+	IMGsetHighLine(row + 1);
 	updateInfo();
 	NPKsaveAlert = true;
 }
@@ -6396,12 +6721,12 @@ void CExRabbitDlg::OnMenuImageMoveDown() {
 
 void CExRabbitDlg::OnMenuImageMix() {
 	// TODO:  在此添加命令处理程序代码
-	if(getSelected(IDC_LIST_IMG, MULTI_SELECT).size() == 0) {
+	if(IMGgetChecked(MULTI_SELECT).size() == 0) {
 		MessageBox(L"没有勾选任何图层喵", L"提示喵");
 		return;
 	};
 	ModalAdvancedMix::OUTPUT para;
-	for(int i = 0; i < no.count; i++) {
+	for(int i = 0; i < no.getCount(); i++) {
 		if(GET_CTRL(CListCtrl, IDC_LIST_IMG)->GetCheck(i)) {
 			para.mixMethod.push_back(0);
 			para.preprocessing.push_back(0);
@@ -6413,14 +6738,14 @@ void CExRabbitDlg::OnMenuImageMix() {
 
 void CExRabbitDlg::OnMenuImageMixAdvanced() {
 	// TODO:  在此添加命令处理程序代码
-	if(getSelected(IDC_LIST_IMG, MULTI_SELECT).size() == 0) {
+	if(IMGgetChecked(MULTI_SELECT).size() == 0) {
 		MessageBox(L"没有勾选任何图层喵", L"提示喵");
 		return;
 	};
 	ModalAdvancedMix dlg;
-	for(int i = 0; i < no.count; i++) {
+	for(int i = 0; i < no.getCount(); i++) {
 		if(GET_CTRL(CListCtrl, IDC_LIST_IMG)->GetCheck(i)) {
-			dlg.in.layerName.push_back(no.entry[i].comment);
+			dlg.in.layerName.push_back(no.content[i].comment);
 		}
 	}
 	if(IDOK == dlg.DoModal()) {
@@ -6440,3 +6765,10 @@ void CExRabbitDlg::OnToolsStat() {
 	ToolStat dlg;
 	dlg.DoModal();
 }
+
+
+void CExRabbitDlg::OnToolsTeenSwitch() {
+	// TODO:  在此添加命令处理程序代码
+	ToolTeenSwitch().DoModal();
+}
+

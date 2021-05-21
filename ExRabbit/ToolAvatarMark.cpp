@@ -225,9 +225,9 @@ void ToolAvatarMark::title(){
 		careerList.push_back(ACHARACTER_DL);
 	if(GET_CTRL(CButton, IDC_CHECK_CAREER14)->GetCheck())
 		careerList.push_back(ACHARACTER_GB);
-	bool singleNPK = GET_CTRL(CButton, IDC_CHECK1)->GetCheck();
-	bool wantWeapon = GET_CTRL(CButton, IDC_CHECK2)->GetCheck();
-	bool onlyNormal = GET_CTRL(CButton, IDC_CHECK3)->GetCheck();
+	BOOL singleNPK = GET_CTRL(CButton, IDC_CHECK1)->GetCheck();
+	BOOL wantWeapon = GET_CTRL(CButton, IDC_CHECK2)->GetCheck();
+	BOOL onlyNormal = GET_CTRL(CButton, IDC_CHECK3)->GetCheck();
 	//待读取的武器类NPK
 	CString folderPath;
 	GET_CTRL(CEdit, IDC_EDIT1)->GetWindowText(folderPath);
@@ -248,7 +248,7 @@ void ToolAvatarMark::title(){
 				continue;
 			NPKobject partNo;
 			int prevID = -1;		//记录上一次编号，同一编号的IMG只打一次
-			for(imgID = 0;imgID < no.count; imgID++){
+			for(imgID = 0;imgID < no.getCount(); imgID++){
 				IMGobject io;
 				if(!no.IMGextract(imgID,io))
 					continue;
@@ -266,12 +266,12 @@ void ToolAvatarMark::title(){
 				//	continue;
 				//if(al == ALAYER_F || al == ALAYER_G)
 				//	continue;
-				str IDstr = getSerialID(no.entry[imgID].comment);
+				str IDstr = getSerialID(no.content[imgID].comment);
 				int avID = std::stoi(IDstr);
 				if(avID == prevID)
 					continue;
 				prevID = avID;
-				GET_CTRL(CEdit, IDC_EDIT3)->SetWindowText(L"正在对"+GetTail(StrToCStr(no.entry[imgID].comment))+L"进行打标中……");
+				GET_CTRL(CEdit, IDC_EDIT3)->SetWindowText(L"正在对"+GetTail(StrToCStr(no.content[imgID].comment))+L"进行打标中……");
 				int startFrame = onlyNormal ? frameEnum[careerID][0]:0;
 				int endFrame = onlyNormal ? frameEnum[careerID][1]:(io.indexCount-1);
 				for(frmID = startFrame;frmID<=endFrame;frmID++){
@@ -313,11 +313,11 @@ void ToolAvatarMark::title(){
 					io.PICreplace(frmID, pi, sPic);
 				}
 				if(singleNPK){
-					totalNo.IMGpush(io, no.entry[imgID].comment);
+					totalNo.IMGpush(no.content[imgID].comment, io);
 				}else{
-					partNo.IMGpush(io, no.entry[imgID].comment);
+					partNo.IMGpush(no.content[imgID].comment, io);
 				}
-				GET_CTRL(CProgressCtrl, IDC_PROGRESS2)->SetPos(1000*imgID/no.count);
+				GET_CTRL(CProgressCtrl, IDC_PROGRESS2)->SetPos(1000 * imgID / no.getCount());
 			}
 			if(!singleNPK){
 				partNo.saveFile(afterStr);
@@ -326,7 +326,7 @@ void ToolAvatarMark::title(){
 			GET_CTRL(CProgressCtrl, IDC_PROGRESS1)->SetPos(1000*(NPKpart)/APART_MAXCOUNT);
 		}
 		if(singleNPK){
-			if(totalNo.count > 0)
+			if(totalNo.getCount() > 0)
 				totalNo.saveFile(afterTotalStr);
 		}
 		//武器部件
@@ -342,7 +342,7 @@ void ToolAvatarMark::title(){
 					continue;
 				NPKobject partNo;
 				int prevID = -1;		//记录上一次编号，同一编号的IMG只打一次
-				for(imgID = 0;imgID < no.count; imgID++){
+				for(imgID = 0;imgID < no.getCount(); imgID++){
 					IMGobject io;
 					if(!no.IMGextract(imgID,io))
 						continue;
@@ -353,12 +353,12 @@ void ToolAvatarMark::title(){
 					//增加这一步是为了防止扩充部分为实色
 					if((io.version == V4 || io.version == V6) && io.paletteData[0].size() > 0 && io.paletteData[0][0].alpha > 0)
 						continue;
-					str IDstr = getSerialID(no.entry[imgID].comment);
+					str IDstr = getSerialID(no.content[imgID].comment);
 					int avID = std::stoi(IDstr);
 					if(avID == prevID)
 						continue;
 					prevID = avID;
-					GET_CTRL(CEdit, IDC_EDIT3)->SetWindowText(L"正在对"+GetTail(StrToCStr(no.entry[imgID].comment))+L"进行打标中……");
+					GET_CTRL(CEdit, IDC_EDIT3)->SetWindowText(L"正在对" + GetTail(StrToCStr(no.content[imgID].comment)) + L"进行打标中……");
 					int startFrame = onlyNormal ? frameEnum[ac][0]:0;
 					int endFrame = onlyNormal ? frameEnum[ac][1]:(io.indexCount-1);
 					for(frmID = startFrame;frmID<=endFrame;frmID++){
@@ -400,11 +400,11 @@ void ToolAvatarMark::title(){
 						io.PICreplace(frmID, pi, sPic);
 					}
 					if(singleNPK){
-						totalWeaponNo.IMGpush(io, no.entry[imgID].comment);
+						totalWeaponNo.IMGpush(no.content[imgID].comment, io);
 					}else{
-						partNo.IMGpush(io, no.entry[imgID].comment);
+						partNo.IMGpush(no.content[imgID].comment, io);
 					}
-					GET_CTRL(CProgressCtrl, IDC_PROGRESS2)->SetPos(1000*imgID/no.count);
+					GET_CTRL(CProgressCtrl, IDC_PROGRESS2)->SetPos(1000*imgID/no.getCount());
 				}
 				if(!singleNPK){
 					partNo.saveFile(afterStr);
@@ -413,7 +413,7 @@ void ToolAvatarMark::title(){
 				GET_CTRL(CProgressCtrl, IDC_PROGRESS1)->SetPos(1000*(i)/weaponNPK.size());
 			}
 			if(singleNPK){
-				if(totalWeaponNo.count > 0)
+				if(totalWeaponNo.getCount() > 0)
 					totalWeaponNo.saveFile(afterTotalWeaponStr);
 			}
 		}

@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExParrot", "ExParrot\ExParr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo", "Demo\Demo.vcxproj", "{39663A0B-53C3-4CCB-BB2B-9B9A884465B7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExSlash", "ExSlash\ExSlash.vcxproj", "{AE2717A7-74A4-44F4-96F6-595D8173953B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -33,6 +35,10 @@ Global
 		{39663A0B-53C3-4CCB-BB2B-9B9A884465B7}.Debug|Win32.Build.0 = Debug|Win32
 		{39663A0B-53C3-4CCB-BB2B-9B9A884465B7}.Release|Win32.ActiveCfg = Release|Win32
 		{39663A0B-53C3-4CCB-BB2B-9B9A884465B7}.Release|Win32.Build.0 = Release|Win32
+		{AE2717A7-74A4-44F4-96F6-595D8173953B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AE2717A7-74A4-44F4-96F6-595D8173953B}.Debug|Win32.Build.0 = Debug|Win32
+		{AE2717A7-74A4-44F4-96F6-595D8173953B}.Release|Win32.ActiveCfg = Release|Win32
+		{AE2717A7-74A4-44F4-96F6-595D8173953B}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

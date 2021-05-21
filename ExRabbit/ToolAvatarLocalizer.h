@@ -22,7 +22,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	Profile profile;
+	ProfileBlack profile;
 	uchar maxEstablished;
 	uchar localFlag;
 	volatile uchar established;
@@ -34,7 +34,7 @@ public:
 	CProgressCtrl * cpl[ACHARACTER_MAXCOUNT];
 	CButton *cbl[ACHARACTER_MAXCOUNT];
 	std::vector<queue> ql;
-	void localize(AvatarCharacter, Profile*,  CEdit*, CProgressCtrl*, uchar);
+	void localize(AvatarCharacter, ProfileBlack*, CEdit*, CProgressCtrl*, uchar);
 public:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnBnClickedStart();

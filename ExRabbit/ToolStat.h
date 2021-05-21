@@ -95,9 +95,9 @@ public:
 		}
 		palQuery.push_back(newTerm);
 	}
-	DeclareThreadFunc(Tool1, int);
-	DeclareThreadFunc(Tool2, int);
-	DeclareThreadFunc(Tool3, int);
+	DeclareThreadFunc(ToolStat, Tool1, int);
+	DeclareThreadFunc(ToolStat, Tool2, int);
+	DeclareThreadFunc(ToolStat, Tool3, int);
 public:
 	afx_msg void OnBnClickedButtonSelect();
 	afx_msg void OnBnClickedButtonTool1();

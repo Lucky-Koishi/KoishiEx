@@ -15,361 +15,575 @@ NPKentry::NPKentry(){
 	comment = "";
 	link = -1;
 }
-NPKentry::NPKentry(const str pathName, int blockID){
-	comment = pathName;
+NPKentry::NPKentry(const str newComment, long blockID) {
+	comment = newComment;
 	link = blockID;
 }
+NPKblock::NPKblock() {
+	start = 0;
+	length = 0;
+}
+NPKblock::~NPKblock() {
+	destroy();
+}
+void NPKblock::load(const stream &sourceStream) {
+	start = 0;
+	length = sourceStream.length;
+	data.allocate(length);
+	memcpy(data.begin(), sourceStream.begin(), sourceStream.length);
+}
+void NPKblock::destroy() {
+	data.release();
+}
+dword NPKblock::checkMagic() {
+	dword value = 0;
+	for(char i = 0; i < 4; i++) {
+		if(i<length)value |= data[i] << (i << 3);
+	}
+	return value;
+}
+dword NPKblock::checkData(long pos) {
+	dword value = 0;
+	for(char i = 0; i < 4; i++) {
+		if(i + pos<length)value |= data[i + pos] << (i << 3);
+	}
+	return value;
+}
 NPKobject::NPKobject(){
-	release();
+	//release();
 }
-NPKobject::NPKobject(const stream &in){
-	load(in);
-}
-NPKobject::NPKobject(const str &fileName){
-	loadFile(fileName);
-}
-//////////////////////////////////////////////////////////////////////////////////////
-//Main Factory
-//////////////////////////////////////////////////////////////////////////////////////
-bool NPKobject::load(const stream &in){
-	stream data(in);
-	data.resetPosition();
-	if(data.length < 20)
+bool NPKobject::loadEntry(const str &fileName) {
+	FILE *file = fopen(fileName.c_str(), "rb+");
+	if(!file)
 		return false;
-	if(data.readString(16) != "NeoplePack_Bill")
+	fseek(file, 0, SEEK_END);
+	int length = ftell(file);
+	if(length < 20) {
+		fclose(file);
 		return false;
-	data.readDWord(count);
-	if(data.length < count*264 + 52)
-		return false;
-	queue offsetInEntry, sizeInEntry;		//条目内标注的偏移量和尺寸
-	queue offsetInBlock, sizeInBlock;		//数据块的偏移量和尺寸
-	entry.clear();
-	block.clear();
-	entry.reserve(count);
-	block.reserve(count);
-	offsetInEntry.reserve(count);
-	offsetInBlock.reserve(count);
-	sizeInEntry.reserve(count);
-	sizeInBlock.reserve(count);
-	for(int i = 0;i<count;i++){
-		long num;
-		data.readInt(num);
-		offsetInEntry.push_back(num);
-		data.readInt(num);
-		sizeInEntry.push_back(num);
-		stream sPath(0x100);
-		data.readStream(sPath, 0x100);
-		sPath.nameMask();
-		entry.push_back(NPKentry((char*)sPath.begin(), -1));
-		entry[entry.size()-1]._len = sizeInEntry[sizeInEntry.size()-1];
-		entry[entry.size()-1]._st = offsetInEntry[offsetInEntry.size()-1];
 	}
-	if(true){
-		stream checkCode;
-		data.readStream(checkCode, 32);
+	fseek(file, 0, SEEK_SET);
+	char magic[17] = {0};
+	fread(magic, sizeof(char), 16, file);
+	if(str(magic) != "NeoplePack_Bill") {
+		fclose(file);
+		return false;
 	}
-	for(int i = 0;i<count;i++){
-		int findBlock = -1;
-		for(int j = 0;j<block.size();j++){
-			if(sizeInBlock[j] == sizeInEntry[i] && offsetInBlock[j] == offsetInEntry[i]){
-				findBlock = j;
+	dword count;
+	fread(&count, sizeof(dword), 1, file);
+	if(length < count * 264 + 52) {
+		fclose(file);
+		return false;
+	}
+	//结束判定，开始解析
+	for(int i = 0; i < count; i++) {
+		NPKblock thisBlock;
+		NPKentry thisEntry;
+		char pathBuf[256] = {0};
+		fread(&thisBlock.start, sizeof(long), 1, file);
+		fread(&thisBlock.length, sizeof(long), 1, file);
+		fread(pathBuf, sizeof(char), 256, file);
+		nameMask(pathBuf);
+		thisEntry.comment = str(pathBuf);
+		thisEntry.link = -1;
+		content.push_back(thisEntry);
+	}
+	fclose(file);
+	return true;
+}
+bool NPKobject::loadFile(const str &fileName) {
+	FILE *file = fopen(fileName.c_str(), "rb+");
+	if(!file)
+		return false;
+	fseek(file, 0, SEEK_END);
+	int length = ftell(file);
+	if(length < 20) {
+		fclose(file);
+		return false;
+	}
+	fseek(file, 0, SEEK_SET);
+	char magic[17] = {0};
+	fread(magic, sizeof(char), 16, file);
+	if(str(magic) != "NeoplePack_Bill") {
+		fclose(file);
+		return false;
+	}
+	dword count;
+	fread(&count, sizeof(dword), 1, file);
+	if(length < count * 264 + 52) {
+		fclose(file);
+		return false;
+	}
+	//结束判定，开始解析
+	for(int i = 0; i < count; i++) {
+		NPKblock thisBlock;
+		NPKentry thisEntry;
+		char pathBuf[256] = {0};
+		fread(&thisBlock.start, sizeof(long), 1, file);
+		fread(&thisBlock.length, sizeof(long), 1, file);
+		fread(pathBuf, sizeof(char), 256, file);
+		nameMask(pathBuf);
+		thisEntry.comment = str(pathBuf);
+		thisEntry.link = -1;
+		//首先确认这个block是不是新的，如果不是新的就是引用对象
+		long thisBlockID = -1;
+		for(int b = 0; b < block.size(); b++) {
+			if(block[b].start == thisBlock.start && block[b].length == thisBlock.length) {
+				thisBlockID = b;
 				break;
 			}
 		}
-		if(findBlock >= 0){
-			entry[i].link = findBlock;
-		}else{
-			stream blockData;
-			offsetInBlock.push_back(offsetInEntry[i]);
-			sizeInBlock.push_back(sizeInEntry[i]);
-			data.setPosition(offsetInEntry[i]);
-			data.readStream(blockData, sizeInEntry[i]);
-			block.push_back(blockData);
-			entry[i].link = block.size()-1;
+		if(thisBlockID == -1) {
+			//新的，增加block，entry的link为此新block
+			block.push_back(thisBlock);
+			thisEntry.link = block.size() - 1;
+			content.push_back(thisEntry);
+		} else {
+			thisEntry.link = thisBlockID;
+			content.push_back(thisEntry);
 		}
 	}
+	for(int i = 0; i < block.size(); i++) {
+		auto &thisBlock = block[i];
+		thisBlock.data.allocate(thisBlock.length);
+		fseek(file, thisBlock.start, SEEK_SET);
+		fread(thisBlock.data.begin(), sizeof(char), thisBlock.length, file);
+	}
+	fclose(file);
 	return true;
 }
-bool NPKobject::make(stream &out){
-	longex preLen = 0;		//数据段预计大小
-	long coff = 0;		//偏移量
-	for(int i = 0;i<block.size();i++){
-		preLen += block[i].length;
-	}
-	stream data;
-	data.allocate(1000 + preLen);
-	out.allocate(count * 264 + 1000 + preLen);
-	out.pushString("NeoplePack_Bill");
-	out.pushByte(0);
-	out.pushDWord(count);
-	coff = count * 264 + 52;
-	queue offsetInEntry, sizeInEntry;
-	offsetInEntry.reserve(count);
-	sizeInEntry.reserve(count);
-	for(int i = 0;i<count;i++){
-		long lfs = checkLink(i);
-		if(lfs == i){
-			offsetInEntry.push_back(coff);
-			sizeInEntry.push_back(block[entry[i].link].length);
-			data.pushStream(block[entry[i].link], block[entry[i].link].length);
-			coff += block[entry[i].link].length;
-		}else{
-			offsetInEntry.push_back(offsetInEntry[lfs]);
-			sizeInEntry.push_back(sizeInEntry[lfs]);
+bool NPKobject::saveFile(const str &fileName) {
+	//一会儿写
+	FILE *file = fopen(fileName.c_str(), "wb+");
+	if(!file)
+		return false;
+	//文件头
+	stream headHelper(52 + content.size() * 264), headTrun(52 + content.size() * 264), checkCode;//计算SHA256用的
+	char magic[16] = "NeoplePack_Bill";
+	fwrite(magic, sizeof(char), 16, file);
+	headHelper.push(magic, 16);
+	long count = content.size();
+	fwrite(&count, sizeof(long), 1, file);
+	headHelper.push(&count, 4);
+	//计算条目的相关项和block的顺序（block要重排）
+	std::vector<long> newBlockSeq;	//block的顺序
+	//先判断哪些属于引用
+	for(int i = 0; i < content.size(); i++) {
+		const auto &entry = content[i];
+		long isQuote = -1;
+		for(int k = 0; k < i; k++) {
+			if(content[k].link == entry.link) {
+				isQuote = k;
+				break;
+			}
 		}
-		stream sPath(512);
-		sPath.pushString(entry[i].comment);
-		while(sPath.length < 256)
-			sPath.pushByte(0);
-		sPath.nameMask();
-		out.pushInt(offsetInEntry[i]);
-		out.pushInt(sizeInEntry[i]);
-		out.pushStream(sPath, 256);
+		if(isQuote == -1) {
+			newBlockSeq.push_back(entry.link);
+		}
 	}
-	stream checkCode, head(count * 264 + 52);
-	head.pushStream(out, out.length / 17 * 17);
-	head.SHA256code(checkCode);
-	out.pushStream(checkCode, 32);
-	out.pushStream(data, data.length);
-	return true;
-}
-bool NPKobject::loadFile(const str &fileName){
-	stream data;
-	if(!data.loadFile(fileName))
-		return false;
-	if(!load(data))
-		return false;
-	return true;
-}
-bool NPKobject::saveFile(const str &fileName){
-	stream data;
-	if(!make(data))
-		return false;
-	if(!data.makeFile(fileName))
-		return false;
-	return true;
-}
-bool NPKobject::create(){
-	count = 0;
-	block.clear();
-	entry.clear();
-	return true;
-}
-bool NPKobject::release(){
-	count = 0;
-	block.clear();
-	entry.clear();
-	return true;
-}
-longex NPKobject::getSize() const{
-	longex preLen = 0;
-	for(int i = 0;i<block.size();i++){
-		preLen += block[i].length;
+	//计算block的新起始位置
+	long start_pos = 52 + 264 * content.size();
+	for(int i = 0; i < newBlockSeq.size(); i++) {
+		block[newBlockSeq[i]].start = start_pos;
+		start_pos += block[newBlockSeq[i]].length;
 	}
-	return count * 264 + 52 + preLen;
+	//计算条目表象
+	for(int i = 0; i < content.size(); i++) {
+		const auto &entry = content[i];
+		long offset = block[entry.link].start;
+		long length = block[entry.link].length;
+		char pathName[256] = {0};
+		memcpy(pathName, entry.comment.c_str(), entry.comment.size());
+		nameMask(pathName);
+		fwrite(&offset, sizeof(long), 1, file);
+		fwrite(&length, sizeof(long), 1, file);
+		fwrite(pathName, sizeof(char), 256, file);
+		
+		
+		headHelper.push(&offset, 4);
+		headHelper.push(&length, 4);
+		headHelper.push(pathName, 256);
+	}
+	headTrun.pushStream(headHelper, headHelper.length / 17 * 17);
+	headTrun.SHA256code(checkCode);
+	fwrite(checkCode.begin(), sizeof(char), 32, file);
+	for(int i = 0; i < newBlockSeq.size(); i++) {
+		const auto &bk = block[newBlockSeq[i]];
+		fwrite(bk.data.begin(), sizeof(char), bk.length, file);
+	}
+	fclose(file);
+	return true;
 }
-//数据流接口
-bool NPKobject::extract(long pos, stream &dest){
-	if(pos < 0 || pos >= count)
+bool NPKobject::create() {
+	block.clear();
+	content.clear();
+	return false;
+}
+bool NPKobject::release() {
+	block.clear();
+	content.clear();
+	return false;
+}
+void NPKobject::addBlock(const stream &newStream) {
+	NPKblock newBlock;
+	block.push_back(newBlock);	//调用了复制构造函数(如果block重新分配空间那么所有项都调用……）
+	NPKblock &lastBlock = block[block.size() - 1];
+	lastBlock.load(newStream);
+}
+bool NPKobject::push(const str &path, const stream &newStream) {
+	addBlock(newStream);
+	content.push_back(NPKentry(path, block.size() - 1));
+	return true;
+}
+bool NPKobject::pushFile(const str &path, str fileName) {
+	stream newStream;
+	if(!newStream.loadFile(fileName))
 		return false;
-	dest = block[entry[pos].link];
-	return true;
-}
-bool NPKobject::push(const stream &sour, const str &imgName){
-	block.push_back(sour);
-	entry.push_back(NPKentry(imgName, block.size()-1));
-	count ++;
-	return true;
-}
-bool NPKobject::insert(long pos, const stream &sour, const str &imgName){
-	if(pos < 0 || pos > count)
+	if(!push(path, newStream))
 		return false;
-	if(pos == count)
-		return push(sour, imgName);
-	block.push_back(sour);
-	entry.insert(entry.begin() + pos, NPKentry(imgName, block.size()-1));
-	count ++;
 	return true;
 }
-bool NPKobject::remove(long pos){
-	if(pos < 0 || pos >= count)
+bool NPKobject::pushCopy(const str &path, long quotePos) {
+	stream newStream;
+	if(!checkEntryRange(quotePos))
 		return false;
-	entry.erase(entry.begin() + pos);
-	count --;
-	return true;
-}
-bool NPKobject::replace2(long pos, const stream &sour){
-	if(pos < 0 || pos >= count)
+	if(!extract(quotePos, newStream))
 		return false;
-	block.push_back(sour);
-	entry[pos].link = block.size()-1;
-	return true;
-}
-bool NPKobject::replace(long pos, const stream &sour){
-	if(pos < 0 || pos >= count)
+	if(!push(path, newStream))
 		return false;
-	block[entry[pos].link].release();
-	block[entry[pos].link] = sour;
 	return true;
 }
-bool NPKobject::pushLink(long linkPos, const str &pathName){
-	if(linkPos < 0 || linkPos >= count)
+bool NPKobject::pushQuote(const str &path, long quotePos) {
+	if(!checkEntryRange(quotePos))
 		return false;
-	entry.push_back(NPKentry(pathName, entry[linkPos].link));
-	count ++;
-	return true;
-}
-bool NPKobject::insertLink(long pos, long linkPos, const str &pathName){
-	if(linkPos < 0 || linkPos >= count || pos < 0 || pos >= count)
+	if(!checkBlockRange(content[quotePos].link))
 		return false;
-	if(pos == count)
-		return pushLink(linkPos, pathName);
-	entry.insert(entry.begin()+pos, NPKentry(pathName, entry[linkPos].link));
-	count ++;
+	content.push_back(NPKentry(path, content[quotePos].link));
 	return true;
 }
-bool NPKobject::modifyLink(long pos, long newLinkPos){
-	if(newLinkPos < 0 || newLinkPos >= count || pos < 0 || pos >= count)
+bool NPKobject::insert(long pos, const str &path, const stream &newStream) {
+	if(!checkEntryRangeEx(pos))
 		return false;
-	entry[pos].link = newLinkPos;
+	if(pos == content.size())
+		return push(path, newStream);
+	addBlock(newStream);
+	content.insert(content.begin() + pos, NPKentry(path, block.size() - 1));
 	return true;
 }
-bool NPKobject::delink(long pos){
-	if(pos < 0 || pos >= count)
+bool NPKobject::insertFile(long pos, const str &path, str fileName) {
+	stream newStream;
+	if(!newStream.loadFile(fileName))
 		return false;
-	replace2(pos, block[entry[pos].link]);
+	if(!insert(pos, path, newStream))
+		return false;
 	return true;
 }
-long NPKobject::checkLink(long pos) const{
-	//检查在其前的Entry是否有与其映射到同一数据块
-	for(int i = 0;i<count;i++){
-		if(entry[pos].link == entry[i].link){
+bool NPKobject::insertCopy(long pos, const str &path, long sourcePos) {
+	stream newStream;
+	if(!checkEntryRange(sourcePos))
+		return false;
+	if(!extract(sourcePos, newStream))
+		return false;
+	if(!insert(pos, path, newStream))
+		return false;
+	return true;
+}
+bool NPKobject::insertQuote(long pos, const str &path, long sourcePos) {
+	if(!checkEntryRangeEx(pos))
+		return false;
+	if(!checkEntryRange(sourcePos))
+		return false;
+	if(!checkBlockRange(content[sourcePos].link))
+		return false;
+	content.insert(content.begin() + pos, NPKentry(path, content[sourcePos].link));
+	return true;
+}
+//提取条目(提取到目标流、另存为文件）
+bool NPKobject::extract(long pos, stream &dest) {
+	if(!checkEntryRange(pos))
+		return false;
+	if(!checkBlockRange(content[pos].link))
+		return false;
+	const auto &bk = block[content[pos].link];
+	dest.allocate(bk.length);
+	dest.push(bk.data.begin(), bk.length);
+	return true;
+}
+bool NPKobject::extractFile(long pos, const str &fileName) {
+	stream newStream;
+	if(!extract(pos, newStream))
+		return false;
+	if(!newStream.makeFile(fileName))
+		return false;
+	return true;
+}
+//删除条目
+bool NPKobject::remove(long pos) {
+	if(!checkEntryRange(pos))
+		return false;
+	content.erase(content.begin() + pos);
+	return true;
+}
+//重命名条目
+bool NPKobject::rename(long pos, str newPathName) {
+	if(!checkEntryRange(pos))
+		return false;
+	if(newPathName.size() >= 256)
+		return false;
+	content[pos].comment = newPathName;
+	return true;
+}
+//查找条目
+bool NPKobject::find(const str &keyword, long &pos, long startPos){
+	for(long i = startPos;i<content.size();i++){
+		if(content[i].comment.find(keyword) != str::npos){
+			pos = i;
+			return true;
+		}
+	}
+	pos = -1;
+	return false;
+}
+//替换条目
+bool NPKobject::replace(long pos, const stream &newStream) {
+	if(!checkEntryRange(pos))
+		return false;
+	if(!checkBlockRange(content[pos].link))
+		return false;
+	auto &bk = block[content[pos].link];
+	bk.destroy();
+	bk.load(newStream);
+	return true;
+}
+bool NPKobject::replaceFile(long pos, const str &fileName) {
+	if(!checkEntryRange(pos))
+		return false;
+	if(!checkBlockRange(content[pos].link))
+		return false;
+	stream newStream;
+	if(!newStream.loadFile(fileName))
+		return false;
+	if(!replace(pos, newStream))
+		return false;
+	return true;
+}
+bool NPKobject::replaceCopy(long pos, long sourcePos) {
+	if(!checkEntryRange(pos))
+		return false;
+	if(!checkBlockRange(content[pos].link))
+		return false;
+	stream newStream;
+	if(!extract(sourcePos, newStream))
+		return false;
+	if(!replace(pos, newStream))
+		return false;
+	return true;
+}
+bool NPKobject::replaceQuote(long pos, long sourcePos) {
+	if(!checkEntryRange(pos))
+		return false;
+	if(!checkEntryRange(sourcePos))
+		return false;
+	if(!checkBlockRange(content[sourcePos].link))
+		return false;
+	content[pos].link = content[sourcePos].link;
+	return true;
+}
+bool NPKobject::subscribe(long pos, stream newStream) {
+	if(!checkEntryRange(pos))
+		return false;
+	addBlock(newStream);
+	content[pos].link = block.size() - 1;
+	return true;
+}
+bool NPKobject::subscribeFile(long pos, const str &fileName) {
+	if(!checkEntryRange(pos))
+		return false;
+	stream newStream;
+	if(!newStream.loadFile(fileName))
+		return false;
+	if(!subscribe(pos, newStream))
+		return false;
+	return true;
+}
+bool NPKobject::subscribeCopy(long pos, long sourcePos) {
+	if(!checkEntryRange(pos))
+		return false;
+	stream newStream;
+	if(!extract(sourcePos, newStream))
+		return false;
+	if(!subscribe(pos, newStream))
+		return false;
+	return true;
+}
+//解引用
+bool NPKobject::dequote(long pos) {
+	if(!checkEntryRange(pos))
+		return false;
+	if(pos == checkQuote(pos))
+		return false;
+	if(!subscribeCopy(pos, pos))
+		return false;
+	return true;
+}
+//检查引用，若非引用，返回自身
+long NPKobject::checkQuote(long pos) {
+	for(int i = 0; i<pos; i++) {
+		if(content[pos].link == content[i].link) {
 			return i;
 		}
 	}
 	return pos;
 }
-bool NPKobject::rename(long pos, const str& newName){
-	if(pos < 0 || pos >= count)
-		return false;
-	entry[pos].comment = newName;
-	return true;
-}
-bool NPKobject::find(const str &keyword, dword &pos, long startPos){
-	for(long i = startPos;i<count;i++){
-		if(entry[i].comment.find(keyword) != str::npos){
-			pos = i;
-			return true;
-		}
-	}
-	return false;
-}
-bool NPKobject::find(const str &keyword, const str &nonkeyword, dword &pos, long startPos){
-	for(long i = startPos;i<count;i++){
-		if(entry[i].comment.find(keyword) != str::npos && entry[i].comment.find(nonkeyword) == str::npos){
-			pos = i;
-			return true;
-		}
-	}
-	return false;
-}
-//文件接口
-bool NPKobject::extract(long pos, const str &fileName){
-	stream fs;
-	if(!extract(pos, fs))
-		return false;
-	return fs.makeFile(fileName);
-}
-bool NPKobject::push(const str &fileName, const str &pathName){
-	stream fs;
-	if(!fs.loadFile(fileName))
-		return false;
-	return push(fs, pathName);
-}
-bool NPKobject::insert(long pos, const str &fileName, const str &pathName){
-	stream fs;
-	if(!fs.loadFile(fileName))
-		return false;
-	return insert(pos, fs, pathName);
-}
-bool NPKobject::replace(long pos, const str &fileName){
-	stream fs;
-	if(!fs.loadFile(fileName))
-		return false;
-	return replace(pos, fs);
-}
 //IMG对象的接口
-bool NPKobject::IMGextract(dword pos, IMGobject &io){
-	if(pos<0 || pos >= count)
-		return false;
+bool NPKobject::IMGextract(long pos, IMGobject &io){
 	stream dataIO;
 	if(!extract(pos, dataIO))
 		return false;
 	if(!io.load(dataIO))
 		return false;
-	io.derived = &entry[pos];
+	io.derived = &content[pos];
 	return true;
 }
-bool NPKobject::IMGpush(IMGobject &io, const str &imgName){
+bool NPKobject::IMGpush(const str &newPath, IMGobject &io){
 	stream dataIO;
-	io.make(dataIO);
-	return push(dataIO, imgName);
+	if(!io.make(dataIO))
+		return false;
+	if(!push(newPath, dataIO))
+		return false;
+	return true;
 }
-bool NPKobject::IMGinsert(long pos, IMGobject &io, const str &imgName){
+bool NPKobject::IMGinsert(long pos, const str &newPath, IMGobject &io) {
 	stream dataIO;
-	io.make(dataIO);
-	return insert(pos, dataIO, imgName);
+	if(!io.make(dataIO))
+		return false;
+	if(!insert(pos, newPath, dataIO))
+		return false;
+	return true;
 }
 bool NPKobject::IMGremove(long pos){
-	return remove(pos);
+	if(!remove(pos))
+		return false;
+	return true;
 }
 bool NPKobject::IMGreplace(long pos, IMGobject &io){
 	stream dataIO;
-	io.make(dataIO);
-	return replace(pos, dataIO);
+	if(!io.make(dataIO))
+		return false;
+	if(!replace(pos, dataIO))
+		return false;
+	return true;
 }
 bool NPKobject::IMGrename(long pos, const str& newName){
-	return rename(pos, newName);
+	if(!rename(pos, newName))
+		return false;
+	return true;
 }
 IMGversion NPKobject::IMGgetVersion(long pos) {
-	long r;
-	stream &s = block[entry[pos].link];
-	s.resetPosition();
-	s.readInt(r);
-	if(r == 0x706F654E/*Neop*/){
-		s.movePosition(20);
-		s.readInt(r);
-		//目前已知的有1、2、4、5、6
-		if(r == 1 || r == 2 || r == 4 || r == 5 || r == 6){
-			return (IMGversion)r;
+	if(!checkEntryRange(pos))
+		return VUDEF;
+	if(!checkBlockRange(content[pos].link))
+		return VUDEF;
+	auto &bk = block[content[pos].link];
+	dword magic = bk.checkMagic();
+	if(0x706F654E == magic) {
+		dword version = bk.checkData(24);
+		if(version == 1) {
+			return V1;
+		} else if(version == 2) {
+			return V2;
+		} else if(version == 4) {
+			return V4;
+		} else if(version == 5) {
+			return V5;
+		} else if(version == 6) {
+			return V6;
+		} else {
+			return VUKNOWN;
 		}
-		return VUKNOWN;
-	} else {
-		SNDversion sv = SNDgetVersion(pos);
-		if(sv != VSNDUKNOWN && sv != VIMAGE) {
-			return VSOUND;
-		}
+	} else if(0x46464952 == magic) {
+		return VSOUND; /*riff*/
+	} else if(0x5367674F == magic) {
+		return VSOUND; /*ogg*/
+	} else if((magic & 0xFFFFFF) == 0x334449 || (magic & 0xF0FF) == 0xF0FF) {
+		return VSOUND; /*mp3*/
 	}
-	return VUDEF;		//根本就不是支持的文件
+	return VUDEF;
+}
+IMGversion NPKobject::IMGgetVersionEx(long pos) {
+	if(!checkEntryRange(pos))
+		return VUDEF;
+	if(!checkBlockRange(content[pos].link))
+		return VUDEF;
+	if(checkQuote(pos) < pos)
+		return VQUOTE;
+	return IMGgetVersion(pos);
 }
 long NPKobject::IMGgetPaletteCount(long pos){
-	long r;
-	stream &s = block[entry[pos].link];
-	s.resetPosition();
-	s.readInt(r);
-	if(r != 0x706F654E)
+	if(!checkEntryRange(pos))
 		return 0;
-	s.movePosition(20);
-	s.readInt(r);
-	if(r != 6)
+	if(!checkBlockRange(content[pos].link))
 		return 0;
-	s.movePosition(4);
-	s.readInt(r);
-	return r;
+	auto &bk = block[content[pos].link];
+	dword magic = bk.checkMagic();
+	if(0x706F654E != magic)
+		return 0;
+	dword version = bk.checkData(24);
+	if(6 != version)
+		return 0;
+	dword count = bk.checkData(32);
+	return count;
 }
 SNDversion NPKobject::SNDgetVersion(long pos) {
-	stream &sour = block[entry[pos].link];
-	return KoishiAudioTool::checkAudioFormat(sour);
+	if(!checkEntryRange(pos))
+		return VSNDUDEF;
+	if(!checkBlockRange(content[pos].link))
+		return VSNDUDEF;
+	auto &bk = block[content[pos].link];
+	dword magic = bk.checkMagic();
+	if(0x46464952 == magic) {
+		return VWAVE; /*riff*/
+	} else if(0x5367674F == magic) {
+		return VVORBIS; /*ogg*/
+	} else if((magic & 0xFFFFFF) == 0x334449 || (magic & 0xF0FF) == 0xF0FF) {
+		return VMP3; /*mp3*/
+	} else if(0x706F654E == magic) {
+		return VIMAGE;
+	}
+	return VSNDUDEF;
+}
+SNDversion NPKobject::SNDgetVersionEx(long pos) {
+	if(!checkEntryRange(pos))
+		return VSNDUDEF;
+	if(!checkBlockRange(content[pos].link))
+		return VSNDUDEF;
+	if(checkQuote(pos) < pos)
+		return VSNDQUOTE;
+	return SNDgetVersion(pos);
+}
+void NPKobject::nameMask(void*data) {
+	str IMGnameMask = "puchikon@neople dungeon and fighter DNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNFDNF";
+	for(long i = 0; i<255; i++)
+		((char*)data)[i] ^= IMGnameMask[i];
+}
+bool NPKobject::checkEntryRange(long pos) {
+	return pos >= 0 && pos < content.size();
+}
+bool NPKobject::checkEntryRangeEx(long pos) {
+	return pos >= 0 && pos <= content.size();
+}
+bool NPKobject::checkBlockRange(long pos) {
+	return pos >= 0 && pos < block.size();
+}
+long NPKobject::getCount() const {
+	return content.size();
+}
+long NPKobject::getSize() const {
+	long sz = 52 + content.size() * 264;
+	for(const auto &bk : block) {
+		sz += bk.length;
+	}
+	return sz;
 }
 //////////////////////////////////////////////////////////////////////////////////////
 PICinfo::PICinfo(){

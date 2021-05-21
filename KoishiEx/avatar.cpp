@@ -61,6 +61,7 @@ dword layerSequence[100][2] = {
 	{APART_PANTS,	'b'},
 	{APART_SHOES,	'h'},
 	{APART_SHOES,	'b'},
+	{APART_SHOES,	'd'},
 	{APART_PANTS,	'h'},
 	{APART_PANTS,	'd'},
 	{APART_BELT,	'b'},
@@ -357,11 +358,11 @@ bool AvatarAlbum::loadNPK(const str& NPKfileName){
 	//开始解析IMG路径名
 	int IMGindex = 0;
 	content.clear();
-	for(IMGindex = 0; IMGindex < source.count; IMGindex++){
+	for(IMGindex = 0; IMGindex < source.content.size(); IMGindex++){
 		IMGversion IMGver = (IMGversion)source.IMGgetVersion(IMGindex);
 		if(IMGver <= 0 || IMGver > V6)
 			continue;
-		str IMGpath = source.entry[IMGindex].comment;
+		str IMGpath = source.content[IMGindex].comment;
 		str::size_type st = IMGpath.find_last_of('/');
 		str IMGname = (st == str::npos) ? IMGpath:IMGpath.substr(st+1);
 		if(IMGname.size() < 6)
@@ -521,7 +522,7 @@ bool AvatarAlbum::updateIMG(){
 		IMGobject io;
 		source.IMGextract(layerList[i].posInNPK, io);
 		layerIMGlist.push_back(io);
-		layerNameList.push_back(source.entry[layerList[i].posInNPK].comment);
+		layerNameList.push_back(source.content[layerList[i].posInNPK].comment);
 	}
 	return true;
 }
@@ -572,11 +573,11 @@ bool WeaponAlbum::loadNPK(const str& NPKfileName){
 	//开始解析IMG路径名
 	int IMGindex = 0;
 	content.clear();
-	for(IMGindex = 0; IMGindex < source.count; IMGindex++){
+	for(IMGindex = 0; IMGindex < source.content.size(); IMGindex++){
 		IMGversion IMGver = (IMGversion)source.IMGgetVersion(IMGindex);
 		if(IMGver <= 0 || IMGver > V6)
 			continue;
-		str IMGpath = source.entry[IMGindex].comment;
+		str IMGpath = source.content[IMGindex].comment;
 		str::size_type st = IMGpath.find_last_of('/');
 		str IMGname = (st == str::npos) ? IMGpath:IMGpath.substr(st+1);
 		if(IMGname.size() < 6)
@@ -736,7 +737,7 @@ bool WeaponAlbum::updateIMG(){
 		IMGobject io;
 		source.IMGextract(layerList[i].posInNPK, io);
 		layerIMGlist.push_back(io);
-		layerNameList.push_back(source.entry[layerList[i].posInNPK].comment);
+		layerNameList.push_back(source.content[layerList[i].posInNPK].comment);
 	}
 	return true;
 }
@@ -897,14 +898,14 @@ void AvatarFactory::makeNPK(NPKobject &no){
 				if(*(dword*)weaponAlbum[currentWeapon].layerList[l].layer == layerSequence[seq][1]){
 					weaponLayerUsed[l] = 1;
 					if(weaponAlbum[currentWeapon].layerList[l].paletteID <= 0){
-						no.IMGpush(weaponAlbum[currentWeapon].layerIMGlist[l], weaponAlbum[currentWeapon].layerNameList[l]);
+						no.IMGpush(weaponAlbum[currentWeapon].layerNameList[l], weaponAlbum[currentWeapon].layerIMGlist[l]);
 					}else{
 						std::vector<IMGobject> ioList;
 						weaponAlbum[currentWeapon].layerIMGlist[l].convertToV4(ioList, colorList());
 						if(weaponAlbum[currentWeapon].layerList[l].paletteID < ioList.size()){
-							no.IMGpush(ioList[weaponAlbum[currentWeapon].layerList[l].paletteID], formatAvatarIDplusBy(weaponAlbum[currentWeapon].layerNameList[l], weaponAlbum[currentWeapon].layerList[l].paletteID));
+							no.IMGpush( formatAvatarIDplusBy(weaponAlbum[currentWeapon].layerNameList[l], weaponAlbum[currentWeapon].layerList[l].paletteID), ioList[weaponAlbum[currentWeapon].layerList[l].paletteID]);
 						}else{
-							no.IMGpush(weaponAlbum[currentWeapon].layerIMGlist[l], weaponAlbum[currentWeapon].layerNameList[l]);
+							no.IMGpush(weaponAlbum[currentWeapon].layerNameList[l], weaponAlbum[currentWeapon].layerIMGlist[l]);
 						}
 					}
 				}
@@ -914,14 +915,14 @@ void AvatarFactory::makeNPK(NPKobject &no){
 				if(*(dword*)album[p].layerList[l].layer == layerSequence[seq][1]){
 					layerUsed[p][l] = 1;
 					if(album[p].layerList[l].paletteID <= 0){
-						no.IMGpush(album[p].layerIMGlist[l], album[p].layerNameList[l]);
+						no.IMGpush(album[p].layerNameList[l], album[p].layerIMGlist[l]);
 					}else{
 						std::vector<IMGobject> ioList;
 						album[p].layerIMGlist[l].convertToV4(ioList, colorList());
 						if(album[p].layerList[l].paletteID < ioList.size()){
-							no.IMGpush(ioList[album[p].layerList[l].paletteID], formatAvatarIDplusBy(album[p].layerNameList[l], album[p].layerList[l].paletteID));
+							no.IMGpush(formatAvatarIDplusBy(album[p].layerNameList[l], album[p].layerList[l].paletteID), ioList[album[p].layerList[l].paletteID]);
 						}else{
-							no.IMGpush(album[p].layerIMGlist[l], album[p].layerNameList[l]);
+							no.IMGpush(album[p].layerNameList[l], album[p].layerIMGlist[l]);
 						}
 					}
 				}
@@ -935,13 +936,13 @@ void AvatarFactory::makeNPK(NPKobject &no){
 	for(int p = 0;p<APART_MAXCOUNT;p++){
 		for(int l = 0;l<album[p].layerList.size();l++){
 			if(!layerUsed[p][l]){
-				no.IMGpush(album[p].layerIMGlist[l], album[p].layerNameList[l]);
+				no.IMGpush(album[p].layerNameList[l], album[p].layerIMGlist[l]);
 			}
 		}
 	}
 	for(int l = 0;l<weaponAlbum[currentWeapon].layerList.size();l++){
 		if(!weaponLayerUsed[l]){
-			no.IMGpush(weaponAlbum[currentWeapon].layerIMGlist[l], weaponAlbum[currentWeapon].layerNameList[l]);
+			no.IMGpush(weaponAlbum[currentWeapon].layerNameList[l], weaponAlbum[currentWeapon].layerIMGlist[l]);
 		}
 	}
 }

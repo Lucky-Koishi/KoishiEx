@@ -36,8 +36,6 @@ BEGIN_MESSAGE_MAP(ModalPreference, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_PREFERENCE5, &ModalPreference::OnBnClickedButtonPreference5)
 	ON_BN_CLICKED(IDC_BUTTON_PREFERENCE6, &ModalPreference::OnBnClickedButtonPreference6)
 	ON_BN_CLICKED(IDC_BUTTON_PREFERENCE7, &ModalPreference::OnBnClickedButtonPreference7)
-	ON_BN_CLICKED(IDC_BUTTON_PREFERENCE8, &ModalPreference::OnBnClickedButtonPreference8)
-	ON_BN_CLICKED(IDC_BUTTON_PREFERENCE9, &ModalPreference::OnBnClickedButtonPreference9)
 	ON_BN_CLICKED(IDOK, &ModalPreference::OnBnClickedOk)
 	ON_BN_CLICKED(IDC_BUTTON_SETPIC1, &ModalPreference::OnBnClickedButtonSetpic1)
 	ON_BN_CLICKED(IDC_BUTTON_SETPIC2, &ModalPreference::OnBnClickedButtonSetpic2)
@@ -105,7 +103,7 @@ void ModalPreference::OnBnClickedButtonPreference2(){
 				MessageBox(L"并不是有效的文件夹喵！",L"提示喵");
 			}else{
 				GET_CTRL(CEdit, IDC_EDIT_PREFERENCE2)->SetWindowText(filePath);
-				modifiedProfile.NPKdictPath = filePath;
+				modifiedProfile.sourcePath = filePath;
 			}
 		}
 		pMalloc->Release();
@@ -209,53 +207,18 @@ void ModalPreference::OnBnClickedButtonPreference7(){
 	modifiedProfile.canvasColor2 = clr;
 }
 
-
-void ModalPreference::OnBnClickedButtonPreference8(){
-	CString s;
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE8)->GetWindowText(s);
-	DWORD clr = _ttoi(s);
-	CColorDialog dlg(clr, CC_FULLOPEN | CC_RGBINIT, this);
-	if(IDOK == dlg.DoModal()){
-		clr = dlg.GetColor();
-	}else{
-		return;
-	}
-	s.Format(L"%d", clr);
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE8)->SetWindowText(s);
-	modifiedProfile.avatarColor0 = clr;
-}
-
-
-void ModalPreference::OnBnClickedButtonPreference9(){
-	CString s;
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE9)->GetWindowText(s);
-	DWORD clr = _ttoi(s);
-	CColorDialog dlg(clr, CC_FULLOPEN | CC_RGBINIT, this);
-	if(IDOK == dlg.DoModal()){
-		clr = dlg.GetColor();
-	}else{
-		return;
-	}
-	s.Format(L"%d", clr);
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE9)->SetWindowText(s);
-	modifiedProfile.avatarColor1 = clr;
-}
-
-
 BOOL ModalPreference::OnInitDialog(){
 	CDialogEx::OnInitDialog();
 
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE1)->SetWindowText(modifiedProfile.outputPath);
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE2)->SetWindowText(modifiedProfile.NPKdictPath);
+	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE2)->SetWindowText(modifiedProfile.sourcePath);
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE3)->SetWindowText(modifiedProfile.avatarPath);
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE4)->SetWindowText(NumToCStr(modifiedProfile.mainColor));
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE5)->SetWindowText(NumToCStr(modifiedProfile.canvasColor0));
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE6)->SetWindowText(NumToCStr(modifiedProfile.canvasColor1));
 	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE7)->SetWindowText(NumToCStr(modifiedProfile.canvasColor2));
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE8)->SetWindowText(NumToCStr(modifiedProfile.avatarColor0));
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE9)->SetWindowText(NumToCStr(modifiedProfile.avatarColor1));
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE10)->SetWindowText(NumToCStr(modifiedProfile.avatarModelSize));
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE11)->SetWindowText(NumToCStr(modifiedProfile.miniSecPerFrame));
+	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE8)->SetWindowText(NumToCStr(modifiedProfile.avatarModelSize));
+	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE9)->SetWindowText(NumToCStr(modifiedProfile.miniSecPerFrame));
 	return TRUE;
 }
 
@@ -263,14 +226,14 @@ BOOL ModalPreference::OnInitDialog(){
 void ModalPreference::OnBnClickedOk(){
 	CString sTemp;
 	int iTemp;
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE10)->GetWindowText(sTemp);
+	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE8)->GetWindowText(sTemp);
 	iTemp = _ttoi(sTemp);
 	if(iTemp < 0)
 		iTemp = 0;
 	if(iTemp > 3)
 		iTemp = 3;
 	modifiedProfile.avatarModelSize = iTemp;
-	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE11)->GetWindowText(sTemp);
+	GET_CTRL(CEdit, IDC_EDIT_PREFERENCE9)->GetWindowText(sTemp);
 	iTemp = _ttoi(sTemp);
 	if(iTemp < 10)
 		iTemp = 10;

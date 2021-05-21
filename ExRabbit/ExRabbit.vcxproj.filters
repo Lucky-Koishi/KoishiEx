@@ -385,12 +385,6 @@
     <ClInclude Include="DialogNew.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ToolIMGSearch.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ToolDict.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="DialogAbout.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -532,6 +526,18 @@
     <ClInclude Include="ToolStat.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ToolTeenSwitch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModalPictureStretch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolNPKsource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolDownloadServerSelection.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExRabbit.cpp">
@@ -544,12 +550,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="DialogNew.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ToolIMGSearch.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ToolDict.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="DialogAbout.cpp">
@@ -691,6 +691,18 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ToolStat.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolTeenSwitch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ModalPictureStretch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolNPKsource.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolDownloadServerSelection.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

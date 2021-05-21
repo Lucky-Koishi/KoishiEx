@@ -305,6 +305,8 @@ void ModalTransform::OnBnClickedCheckUseTexture(){
 
 void ModalTransform::OnMenuIndexingCurrent(){
 	out.useColorPalette[currentPaletteID] = in.contextColorList;
+	updatePaletteList();
+	updatePalette();
 }
 
 void ModalTransform::OnMenuIndexingBase(){

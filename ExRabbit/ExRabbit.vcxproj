@@ -244,6 +244,7 @@
     <ClInclude Include="ModalLockInput.h" />
     <ClInclude Include="ModalLoseBlackPicture.h" />
     <ClInclude Include="ModalPictureParameter.h" />
+    <ClInclude Include="ModalPictureStretch.h" />
     <ClInclude Include="ModalPreference.h" />
     <ClInclude Include="ModalRename.h" />
     <ClInclude Include="ModalSaveWarning.h" />
@@ -271,12 +272,13 @@
     <ClInclude Include="ToolAvatarStageConfig.h" />
     <ClInclude Include="ToolAvatarSuit.h" />
     <ClInclude Include="ToolAvatarSuitRegister.h" />
-    <ClInclude Include="ToolDict.h" />
     <ClInclude Include="ToolDownload.h" />
+    <ClInclude Include="ToolDownloadServerSelection.h" />
     <ClInclude Include="ToolForceEx.h" />
-    <ClInclude Include="ToolIMGSearch.h" />
+    <ClInclude Include="ToolNPKsource.h" />
     <ClInclude Include="ToolPatch.h" />
     <ClInclude Include="ToolStat.h" />
+    <ClInclude Include="ToolTeenSwitch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\General\Func.cpp" />
@@ -301,6 +303,7 @@
     <ClCompile Include="ModalLockInput.cpp" />
     <ClCompile Include="ModalLoseBlackPicture.cpp" />
     <ClCompile Include="ModalPictureParameter.cpp" />
+    <ClCompile Include="ModalPictureStretch.cpp" />
     <ClCompile Include="ModalPreference.cpp" />
     <ClCompile Include="ModalRename.cpp" />
     <ClCompile Include="ModalSaveWarning.cpp" />
@@ -329,12 +332,13 @@
     <ClCompile Include="ToolAvatarStageConfig.cpp" />
     <ClCompile Include="ToolAvatarSuit.cpp" />
     <ClCompile Include="ToolAvatarSuitRegister.cpp" />
-    <ClCompile Include="ToolDict.cpp" />
     <ClCompile Include="ToolDownload.cpp" />
+    <ClCompile Include="ToolDownloadServerSelection.cpp" />
     <ClCompile Include="ToolForceEx.cpp" />
-    <ClCompile Include="ToolIMGSearch.cpp" />
+    <ClCompile Include="ToolNPKsource.cpp" />
     <ClCompile Include="ToolPatch.cpp" />
     <ClCompile Include="ToolStat.cpp" />
+    <ClCompile Include="ToolTeenSwitch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ExRabbit.rc" />

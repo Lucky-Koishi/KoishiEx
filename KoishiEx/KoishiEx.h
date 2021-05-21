@@ -237,7 +237,7 @@ namespace Koishi{
 		static color getDarken(const color &c);
 	};
 	///////////////////////////////////////
-	//基本类:坐标点·尺寸
+	//基本类:坐标点·尺寸·矩形
 	///////////////////////////////////////
 	class point{
 	public:
@@ -263,6 +263,25 @@ namespace Koishi{
 		size();
 		size(long w, long h);
 		long area() const;
+	};
+	class rectangle {
+	public:
+		long X1, Y1, X2, Y2;
+	public:
+		rectangle();
+		rectangle(point lt, point rb);
+		rectangle(point lt, size sz);
+		rectangle(long x1, long y1, long x2, long y2);
+		char operator == (const rectangle &other) const;
+		long getWidth() const;
+		long getHeight() const;
+	public:
+		void shrink(long distance);
+		void expand(long distance);
+		void splitHroz2(rectangle &x1, rectangle &x2, int ratioLeft, int ratioRight, int gap = 0);
+		void splitVert2(rectangle &x1, rectangle &x2, int ratioTop, int ratioBottom, int gap = 0);
+		void splitHrozN(std::vector<rectangle> xn, queue ratioList, int gap = 0);
+		void splitVertN(std::vector<rectangle> xn, queue ratioList, int gap = 0);
 	};
 	///////////////////////////////////////
 	//基本类:图像，当R=G=B=0时，可以用做索引矩阵用

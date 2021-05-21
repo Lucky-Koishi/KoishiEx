@@ -348,6 +348,14 @@ void ToolAvatar::chooseCharacter(const AvatarCharacter &newCharacter){
 	currentIconSelect = -1;
 	initalModel(profile.avatarModelSize);
 	factory.initial(newCharacter, CStrToStr(profile.getAvatarPath()));
+	animationList.load(profile.getAvatarStagePath(), newCharacter);
+	cbAction->ResetContent();
+	cbAction->AddString(L"选择动作");
+	for(int i = 0; i < animationList.ann.size(); i++) {
+		cbAction->AddString(animationList[i].aniName);
+	}
+	cbAction->AddString(L"全帧播放");
+	cbAction->SetCurSel(0);
 	loadResource();
 }
 unsigned loadResource1(void*para){
@@ -731,7 +739,7 @@ void ToolAvatar::playAvatar(){
 			drawAvatar();
 			Sleep(profile.miniSecPerFrame);
 			localFrame ++;
-			if(localFrame >= ~animation)
+			if(localFrame >= animation.aniFrame.size())
 				localFrame = 0;
 		}
 	}
@@ -860,8 +868,8 @@ void ToolAvatar::buildIconPatch(){
 		for(int p = 0;p<APART_MAXCOUNT;p++){
 			bar.setInfo(L"生成" + iconCString[p] + L"的图标中……", p);
 			str imgPath = IMG_avatarIcon(character, (AvatarPart)p);
-			dword pos;
-			if(!no.find(imgPath, pos))
+			long pos;
+			if(!no.find(imgPath, pos, 0))
 				continue;
 			IMGobject io;
 			no.IMGextract(pos, io);
@@ -875,8 +883,8 @@ void ToolAvatar::buildIconPatch(){
 		}
 		bar.setInfo(L"生成" + iconSpecCString + L"的图标中……", APART_MAXCOUNT);
 		str imgPath = IMG_avatarIcon(character, "tong");
-		dword pos;
-		if(no.find(imgPath, pos)){
+		long pos;
+		if(no.find(imgPath, pos, 0)){
 			IMGobject io;
 			no.IMGextract(pos, io);
 			for(int id = 0;id<io.indexCount;id++){
@@ -894,7 +902,7 @@ void ToolAvatar::buildIconPatch(){
 		NPKobject now;
 		if(!now.loadFile(CStrToStr(profile.getAvatarPath()) + fileList[fileID]))
 			continue;
-		if(now.count == 0)
+		if(now.getCount() == 0)
 			continue;
 		IMGobject io;
 		if(!now.IMGextract(0, io))
@@ -973,8 +981,8 @@ void ToolAvatar::buildPatch(){
 		for(int p = 0;p<APART_MAXCOUNT;p++){
 			bar.setInfo(L"生成" + iconCString[p] + L"的图标中……", 1000 + p * 500 / APART_MAXCOUNT);
 			str imgPath = IMG_avatarIcon(character, (AvatarPart)p);
-			dword pos;
-			if(!no.find(imgPath, pos))
+			long pos;
+			if(!no.find(imgPath, pos, 0))
 				continue;
 			IMGobject io;
 			no.IMGextract(pos, io);
@@ -988,8 +996,8 @@ void ToolAvatar::buildPatch(){
 		}
 		bar.setInfo(L"生成" + iconSpecCString + L"的图标中……", 1500);
 		str imgPath = IMG_avatarIcon(character, "tong");
-		dword pos;
-		if(no.find(imgPath, pos)){
+		long pos;
+		if(no.find(imgPath, pos, 0)){
 			IMGobject io;
 			no.IMGextract(pos, io);
 			for(int id = 0;id<io.indexCount;id++){
@@ -1007,7 +1015,7 @@ void ToolAvatar::buildPatch(){
 		NPKobject now;
 		if(!now.loadFile(CStrToStr(profile.getAvatarPath()) + fileList[fileID]))
 			continue;
-		if(now.count == 0)
+		if(now.getCount() == 0)
 			continue;
 		IMGobject io;
 		if(!now.IMGextract(0, io))
@@ -1651,19 +1659,19 @@ void ToolAvatar::OnMenuAvatarFunToEX(){
 	dlg->IMGsaveAlert = FALSE;
 	factory.makeNPK(dlg->no);
 	MessageBox(L"已导入到EX里了！",L"提示喵");
-	dlg->updateIMGlist();
+	dlg->IMGloadList();
 	dlg->updateInfo();
 }
 
 void ToolAvatar::buildMixedIMG(IMGobject &io){
 	NPKobject mixNo;
 	factory.makeNPK(mixNo);
-	IMGobject *ioList = new IMGobject[mixNo.count];
+	IMGobject *ioList = new IMGobject[mixNo.getCount()];
 	IMGobject newIO;
 	newIO.create(V2);
 	int maxFrameCount = 0;
 	//取最大帧数
-	for(int i=0;i<mixNo.count;i++){
+	for(int i = 0; i<mixNo.getCount(); i++) {
 		mixNo.IMGextract(i, ioList[i]);
 		if(ioList[i].indexCount> maxFrameCount)
 			maxFrameCount = ioList[i].indexCount;
@@ -1677,7 +1685,7 @@ void ToolAvatar::buildMixedIMG(IMGobject &io){
 		point ptLT, ptRB;
 		std::vector<int> mLeft, mTop, mRight, mBottom;
 		//计算点集的边界
-		for(int i=0;i<mixNo.count;i++){
+		for(int i = 0; i<mixNo.getCount(); i++) {
 			long newFrame = ioList[i].linkFind(frame);
 			if(ioList[i].PICgetInfo(newFrame, pi)){
 				CHECK_VALID_CONTINUE(pi.picSize.area() > 1);
@@ -1724,12 +1732,12 @@ void ToolAvatar::buildMixedIMG(IMGobject &io){
 		ptLT = point(tLeft, tTop);
 		ptRB = point(tRight, tBottom);
 		mPic.create(tBottom-tTop+1, tRight-tLeft+1);
-		for(int i=0;i<mixNo.count;i++){
+		for(int i = 0; i<mixNo.getCount(); i++) {
 			long newFrame = ioList[i].linkFind(frame);
 			if(ioList[i].PICgetInfo(newFrame, pi)){
 				CHECK_VALID_CONTINUE(pi.picSize.area() > 1);
 				ioList[i].PICextract(newFrame, mPicTemp);
-				if(mixNo.entry[i].comment.find("f.") != str::npos || mixNo.entry[i].comment.find("f1.") != str::npos){
+				if(mixNo.content[i].comment.find("f.") != str::npos || mixNo.content[i].comment.find("f1.") != str::npos){
 					mPicTemp.loseBlack(3);
 				}
 				mPic.putBack(mPicTemp, LAY, pi.basePt - ptLT);
@@ -1791,14 +1799,62 @@ void ToolAvatar::buildMixedIMG(IMGobject &io){
 	io = newIO;
 #endif
 }
+
+void ToolAvatar::buildMixedIMG4(IMGobject &io) {
+	IMGobject newIO;
+	buildMixedIMG(newIO);
+	palette pal;
+	colorList clrList;
+	queue clrCount;
+	pal.push(clrList);
+	for(long frame = 0; frame<newIO.indexCount; frame++) {
+		bar.setInfo(L"构建色表中……", 100 + 50 * frame / newIO.indexCount);
+		image mat;
+		if(!newIO.PICextract(frame, mat)) {
+			continue;
+		}
+		for(int i = 0; i<mat.getElemCount(); i++) {
+			color clr = mat.getElem(i);
+			long clrPos = pal.findColor(clr, 0);
+			if(clrPos == -1) {
+				pal[0].push_back(clr);
+				clrCount.push_back(1);
+			} else {
+				clrCount[clrPos] ++;
+			}
+		}
+		mat.destory();
+	}
+	clrList = pal[0];
+	long finalColorCount = MIN(0xFF, pal.getColorCount(0));
+	colorList finalColorList;
+	for(int i = 0; i<finalColorCount; i++) {
+		bar.setInfo(L"着色中……", 150 + 50 * i / (finalColorCount + 1));
+		long maxCount = 0;
+		long maxID = -1;
+		for(int j = 0; j<clrCount.size(); j++) {
+			if(clrCount[j] > maxCount) {
+				maxCount = clrCount[j];
+				maxID = j;
+			}
+		}
+		finalColorList.push_back(clrList[maxID]);
+		clrList.erase(clrList.begin() + maxID);
+		clrCount.erase(clrCount.begin() + maxID);
+	}
+	clrList = KoishiImageTool::nearbySort(finalColorList);
+	std::vector<IMGobject> outIOList;
+	newIO.convertToV4(outIOList, clrList, false);
+	io = outIOList[0];
+}
 unsigned buildGIF(void*para){
 	ToolAvatar* dlg = (ToolAvatar*)para;
 	IMGobject picIO;
-	dlg->buildMixedIMG(picIO);
+	dlg->buildMixedIMG4(picIO);
 	std::vector<long> frameList;
 	if(!dlg->playing)
-		dlg->setAnimation(10);
-	for(int i = 0;i<~dlg->animation;i++)
+		dlg->setAnimation(dlg->animationList.ann.size() + 1);
+	for(int i = 0;i<dlg->animation.aniFrame.size();i++)
 		frameList.push_back(dlg->animation[i]);
 	std::vector<image> matList;
 	long imgX1, imgX2, imgY1, imgY2;
@@ -1845,24 +1901,24 @@ unsigned buildNPK1(void*para){
 	IMGobject::makeEmpty(emptyIO, picIO.indexCount);
 	parent->no.release();
 	parent->no.create();
-	parent->no.IMGpush(picIO, "meow/本体图层.img");
+	parent->no.IMGpush("meow/本体图层.img", picIO);
 	if(dlg->factory.album[APART_COAT].layerNameList.size() == 0) {
 		dlg->MessageBox(L"制作错误喵，必须制定一个上衣部件作为本体喵！", L"提示喵");
 		return 0U;
 	}
-	parent->no.pushLink(0, dlg->factory.album[APART_COAT].layerNameList[0]);
-	parent->no.IMGpush(emptyIO, "meow/隐藏图层.img");
+	parent->no.pushQuote(dlg->factory.album[APART_COAT].layerNameList[0], 0);
+	parent->no.IMGpush("meow/隐藏图层.img", emptyIO);
 	for(int iPart = 0;iPart<APART_MAXCOUNT;iPart++){
 		dlg->bar.setInfo(L"建立空图层中……", 200 + 200 * iPart / APART_MAXCOUNT);
 		for(int t = 0;t<dlg->factory.album[iPart].layerNameList.size();t++){
 			if(iPart == APART_BODY || iPart == APART_COAT && t == 0)
 				continue;
-			parent->no.pushLink(2, dlg->factory.album[iPart].layerNameList[t]);
+			parent->no.pushQuote(dlg->factory.album[iPart].layerNameList[t], 2);
 		}
 	}
 	dlg->bar.hide();
 	dlg->MessageBox(L"制作完成了喵，请在EX中查看喵！",L"提示喵");
-	parent->updateIMGlist();
+	parent->IMGloadList();
 	parent->updateInfo();
 	return 0U;
 }
@@ -1874,19 +1930,19 @@ unsigned buildNPK2(void*para){
 	IMGobject::makeEmpty(emptyIO, picIO.indexCount);
 	parent->no.release();
 	parent->no.create();
-	parent->no.IMGpush(picIO, "meow/本体图层.img");
-	parent->no.IMGpush(emptyIO, "meow/隐藏图层.img");
+	parent->no.IMGpush("meow/本体图层.img", picIO);
+	parent->no.IMGpush("meow/隐藏图层.img", emptyIO);
 	for(int iPart = 0;iPart<APART_MAXCOUNT;iPart++){
 		dlg->bar.setInfo(L"建立空图层中……", 200 + 200 * iPart / APART_MAXCOUNT);
 		for(int t = 0;t<dlg->factory.album[iPart].layerNameList.size();t++){
 			if(iPart == APART_BODY)
 				continue;
-			parent->no.pushLink(1, dlg->factory.album[iPart].layerNameList[t]);
+			parent->no.pushQuote(dlg->factory.album[iPart].layerNameList[t], 1);
 		}
 	}
 	dlg->bar.hide();
 	dlg->MessageBox(L"制作完成了喵，请在EX中查看喵！",L"提示喵");
-	parent->updateIMGlist();
+	parent->IMGloadList();
 	parent->updateInfo();
 	return 0U;
 }
@@ -1898,24 +1954,24 @@ unsigned buildNPK3(void*para){
 	IMGobject::makeEmpty(emptyIO, picIO.indexCount);
 	parent->no.release();
 	parent->no.create();
-	parent->no.IMGpush(picIO, "meow/本体图层.img");
-	for(int t = 0;t<dlg->factory.album[APART_BODY].source.count;t++){
+	parent->no.IMGpush("meow/本体图层.img", picIO);
+	for(int t = 0;t<dlg->factory.album[APART_BODY].source.getCount();t++){
 		IMGobject io;
-		parent->no.pushLink(0, dlg->factory.album[APART_BODY].source.entry[t].comment);
+		parent->no.pushQuote(dlg->factory.album[APART_BODY].source.content[t].comment, 0);
 	}
-	int sl = parent->no.count;
-	parent->no.IMGpush(emptyIO, "meow/隐藏图层.img");
+	int sl = parent->no.getCount();
+	parent->no.IMGpush("meow/隐藏图层.img, ", emptyIO);
 	for(int iPart = 0;iPart<APART_MAXCOUNT;iPart++){
 		dlg->bar.setInfo(L"建立"+avatarCString[iPart]+L"空图层中……", 200 + 200 * iPart / APART_MAXCOUNT);
 		if(iPart == APART_BODY)
 			continue;
-		for(int t = 0;t<dlg->factory.album[iPart].source.count;t++){
-			parent->no.pushLink(sl, dlg->factory.album[iPart].source.entry[t].comment);
+		for(int t = 0; t<dlg->factory.album[iPart].source.getCount(); t++) {
+			parent->no.pushQuote(dlg->factory.album[iPart].source.content[t].comment, sl);
 		}
 	}
 	dlg->MessageBox(L"制作完成了喵，请在EX中查看喵！",L"提示喵");
 	dlg->bar.hide();
-	parent->updateIMGlist();
+	parent->IMGloadList();
 	parent->updateInfo();
 	return 0U;
 }
@@ -2022,173 +2078,182 @@ void ToolAvatar::OnMenuAvatarFunMakeAllIn1NPK(){
 	dlg->IMGsaveAlert = false;
 	AfxBeginThread(buildNPK3, this);
 }
-
-ToolAvatar::_ani::_ani(){
-	frameLength = 0;
-	memset(frame, 0, sizeof(long)*255);
-	frame[0] = -1;
-}
-ToolAvatar::_ani  &ToolAvatar::_ani::operator>(long newFrame){
-	frame[frameLength++] = newFrame;
-	frame[frameLength] = -1;
-	return *this;
-}
-ToolAvatar::_ani  &ToolAvatar::_ani::operator>=(long totalFrame){
-	frameLength = totalFrame;
-	for(int i = 0;i<totalFrame;i++){
-		frame[i] = i;
-	}
-	frame[frameLength] = -1;
-	return *this;
-}
-long &ToolAvatar::_ani::operator[](long ID){
-	return frame[ID];
-}
-long ToolAvatar::_ani::operator~() const{
-	return frameLength;
-}
+//
+//ToolAvatar::_ani::_ani(){
+//	frameLength = 0;
+//	memset(frame, 0, sizeof(long)*255);
+//	frame[0] = -1;
+//}
+//ToolAvatar::_ani  &ToolAvatar::_ani::operator>(long newFrame){
+//	frame[frameLength++] = newFrame;
+//	frame[frameLength] = -1;
+//	return *this;
+//}
+//ToolAvatar::_ani  &ToolAvatar::_ani::operator>=(long totalFrame){
+//	frameLength = totalFrame;
+//	for(int i = 0;i<totalFrame;i++){
+//		frame[i] = i;
+//	}
+//	frame[frameLength] = -1;
+//	return *this;
+//}
+//long &ToolAvatar::_ani::operator[](long ID){
+//	return frame[ID];
+//}
+//long ToolAvatar::_ani::operator~() const{
+//	return frameLength;
+//}
 void ToolAvatar::setAnimation(const long &aniID){
-#define SET_ANIMATION(__ac, __ai, __ani) if(__ac == character && aniID == __ai){animation = (_ani()>__ani);}
-	SET_ANIMATION(ACHARACTER_SM, ANI_NORMAL,	176 > 176 > 176 > 177 > 178);
-	SET_ANIMATION(ACHARACTER_SM, ANI_PREPARE,	90 > 91 > 92 > 93 > 94 > 95);
-	SET_ANIMATION(ACHARACTER_SM, ANI_WALK,		180 > 181 > 182 > 183 > 184 > 185 > 186 > 187);
-	SET_ANIMATION(ACHARACTER_SM, ANI_DASH,		105 > 106 > 107 > 108 > 109 > 110 > 111 > 112);
-	SET_ANIMATION(ACHARACTER_SM, ANI_ATTACK,	0 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 8 > 8 > 8);
-	SET_ANIMATION(ACHARACTER_SM, ANI_ZATTACK,	33 > 34 > 35 > 36 > 37 > 38 > 39 > 39 > 39 > 39);
-	SET_ANIMATION(ACHARACTER_SM, ANI_CAST,		75 > 76 > 77 > 78 > 79 > 80 > 81 > 82 > 82 > 82);
-	SET_ANIMATION(ACHARACTER_SM, ANI_HIT,		96 > 96 > 96 > 99 > 99 > 99);
-	SET_ANIMATION(ACHARACTER_SM, ANI_FALL,		101 > 102 > 102 > 102 > 102 > 102 > 102 > 102);
-	SET_ANIMATION(ACHARACTER_SM, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_SG, ANI_NORMAL,	0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8);
-	SET_ANIMATION(ACHARACTER_SG, ANI_PREPARE,	9 > 10 > 11 > 12);
-	SET_ANIMATION(ACHARACTER_SG, ANI_WALK,		13 > 14 > 15 > 16 > 17 > 18 > 19 > 20 > 21 > 22);
-	SET_ANIMATION(ACHARACTER_SG, ANI_DASH,		151 > 152 > 153 > 154 > 155 > 156 > 157 > 158);
-	SET_ANIMATION(ACHARACTER_SG, ANI_ATTACK,	48 > 49 > 50 > 51 > 52);
-	SET_ANIMATION(ACHARACTER_SG, ANI_ZATTACK,	48 > 49 > 50 > 51 > 52);
-	SET_ANIMATION(ACHARACTER_SG, ANI_CAST,		121 > 122 > 123 > 124 > 125 > 126 > 127 > 128 > 129 > 130 > 131 > 132 > 133 > 134 > 135 > 136);
-	SET_ANIMATION(ACHARACTER_SG, ANI_HIT,		139 > 140);
-	SET_ANIMATION(ACHARACTER_SG, ANI_FALL,		141 > 142 > 143);
-	SET_ANIMATION(ACHARACTER_SG, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_GN, ANI_NORMAL,	0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 9 > 10 > 11 > 12);
-	SET_ANIMATION(ACHARACTER_GN, ANI_PREPARE,	13 > 14 > 15 > 16 > 17 > 18 > 19 > 20 > 21 > 22);
-	SET_ANIMATION(ACHARACTER_GN, ANI_WALK,		55 > 56 > 57 > 58 > 59 > 60 > 61 > 62);
-	SET_ANIMATION(ACHARACTER_GN, ANI_DASH,		103 > 104 > 105 > 106 > 107 > 108 > 109 > 110);
-	SET_ANIMATION(ACHARACTER_GN, ANI_ATTACK,	25 > 26 > 27 > 28 > 29 > 30 > 31 > 32 > 33 > 34 > 35 > 36 > 37 > 38);
-	SET_ANIMATION(ACHARACTER_GN, ANI_ZATTACK,	155 > 156 > 157 > 158);
-	SET_ANIMATION(ACHARACTER_GN, ANI_CAST,		193 > 194 > 195 > 196 > 197);
-	SET_ANIMATION(ACHARACTER_GN, ANI_HIT,		121 > 122 > 123 > 124);
-	SET_ANIMATION(ACHARACTER_GN, ANI_FALL,		125 > 126 > 127);
-	SET_ANIMATION(ACHARACTER_GN, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_GG, ANI_NORMAL,	0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 9);
-	SET_ANIMATION(ACHARACTER_GG, ANI_PREPARE,	14 > 15 > 16 > 17 > 18 > 19 > 20);
-	SET_ANIMATION(ACHARACTER_GG, ANI_WALK,		68 > 69 > 70 > 71 > 72 > 73 > 74 > 75);
-	SET_ANIMATION(ACHARACTER_GG, ANI_DASH,		76 > 77 > 78 > 79 > 80 > 71);
-	SET_ANIMATION(ACHARACTER_GG, ANI_ATTACK,	22 > 23 > 24 > 25 > 26 > 27 > 28 > 29 > 30 > 31 > 32 > 33 > 34 > 35);
-	SET_ANIMATION(ACHARACTER_GG, ANI_ZATTACK,	111 > 112 > 113 > 114 > 115);
-	SET_ANIMATION(ACHARACTER_GG, ANI_CAST,		10 > 11 > 12 > 13);
-	SET_ANIMATION(ACHARACTER_GG, ANI_HIT,		89 > 90);
-	SET_ANIMATION(ACHARACTER_GG, ANI_FALL,		91);
-	SET_ANIMATION(ACHARACTER_GG, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_FT, ANI_PREPARE,	132 > 133 > 134 > 135);
-	SET_ANIMATION(ACHARACTER_FT, ANI_WALK,		136 > 137 > 138 > 139 > 140 > 141 > 142 > 143);
-	SET_ANIMATION(ACHARACTER_FT, ANI_DASH,		39 > 40 > 41 > 42 > 43 > 44 > 45 > 46);
-	SET_ANIMATION(ACHARACTER_FT, ANI_ATTACK,	5 > 6 > 7 > 8 > 9);
-	SET_ANIMATION(ACHARACTER_FT, ANI_ZATTACK,	30 > 31 > 32 > 33 > 34 > 35);
-	SET_ANIMATION(ACHARACTER_FT, ANI_CAST,		92 > 93 > 94 > 95);
-	SET_ANIMATION(ACHARACTER_FT, ANI_HIT,		77 > 78 > 84 > 85);
-	SET_ANIMATION(ACHARACTER_FT, ANI_FALL,		79 > 80 > 81 > 82 > 83);
-	SET_ANIMATION(ACHARACTER_FT, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_FM, ANI_NORMAL,	0 > 1 > 2 > 3);
-	SET_ANIMATION(ACHARACTER_FM, ANI_PREPARE,	12 > 13 > 14 > 15);
-	SET_ANIMATION(ACHARACTER_FM, ANI_WALK,		4 > 5 > 6 > 7 > 8 > 9 > 10 > 11);
-	SET_ANIMATION(ACHARACTER_FM, ANI_DASH,		136 > 137 > 138 > 139 > 140 > 141 > 142 > 143);
-	SET_ANIMATION(ACHARACTER_FM, ANI_ATTACK,	28 > 29 > 30 > 31 > 32);
-	SET_ANIMATION(ACHARACTER_FM, ANI_ZATTACK,	64 > 65 > 66 > 67 > 68);
-	SET_ANIMATION(ACHARACTER_FM, ANI_CAST,		79 > 80 > 81 > 82 > 83 > 84 > 85);
-	SET_ANIMATION(ACHARACTER_FM, ANI_HIT,		74 > 75);
-	SET_ANIMATION(ACHARACTER_FM, ANI_FALL,		76 > 77 > 78);
-	SET_ANIMATION(ACHARACTER_FM, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_MG, ANI_NORMAL,	10 > 11 > 12 > 13);
-	SET_ANIMATION(ACHARACTER_MG, ANI_PREPARE,	14 > 15 > 16 > 17);
-	SET_ANIMATION(ACHARACTER_MG, ANI_WALK,		0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 9);
-	SET_ANIMATION(ACHARACTER_MG, ANI_DASH, 18 > 19 > 20 > 21);
-	SET_ANIMATION(ACHARACTER_MG, ANI_ATTACK, 109 > 110 > 111 > 112 > 113 > 113 > 113);
-	SET_ANIMATION(ACHARACTER_MG, ANI_ZATTACK, 114 > 115 > 116 > 117 > 118 > 118 > 118);
-	SET_ANIMATION(ACHARACTER_MG, ANI_CAST, 144 > 145 > 146 > 146 > 146 > 147);
-	SET_ANIMATION(ACHARACTER_MG, ANI_HIT, 128 > 128 > 129 > 129);
-	SET_ANIMATION(ACHARACTER_MG, ANI_FALL, 133 > 134 > 134 > 134 > 134 > 134);
-	SET_ANIMATION(ACHARACTER_MG, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_MM, ANI_NORMAL, 0 > 1 > 2 > 3 > 4 > 5 > 6 > 7);
-	SET_ANIMATION(ACHARACTER_MM, ANI_PREPARE, 8 > 9 > 10 > 11 > 12 > 13 > 14 > 15 > 16 > 17);
-	SET_ANIMATION(ACHARACTER_MM, ANI_WALK, 18 > 19 > 20 > 21 > 22 > 23 > 24 > 25 > 26 > 27);
-	SET_ANIMATION(ACHARACTER_MM, ANI_DASH, 28 > 29 > 30 > 31 > 32 > 33 > 34 > 35);
-	SET_ANIMATION(ACHARACTER_MM, ANI_ATTACK, 60 > 61 > 62 > 63 > 64);
-	SET_ANIMATION(ACHARACTER_MM, ANI_ZATTACK, 60 > 61 > 62 > 63 > 64);
-	SET_ANIMATION(ACHARACTER_MM, ANI_CAST, 142 > 143 > 144 > 145 > 146 > 147 > 148 > 149 > 150 > 151 > 152 > 153);
-	SET_ANIMATION(ACHARACTER_MM, ANI_HIT, 175 > 176);
-	SET_ANIMATION(ACHARACTER_MM, ANI_FALL, 177 > 178 > 179);
-	SET_ANIMATION(ACHARACTER_MM, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_PR, ANI_NORMAL, 0 > 1 > 2 > 3);
-	SET_ANIMATION(ACHARACTER_PR, ANI_PREPARE, 4 > 5 > 6 > 7);
-	SET_ANIMATION(ACHARACTER_PR, ANI_WALK, 65 > 66 > 67 > 68 > 69 > 70 > 71 > 72);
-	SET_ANIMATION(ACHARACTER_PR, ANI_DASH, 73 > 74 > 75 > 76 > 77 > 78);
-	SET_ANIMATION(ACHARACTER_PR, ANI_ATTACK, 8 > 9 > 10 > 11 > 12 > 13 > 14 > 15);
-	SET_ANIMATION(ACHARACTER_PR, ANI_ZATTACK, 31 > 32 > 33 > 34 > 35 > 36 > 37 > 38 > 39);
-	SET_ANIMATION(ACHARACTER_PR, ANI_CAST, 146 > 147 > 148 > 149 > 150 > 151 > 152 > 153);
-	SET_ANIMATION(ACHARACTER_PR, ANI_HIT, 122 > 123);
-	SET_ANIMATION(ACHARACTER_PR, ANI_FALL, 124 > 126 > 126 > 126);
-	SET_ANIMATION(ACHARACTER_PR, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_PG, ANI_NORMAL, 0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8);
-	SET_ANIMATION(ACHARACTER_PG, ANI_PREPARE, 9 > 10 > 11 > 12);
-	SET_ANIMATION(ACHARACTER_PG, ANI_WALK, 13 > 14 > 15 > 16 > 17 > 18 > 19 > 20);
-	SET_ANIMATION(ACHARACTER_PG, ANI_DASH, 21 > 22 > 23 > 24 > 25 > 26 > 27 > 28);
-	SET_ANIMATION(ACHARACTER_PG, ANI_ATTACK, 23 > 30 > 31 > 32);
-	SET_ANIMATION(ACHARACTER_PG, ANI_ZATTACK, 70 > 71 > 72 > 73);
-	SET_ANIMATION(ACHARACTER_PG, ANI_CAST, 108 > 109 > 110 > 111 > 112);
-	SET_ANIMATION(ACHARACTER_PG, ANI_HIT, 51 > 52);
-	SET_ANIMATION(ACHARACTER_PG, ANI_FALL, 53 > 54 > 55);
-	SET_ANIMATION(ACHARACTER_PG, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_TH, ANI_NORMAL, 0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 9 > 10 > 11);
-	SET_ANIMATION(ACHARACTER_TH, ANI_PREPARE, 12 > 13 > 14 > 15 > 16 > 17);
-	SET_ANIMATION(ACHARACTER_TH, ANI_WALK, 18 > 19 > 20 > 21 > 22 > 23 > 24 > 25 > 26);
-	SET_ANIMATION(ACHARACTER_TH, ANI_DASH, 61 > 62 > 63 > 64 > 65 > 66);
-	SET_ANIMATION(ACHARACTER_TH, ANI_ATTACK, 67 > 68 > 69 > 70 > 71 > 72);
-	SET_ANIMATION(ACHARACTER_TH, ANI_ZATTACK, 96 > 97 > 98 > 99 > 100);
-	SET_ANIMATION(ACHARACTER_TH, ANI_CAST, 32 > 33 > 34 > 35 > 36 > 37 > 38 > 39 > 40 > 41 > 42 > 43 > 44 > 45);
-	SET_ANIMATION(ACHARACTER_TH, ANI_HIT, 91 > 92);
-	SET_ANIMATION(ACHARACTER_TH, ANI_FALL, 93 > 94 > 95);
-	SET_ANIMATION(ACHARACTER_TH, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_KN, ANI_NORMAL, 0 > 1 > 2 > 3 > 4 > 5);
-	SET_ANIMATION(ACHARACTER_KN, ANI_PREPARE, 6 > 7 > 8 > 9 > 10 > 11);
-	SET_ANIMATION(ACHARACTER_KN, ANI_WALK, 12 > 13 > 14 > 15 > 16 > 17 > 18 > 19 > 20 > 21);
-	SET_ANIMATION(ACHARACTER_KN, ANI_DASH, 22 > 23 > 24 > 25 > 26 > 27 > 28 > 29);
-	SET_ANIMATION(ACHARACTER_KN, ANI_ATTACK, 51 > 52 > 53 > 54 > 55 > 56 > 57 > 58 > 59);
-	SET_ANIMATION(ACHARACTER_KN, ANI_ZATTACK, 182 > 183 > 184 > 185 > 186);
-	SET_ANIMATION(ACHARACTER_KN, ANI_CAST, 170 > 171 > 172 > 173 > 174 > 175 > 176 > 177 > 178 > 179 > 180 > 171);
-	SET_ANIMATION(ACHARACTER_KN, ANI_HIT, 195 > 196);
-	SET_ANIMATION(ACHARACTER_KN, ANI_FALL, 197 > 198 > 199);
-	SET_ANIMATION(ACHARACTER_KN, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_DL, ANI_NORMAL, 0 > 1 > 2 > 3);
-	SET_ANIMATION(ACHARACTER_DL, ANI_PREPARE, 4 > 5 > 6 > 7);
-	SET_ANIMATION(ACHARACTER_DL, ANI_WALK, 8 > 9 > 10 > 11 > 12 > 13 > 14 > 15 > 16);
-	SET_ANIMATION(ACHARACTER_DL, ANI_DASH, 17 > 18 > 19 > 20 > 21 > 22 > 23 > 24);
-	SET_ANIMATION(ACHARACTER_DL, ANI_ATTACK, 62 > 63 > 64 > 65 > 66);
-	SET_ANIMATION(ACHARACTER_DL, ANI_ZATTACK, 143 > 144 > 145 > 146 > 147 > 148 > 149);
-	SET_ANIMATION(ACHARACTER_DL, ANI_CAST, 158 > 159 > 160);
-	SET_ANIMATION(ACHARACTER_DL, ANI_HIT, 175 > 176);
-	SET_ANIMATION(ACHARACTER_DL, ANI_FALL, 177 > 178 > 179);
-	SET_ANIMATION(ACHARACTER_DL, ANI_FULLPLAY,	0 >= maxFrame);
-	SET_ANIMATION(ACHARACTER_GB, ANI_NORMAL, 0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 9);
-	SET_ANIMATION(ACHARACTER_GB, ANI_PREPARE, 10 > 11 > 12 > 13 > 14);
-	SET_ANIMATION(ACHARACTER_GB, ANI_WALK, 15 > 16 > 17 > 18 > 19 > 20 > 21 > 22);
-	SET_ANIMATION(ACHARACTER_GB, ANI_DASH, 23 > 24 > 25 > 26 > 27 > 28 > 29 > 30);
-	SET_ANIMATION(ACHARACTER_GB, ANI_ATTACK, 76 > 77 > 78 > 79);
-	SET_ANIMATION(ACHARACTER_GB, ANI_ZATTACK, 56 > 57 > 58 > 59 > 60 > 61 > 62);
-	SET_ANIMATION(ACHARACTER_GB, ANI_CAST, 141 > 142 > 143 > 144);
-	SET_ANIMATION(ACHARACTER_GB, ANI_HIT, 145 > 146);
-	SET_ANIMATION(ACHARACTER_GB, ANI_FALL, 147 > 148 > 149);
-	SET_ANIMATION(ACHARACTER_GB, ANI_FULLPLAY,	0 >= maxFrame);
-#undef SET_ANIMATION
+	if(aniID == 0)
+		return;
+	if(aniID == animationList.ann.size() + 1) {
+		animation.aniFrame.clear();
+		for(int i = 0; i < maxFrame; i++)
+			animation.aniFrame.push_back(i);
+		return;
+	}
+	animation = animationList[aniID - 1];
+//#define SET_ANIMATION(__ac, __ai, __ani) if(__ac == character && aniID == __ai){animation = (_ani()>__ani);}
+//	SET_ANIMATION(ACHARACTER_SM, ANI_NORMAL,	176 > 176 > 176 > 177 > 178);
+//	SET_ANIMATION(ACHARACTER_SM, ANI_PREPARE,	90 > 91 > 92 > 93 > 94 > 95);
+//	SET_ANIMATION(ACHARACTER_SM, ANI_WALK,		180 > 181 > 182 > 183 > 184 > 185 > 186 > 187);
+//	SET_ANIMATION(ACHARACTER_SM, ANI_DASH,		105 > 106 > 107 > 108 > 109 > 110 > 111 > 112);
+//	SET_ANIMATION(ACHARACTER_SM, ANI_ATTACK,	0 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 8 > 8 > 8);
+//	SET_ANIMATION(ACHARACTER_SM, ANI_ZATTACK,	33 > 34 > 35 > 36 > 37 > 38 > 39 > 39 > 39 > 39);
+//	SET_ANIMATION(ACHARACTER_SM, ANI_CAST,		75 > 76 > 77 > 78 > 79 > 80 > 81 > 82 > 82 > 82);
+//	SET_ANIMATION(ACHARACTER_SM, ANI_HIT,		96 > 96 > 96 > 99 > 99 > 99);
+//	SET_ANIMATION(ACHARACTER_SM, ANI_FALL,		101 > 102 > 102 > 102 > 102 > 102 > 102 > 102);
+//	SET_ANIMATION(ACHARACTER_SM, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_SG, ANI_NORMAL,	0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8);
+//	SET_ANIMATION(ACHARACTER_SG, ANI_PREPARE,	9 > 10 > 11 > 12);
+//	SET_ANIMATION(ACHARACTER_SG, ANI_WALK,		13 > 14 > 15 > 16 > 17 > 18 > 19 > 20 > 21 > 22);
+//	SET_ANIMATION(ACHARACTER_SG, ANI_DASH,		151 > 152 > 153 > 154 > 155 > 156 > 157 > 158);
+//	SET_ANIMATION(ACHARACTER_SG, ANI_ATTACK,	48 > 49 > 50 > 51 > 52);
+//	SET_ANIMATION(ACHARACTER_SG, ANI_ZATTACK,	48 > 49 > 50 > 51 > 52);
+//	SET_ANIMATION(ACHARACTER_SG, ANI_CAST,		121 > 122 > 123 > 124 > 125 > 126 > 127 > 128 > 129 > 130 > 131 > 132 > 133 > 134 > 135 > 136);
+//	SET_ANIMATION(ACHARACTER_SG, ANI_HIT,		139 > 140);
+//	SET_ANIMATION(ACHARACTER_SG, ANI_FALL,		141 > 142 > 143);
+//	SET_ANIMATION(ACHARACTER_SG, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_GN, ANI_NORMAL,	0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 9 > 10 > 11 > 12);
+//	SET_ANIMATION(ACHARACTER_GN, ANI_PREPARE,	13 > 14 > 15 > 16 > 17 > 18 > 19 > 20 > 21 > 22);
+//	SET_ANIMATION(ACHARACTER_GN, ANI_WALK,		55 > 56 > 57 > 58 > 59 > 60 > 61 > 62);
+//	SET_ANIMATION(ACHARACTER_GN, ANI_DASH,		103 > 104 > 105 > 106 > 107 > 108 > 109 > 110);
+//	SET_ANIMATION(ACHARACTER_GN, ANI_ATTACK,	25 > 26 > 27 > 28 > 29 > 30 > 31 > 32 > 33 > 34 > 35 > 36 > 37 > 38);
+//	SET_ANIMATION(ACHARACTER_GN, ANI_ZATTACK,	155 > 156 > 157 > 158);
+//	SET_ANIMATION(ACHARACTER_GN, ANI_CAST,		193 > 194 > 195 > 196 > 197);
+//	SET_ANIMATION(ACHARACTER_GN, ANI_HIT,		121 > 122 > 123 > 124);
+//	SET_ANIMATION(ACHARACTER_GN, ANI_FALL,		125 > 126 > 127);
+//	SET_ANIMATION(ACHARACTER_GN, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_GG, ANI_NORMAL,	0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 9);
+//	SET_ANIMATION(ACHARACTER_GG, ANI_PREPARE,	14 > 15 > 16 > 17 > 18 > 19 > 20);
+//	SET_ANIMATION(ACHARACTER_GG, ANI_WALK,		68 > 69 > 70 > 71 > 72 > 73 > 74 > 75);
+//	SET_ANIMATION(ACHARACTER_GG, ANI_DASH,		76 > 77 > 78 > 79 > 80 > 71);
+//	SET_ANIMATION(ACHARACTER_GG, ANI_ATTACK,	22 > 23 > 24 > 25 > 26 > 27 > 28 > 29 > 30 > 31 > 32 > 33 > 34 > 35);
+//	SET_ANIMATION(ACHARACTER_GG, ANI_ZATTACK,	111 > 112 > 113 > 114 > 115);
+//	SET_ANIMATION(ACHARACTER_GG, ANI_CAST,		10 > 11 > 12 > 13);
+//	SET_ANIMATION(ACHARACTER_GG, ANI_HIT,		89 > 90);
+//	SET_ANIMATION(ACHARACTER_GG, ANI_FALL,		91);
+//	SET_ANIMATION(ACHARACTER_GG, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_FT, ANI_PREPARE,	132 > 133 > 134 > 135);
+//	SET_ANIMATION(ACHARACTER_FT, ANI_WALK,		136 > 137 > 138 > 139 > 140 > 141 > 142 > 143);
+//	SET_ANIMATION(ACHARACTER_FT, ANI_DASH,		39 > 40 > 41 > 42 > 43 > 44 > 45 > 46);
+//	SET_ANIMATION(ACHARACTER_FT, ANI_ATTACK,	5 > 6 > 7 > 8 > 9);
+//	SET_ANIMATION(ACHARACTER_FT, ANI_ZATTACK,	30 > 31 > 32 > 33 > 34 > 35);
+//	SET_ANIMATION(ACHARACTER_FT, ANI_CAST,		92 > 93 > 94 > 95);
+//	SET_ANIMATION(ACHARACTER_FT, ANI_HIT,		77 > 78 > 84 > 85);
+//	SET_ANIMATION(ACHARACTER_FT, ANI_FALL,		79 > 80 > 81 > 82 > 83);
+//	SET_ANIMATION(ACHARACTER_FT, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_FM, ANI_NORMAL,	0 > 1 > 2 > 3);
+//	SET_ANIMATION(ACHARACTER_FM, ANI_PREPARE,	12 > 13 > 14 > 15);
+//	SET_ANIMATION(ACHARACTER_FM, ANI_WALK,		4 > 5 > 6 > 7 > 8 > 9 > 10 > 11);
+//	SET_ANIMATION(ACHARACTER_FM, ANI_DASH,		136 > 137 > 138 > 139 > 140 > 141 > 142 > 143);
+//	SET_ANIMATION(ACHARACTER_FM, ANI_ATTACK,	28 > 29 > 30 > 31 > 32);
+//	SET_ANIMATION(ACHARACTER_FM, ANI_ZATTACK,	64 > 65 > 66 > 67 > 68);
+//	SET_ANIMATION(ACHARACTER_FM, ANI_CAST,		79 > 80 > 81 > 82 > 83 > 84 > 85);
+//	SET_ANIMATION(ACHARACTER_FM, ANI_HIT,		74 > 75);
+//	SET_ANIMATION(ACHARACTER_FM, ANI_FALL,		76 > 77 > 78);
+//	SET_ANIMATION(ACHARACTER_FM, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_MG, ANI_NORMAL,	10 > 11 > 12 > 13);
+//	SET_ANIMATION(ACHARACTER_MG, ANI_PREPARE,	14 > 15 > 16 > 17);
+//	SET_ANIMATION(ACHARACTER_MG, ANI_WALK,		0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 9);
+//	SET_ANIMATION(ACHARACTER_MG, ANI_DASH, 18 > 19 > 20 > 21);
+//	SET_ANIMATION(ACHARACTER_MG, ANI_ATTACK, 109 > 110 > 111 > 112 > 113 > 113 > 113);
+//	SET_ANIMATION(ACHARACTER_MG, ANI_ZATTACK, 114 > 115 > 116 > 117 > 118 > 118 > 118);
+//	SET_ANIMATION(ACHARACTER_MG, ANI_CAST, 144 > 145 > 146 > 146 > 146 > 147);
+//	SET_ANIMATION(ACHARACTER_MG, ANI_HIT, 128 > 128 > 129 > 129);
+//	SET_ANIMATION(ACHARACTER_MG, ANI_FALL, 133 > 134 > 134 > 134 > 134 > 134);
+//	SET_ANIMATION(ACHARACTER_MG, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_MM, ANI_NORMAL, 0 > 1 > 2 > 3 > 4 > 5 > 6 > 7);
+//	SET_ANIMATION(ACHARACTER_MM, ANI_PREPARE, 8 > 9 > 10 > 11 > 12 > 13 > 14 > 15 > 16 > 17);
+//	SET_ANIMATION(ACHARACTER_MM, ANI_WALK, 18 > 19 > 20 > 21 > 22 > 23 > 24 > 25 > 26 > 27);
+//	SET_ANIMATION(ACHARACTER_MM, ANI_DASH, 28 > 29 > 30 > 31 > 32 > 33 > 34 > 35);
+//	SET_ANIMATION(ACHARACTER_MM, ANI_ATTACK, 60 > 61 > 62 > 63 > 64);
+//	SET_ANIMATION(ACHARACTER_MM, ANI_ZATTACK, 60 > 61 > 62 > 63 > 64);
+//	SET_ANIMATION(ACHARACTER_MM, ANI_CAST, 142 > 143 > 144 > 145 > 146 > 147 > 148 > 149 > 150 > 151 > 152 > 153);
+//	SET_ANIMATION(ACHARACTER_MM, ANI_HIT, 175 > 176);
+//	SET_ANIMATION(ACHARACTER_MM, ANI_FALL, 177 > 178 > 179);
+//	SET_ANIMATION(ACHARACTER_MM, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_PR, ANI_NORMAL, 0 > 1 > 2 > 3);
+//	SET_ANIMATION(ACHARACTER_PR, ANI_PREPARE, 4 > 5 > 6 > 7);
+//	SET_ANIMATION(ACHARACTER_PR, ANI_WALK, 65 > 66 > 67 > 68 > 69 > 70 > 71 > 72);
+//	SET_ANIMATION(ACHARACTER_PR, ANI_DASH, 73 > 74 > 75 > 76 > 77 > 78);
+//	SET_ANIMATION(ACHARACTER_PR, ANI_ATTACK, 8 > 9 > 10 > 11 > 12 > 13 > 14 > 15);
+//	SET_ANIMATION(ACHARACTER_PR, ANI_ZATTACK, 31 > 32 > 33 > 34 > 35 > 36 > 37 > 38 > 39);
+//	SET_ANIMATION(ACHARACTER_PR, ANI_CAST, 146 > 147 > 148 > 149 > 150 > 151 > 152 > 153);
+//	SET_ANIMATION(ACHARACTER_PR, ANI_HIT, 122 > 123);
+//	SET_ANIMATION(ACHARACTER_PR, ANI_FALL, 124 > 126 > 126 > 126);
+//	SET_ANIMATION(ACHARACTER_PR, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_PG, ANI_NORMAL, 0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8);
+//	SET_ANIMATION(ACHARACTER_PG, ANI_PREPARE, 9 > 10 > 11 > 12);
+//	SET_ANIMATION(ACHARACTER_PG, ANI_WALK, 13 > 14 > 15 > 16 > 17 > 18 > 19 > 20);
+//	SET_ANIMATION(ACHARACTER_PG, ANI_DASH, 21 > 22 > 23 > 24 > 25 > 26 > 27 > 28);
+//	SET_ANIMATION(ACHARACTER_PG, ANI_ATTACK, 23 > 30 > 31 > 32);
+//	SET_ANIMATION(ACHARACTER_PG, ANI_ZATTACK, 70 > 71 > 72 > 73);
+//	SET_ANIMATION(ACHARACTER_PG, ANI_CAST, 108 > 109 > 110 > 111 > 112);
+//	SET_ANIMATION(ACHARACTER_PG, ANI_HIT, 51 > 52);
+//	SET_ANIMATION(ACHARACTER_PG, ANI_FALL, 53 > 54 > 55);
+//	SET_ANIMATION(ACHARACTER_PG, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_TH, ANI_NORMAL, 0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 9 > 10 > 11);
+//	SET_ANIMATION(ACHARACTER_TH, ANI_PREPARE, 12 > 13 > 14 > 15 > 16 > 17);
+//	SET_ANIMATION(ACHARACTER_TH, ANI_WALK, 18 > 19 > 20 > 21 > 22 > 23 > 24 > 25 > 26);
+//	SET_ANIMATION(ACHARACTER_TH, ANI_DASH, 61 > 62 > 63 > 64 > 65 > 66);
+//	SET_ANIMATION(ACHARACTER_TH, ANI_ATTACK, 67 > 68 > 69 > 70 > 71 > 72);
+//	SET_ANIMATION(ACHARACTER_TH, ANI_ZATTACK, 96 > 97 > 98 > 99 > 100);
+//	SET_ANIMATION(ACHARACTER_TH, ANI_CAST, 32 > 33 > 34 > 35 > 36 > 37 > 38 > 39 > 40 > 41 > 42 > 43 > 44 > 45);
+//	SET_ANIMATION(ACHARACTER_TH, ANI_HIT, 91 > 92);
+//	SET_ANIMATION(ACHARACTER_TH, ANI_FALL, 93 > 94 > 95);
+//	SET_ANIMATION(ACHARACTER_TH, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_KN, ANI_NORMAL, 0 > 1 > 2 > 3 > 4 > 5);
+//	SET_ANIMATION(ACHARACTER_KN, ANI_PREPARE, 6 > 7 > 8 > 9 > 10 > 11);
+//	SET_ANIMATION(ACHARACTER_KN, ANI_WALK, 12 > 13 > 14 > 15 > 16 > 17 > 18 > 19 > 20 > 21);
+//	SET_ANIMATION(ACHARACTER_KN, ANI_DASH, 22 > 23 > 24 > 25 > 26 > 27 > 28 > 29);
+//	SET_ANIMATION(ACHARACTER_KN, ANI_ATTACK, 51 > 52 > 53 > 54 > 55 > 56 > 57 > 58 > 59);
+//	SET_ANIMATION(ACHARACTER_KN, ANI_ZATTACK, 182 > 183 > 184 > 185 > 186);
+//	SET_ANIMATION(ACHARACTER_KN, ANI_CAST, 170 > 171 > 172 > 173 > 174 > 175 > 176 > 177 > 178 > 179 > 180 > 171);
+//	SET_ANIMATION(ACHARACTER_KN, ANI_HIT, 195 > 196);
+//	SET_ANIMATION(ACHARACTER_KN, ANI_FALL, 197 > 198 > 199);
+//	SET_ANIMATION(ACHARACTER_KN, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_DL, ANI_NORMAL, 0 > 1 > 2 > 3);
+//	SET_ANIMATION(ACHARACTER_DL, ANI_PREPARE, 4 > 5 > 6 > 7);
+//	SET_ANIMATION(ACHARACTER_DL, ANI_WALK, 8 > 9 > 10 > 11 > 12 > 13 > 14 > 15 > 16);
+//	SET_ANIMATION(ACHARACTER_DL, ANI_DASH, 17 > 18 > 19 > 20 > 21 > 22 > 23 > 24);
+//	SET_ANIMATION(ACHARACTER_DL, ANI_ATTACK, 62 > 63 > 64 > 65 > 66);
+//	SET_ANIMATION(ACHARACTER_DL, ANI_ZATTACK, 143 > 144 > 145 > 146 > 147 > 148 > 149);
+//	SET_ANIMATION(ACHARACTER_DL, ANI_CAST, 158 > 159 > 160);
+//	SET_ANIMATION(ACHARACTER_DL, ANI_HIT, 175 > 176);
+//	SET_ANIMATION(ACHARACTER_DL, ANI_FALL, 177 > 178 > 179);
+//	SET_ANIMATION(ACHARACTER_DL, ANI_FULLPLAY,	0 >= maxFrame);
+//	SET_ANIMATION(ACHARACTER_GB, ANI_NORMAL, 0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 9);
+//	SET_ANIMATION(ACHARACTER_GB, ANI_PREPARE, 10 > 11 > 12 > 13 > 14);
+//	SET_ANIMATION(ACHARACTER_GB, ANI_WALK, 15 > 16 > 17 > 18 > 19 > 20 > 21 > 22);
+//	SET_ANIMATION(ACHARACTER_GB, ANI_DASH, 23 > 24 > 25 > 26 > 27 > 28 > 29 > 30);
+//	SET_ANIMATION(ACHARACTER_GB, ANI_ATTACK, 76 > 77 > 78 > 79);
+//	SET_ANIMATION(ACHARACTER_GB, ANI_ZATTACK, 56 > 57 > 58 > 59 > 60 > 61 > 62);
+//	SET_ANIMATION(ACHARACTER_GB, ANI_CAST, 141 > 142 > 143 > 144);
+//	SET_ANIMATION(ACHARACTER_GB, ANI_HIT, 145 > 146);
+//	SET_ANIMATION(ACHARACTER_GB, ANI_FALL, 147 > 148 > 149);
+//	SET_ANIMATION(ACHARACTER_GB, ANI_FULLPLAY,	0 >= maxFrame);
+//#undef SET_ANIMATION
 }
 
 void ToolAvatar::OnCbnSelchangeComboAction()

@@ -51,3 +51,5 @@
 #include "../General/Func.h"
 #include "../General/GoodListCtrl.h"
 #include "../General/Profile.h"
+
+#define WHITE_CAT

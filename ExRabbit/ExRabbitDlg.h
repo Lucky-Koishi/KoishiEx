@@ -8,15 +8,14 @@
 #include "DialogNew.h"
 #include "DialogAbout.h"
 #include "TinyBar.h"
-#include "ToolIMGSearch.h"
 #include "ToolAvatar.h"
-#include "ToolDict.h"
 #include "ToolForceEx.h"
 #include "AdjustColorDlg.h"
 
 #include "ModalInsertPicture.h"
 #include "ModalInsertPicturePatch.h"
 #include "ModalAdjustCanvas.h"
+#include "ModalPictureStretch.h"
 #include "ModalPictureParameter.h"
 #include "ModalClearPicture.h"
 #include "ModalLoseBlackPicture.h"
@@ -29,11 +28,11 @@
 #include "ModalPreference.h"
 #include "ModalAdvancedMix.h"
 #include "ToolPatch.h"
-#include "ToolDownload.h"
+#include "ToolNPKsource.h"
 
 #pragma once
 
-#define VERSION_STR "恋恋のEx黑猫版.4.9"
+#define VERSION_STR "恋恋のEx黑猫版.5.2"
 
 // CExRabbitDlg 对话框
 using namespace Koishi;
@@ -58,7 +57,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	Profile profile;
+	ProfileBlack profile;
 public:
 	//基础变量
 	IMGobject io;			//主编辑IMG
@@ -105,11 +104,6 @@ public:
 		BOOL compareMode;		//IMG比较模式
 		colorMethod mixMode;	//混合显示模式
 	}drawPara;
-	enum enumSelectType{
-		SINGLE_SELECT = 0x0000U,
-		MULTI_SELECT = 0x0001U,
-		ALL_SELECT = 0x0002U
-	};
 	enum enumCanvasOperation{
 		CANVAS_SHOW,		//单纯显示
 		CANVAS_DRAG,		//拖动
@@ -176,22 +170,42 @@ public:
 	void updateColorTable();					//更新颜色表
 	BOOL getIDofCurrentPos(int &cid);			//鼠标点击颜色表时，获取当前的颜色ID
 public:
-	//辅助函数
-	int getIconIMG(IMGversion iv);
-	int getIconPIC(Koishi::colorFormat cf);
-	int getIconPIC(const PICinfo &pi);
-	void getSelected(CGoodListCtrl *listCtrl, int highLine, int targetPara, std::vector<int> &selected);
-	std::vector<int> getSelected(CGoodListCtrl *listCtrl);
-	std::vector<int> getSelected(UINT listCtrlID, INT selectType);
-public:
 	//更新控件
 	void adjustWindow(int w, int h);
 	void switchIMGver(IMGversion ver);
-	void updateIMGlist();
-	void updateIMGterm(int pos);
-	void updatePIClist();
-	void updatePICterm(int pos);
-	void updateTEXlist();
+public:
+	//IMG列表方法
+	void IMGloadList();				//读取IMG列表
+	void IMGupdateList();			//更新所有IMG项
+	void IMGupdateTerm(int pos);	//更新某一个IMG项
+	void IMGaddTerm(int pos, IMGversion iv, CString comment);
+	void IMGdeleteTerm(int pos);
+	void IMGmodifyTerm(int pos, IMGversion iv, CString comment);
+	void IMGmodifyIcon(int pos, IMGversion iv);
+	void IMGsetHighLine(int pos);	//强制更改高亮行（以及当前选择标志）
+	queue IMGgetChecked(enumSelectType selectType);
+	UINT IMGiconID(IMGversion iv);
+	//帧列表方法
+	void PICloadList();				//读取帧列表
+	void PICupdateList();			//更新所有的帧信息
+	void PICupdateTerm(int pos);	//更新某一个帧信息
+	void PICrenumber();				//重新为帧编号
+	void PICaddTerm(int pos, PICinfo pi);
+	void PICdeleteTerm(int pos);
+	void PICmodifyTerm(int pos, PICinfo pi);
+	void PICmodifyBasePoint(int pos);//更新某一帧的基准坐标信息
+	void PICsetHighLine(int pos);
+	queue PICgetChecked(enumSelectType selectType);
+	UINT PICiconID(IMGversion iv, PICinfo pi);
+
+	//void updateTEXlist();
+	void TEXloadList();
+	void TEXaddTerm(int pos, TEXinfo ti);
+	void TEXmodifyTerm(int pos, TEXinfo ti);
+	void TEXsetHighLine(int pos);
+	queue TEXgetChecked(enumSelectType selectType);
+	UINT TEXiconID(TEXinfo pi);
+	//其他方法
 	void updateInfo();
 	void updateCursorInfo();
 	void updateModified();
@@ -200,10 +214,10 @@ public:
 	CPoint getWinMouseAxis();				//获得鼠标的窗口内坐标
 public:
 	//绘制线程函数
-	DeclareThreadFunc(Draw, BOOL);				//画布线程
-	DeclareThreadFunc(DrawColor, PVOID);		//画颜色表的线程
-	DeclareThreadFunc(Play, PVOID);
-	DeclareThreadFunc(Lazy, PVOID);
+	DeclareThreadFunc(CExRabbitDlg, Draw, BOOL);				//画布线程
+	DeclareThreadFunc(CExRabbitDlg, DrawColor, PVOID);		//画颜色表的线程
+	DeclareThreadFunc(CExRabbitDlg, Play, PVOID);
+	DeclareThreadFunc(CExRabbitDlg, Lazy, PVOID);
 	void draw(BOOL isTex = false);
 public:
 	//需要的控件、对话框等
@@ -215,9 +229,7 @@ public:
 	CImageList i_lIMG,i_lPIC,i_lTEX;
 	CToolTipCtrl m_ttc;
 public:
-	CToolIMGSearch toolIMGSearch;
 	ToolAvatar toolAvatar;
-	CToolDict toolDict;
 	CToolForceEx toolForceEx;
 public:
 	//按钮事件
@@ -284,8 +296,8 @@ public:
 	afx_msg void OnBnClickedToolButton14();
 	afx_msg void OnBnClickedToolButton15();
 	//颜色表减号菜单
-	DeclareThreadFunc(PickColorFromFrame, PVOID);
-	DeclareThreadFunc(PickColorFromImage, PVOID);
+	DeclareThreadFunc(CExRabbitDlg, PickColorFromFrame, PVOID);
+	DeclareThreadFunc(CExRabbitDlg, PickColorFromImage, PVOID);
 	afx_msg void OnMenuColorTableChooseAll();
 	afx_msg void OnMenuColorTableChooseNone();
 	afx_msg void OnMenuColorTableInverseChoose();
@@ -304,17 +316,18 @@ public:
 	afx_msg void OnMenuColorTableExtractCurrent();
 	afx_msg void OnMenuColorTableExtractAllFrame();
 	//帧列表右键菜单
-	DeclareThreadFunc(PictureInsert, ModalInsertPicture::OUTPUT);
-	DeclareThreadFunc(PictureInsertPatch, ModalInsertPicturePatch::OUTPUT);
-	DeclareThreadFunc(PictureAxisModify, ModalPictureParameter::OUTPUT);
-	DeclareThreadFunc(PictureCanvas, ModalAdjustCanvas::OUTPUT);
-	DeclareThreadFunc(PictureClear, ModalClearPicture::OUTPUT);
-	DeclareThreadFunc(PictureLoseBlack, ModalLoseBlackPicture::OUTPUT);
-	DeclareThreadFunc(PictureGradient, ModalGradient::OUTPUT);
-	DeclareThreadFunc(PictureColor, ModalAdjustColor::OUTPUT);
-	DeclareThreadFunc(PictureMark, ModalAddMark::OUTPUT);
-	DeclareThreadFunc(PictureGetPNG, INT);
-	DeclareThreadFunc(PictureGetGIF, PVOID);
+	DeclareThreadFunc(CExRabbitDlg, PictureInsert, ModalInsertPicture::OUTPUT);
+	DeclareThreadFunc(CExRabbitDlg, PictureInsertPatch, ModalInsertPicturePatch::OUTPUT);
+	DeclareThreadFunc(CExRabbitDlg, PictureAxisModify, ModalPictureParameter::OUTPUT);
+	DeclareThreadFunc(CExRabbitDlg, PictureCanvas, ModalAdjustCanvas::OUTPUT);
+	DeclareThreadFunc(CExRabbitDlg, PictureStretch, ModalPictureStretch::__output);
+	DeclareThreadFunc(CExRabbitDlg, PictureClear, ModalClearPicture::OUTPUT);
+	DeclareThreadFunc(CExRabbitDlg, PictureLoseBlack, ModalLoseBlackPicture::OUTPUT);
+	DeclareThreadFunc(CExRabbitDlg, PictureGradient, ModalGradient::OUTPUT);
+	DeclareThreadFunc(CExRabbitDlg, PictureColor, ModalAdjustColor::OUTPUT);
+	DeclareThreadFunc(CExRabbitDlg, PictureMark, ModalAddMark::OUTPUT);
+	DeclareThreadFunc(CExRabbitDlg, PictureGetPNG, enumSelectType);
+	DeclareThreadFunc(CExRabbitDlg, PictureGetGIF, PVOID);
 	afx_msg void OnMenuPictureChooseAll();
 	afx_msg void OnMenuPictureChooseInverse();
 	afx_msg void OnMenuPictureChooseHighline();
@@ -326,6 +339,7 @@ public:
 	afx_msg void OnMenuPictureDeletePatch();
 	afx_msg void OnMenuPictureAxisModify();
 	afx_msg void OnMenuPictureCanvas();
+	afx_msg void OnMenuPictureStretch();
 	afx_msg void OnMenuPictureClear();
 	afx_msg void OnMenuPictureLoseblack();
 	afx_msg void OnMenuPictureGradient();
@@ -335,9 +349,9 @@ public:
 	afx_msg void OnMenuPictureGetPngPatch();
 	afx_msg void OnMenuPictureGetGIF();
 	//纹理集列表右键菜单
-	DeclareThreadFunc(TextureInsert, ModalInsertTexture::OUTPUT);
-	DeclareThreadFunc(TextureGetPNG, INT);
-	DeclareThreadFunc(TextureGetOrigin, INT);
+	DeclareThreadFunc(CExRabbitDlg, TextureInsert, ModalInsertTexture::OUTPUT);
+	DeclareThreadFunc(CExRabbitDlg, TextureGetPNG, enumSelectType);
+	DeclareThreadFunc(CExRabbitDlg, TextureGetOrigin, enumSelectType);
 	afx_msg void OnMenuTextureChooseAll();
 	afx_msg void OnMenuTextureChooseInverse();
 	afx_msg void OnMenuTextureChooseHighline();
@@ -352,7 +366,6 @@ public:
 	//特殊工具菜单
 	afx_msg void OnToolAvatar();
 	afx_msg void OnToolNpkDict();
-	afx_msg void OnToolImgSearch();
 	afx_msg void OnToolDownload();
 	afx_msg void OnToolForceExtract();
 	afx_msg void OnToolOpenOutputFolder();
@@ -369,24 +382,24 @@ public:
 	afx_msg void OnDrawCompareEnabled();
 	afx_msg void OnDrawCompareDisabled();
 	//IMG列表右键菜单
-	DeclareThreadFunc(ImageInsertEmpty, DWORD);
-	DeclareThreadFunc(ImageInsertIMG, DWORD);
-	DeclareThreadFunc(ImageInsertNPK, DWORD);
-	DeclareThreadFunc(ImageInsertFolder, DWORD);
-	DeclareThreadFunc(ImageInsertOther, DWORD);
-	DeclareThreadFunc(ImageReplaceExtern, DWORD);
-	DeclareThreadFunc(ImageReplaceLocal, DWORD);
-	DeclareThreadFunc(ImageReplaceQuote, DWORD);
-	DeclareThreadFunc(ImageRemove, DWORD);
-	DeclareThreadFunc(ImageExtract, DWORD);
-	DeclareThreadFunc(ImageMakeNPKandSavePatch, DWORD);
-	DeclareThreadFunc(ImageDequote, DWORD);
-	DeclareThreadFunc(ImageHide, DWORD);
-	DeclareThreadFunc(ImageTransToV2, DWORD);
-	DeclareThreadFunc(ImageV6TransToV4, DWORD);
-	DeclareThreadFunc(ImageTransform, ModalTransform::OUTPUT);
-	DeclareThreadFunc(ImageAutoSort, PVOID);
-	DeclareThreadFunc(ImageMix, ModalAdvancedMix::OUTPUT);
+	DeclareThreadFunc(CExRabbitDlg, ImageInsertEmpty, DWORD);
+	DeclareThreadFunc(CExRabbitDlg, ImageInsertIMG, DWORD);
+	DeclareThreadFunc(CExRabbitDlg, ImageInsertNPK, DWORD);
+	DeclareThreadFunc(CExRabbitDlg, ImageInsertFolder, DWORD);
+	DeclareThreadFunc(CExRabbitDlg, ImageInsertOther, DWORD);
+	DeclareThreadFunc(CExRabbitDlg, ImageReplaceExtern, enumSelectType);
+	DeclareThreadFunc(CExRabbitDlg, ImageReplaceLocal, enumSelectType);
+	DeclareThreadFunc(CExRabbitDlg, ImageReplaceQuote, enumSelectType);
+	DeclareThreadFunc(CExRabbitDlg, ImageRemove, enumSelectType);
+	DeclareThreadFunc(CExRabbitDlg, ImageExtract, enumSelectType);
+	DeclareThreadFunc(CExRabbitDlg, ImageMakeNPKandSavePatch, enumSelectType);
+	DeclareThreadFunc(CExRabbitDlg, ImageDequote, enumSelectType);
+	DeclareThreadFunc(CExRabbitDlg, ImageHide, enumSelectType);
+	DeclareThreadFunc(CExRabbitDlg, ImageTransToV2, enumSelectType);
+	DeclareThreadFunc(CExRabbitDlg, ImageV6TransToV4, enumSelectType);
+	DeclareThreadFunc(CExRabbitDlg, ImageTransform, ModalTransform::OUTPUT);
+	DeclareThreadFunc(CExRabbitDlg, ImageAutoSort, PVOID);
+	DeclareThreadFunc(CExRabbitDlg, ImageMix, ModalAdvancedMix::OUTPUT);
 	afx_msg void OnMenuImageInertEmpty();
 	afx_msg void OnMenuImageInertIMG();
 	afx_msg void OnMenuImageInertNPK();
@@ -437,4 +450,5 @@ public:
 	afx_msg void OnMenuImageInertFolderBlank();
 	afx_msg void OnMenuImageInertOtherBlank();
 	afx_msg void OnToolsStat();
+	afx_msg void OnToolsTeenSwitch();
 };

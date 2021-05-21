@@ -135,9 +135,6 @@
     <ClInclude Include="TinySNDSelect.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="TinyBar%28white%29.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="ModalConflictWarning%28white%29.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -153,9 +150,6 @@
     <ClInclude Include="TinySetName%28white%29.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ToolDownload%28white%29.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="TinyAdjustSpeed.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -166,6 +160,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TinyNoteBar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolAudioMark.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolDownload.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolDownloadServerSelection.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyBar.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -200,9 +206,6 @@
     <ClCompile Include="TinySNDSelect.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="TinyBar%28white%29.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="ModalConflictWarning%28white%29.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -218,9 +221,6 @@
     <ClCompile Include="TinySetName%28white%29.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ToolDownload%28white%29.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="TinyAdjustSpeed.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -231,6 +231,18 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TinyNoteBar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolAudioMark.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolDownload.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolDownloadServerSelection.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TinyBar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

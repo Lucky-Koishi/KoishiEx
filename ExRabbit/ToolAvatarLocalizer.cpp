@@ -49,7 +49,7 @@ END_MESSAGE_MAP()
 
 
 // ToolAvatarLocalizer 消息处理程序
-void ToolAvatarLocalizer::localize(AvatarCharacter ac, Profile *ppf, CEdit *ce, CProgressCtrl* cp, uchar flag){
+void ToolAvatarLocalizer::localize(AvatarCharacter ac, ProfileBlack *ppf, CEdit *ce, CProgressCtrl* cp, uchar flag) {
 	long widthEnum1[5] = {54, 63, 84, 126, 28};		//750→756
 	long heightEnum1[5] = {84, 96, 112, 168, 28};	//675→672
 	int p;
@@ -137,8 +137,8 @@ void ToolAvatarLocalizer::localize(AvatarCharacter ac, Profile *ppf, CEdit *ce, 
 				ce->SetWindowText(careerName[ac] + L":生成" + iconCString[p] + L"图标中");
 				cp->SetPos(400 + p*100/APART_MAXCOUNT);
 				str imgPath = IMG_avatarIcon(ac, (AvatarPart)p);
-				dword pos;
-				if(!no.find(imgPath, pos))
+				long pos;
+				if(!no.find(imgPath, pos, 0))
 					continue;
 				IMGobject io;
 				no.IMGextract(pos, io);
@@ -152,8 +152,8 @@ void ToolAvatarLocalizer::localize(AvatarCharacter ac, Profile *ppf, CEdit *ce, 
 				}
 			}
 			str imgPath = IMG_avatarIcon(ac, "tong");
-			dword pos;
-			if(no.find(imgPath, pos)){
+			long pos;
+			if(no.find(imgPath, pos, 0)){
 				IMGobject io;
 				no.IMGextract(pos, io);
 				for(int id = 0;id<io.indexCount;id++){
@@ -174,7 +174,7 @@ void ToolAvatarLocalizer::localize(AvatarCharacter ac, Profile *ppf, CEdit *ce, 
 			NPKobject now;
 			if(!now.loadFile(CStrToStr(ppf->getAvatarPath()) + fileList[fileID]))
 				continue;
-			if(now.count == 0)
+			if(now.getCount() == 0)
 				continue;
 			IMGobject io;
 			if(!now.IMGextract(0, io))

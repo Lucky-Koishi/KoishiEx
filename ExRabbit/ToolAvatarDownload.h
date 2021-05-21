@@ -22,7 +22,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	Profile profile;
+	ProfileBlack profile;
 	CString downloadPath;
 	std::vector<CString> fileList;
 public:

@@ -24,7 +24,7 @@ protected:
 public:
 	AvatarCharacter charInput;
 	long outputID[APART_MAXCOUNT];
-	Profile prof;
+	ProfileBlack prof;
 	AvatarMap map;
 	void load();
 	virtual BOOL OnInitDialog();

@@ -47,7 +47,7 @@ void ToolStat::OnBnClickedButtonSelect() {
 	}
 	GET_CTRL(CEdit, IDC_EDIT1)->SetWindowText(folderName);
 }
-DefineThreadFunc(ToolStat, Tool1, int) {
+void ToolStat::Tool1(int para) {
 	CListCtrl *lc = GET_CTRL(CListCtrl, IDC_LIST1);
 	lc->DeleteAllItems();
 	while(lc->DeleteColumn(0));
@@ -67,17 +67,12 @@ DefineThreadFunc(ToolStat, Tool1, int) {
 		NPKobject no;
 		if(!no.loadFile(CStrToStr(pathList[i])))
 			continue;
-		for(int imgID = 0; imgID < no.count; imgID++) {
-			DWORD magic = 0;
+		for(int imgID = 0; imgID < no.getCount(); imgID++) {
 			long nVer = 0;
-			stream &s = no.block[no.entry[imgID].link];
-			s.resetPosition();
-			s.readDWord(magic);
-			if(magic == 0x706F654E) {
-				s.movePosition(20);
-				s.readInt(nVer);
-			}
-			img_version_term newTerm = {nVer, 1, fileList[i], GetTail(StrToCStr(no.entry[imgID].comment))};
+			if(0x706F654E == no.block[no.content[imgID].link].checkMagic()) {
+				nVer = no.block[no.content[imgID].link].checkData(24);
+			} 
+			img_version_term newTerm = {nVer, 1, fileList[i], GetTail(StrToCStr(no.content[imgID].comment))};
 			updateImgBerQueryTable(newTerm);
 		}
 		lc->DeleteAllItems();
@@ -96,7 +91,7 @@ DefineThreadFunc(ToolStat, Tool1, int) {
 		lc->SetItemText(k, 3, imgVerQuery[k].imgPathName);
 	}
 	CStdioFile file;
-	Profile prof;
+	ProfileBlack prof;
 	prof.loadProfile();
 	file.Open(prof.getOutputPath() + L"IMG版本统计.csv", CFile::modeCreate | CFile::modeWrite);
 	for(img_version_term i : imgVerQuery) {
@@ -106,7 +101,7 @@ DefineThreadFunc(ToolStat, Tool1, int) {
 	}
 	file.Close();
 }
-DefineThreadFunc(ToolStat, Tool2, int) {
+void ToolStat::Tool2(int para) {
 	CListCtrl *lc = GET_CTRL(CListCtrl, IDC_LIST1);
 	lc->DeleteAllItems();
 	while(lc->DeleteColumn(0));
@@ -127,7 +122,7 @@ DefineThreadFunc(ToolStat, Tool2, int) {
 		NPKobject no;
 		if(!no.loadFile(CStrToStr(pathList[i])))
 			continue;
-		for(int imgID = 0; imgID < no.count; imgID++) {
+		for(int imgID = 0; imgID < no.getCount(); imgID++) {
 			long nVer = no.IMGgetVersion(imgID);
 			IMGobject io;
 			BOOL isV1 = FALSE;
@@ -151,7 +146,7 @@ DefineThreadFunc(ToolStat, Tool2, int) {
 					continue;
 				if(pi.format == LINK)
 					pi.comp = (IMGcomp)0;
-				frame_version_term newTerm = {(isV1 ? 1 : io.version) << 16 | pi.format << 8 | pi.comp, 1, fileList[i], GetTail(StrToCStr(no.entry[imgID].comment)), frameID};
+				frame_version_term newTerm = {(isV1 ? 1 : io.version) << 16 | pi.format << 8 | pi.comp, 1, fileList[i], GetTail(StrToCStr(no.content[imgID].comment)), frameID};
 				updateFrameVerQueryTable(newTerm);
 			}
 		}
@@ -177,7 +172,7 @@ DefineThreadFunc(ToolStat, Tool2, int) {
 		lc->SetItemText(k, 4, NumToCStr(frameVerQuery[k].frameID));
 	}
 	CStdioFile file;
-	Profile prof;
+	ProfileBlack prof;
 	prof.loadProfile();
 	file.Open(prof.getOutputPath() + L"贴图版本统计.csv", CFile::modeCreate | CFile::modeWrite);
 	for(frame_version_term i : frameVerQuery) {
@@ -187,7 +182,7 @@ DefineThreadFunc(ToolStat, Tool2, int) {
 	}
 	file.Close();
 }
-DefineThreadFunc(ToolStat, Tool3, int) {
+void ToolStat::Tool3(int para) {
 	CListCtrl *lc = GET_CTRL(CListCtrl, IDC_LIST1);
 	lc->DeleteAllItems();
 	while(lc->DeleteColumn(0));
@@ -214,8 +209,8 @@ DefineThreadFunc(ToolStat, Tool3, int) {
 		NPKobject no;
 		if(!no.loadFile(CStrToStr(pathList[i])))
 			continue;
-		for(int imgID = 0; imgID < no.count; imgID++) {
-			CString path = GetTail(StrToCStr(no.entry[imgID].comment));
+		for(int imgID = 0; imgID < no.getCount(); imgID++) {
+			CString path = GetTail(StrToCStr(no.content[imgID].comment));
 			pal_term newTerm = {{0}, 1, L"", path};
 			newTerm.value.value = 0;
 			if(-1 != path.Find(L"mask")) {
@@ -291,7 +286,7 @@ DefineThreadFunc(ToolStat, Tool3, int) {
 		lc->SetItemText(k, 2, palQuery[k].imgPathName);
 	}
 	CStdioFile file;
-	Profile prof;
+	ProfileBlack prof;
 	prof.loadProfile();
 	file.Open(prof.getOutputPath() + L"图层统计.csv", CFile::modeCreate | CFile::modeWrite);
 	for(pal_term i : palQuery) {
@@ -326,7 +321,7 @@ BOOL ToolStat::OnInitDialog() {
 	CDialogEx::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
-	Profile prof;
+	ProfileBlack prof;
 	prof.loadProfile();
 	GET_CTRL(CEdit, IDC_EDIT1)->SetWindowText(prof.getAvatarPath());
 	return TRUE;  // return TRUE unless you set the focus to a control

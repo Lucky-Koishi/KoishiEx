@@ -147,13 +147,15 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TinyAdjustSpeed.h" />
     <ClInclude Include="TinyAdjustVolume.h" />
-    <ClInclude Include="TinyBar%28white%29.h" />
+    <ClInclude Include="TinyBar.h" />
     <ClInclude Include="TinyEcho.h" />
     <ClInclude Include="TinyNoteBar.h" />
     <ClInclude Include="TinySNDSelect.h" />
     <ClInclude Include="TinySetName%28white%29.h" />
     <ClInclude Include="TinyStretch.h" />
-    <ClInclude Include="ToolDownload%28white%29.h" />
+    <ClInclude Include="ToolAudioMark.h" />
+    <ClInclude Include="ToolDownload.h" />
+    <ClInclude Include="ToolDownloadServerSelection.h" />
     <ClInclude Include="ToolPiano.h" />
   </ItemGroup>
   <ItemGroup>
@@ -173,13 +175,15 @@
     </ClCompile>
     <ClCompile Include="TinyAdjustSpeed.cpp" />
     <ClCompile Include="TinyAdjustVolume.cpp" />
-    <ClCompile Include="TinyBar%28white%29.cpp" />
+    <ClCompile Include="TinyBar.cpp" />
     <ClCompile Include="TinyEcho.cpp" />
     <ClCompile Include="TinyNoteBar.cpp" />
     <ClCompile Include="TinySNDSelect.cpp" />
     <ClCompile Include="TinySetName%28white%29.cpp" />
     <ClCompile Include="TinyStretch.cpp" />
-    <ClCompile Include="ToolDownload%28white%29.cpp" />
+    <ClCompile Include="ToolAudioMark.cpp" />
+    <ClCompile Include="ToolDownload.cpp" />
+    <ClCompile Include="ToolDownloadServerSelection.cpp" />
     <ClCompile Include="ToolPiano.cpp" />
   </ItemGroup>
   <ItemGroup>

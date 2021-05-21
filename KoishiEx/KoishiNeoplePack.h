@@ -7,80 +7,109 @@ using namespace Koishi;
 
 namespace KoishiNeoplePack{
 	enum IMGversion:dword{
-		V1 = 1, V2 = 2, V4 = 4, V5 = 5, V6 = 6, VUDEF = 0, VUKNOWN = 0xFFFFFFFF, 
-		VSOUND = 0xFFFFFFFE
+		V1 = 1, V2 = 2, V4 = 4, V5 = 5, V6 = 6, 
+		VUDEF = 0, VUKNOWN = (dword)-1, VSOUND = (dword)-2, VQUOTE = (dword)-3
 	};
 	enum SNDversion:dword{
-		VWAVE, VVORBIS, VMP3, VIMAGE, VSNDUKNOWN
+		VWAVE = 1, VVORBIS = 2, VMP3 = 3, 
+		VSNDUDEF = 0, VSNDUKNOWN = (dword)-1, VIMAGE = (dword)-2, VSNDQUOTE = (dword)-3
 	};
 	enum IMGcomp:dword{
 		COMP_NONE =	5, COMP_ZLIB = 6, COMP_ZLIB_DUAL = 7, COMP_UDEF = 0
 	};
 	class NPKobject;		//NPK对象
 	class IMGobject;		//IMG对象
-	class NPKentry{
+	class NPKentry {
 	public:
-		NPKentry(const str pathName, int blockID);
 		NPKentry();
+		NPKentry(str newComment, long newLink);
 	public:
-		str comment;	//路径名
-		int link;		//映射到的数据块
-#if 1
-		int _st,_len;
-#endif
+		str comment;
+		long link;
 	};
-	class NPKobject{
+	class NPKblock {
+	public:
+		NPKblock();
+		~NPKblock();
+	public:
+		stream data;		//借用stream类，但不用其方法
+		long start;			//只在导入导出时使用，其他时就不用了
+		long length;
+	public:
+		void load(const stream &sourceStream);
+		void destroy();
+		dword checkMagic();
+		dword checkData(long pos);
+	};
+	class NPKobject {
 	public:
 		NPKobject();
-		NPKobject(const stream &in);
-		NPKobject(const str &fileName);
 	public:
-		dword count;
-		std::vector<NPKentry> entry;
-		std::vector<stream> block;
+		std::vector < NPKentry > content;
+		std::vector < NPKblock > block;
 	public:
-		bool load(const stream &in);
-		bool make(stream &out);
-		bool loadFile(const str &fileName);
-		bool saveFile(const str &fileName);
-		bool create();
-		bool release();
-		longex getSize() const;
+		bool loadFile(const str &fileName);	//读取文件
+		bool saveFile(const str &fileName);	//保存文件
+		bool create();		//新建一个空条目的NPK对象
+		bool release();		//释放
+	private:
+		void addBlock(const stream &newStream);
 	public:
-		//数据流接口
+		//在最后位置插入条目
+		bool push(const str &path, const stream &newStream);
+		bool pushFile(const str &path, str fileName);
+		bool pushCopy(const str &path, long sourcePos);
+		bool pushQuote(const str &path, long sourcePos);
+		//从中间插入条目
+		bool insert(long pos, const str &path, const stream &newStream);
+		bool insertFile(long pos, const str &path, str fileName);
+		bool insertCopy(long pos, const str &path, long sourcePos);
+		bool insertQuote(long pos, const str &path, long sourcePos);
+		//提取条目
 		bool extract(long pos, stream &dest);
-		bool push(const stream &sour, const str &pathName);
-		bool insert(long pos, const stream &sour, const str &pathName);
+		bool extractFile(long pos, const str &fileName);
+		//删除条目
 		bool remove(long pos);
-		bool replace(long pos, const stream &sour);		//将直接修改缓存里的数据·同引用的IMG将一同被修改
-		bool replace2(long pos, const stream &sour);			//将新数据插入缓存，同引用的其他IMG将不会修改，占空间
-		//映射操作
-		bool pushLink(long linkPos, const str &pathName);
-		bool insertLink(long pos, long linkPos, const str &pathName);
-		bool modifyLink(long pos, long newLinkPos);
-		bool delink(long pos);
-		long checkLink(long pos) const;							//查找第一个与pos相同映射的条目
-		//条目名操作
-		bool rename(long pos, const str &newPathName);
-		bool find(const str &keyword, dword &pos, long startPos = 0);
-		bool find(const str &keyword, const str &nonkeyword, dword &pos, long startPos = 0);
-	public:
-		//其他接口
-		bool extract(long pos, const str &fileName);
-		bool push(const str &fileName, const str &pathName);
-		bool insert(long pos, const str &fileName, const str &pathName);
-		bool replace(long pos, const str &fileName);
-		//IMG对象的接口
-		bool IMGextract(dword pos, IMGobject &obj);
-		bool IMGpush(IMGobject &obj, const str &imgName);
-		bool IMGinsert(long pos, IMGobject &obj, const str &imgName);
+		//重命名条目
+		bool rename(long pos, str newPathName);
+		//查找条目
+		bool find(const str &keyword, long &pos, long startPos);
+		//替换条目的数据
+		bool replace(long pos, const stream &newStream);
+		bool replaceFile(long pos, const str &fileName);
+		bool replaceCopy(long pos, long sourcePos);
+		bool replaceQuote(long pos, long sourcePos);
+		//为条目重新订阅数据（将资源追加到数据块表中，并重定向于它）
+		bool subscribe(long pos, stream newStream);
+		bool subscribeFile(long pos, const str &fileName);
+		bool subscribeCopy(long pos, long sourcePos);
+		//解引用
+		bool dequote(long pos);
+		//检查是否为前面条目的引用：若是，返回被引用条目的ID。若不是，返回自身。
+		long checkQuote(long pos);
+		//IMG接口
+		bool IMGextract(long pos, IMGobject &io);
+		bool IMGpush(const str &newPath, IMGobject &io);
+		bool IMGinsert(long pos, const str &newPath, IMGobject &io);
 		bool IMGremove(long pos);
-		bool IMGreplace(long pos, IMGobject &obj);
-		bool IMGrename(long pos, const str &newName);
+		bool IMGreplace(long pos, IMGobject &io);
+		bool IMGrename(long pos, const str &newPath);
 		IMGversion IMGgetVersion(long pos);
+		IMGversion IMGgetVersionEx(long pos);
 		long IMGgetPaletteCount(long pos);
-		//音效接口
+		//SND接口
 		SNDversion SNDgetVersion(long pos);
+		SNDversion SNDgetVersionEx(long pos);
+	private:
+		void nameMask(void *dest);				//名称掩码
+		bool checkEntryRange(long pos);			//检查一个数字是否
+		bool checkEntryRangeEx(long pos);
+		bool checkBlockRange(long pos);
+	public:
+		long getCount() const;
+		long getSize() const;
+	public:
+		bool loadEntry(const str &fileName);	//读取文件，仅读取路径名
 	};
 	class PICinfo;			//IMG内部帧数据
 	class TEXinfo;			//IMG内部纹理集数据

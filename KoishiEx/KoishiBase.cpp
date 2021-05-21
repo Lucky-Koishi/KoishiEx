@@ -278,9 +278,13 @@ void color::mixWith(const color &clr2, colorMethod method){
 	double a = a1 + a2 - a1*a2;
 	double r,g,b;
 	if(method == LAY){
-		r = r1*a1+r2*(1-a1);
-		g = g1*a1+g2*(1-a1);
-		b = b1*a1+b2*(1-a1);
+		if(a == 0) {
+			r = g = b = 0;
+		} else {
+			r = (r1*a1 + r2*(1 - a1)*a2) / a;
+			g = (g1*a1 + g2*(1 - a1)*a2) / a;
+			b = (b1*a1 + b2*(1 - a1)*a2) / a;
+		}
 	}else{
 		r = mixMethod(r1,r2,method);
 		g = mixMethod(g1,g2,method);
@@ -547,6 +551,101 @@ size::size(long w, long h){
 long size::area() const{
 	return W*H;
 }
+rectangle::rectangle() {
+	X1 = 0;
+	X2 = 0;
+	Y1 = 0;
+	Y2 = 0;
+}
+rectangle::rectangle(point lt, point rb) {
+	X1 = lt.X;
+	X2 = rb.X;
+	Y1 = lt.Y;
+	Y2 = rb.Y;
+}
+rectangle::rectangle(point lt, size sz) {
+	X1 = lt.X;
+	X2 = lt.X + sz.W;
+	Y1 = lt.Y;
+	Y2 = lt.Y + sz.H;
+}
+rectangle::rectangle(long x1, long y1, long x2, long y2) {
+	X1 = x1;
+	X2 = x2;
+	Y1 = y1;
+	Y2 = y2;
+}
+char rectangle::operator == (const rectangle &other) const {
+	return X1 == other.X1 && X2 == other.X2 && Y1 == other.Y1 && Y2 == other.Y2;
+}
+long rectangle::getWidth() const {
+	return X2 - X1;
+}
+long rectangle::getHeight() const {
+	return Y2 - Y1;
+}
+void rectangle::shrink(long distance) {
+	X1 += distance;
+	X2 -= distance;
+	Y1 += distance;
+	Y2 -= distance;
+	if(X1 > X2) {
+		long X = X1;
+		X1 = X2;
+		X2 = X;
+	}
+	if(Y1 > Y2) {
+		long Y = Y1;
+		Y1 = Y2;
+		Y2 = Y;
+	}
+}
+void rectangle::expand(long distance) {
+	shrink(-distance);
+}
+void rectangle::splitHroz2(rectangle &x1, rectangle &x2, int ratioLeft, int ratioRight, int gap) {
+	queue ratioList = {ratioLeft, ratioRight};
+	std::vector<rectangle> xn;
+	splitHrozN(xn, ratioList, gap);
+	x1 = xn[0];
+	x2 = xn[1];
+}
+void rectangle::splitVert2(rectangle &x1, rectangle &x2, int ratioTop, int ratioBottom, int gap) {
+	queue ratioList = {ratioTop, ratioBottom};
+	std::vector<rectangle> xn;
+	splitVertN(xn, ratioList, gap);
+	x1 = xn[0];
+	x2 = xn[1];
+}
+void rectangle::splitHrozN(std::vector<rectangle> xn, queue ratioList, int gap) {
+	int count = 0;
+	for(long pv : ratioList)
+		count += pv;
+	int content = getWidth() - gap * (ratioList.size() - 1);
+	std::vector<double> lList, rList;
+	xn.clear();
+	for(int i = 0; i < ratioList.size(); i++) {
+		double wid = 1.0f * content * ratioList[i] / count;
+		lList.push_back(i ? (rList[i - 1] + gap) : 0);
+		rList.push_back(lList[i] + wid);
+		xn.push_back(rectangle(lList[i] + X1, Y1, rList[i] + X1, Y2));
+	}
+}
+void rectangle::splitVertN(std::vector<rectangle> xn, queue ratioList, int gap) {
+	int count = 0;
+	for(long pv : ratioList)
+		count += pv;
+	int content = getHeight() - gap * (ratioList.size() - 1);
+	std::vector<double> tList, bList;
+	xn.clear();
+	for(int i = 0; i < ratioList.size(); i++) {
+		double hei = 1.0f * content * ratioList[i] / count;
+		tList.push_back(i ? (bList[i - 1] + gap) : 0);
+		bList.push_back(tList[i] + hei);
+		xn.push_back(rectangle(X1, Y1 + tList[i], X2, Y1 + bList[i]));
+	}
+}
+
 image::image(){
 	column = 0;
 	row = 0;

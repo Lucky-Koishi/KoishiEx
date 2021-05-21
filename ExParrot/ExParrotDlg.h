@@ -6,14 +6,14 @@
 #include "../KoishiEx//KoishiNeoplePack.h"
 #include "../KoishiEx//KoishiAudioTool.h"
 
-#include "TinyBar(white).h"
+#include "TinyBar.h"
 
 #include "ModalRename(white).h"
 #include "ModalPreference(white).h"
 
 #pragma once
 
-#define VERSION_STR "恋恋のEx白猫版.2.2"
+#define VERSION_STR "恋恋のEx白猫版.3.2"
 
 using namespace Koishi;
 using namespace KoishiNeoplePack;
@@ -41,7 +41,7 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	Profile profile;
+	ProfileWhite profile;
 public:
 	//基础变量
 	NPKobject no;
@@ -97,16 +97,21 @@ public:
 	}canvasOperatePara;
 public:
 	void adjustWindow(int w, int h);
-	int getIconSND(dword ext);
-	enum enum_selectType{
-		SINGLE_SELECT, 
-		MULTI_SELECT, 
-		ALL_SELECT
-	};
-	void getSelected(CGoodListCtrl *listCtrl, int highLine, int targetPara, std::vector<int> &selected);
-	std::vector<int> CExParrotDlg::getSelected(UINT listCtrlID, INT selectType);
-	void updateSNDlist();
-	void updateSNDterm(int pos);
+
+	//SND列表方法
+	void SNDloadList();				//读取IMG列表
+	void SNDupdateList();			//更新所有IMG项
+	void SNDupdateTerm(int pos);	//更新某一个IMG项
+	void SNDaddTerm(int pos, SNDversion sv, CString comment);
+	void SNDdeleteTerm(int pos);
+	void SNDmodifyTerm(int pos, SNDversion sv, CString comment);
+	void SNDmodifyIcon(int pos, SNDversion sv);
+	void SNDsetHighLine(int pos);	//强制更改高亮行（以及当前选择标志）
+	queue SNDgetChecked(enumSelectType selectType);
+	UINT SNDiconID(SNDversion sv);
+
+	//void updateSNDlist();
+	//void updateSNDterm(int pos);
 	void updateInfo();
 	void updateCommentInfo(const SNDversion &ver);
 	void updateMP3image();
@@ -117,13 +122,13 @@ public:
 	CPoint getWinMouseAxis();
 	void OnMouseEventCanvas(enumCanvasMouseOperation mouseOperation, point mousePt);
 public:
-	DeclareThreadFunc(play, BOOL);			//播放线程，BOOL=TURE -> 只播放选定段 
-	DeclareThreadFunc(RecordStart,	BOOL);	//录音线程，BOOL无意义
-	DeclareThreadFunc(RecordFinish, BOOL);	//录音结束处理线程，BOOL无意义
-	DeclareThreadFunc(ReplaceSound,	BOOL);	//音频段替换线程，BOOL无意义
-	DeclareThreadFunc(Draw, BOOL);			//绘制时域图线程，BOOL无意义
-	DeclareThreadFunc(DrawPower, BOOL);		//绘制频域图线程，BOOL无意义
-	DeclareThreadFunc(DecodeAndPlay, BOOL);	//解码线程
+	DeclareThreadFunc(CExParrotDlg, play, BOOL);			//播放线程，BOOL=TURE -> 只播放选定段 
+	DeclareThreadFunc(CExParrotDlg, RecordStart, BOOL);	//录音线程，BOOL无意义
+	DeclareThreadFunc(CExParrotDlg, RecordFinish, BOOL);	//录音结束处理线程，BOOL无意义
+	DeclareThreadFunc(CExParrotDlg, ReplaceSound, BOOL);	//音频段替换线程，BOOL无意义
+	DeclareThreadFunc(CExParrotDlg, Draw, BOOL);			//绘制时域图线程，BOOL无意义
+	DeclareThreadFunc(CExParrotDlg, DrawPower, BOOL);		//绘制频域图线程，BOOL无意义
+	DeclareThreadFunc(CExParrotDlg, DecodeAndPlay, BOOL);	//解码线程
 	void draw();
 	void makeGraph(image &graphMat, int w, int h);
 	void decodeAndPlay();
@@ -191,21 +196,21 @@ public:
 
 	afx_msg void OnToolDownload();
 	//SND右键菜单
-	DeclareThreadFunc(SoundInsertEmpty, DWORD);
-	DeclareThreadFunc(SoundInsertSND, DWORD);
-	DeclareThreadFunc(SoundInsertNPK, DWORD);
-	DeclareThreadFunc(SoundInsertFolder, DWORD);
-	DeclareThreadFunc(SoundInsertOther, DWORD);
-	DeclareThreadFunc(SoundReplaceExtern, DWORD);
-	DeclareThreadFunc(SoundReplaceLocal, DWORD);
-	DeclareThreadFunc(SoundReplaceQuote, DWORD);
-	DeclareThreadFunc(SoundTransToWAV, DWORD);
-	DeclareThreadFunc(SoundTransToOGG, DWORD);
-	DeclareThreadFunc(SoundRemove, DWORD);
-	DeclareThreadFunc(SoundExtract, DWORD);
-	DeclareThreadFunc(SoundSaveAsNPK, DWORD);
-	DeclareThreadFunc(SoundDequote, DWORD);
-	DeclareThreadFunc(SoundHide, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundInsertEmpty, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundInsertSND, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundInsertNPK, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundInsertFolder, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundInsertOther, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundReplaceExtern, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundReplaceLocal, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundReplaceQuote, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundTransToWAV, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundTransToOGG, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundRemove, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundExtract, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundSaveAsNPK, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundDequote, DWORD);
+	DeclareThreadFunc(CExParrotDlg, SoundHide, DWORD);
 	afx_msg void OnMenuSoundInertEmpty();
 	afx_msg void OnMenuSoundInertSnd();
 	afx_msg void OnMenuSoundInertNPK();
@@ -250,4 +255,5 @@ public:
 	afx_msg void OnMenuSoundTransformToOGG();
 	afx_msg void OnMenuSoundTransformToWAVPatch();
 	afx_msg void OnMenuSoundTransformToOGGPatch();
+	afx_msg void OnToolsAudioMark();
 };

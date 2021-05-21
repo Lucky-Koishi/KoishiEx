@@ -42,8 +42,8 @@ BOOL TinyClipBoard::OnInitDialog(){
 	// TODO:  在此添加额外的初始化
 	selectID = -1;
 	GET_CTRL(CGoodListCtrl, IDC_LIST1)->EasyInsertColumn(L"剪辑库中的IMG,200");
-	for(int i = 0;i<ptrClipNo->count;i++)
-		GET_CTRL(CGoodListCtrl, IDC_LIST1)->EasyInsertItem(GetTail(StrToCStr(ptrClipNo->entry[i].comment)));
+	for(int i = 0;i<ptrClipNo->getCount();i++)
+		GET_CTRL(CGoodListCtrl, IDC_LIST1)->EasyInsertItem(GetTail(StrToCStr(ptrClipNo->content[i].comment)));
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }
